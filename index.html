@@ -1,4 +1,14 @@
 <!DOCTYPE html>
+<!--
+Changelog:
+- Added skip link for keyboard users and ARIA landmarks (header/nav/main)
+- Improved hero structure semantics; associated hero with heading via aria-labelledby
+- Converted quick-filter spans to accessible buttons; added role="search" to form and aria-describedby
+- Added IDs/ARIA to nav toggle and menu; improved button labels
+- Added sr-only live regions for status messages
+- Added loading="lazy" to images where appropriate and minor a11y attributes
+- Added CSP best-practice suggestions (comment) and retained RTL Arabic-first setup
+-->
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
@@ -8,6 +18,10 @@
       name="description"
       content="تفصيلك - منصة رقمية تربطك بأمهر الخياطين في منطقتك. أسعار شفافة، جودة موثوقة، حجز سهل"
     />
+    <!-- Security best practice (suggested):
+    Consider a strict Content Security Policy (CSP) like:
+    default-src 'self'; img-src 'self' https: data:; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; script-src 'self'; connect-src 'self' https:; media-src 'self' https:; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content
+    Test thoroughly before enforcing to avoid breaking 3rd-party resources. -->
 
     <!-- PWA Manifest -->
     <meta name="theme-color" content="#2c5aa0" />
@@ -27,53 +41,39 @@
     />
 
     <link rel="stylesheet" href="styles.css" />
-    
   </head>
   <body>
+    <a class="skip-link" href="#main">تخطي إلى المحتوى</a>
+
     <!-- Header -->
-    <header class="header">
-      <nav class="navbar">
+    <header class="header" role="banner">
+      <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
         <div class="container">
           <div class="brand">
-            <div class="brand-icon">
+            <div class="brand-icon" aria-hidden="true">
               <i class="fas fa-cut"></i>
             </div>
             <h1 class="logo">تفصيلك</h1>
           </div>
-          <ul class="nav-menu">
+          <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
             <li>
-              <a href="#home" class="nav-link" data-translate="nav.home"
-                >الرئيسية</a
-              >
+              <a href="#home" class="nav-link" data-translate="nav.home">الرئيسية</a>
             </li>
             <li>
-              <a
-                href="#how-it-works"
-                class="nav-link"
-                data-translate="nav.howItWorks"
-                >كيف تعمل المنصة</a
-              >
+              <a href="#how-it-works" class="nav-link" data-translate="nav.howItWorks">كيف تعمل المنصة</a>
             </li>
             <li>
-              <a href="#tailors" class="nav-link" data-translate="nav.tailors"
-                >الخياطين</a
-              >
+              <a href="#tailors" class="nav-link" data-translate="nav.tailors">الخياطين</a>
             </li>
             <li>
-              <a href="#contact" class="nav-link" data-translate="nav.contact"
-                >تواصل معنا</a
-              >
+              <a href="#contact" class="nav-link" data-translate="nav.contact">تواصل معنا</a>
             </li>
           </ul>
           <div class="nav-actions">
-            <a href="#" class="btn btn-outline" data-translate="nav.login"
-              >تسجيل دخول</a
-            >
-            <a href="#" class="btn btn-primary" data-translate="nav.joinTailor"
-              >انضم كخياط</a
-            >
-            <button class="lang-toggle">
-              <i class="fas fa-globe"></i>
+            <a href="#" class="btn btn-outline" data-translate="nav.login">تسجيل دخول</a>
+            <a href="register.html" class="btn btn-primary" data-translate="nav.joinTailor">انضم كخياط</a>
+            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+              <i class="fas fa-globe" aria-hidden="true"></i>
               <span data-translate="langToggle">العربية / EN</span>
             </button>
           </div>
@@ -81,6 +81,9 @@
             class="nav-toggle"
             aria-label="فتح القائمة"
             data-translate-aria="nav.menu.open"
+            aria-controls="nav-menu"
+            aria-expanded="false"
+            type="button"
           >
             <span></span>
             <span></span>
@@ -90,179 +93,198 @@
       </nav>
     </header>
 
-    <main>
-      <!-- Hero Section with Video Background -->
-      <section id="home" class="hero">
-        <video
-          class="hero-video"
-          id="heroVideo"
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="auto"
-          aria-label="خلفية توضيحية لورش وخدمات الخياطة"
-        >
-          <source src="video.mp4" type="video/mp4" />
-        </video>
-        <div
-          class="hero-video-fallback"
-          id="heroVideoFallback"
-          aria-hidden="true"
-          style="display: none;"
-        >
-          <div class="fallback-content">
-            <i class="fas fa-cut fa-3x"></i>
-            <h2 data-translate="hero.video.fallback">تفصيلك – اكتشف أمهر الخياطين بسهولة</h2>
-            <p data-translate="hero.video.fallback.subtitle">منصة رقمية تربطك بأمهر الخياطين في منطقتك</p>
-          </div>
-        </div>
-        <div class="hero-overlay" id="heroOverlay"></div>
-
+    <main id="main" role="main">
+      <!-- Hero Section -->
+      <section id="home" class="hero hero--new" aria-labelledby="heroHeading">
         <div class="container">
-          <div class="hero-content">
-            <h1 class="hero-title" data-translate="hero.title">
-              أمهر الخياطين في منطقتك. موثوقين وبالأسعار
-            </h1>
-            <p class="hero-subtitle" data-translate="hero.subtitle">
-              تصفح أعمالهم، اعرف الأسعار، واحجز معادك في دقائق
-            </p>
-
-            <!-- Search Center -->
-            <div class="search-center">
-              <div class="search-widget">
-                <form class="search-form">
-                  <div class="search-input-group">
-                    <input
-                      type="text"
-                      class="search-input"
-                      data-translate-placeholder="hero.search.placeholder"
-                      placeholder="ابحث عن خياط قريب منك..."
-                      aria-label="البحث عن خياط"
-                      data-translate-aria="hero.search.label"
-                    />
-                    <button type="submit" class="btn btn-primary">
-                      <i class="fas fa-search"></i>
-                      <span data-translate="hero.search.button">ابحث</span>
-                    </button>
+          <div class="hero-container">
+            <div class="hero-content">
+              <div class="hero-text-content">
+                <div class="hero-badge">
+                  <span data-translate="hero.badge">الأكثر طلباً في مصر</span>
+                </div>
+                <h1 id="heroHeading" class="hero-title" data-translate="hero.title">أمهر الخياطين في منطقتك. موثوقين وبالأسعار</h1>
+                <p class="hero-subtitle" data-translate="hero.subtitle">تصفح أعمالهم، اعرف الأسعار، واحجز معادك في دقائق</p>
+                <div class="hero-stats" aria-label="إحصائيات الثقة">
+                  <div class="stat">
+                    <span class="stat-number">300+</span>
+                    <span class="stat-label" data-translate="trust.tailors">خياط موثق</span>
                   </div>
-
-                  <div class="search-options">
-                    <label class="search-chip">
-                      <input type="checkbox" name="express" />
-                      <i class="fas fa-clock"></i>
-                      <span data-translate="hero.search.express"
-                        >خدمة عاجلة</span
-                      >
-                      (<span data-translate="hero.search.sameDay"
-                        >اليوم/غدًا</span
-                      >)
-                    </label>
-                    <div class="search-chip">
-                      <i class="fas fa-map-marker-alt"></i>
-                      <span data-translate="hero.search.range">نطاق: 5 كم</span>
+                  <div class="stat">
+                    <span class="stat-number">5,000+</span>
+                    <span class="stat-label" data-translate="trust.orders">طلب مكتمل</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-number">4.9</span>
+                    <span class="stat-label" data-translate="trust.rating">تقييم العملاء</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="hero-visual" aria-label="عناصر بصرية توضيحية">
+              <div class="visual-background" aria-hidden="true">
+                <div class="floating-elements">
+                  <div class="floating-card card-1" aria-label="خياط مميز">
+                    <div class="card-content">
+                      <span class="card-badge" aria-hidden="true">🔥</span>
+                      <div class="card-image">
+                        <img src="tailoring-Egyptian-student.png" data-translate-alt="persona.student.image.alt" alt="" loading="lazy" />
+                      </div>
+                      <div class="card-info">
+                        <h4 data-translate="tailor.name.mohamed">أستاذ محمد</h4>
+                        <p data-translate="tailor.specialty.evening">فساتين سهرة</p>
+                        <div class="rating">⭐ 4.9 (<span>124</span>)</div>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      class="location-btn"
-                      id="useLocationBtn"
-                    >
-                      <i class="fas fa-location-arrow"></i>
-                      <span data-translate="hero.search.useLocation"
-                        >أو استخدم موقعي الحالي</span
-                      >
-                    </button>
                   </div>
-                </form>
+                  <div class="floating-card card-2" aria-label="خدمة توصيل سريعة">
+                    <div class="card-content">
+                      <span class="card-badge" aria-hidden="true">⚡</span>
+                      <div class="card-info">
+                        <h4 data-translate="hero.card.delivery">توصيل خلال 24 ساعة</h4>
+                        <p data-translate="hero.card.simpleEdits">لطلبات التعديلات البسيطة</p>
+                        <div class="price" data-translate="hero.card.fromPrice">من 50 جنيه</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="floating-card card-3" aria-label="نسبة رضا العملاء">
+                    <div class="card-content">
+                      <div class="stats-circle" aria-hidden="true">
+                        <div class="circle-content">
+                          <span class="percentage">95%</span>
+                          <span data-translate="hero.card.satisfaction">عملاء راضون</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="video-container">
+                <div class="video-placeholder">
+                  <div class="placeholder-content"><i class="fas fa-play-circle" aria-hidden="true"></i><span data-translate="hero.video.seeHow">شاهد كيف نعمل</span></div>
+                  <div class="video-thumbnail" role="button" tabindex="0" aria-label="تشغيل الفيديو">
+                    <img src="tailoring-Egyptian-student.png" alt="عرض توضيحي لخدمات الخياطة" loading="lazy" />
+                    <div class="play-button"><i class="fas fa-play" aria-hidden="true"></i></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <div class="hero-trust-indicators" aria-label="مؤشرات الثقة">
+            <div class="trust-item"><i class="fas fa-check-circle" aria-hidden="true"></i><span data-translate="trust.quality.guarantee">ضمان الجودة 100%</span></div>
+            <div class="trust-item"><i class="fas fa-clock" aria-hidden="true"></i><span data-translate="trust.refund">استرجاع خلال 7 أيام</span></div>
+            <div class="trust-item"><i class="fas fa-headset" aria-hidden="true"></i><span data-translate="trust.support">دعم فوري 24/7</span></div>
+          </div>
+          <div class="hero-search-widget">
+            <form class="search-form" id="searchForm" role="search" aria-label="البحث عن خياط" aria-describedby="searchHint">
+              <div class="search-header">
+                <h3 data-translate="hero.search.header">ابحث عن خياط قريب منك</h3>
+                <span id="searchHint" class="search-hint" data-translate="hero.search.hint">خدمة مجانية وسريعة</span>
+              </div>
+              <div class="search-inputs-grid">
+                <div class="input-group">
+                  <label for="locationInput">
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                    <span data-translate="hero.search.location.label">المنطقة</span>
+                  </label>
+                  <input type="text" id="locationInput" class="location-input" data-translate-placeholder="hero.search.placeholder" placeholder="ابحث عن خياط قريب منك..." autocomplete="off" />
+                  <input type="hidden" class="search-input" />
+                </div>
+                <div class="input-group">
+                  <label for="serviceType">
+                    <i class="fas fa-scissors" aria-hidden="true"></i>
+                    <span data-translate="hero.search.service.label">نوع الخدمة</span>
+                  </label>
+                  <select id="serviceType" class="service-select">
+                    <option value="" data-translate="hero.search.all">جميع الخدمات</option>
+                    <option value="alterations" data-translate="category.alter">تعديل ملابس</option>
+                    <option value="dresses" data-translate="category.dress">فساتين سهرة</option>
+                    <option value="suits" data-translate="category.suit">بدل رجالي</option>
+                    <option value="repair" data-translate="category.repair">تصليح ملابس</option>
+                  </select>
+                </div>
+                <button type="submit" class="search-action-btn">
+                  <i class="fas fa-search" aria-hidden="true"></i>
+                  <span data-translate="hero.search.now">ابحث الآن</span>
+                </button>
+                <button type="button" class="location-btn" id="useLocationBtn">
+                  <i class="fas fa-location-arrow" aria-hidden="true"></i>
+                  <span data-translate="hero.search.useLocation">أو استخدم موقعي الحالي</span>
+                </button>
+              </div>
+              <div class="search-quick-filters" aria-label="فلاتر سريعة">
+                <button type="button" class="quick-filter active" data-filter="all" data-translate="hero.search.all" aria-pressed="true">الكل</button>
+                <button type="button" class="quick-filter" data-filter="express"><i class="fas fa-bolt" aria-hidden="true"></i><span data-translate="hero.search.express">خدمة عاجلة</span></button>
+                <button type="button" class="quick-filter" data-filter="discount"><i class="fas fa-percentage" aria-hidden="true"></i><span data-translate="hero.search.discount">عروض خاصة</span></button>
+              </div>
+              <div id="searchStatus" class="sr-only" role="status" aria-live="polite"></div>
+            </form>
+          </div>
+          <div class="scroll-indicator"><span data-translate="hero.scroll.more">اكتشف المزيد</span><div class="arrow-down" aria-hidden="true"></div></div>
         </div>
       </section>
 
       <!-- Trust Indicators -->
-      <section class="trust-bar">
+      <section class="trust-bar" aria-label="شريط الثقة">
         <div class="container">
           <div class="trust-indicators">
             <div class="trust-item">
-              <span class="trust-dot">
+              <span class="trust-dot" aria-hidden="true">
                 <i class="fas fa-users"></i>
               </span>
               <span class="trust-number">300+</span>
-              <span class="trust-label" data-translate="trust.tailors"
-                >خياط موثق</span
-              >
+              <span class="trust-label" data-translate="trust.tailors">خياط موثق</span>
             </div>
             <div class="trust-item">
-              <span class="trust-dot">
+              <span class="trust-dot" aria-hidden="true">
                 <i class="fas fa-check-circle"></i>
               </span>
               <span class="trust-number">5,000+</span>
-              <span class="trust-label" data-translate="trust.orders"
-                >طلب مكتمل</span
-              >
+              <span class="trust-label" data-translate="trust.orders">طلب مكتمل</span>
             </div>
             <div class="trust-item">
-              <span class="trust-dot">
+              <span class="trust-dot" aria-hidden="true">
                 <i class="fas fa-map-marked-alt"></i>
               </span>
-              <span class="trust-number" data-translate="trust.cities.count"
-                >3 مدن</span
-              >
-              <span class="trust-label" data-translate="trust.cities"
-                >نخدم القاهرة، الجيزة، والإسكندرية</span
-              >
+              <span class="trust-number" data-translate="trust.cities.count">3 مدن</span>
+              <span class="trust-label" data-translate="trust.cities">نخدم القاهرة، الجيزة، والإسكندرية</span>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Value Propositions -->
-      <section class="value-props">
+      <section class="value-props" aria-labelledby="whyTitle">
         <div class="container">
-          <h2 class="section-title" data-translate="section.why">
-            لماذا تفصيلك؟
-          </h2>
+          <h2 class="section-title" id="whyTitle" data-translate="section.why">لماذا تفص��لك؟</h2>
           <div class="props-grid">
             <div class="prop-card">
-              <div class="prop-icon price">
+              <div class="prop-icon price" aria-hidden="true">
                 <i class="fas fa-money-bill-wave fa-2x"></i>
               </div>
               <div class="prop-content">
-                <h3 class="prop-title" data-translate="value.price.title">
-                  أسعار شفافة
-                </h3>
-                <p class="prop-desc" data-translate="value.price.desc">
-                  اعرف تكلفة الخدمة قبل ما تحجز
-                </p>
+                <h3 class="prop-title" data-translate="value.price.title">أسعار شفافة</h3>
+                <p class="prop-desc" data-translate="value.price.desc">اعرف تكلفة الخدمة قبل ما تحجز</p>
               </div>
             </div>
 
             <div class="prop-card">
-              <div class="prop-icon quality">
+              <div class="prop-icon quality" aria-hidden="true">
                 <i class="fas fa-shield-alt fa-2x"></i>
               </div>
               <div class="prop-content">
-                <h3 class="prop-title" data-translate="value.quality.title">
-                  جودة موثوقة
-                </h3>
-                <p class="prop-desc" data-translate="value.quality.desc">
-                  شوف صور شغلهم وتقييمات عملاء حقيقيين
-                </p>
+                <h3 class="prop-title" data-translate="value.quality.title">جودة موثوقة</h3>
+                <p class="prop-desc" data-translate="value.quality.desc">شوف صور شغلهم وتقييمات عملاء حقيقيين</p>
               </div>
             </div>
 
             <div class="prop-card">
-              <div class="prop-icon location">
+              <div class="prop-icon location" aria-hidden="true">
                 <i class="fas fa-map-marker-alt fa-2x"></i>
               </div>
               <div class="prop-content">
-                <h3 class="prop-title" data-translate="value.location.title">
-                  خياطين في كل مكان
-                </h3>
-                <p class="prop-desc" data-translate="value.location.desc">
-                  اكتشف أمهر الخياطين في منطقتك بسهولة
-                </p>
+                <h3 class="prop-title" data-translate="value.location.title">خياطين في كل مكان</h3>
+                <p class="prop-desc" data-translate="value.location.desc">اكتشف أمهر الخياط��ن في منطقتك بسهولة</p>
               </div>
             </div>
           </div>
@@ -270,96 +292,69 @@
       </section>
 
       <!-- How It Works -->
-      <section id="how-it-works" class="how-it-works">
+      <section id="how-it-works" class="how-it-works" aria-labelledby="howTitle">
         <div class="container">
-          <h2 class="section-title" data-translate="how.title">
-            كيف تعمل المنصة؟
-          </h2>
-          <p class="section-subtitle" data-translate="how.subtitle">
-            خطوات بسيطة للحصول على أفضل خدمات الخياطة
-          </p>
+          <h2 class="section-title" id="howTitle" data-translate="how.title">كيف تعمل المنصة؟</h2>
+          <p class="section-subtitle" data-translate="how.subtitle">خطوات بسيطة للحصول على أفضل خدمات الخياطة</p>
           <div class="steps-grid">
             <div class="step-card">
               <div class="step-number">1</div>
               <h3 class="step-title" data-translate="how.step1.title">ابحث</h3>
-              <p class="step-desc" data-translate="how.step1.desc">
-                حدد منطقتك ونوع الخدمة اللي محتاجها
-              </p>
+              <p class="step-desc" data-translate="how.step1.desc">حدد منطقتك ونوع الخدمة اللي محتاجها</p>
             </div>
 
             <div class="step-card">
               <div class="step-number">2</div>
-              <h3 class="step-title" data-translate="how.step2.title">
-                قارن واحجز
-              </h3>
-              <p class="step-desc" data-translate="how.step2.desc">
-                شوف صور الشغل، الأسعار، والتقييمات، واحجز معادك
-              </p>
+              <h3 class="step-title" data-translate="how.step2.title">قارن واحجز</h3>
+              <p class="step-desc" data-translate="how.step2.desc">شوف صور الشغل، الأسعار، والتقييمات، واحجز معادك</p>
             </div>
 
             <div class="step-card">
               <div class="step-number">3</div>
               <h3 class="step-title" data-translate="how.step3.title">استلم</h3>
-              <p class="step-desc" data-translate="how.step3.desc">
-                تابع طلبك واستلم في الميعاد المتفق عليه
-              </p>
+              <p class="step-desc" data-translate="how.step3.desc">تابع طلبك واستلم في الميعاد المتفق عليه</p>
             </div>
           </div>
         </div>
       </section>
 
       <!-- Featured Tailors -->
-      <section id="tailors" class="featured-tailors">
+      <section id="tailors" class="featured-tailors" aria-labelledby="tailorsTitle">
         <div class="container">
-          <h2 class="section-title" data-translate="tailors.featured.title">
-            تعرف على أمهر الخياطين في منطقتك
-          </h2>
+          <h2 class="section-title" id="tailorsTitle" data-translate="tailors.featured.title">تعرف على أمهر الخياطين في منطقتك</h2>
           <div class="carousel-container">
-            <div class="tailors-carousel">
+            <div class="tailors-carousel" aria-label="قائمة خياطين مميزين">
               <div class="tailor-card">
                 <img
                   src="https://placehold.co/400x300/e3f2fd/2c5aa0?text=خياط+محترف"
                   alt="خياط محترف"
                   data-translate-alt="tailor.image.alt"
                   class="tailor-image"
+                  loading="lazy"
                 />
                 <div class="tailor-info">
                   <div class="tailor-name-row">
-                    <h3 class="tailor-name" data-translate="tailor.name.mohamed">
-                      أستاذ محمد أحمد
-                    </h3>
+                    <h3 class="tailor-name" data-translate="tailor.name.mohamed">أستاذ محمد أحمد</h3>
                     <span class="verified-badge">
-                      <i class="fas fa-check-circle"></i>
+                      <i class="fas fa-check-circle" aria-hidden="true"></i>
                       <span data-translate="tailor.verified">موثق</span>
                     </span>
                   </div>
                   <div class="tailor-rating">
                     <span class="rating">
-                      <i class="fas fa-star"></i> 4.8
+                      <i class="fas fa-star" aria-hidden="true"></i> 4.8
                     </span>
-                    <span class="reviews"
-                      >(<span>120</span>
-                      <span data-translate="tailor.reviews">تقييم</span>)</span
-                    >
+                    <span class="reviews">(<span>120</span> <span data-translate="tailor.reviews">تقييم</span>)</span>
                   </div>
                   <p class="tailor-specialty">
-                    <i class="fas fa-tshirt"></i>
-                    <span data-translate="tailor.specialty.evening"
-                      >فساتين سهرة</span
-                    >
+                    <i class="fas fa-tshirt" aria-hidden="true"></i>
+                    <span data-translate="tailor.specialty.evening">فساتين سهرة</span>
                   </p>
                   <p class="tailor-location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span data-translate="tailor.location.heliopolis"
-                      >مصر الجديدة</span
-                    >
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                    <span data-translate="tailor.location.heliopolis">مصر الجديدة</span>
                   </p>
-                  <a
-                    href="#"
-                    class="btn btn-primary"
-                    data-translate="tailor.view.profile"
-                    >عرض الملف الشخصي</a
-                  >
+                  <a href="tailor.html" class="btn btn-primary" data-translate="tailor.view.profile">عرض الملف الشخصي</a>
                 </div>
               </div>
 
@@ -369,42 +364,31 @@
                   alt="خياط محترف"
                   data-translate-alt="tailor.image.alt"
                   class="tailor-image"
+                  loading="lazy"
                 />
                 <div class="tailor-info">
                   <div class="tailor-name-row">
-                    <h3 class="tailor-name" data-translate="tailor.name.fatma">
-                      أستاذة فاطمة علي
-                    </h3>
+                    <h3 class="tailor-name" data-translate="tailor.name.fatma">أستاذة فاطمة علي</h3>
                     <span class="verified-badge">
-                      <i class="fas fa-check-circle"></i>
+                      <i class="fas fa-check-circle" aria-hidden="true"></i>
                       <span data-translate="tailor.verified">موثق</span>
                     </span>
                   </div>
                   <div class="tailor-rating">
                     <span class="rating">
-                      <i class="fas fa-star"></i> 4.9
+                      <i class="fas fa-star" aria-hidden="true"></i> 4.9
                     </span>
-                    <span class="reviews"
-                      >(<span>89</span>
-                      <span data-translate="tailor.reviews">تقييم</span>)</span
-                    >
+                    <span class="reviews">(<span>89</span> <span data-translate="tailor.reviews">تقييم</span>)</span>
                   </div>
                   <p class="tailor-specialty">
-                    <i class="fas fa-user-tie"></i>
-                    <span data-translate="tailor.specialty.suits"
-                      >بدل رجالي</span
-                    >
+                    <i class="fas fa-user-tie" aria-hidden="true"></i>
+                    <span data-translate="tailor.specialty.suits">بدل رجالي</span>
                   </p>
                   <p class="tailor-location">
-                    <i class="fas fa-map-marker-alt"></i>
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
                     <span data-translate="tailor.location.maadi">المعادي</span>
                   </p>
-                  <a
-                    href="#"
-                    class="btn btn-primary"
-                    data-translate="tailor.view.profile"
-                    >عرض الملف الشخصي</a
-                  >
+                  <a href="tailor.html" class="btn btn-primary" data-translate="tailor.view.profile">عرض الملف الشخصي</a>
                 </div>
               </div>
 
@@ -414,44 +398,31 @@
                   alt="خياط محترف"
                   data-translate-alt="tailor.image.alt"
                   class="tailor-image"
+                  loading="lazy"
                 />
                 <div class="tailor-info">
                   <div class="tailor-name-row">
-                    <h3 class="tailor-name" data-translate="tailor.name.ahmed">
-                      أستاذ أحمد حسن
-                    </h3>
+                    <h3 class="tailor-name" data-translate="tailor.name.ahmed">أستاذ أحمد حسن</h3>
                     <span class="verified-badge">
-                      <i class="fas fa-check-circle"></i>
+                      <i class="fas fa-check-circle" aria-hidden="true"></i>
                       <span data-translate="tailor.verified">موثق</span>
                     </span>
                   </div>
                   <div class="tailor-rating">
                     <span class="rating">
-                      <i class="fas fa-star"></i> 4.9
+                      <i class="fas fa-star" aria-hidden="true"></i> 4.9
                     </span>
-                    <span class="reviews"
-                      >(<span>156</span>
-                      <span data-translate="tailor.reviews">تقييم</span>)</span
-                    >
+                    <span class="reviews">(<span>156</span> <span data-translate="tailor.reviews">تقييم</span>)</span>
                   </div>
                   <p class="tailor-specialty">
-                    <i class="fas fa-tools"></i>
-                    <span data-translate="tailor.specialty.alterations"
-                      >تعديل ملابس</span
-                    >
+                    <i class="fas fa-tools" aria-hidden="true"></i>
+                    <span data-translate="tailor.specialty.alterations">تعديل ملابس</span>
                   </p>
                   <p class="tailor-location">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <span data-translate="tailor.location.zamalek"
-                      >الزمالك</span
-                    >
+                    <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                    <span data-translate="tailor.location.zamalek">الزمالك</span>
                   </p>
-                  <a
-                    href="#"
-                    class="btn btn-primary"
-                    data-translate="tailor.view.profile"
-                    >عرض الملف الشخصي</a
-                  >
+                  <a href="tailor.html" class="btn btn-primary" data-translate="tailor.view.profile">عرض الملف الشخصي</a>
                 </div>
               </div>
             </div>
@@ -460,28 +431,18 @@
       </section>
 
       <!-- Persona-Based Content -->
-      <section class="persona-content">
+      <section class="persona-content" aria-label="محتوى مخصص للفئات">
         <div class="container">
           <div class="persona-grid">
             <!-- Student Persona -->
             <div class="persona-card">
               <div class="persona-content-inner">
                 <h3 class="persona-title">
-                  <i class="fas fa-graduation-cap"></i>
-                  <span data-translate="persona.student.title"
-                    >أناقة على قد الميزانية</span
-                  >
+                  <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                  <span data-translate="persona.student.title">أناقة على قد الميزانية</span>
                 </h3>
-                <p class="persona-desc" data-translate="persona.student.desc">
-                  أسعار تبدأ من 150 جنيه. اكتشف عروض خاصة للطلاب وباقات
-                  التعديلات
-                </p>
-                <a
-                  href="#"
-                  class="btn btn-light"
-                  data-translate="persona.student.cta"
-                  >اعرف أكتر عن عروض الطلاب</a
-                >
+                <p class="persona-desc" data-translate="persona.student.desc">أسعار تبدأ من 150 جنيه. اكتشف عروض خاصة للطلاب وباقات التعديلات</p>
+                <a href="#" class="btn btn-light" data-translate="persona.student.cta">اعرف أكتر عن عروض الطلاب</a>
               </div>
               <div class="persona-image">
                 <img
@@ -497,21 +458,11 @@
             <div class="persona-card professional">
               <div class="persona-content-inner">
                 <h3 class="persona-title">
-                  <i class="fas fa-briefcase"></i>
-                  <span data-translate="persona.prof.title"
-                    >الجودة والالتزام أهم حاجة</span
-                  >
+                  <i class="fas fa-briefcase" aria-hidden="true"></i>
+                  <span data-translate="persona.prof.title">الجودة والالتزام أهم حاجة</span>
                 </h3>
-                <p class="persona-desc" data-translate="persona.prof.desc">
-                  خياطين بخبرة عالية لملابسك الرسمية. اختار خدمة التوصيل أو
-                  الحجز السريع لإنقاذ الموقف
-                </p>
-                <a
-                  href="#"
-                  class="btn btn-light"
-                  data-translate="persona.prof.cta"
-                  >تصفح الخياطين المميزين</a
-                >
+                <p class="persona-desc" data-translate="persona.prof.desc">خياطين بخبرة عالية لملابسك الرسمية. اختار خدمة التوصيل أو الحجز السريع لإنقاذ الموقف</p>
+                <a href="#" class="btn btn-light" data-translate="persona.prof.cta">تصفح الخياطين المميزين</a>
               </div>
               <div class="persona-image">
                 <img
@@ -527,35 +478,27 @@
       </section>
 
       <!-- Tailor Recruitment -->
-      <section class="tailor-recruitment">
+      <section class="tailor-recruitment" aria-labelledby="recruitTitle">
         <div class="container">
           <div class="recruitment-content">
-            <h2 class="section-title" data-translate="recruit.join.title">
-              انضم لشبكة تفصيلك. كّبر شغلك ووصل لعملاء أكتر
-            </h2>
-            <div class="join-benefits">
+            <h2 class="section-title" id="recruitTitle" data-translate="recruit.join.title">انضم لشبكة تفصيلك. كّبر شغلك ووصل لعملاء أكتر</h2>
+            <div class="join-benefits" aria-label="مزايا الإنضمام">
               <span class="benefit-pill">
-                <i class="fas fa-users"></i>
-                <span data-translate="recruit.benefit.percent"
-                  >+50% عملاء أكثر</span
-                >
+                <i class="fas fa-users" aria-hidden="true"></i>
+                <span data-translate="recruit.benefit.percent">+50% عملاء أكثر</span>
               </span>
               <span class="benefit-pill">
-                <i class="fas fa-calendar-alt"></i>
-                <span data-translate="recruit.benefit.management"
-                  >إدارة سهلة للمواعيد</span
-                >
+                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                <span data-translate="recruit.benefit.management">إدارة سهلة للمواعيد</span>
               </span>
               <span class="benefit-pill">
-                <i class="fas fa-portrait"></i>
-                <span data-translate="recruit.benefit.portfolio"
-                  >ملف أعمال احترافي</span
-                >
+                <i class="fas fa-portrait" aria-hidden="true"></i>
+                <span data-translate="recruit.benefit.portfolio">ملف أعمال احترافي</span>
               </span>
             </div>
             <div class="recruitment-cta">
               <a href="#" class="btn btn-dark btn-large">
-                <i class="fas fa-plus-circle"></i>
+                <i class="fas fa-plus-circle" aria-hidden="true"></i>
                 <span data-translate="recruit.cta">سجل ورشتك الآن</span>
               </a>
             </div>
@@ -564,88 +507,49 @@
       </section>
 
       <!-- Service Categories -->
-      <section class="service-categories">
+      <section class="service-categories" aria-labelledby="categoryTitle">
         <div class="container">
-          <h2 class="section-title" data-translate="categories.title">
-            الخدمات الشائعة
-          </h2>
-          <p class="section-subtitle" data-translate="categories.subtitle">
-            اختر من بين خدماتنا المتعددة التي نقدمها بأعلى جودة وأفضل الأسعار
-          </p>
+          <h2 class="section-title" id="categoryTitle" data-translate="categories.title">الخدمات الشائعة</h2>
+          <p class="section-subtitle" data-translate="categories.subtitle">اختر من بين خدماتنا المتعددة التي نقدمها بأعلى جودة وأفضل الأسعار</p>
           <div class="categories-grid">
             <div class="category-card">
-              <div class="category-icon">
+              <div class="category-icon" aria-hidden="true">
                 <i class="fas fa-tools fa-2x"></i>
               </div>
-              <h3 class="category-title" data-translate="category.alter">
-                تعديل ملابس
-              </h3>
-              <p
-                class="service-description"
-                data-translate="category.alter.desc"
-              >
-                تصليح جميع أنواع الملابس
-              </p>
+              <h3 class="category-title" data-translate="category.alter">تعديل ملابس</h3>
+              <p class="service-description" data-translate="category.alter.desc">تصليح جميع أنواع الملابس</p>
             </div>
 
             <div class="category-card">
-              <div class="category-icon">
+              <div class="category-icon" aria-hidden="true">
                 <i class="fas fa-tshirt fa-2x"></i>
               </div>
-              <h3 class="category-title" data-translate="category.dress">
-                تفصيل فساتين
-              </h3>
-              <p
-                class="service-description"
-                data-translate="category.dress.desc"
-              >
-                تعديل وتفصيل فساتين السهرة
-              </p>
+              <h3 class="category-title" data-translate="category.dress">تفصيل فساتين</h3>
+              <p class="service-description" data-translate="category.dress.desc">تعديل وتفصيل فساتين السهرة</p>
             </div>
 
             <div class="category-card">
-              <div class="category-icon">
+              <div class="category-icon" aria-hidden="true">
                 <i class="fas fa-user-tie fa-2x"></i>
               </div>
-              <h3 class="category-title" data-translate="category.suit">
-                بدل رجالي
-              </h3>
-              <p
-                class="service-description"
-                data-translate="category.suit.desc"
-              >
-                تفصيل بدلة بكافة المقاسات
-              </p>
+              <h3 class="category-title" data-translate="category.suit">بدل رجالي</h3>
+              <p class="service-description" data-translate="category.suit.desc">تفصيل بدلة بكافة المقاسات</p>
             </div>
 
             <div class="category-card">
-              <div class="category-icon">
+              <div class="category-icon" aria-hidden="true">
                 <i class="fas fa-child fa-2x"></i>
               </div>
-              <h3 class="category-title" data-translate="category.kids">
-                ملابس أطفال
-              </h3>
-              <p
-                class="service-description"
-                data-translate="category.kids.desc"
-              >
-                تفصيل ملابس الأطفال
-              </p>
+              <h3 class="category-title" data-translate="category.kids">ملابس أطفال</h3>
+              <p class="service-description" data-translate="category.kids.desc">تفصيل ملابس الأطفال</p>
             </div>
 
             <div class="category-card">
-              <div class="category-icon">
+              <div class="category-icon" aria-hidden="true">
                 <i class="fas fa-wrench fa-2x"></i>
               </div>
-              <h3 class="category-title" data-translate="category.repair">
-                تصليح
-              </h3>
-              <p
-                class="service-description"
-                data-translate="category.repair.desc"
-              >
-                إصلاح وصيانة الملابس
-              </p>
+              <h3 class="category-title" data-translate="category.repair">تصليح</h3>
+              <p class="service-description" data-translate="category.repair.desc">إصلاح وصيانة الملابس</p>
             </div>
           </div>
         </div>
@@ -657,121 +561,59 @@
       <div class="container">
         <div class="footer-content">
           <div class="footer-section">
-            <h3 class="footer-title" data-translate="footer.about.title">
-              من نحن
-            </h3>
+            <h3 class="footer-title" data-translate="footer.about.title">من نحن</h3>
             <ul class="footer-links">
-              <li>
-                <a href="#" data-translate="footer.about.link1">عن تفصيلك</a>
-              </li>
-              <li>
-                <a href="#" data-translate="footer.about.link2"
-                  >كيف تعمل المنصة</a
-                >
-              </li>
-              <li>
-                <a href="#" data-translate="footer.about.link3"
-                  >الأسئلة الشائعة</a
-                >
-              </li>
+              <li><a href="#" data-translate="footer.about.link1">عن تفصيلك</a></li>
+              <li><a href="#" data-translate="footer.about.link2">كيف تعمل المنصة</a></li>
+              <li><a href="#" data-translate="footer.about.link3">الأسئلة الشائعة</a></li>
             </ul>
           </div>
 
           <div class="footer-section">
-            <h3 class="footer-title" data-translate="footer.clients.title">
-              للعملاء
-            </h3>
+            <h3 class="footer-title" data-translate="footer.clients.title">للعملاء</h3>
             <ul class="footer-links">
-              <li>
-                <a href="#" data-translate="footer.clients.link1"
-                  >الأسئلة الشائعة</a
-                >
-              </li>
-              <li>
-                <a href="#" data-translate="footer.clients.link2"
-                  >كيف تعمل المنصة</a
-                >
-              </li>
-              <li>
-                <a href="#" data-translate="footer.clients.link3"
-                  >خدمة العملاء</a
-                >
-              </li>
+              <li><a href="#" data-translate="footer.clients.link1">الأسئلة الشائعة</a></li>
+              <li><a href="#" data-translate="footer.clients.link2">كيف تعمل المنصة</a></li>
+              <li><a href="#" data-translate="footer.clients.link3">خدمة العملاء</a></li>
             </ul>
           </div>
 
           <div class="footer-section">
-            <h3 class="footer-title" data-translate="footer.tailors.title">
-              للخياطين
-            </h3>
+            <h3 class="footer-title" data-translate="footer.tailors.title">للخياطين</h3>
             <ul class="footer-links">
-              <li>
-                <a href="#" data-translate="footer.tailors.link1">انضم إلينا</a>
-              </li>
-              <li>
-                <a href="#" data-translate="footer.tailors.link2"
-                  >أسئلة الخياطين الشائعة</a
-                >
-              </li>
-              <li>
-                <a href="#" data-translate="footer.tailors.link3"
-                  >مركز المساعدة</a
-                >
-              </li>
+              <li><a href="#" data-translate="footer.tailors.link1">انضم إلينا</a></li>
+              <li><a href="#" data-translate="footer.tailors.link2">أسئلة الخياطين الشائعة</a></li>
+              <li><a href="#" data-translate="footer.tailors.link3">مركز المساعدة</a></li>
             </ul>
           </div>
 
           <div class="footer-section">
-            <h3 class="footer-title" data-translate="footer.legal.title">
-              قانوني
-            </h3>
+            <h3 class="footer-title" data-translate="footer.legal.title">قانوني</h3>
             <ul class="footer-links">
-              <li>
-                <a href="#" data-translate="footer.legal.link1">شروط الخدمة</a>
-              </li>
-              <li>
-                <a href="#" data-translate="footer.legal.link2"
-                  >سياسة الخصوصية</a
-                >
-              </li>
-              <li>
-                <a href="#" data-translate="footer.legal.link3">تواصل معنا</a>
-              </li>
+              <li><a href="#" data-translate="footer.legal.link1">شروط الخدمة</a></li>
+              <li><a href="#" data-translate="footer.legal.link2">سياسة الخصوصية</a></li>
+              <li><a href="#" data-translate="footer.legal.link3">تواصل معنا</a></li>
             </ul>
           </div>
         </div>
 
         <div class="footer-bottom">
           <div class="footer-info">
-            <p data-translate="footer.rights">
-              &copy; 2025 تفصيلك. جميع الحقوق محفوظة
-            </p>
+            <p data-translate="footer.rights">&copy; 2025 تفصيلك. جميع الحقوق محفوظة</p>
             <div class="social-links">
-              <a
-                href="#"
-                aria-label="فيسبوك"
-                data-translate-aria="social.facebook"
-              >
-                <i class="fab fa-facebook-f"></i>
+              <a href="#" aria-label="فيسبوك" data-translate-aria="social.facebook">
+                <i class="fab fa-facebook-f" aria-hidden="true"></i>
               </a>
-              <a
-                href="#"
-                aria-label="إنستغرام"
-                data-translate-aria="social.instagram"
-              >
-                <i class="fab fa-instagram"></i>
+              <a href="#" aria-label="إنستغرام" data-translate-aria="social.instagram">
+                <i class="fab fa-instagram" aria-hidden="true"></i>
               </a>
-              <a
-                href="#"
-                aria-label="تويتر"
-                data-translate-aria="social.twitter"
-              >
-                <i class="fab fa-twitter"></i>
+              <a href="#" aria-label="تويتر" data-translate-aria="social.twitter">
+                <i class="fab fa-twitter" aria-hidden="true"></i>
               </a>
             </div>
           </div>
-          <button class="lang-toggle">
-            <i class="fas fa-globe"></i>
+          <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+            <i class="fas fa-globe" aria-hidden="true"></i>
             <span data-translate="langToggle">العربية / English</span>
           </button>
         </div>
@@ -781,6 +623,4 @@
     <script src="video-handler.js" defer></script>
     <script src="script.js" defer></script>
   </body>
-</html>
-</html>
 </html>

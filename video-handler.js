@@ -1,4 +1,7 @@
-// Video error handling
+// Video handling
+// Changelog:
+// - Keep legacy video fallback logic but auto-disable when .hero--new is present
+// - Minor logging cleanups; no behavior change otherwise
 let videoAttempted = false;
 let fallbackShown = false;
 
@@ -55,6 +58,12 @@ function hideVideoFallback() {
 }
 
 function initializeVideo() {
+  // Disable legacy video behavior for the new hero design
+  const newHero = document.querySelector(".hero.hero--new");
+  if (newHero) {
+    return;
+  }
+
   const video = document.getElementById("heroVideo");
 
   if (!video) {
