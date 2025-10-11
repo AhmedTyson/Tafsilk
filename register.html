@@ -362,6 +362,34 @@
         font-size: 1rem;
       }
 
+      /* User Type Toggle */
+      .user-type-toggle {
+        display: flex;
+        background: var(--background-gray);
+        border-radius: var(--radius-md);
+        padding: 4px;
+        margin-bottom: var(--spacing-lg);
+        gap: 4px;
+      }
+
+      .user-type-option {
+        flex: 1;
+        text-align: center;
+        padding: var(--spacing-sm) var(--spacing-md);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .user-type-option.active {
+        background: var(--background-white);
+        color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+      }
+
       .oauth-buttons {
         display: flex;
         flex-direction: column;
@@ -396,8 +424,9 @@
         border-color: #DB4437;
       }
 
-      .btn-x {
-        border-color: #000000;
+      .btn-facebook {
+        border-color: #1877F2;
+        color: #1877F2;
       }
 
       .divider {
@@ -613,14 +642,30 @@
             <p class="form-subtitle">انضم إلى شبكتنا الإبداعية المجانية بالكامل</p>
           </div>
 
+          <!-- User Type Toggle -->
+          <div class="user-type-toggle" id="userTypeToggle">
+            <div class="user-type-option active" data-type="tailor">
+              <i class="fas fa-cut"></i>
+              <span>خياط</span>
+            </div>
+            <div class="user-type-option" data-type="customer">
+              <i class="fas fa-user"></i>
+              <span>عميل</span>
+            </div>
+            <div class="user-type-option" data-type="corporate">
+              <i class="fas fa-building"></i>
+              <span>شركة</span>
+            </div>
+          </div>
+
           <div class="oauth-buttons">
             <button class="btn-oauth btn-google">
               <i class="fab fa-google"></i>
               <span>التسجيل باستخدام Google</span>
             </button>
-            <button class="btn-oauth btn-x">
-              <i class="fab fa-x-twitter"></i>
-              <span>التسجيل باستخدام X</span>
+            <button class="btn-oauth btn-facebook">
+              <i class="fab fa-facebook-f"></i>
+              <span>التسجيل باستخدام Facebook</span>
             </button>
           </div>
 
@@ -668,6 +713,28 @@
       // Form validation and OAuth button handlers
       document.addEventListener('DOMContentLoaded', function() {
         const registerForm = document.getElementById('registerForm');
+        const userTypeToggle = document.getElementById('userTypeToggle');
+        const userTypeOptions = document.querySelectorAll('.user-type-option');
+        let selectedUserType = 'tailor';
+        
+        // User type toggle functionality
+        userTypeOptions.forEach(option => {
+          option.addEventListener('click', function() {
+            userTypeOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+            selectedUserType = this.getAttribute('data-type');
+            
+            // Update form title based on selected type
+            const formTitle = document.querySelector('.form-title');
+            if (selectedUserType === 'tailor') {
+              formTitle.textContent = 'انضم كخياط';
+            } else if (selectedUserType === 'customer') {
+              formTitle.textContent = 'إنشاء حساب عميل';
+            } else if (selectedUserType === 'corporate') {
+              formTitle.textContent = 'إنشاء حساب شركة';
+            }
+          });
+        });
         
         // Form validation
         registerForm.addEventListener('submit', function(e) {
@@ -689,7 +756,7 @@
           }
           
           // If validation passes, submit the form (in a real app, this would send to server)
-          alert('تم إنشاء الحساب بنجاح! سيتم توجيهك إلى لوحة التحكم.');
+          alert(`تم إنشاء الحساب بنجاح! نوع الحساب: ${selectedUserType === 'tailor' ? 'خياط' : selectedUserType === 'customer' ? 'عميل' : 'شركة'}. سيتم توجيهك إلى لوحة التحكم.`);
           // In a real application, you would submit the form data to your backend here
         });
         
@@ -699,9 +766,9 @@
           alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر Google');
         });
         
-        document.querySelector('.btn-x').addEventListener('click', function() {
-          // In a real app, this would redirect to X OAuth
-          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر X');
+        document.querySelector('.btn-facebook').addEventListener('click', function() {
+          // In a real app, this would redirect to Facebook OAuth
+          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر Facebook');
         });
         
         // Language toggle
