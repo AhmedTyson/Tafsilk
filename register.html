@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفصيلك — إنشاء حساب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      /* استيراد المتغيرات من styles.css */
+      :root {
+        --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+        --secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --text-light: #bdc3c7;
+        --text-white: #ffffff;
+        --background-white: #ffffff;
+        --background-gray: #f8f9fa;
+        --background-light: #ecf0f1;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+        --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 1.875rem;
+        --font-size-4xl: 2.25rem;
+
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --spacing-3xl: 4rem;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-full: 9999px;
+
+        --transition-fast: 0.15s ease-in-out;
+        --transition-normal: 0.3s ease-in-out;
+        --transition-slow: 0.5s ease-in-out;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-family);
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--background-white);
+        direction: rtl;
+        text-align: right;
+      }
+
+      /* شريط التنقل - من styles.css */
+      .header {
+        background-color: var(--background-white);
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar {
+        padding: 6px 0;
+        min-height: unset;
+      }
+
+      .navbar .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      @media (min-width: 768px) {
+        .navbar .container {
+          padding: 0 var(--spacing-lg);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .navbar .container {
+          padding: 0 var(--spacing-xl);
+        }
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-size: var(--font-size-2xl);
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+      }
+
+      .brand-icon {
+        display: none !important;
+      }
+
+      .logo {
+        width: 32px;
+        height: 32px;
+      }
+
+      .nav-menu {
+        display: none;
+        list-style: none;
+        gap: var(--spacing-lg);
+      }
+
+      .nav-link {
+        font-weight: 600;
+        transition: color var(--transition-fast);
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .nav-link:hover {
+        color: var(--primary-color);
+      }
+
+      .nav-actions {
+        display: none;
+        gap: var(--spacing-sm);
+        align-items: center;
+      }
+
+      .nav-toggle {
+        background: none;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      .nav-toggle span {
+        width: 24px;
+        height: 2px;
+        background-color: var(--text-primary);
+        transition: all var(--transition-fast);
+      }
+
+      .lang-toggle {
+        background: var(--background-gray);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: var(--font-family);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .lang-toggle:hover {
+        background: var(--border-color);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        line-height: 1.5;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+      .btn-primary:hover,
+      .btn-primary:focus {
+        background-color: var(--primary-hover);
+        color: var(--text-white);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+      }
+
+      .btn-outline:hover,
+      .btn-outline:focus {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+      @media (min-width: 768px) {
+        .nav-menu {
+          display: flex;
+        }
+
+        .nav-actions {
+          display: flex;
+        }
+
+        .nav-toggle {
+          display: none;
+        }
+      }
+
+      /* تصميم الصفحة الرئيسية */
+      .register-page {
+        display: flex;
+        min-height: calc(100vh - 80px);
+      }
+
+      .brand-section {
+        flex: 1;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+        color: white;
+        padding: var(--spacing-3xl);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .brand-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z" fill="white"/></svg>') repeat;
+        background-size: 200px;
+      }
+
+      .brand-content {
+        position: relative;
+        z-index: 1;
+        max-width: 500px;
+      }
+
+      .brand-logo {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: var(--spacing-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+      }
+
+      .brand-logo i {
+        font-size: 2rem;
+      }
+
+      .brand-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        line-height: 1.2;
+      }
+
+      .brand-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .features {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-lg);
+        justify-content: center;
+        margin-top: var(--spacing-2xl);
+      }
+
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: 0.9rem;
+      }
+
+      .feature i {
+        color: var(--secondary-color);
+      }
+
+      .form-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: var(--spacing-2xl);
+        background-color: var(--background-white);
+      }
+
+      .form-container {
+        width: 100%;
+        max-width: 450px;
+      }
+
+      .form-header {
+        text-align: center;
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .form-subtitle {
+        color: var(--text-secondary);
+        font-size: 1rem;
+      }
+
+      .oauth-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .btn-oauth {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--spacing-sm);
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        background: var(--background-white);
+        color: var(--text-primary);
+        font-weight: 600;
+        transition: all var(--transition-normal);
+        width: 100%;
+        font-size: 0.95rem;
+        cursor: pointer;
+      }
+
+      .btn-oauth:hover {
+        background: var(--background-gray);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .btn-google {
+        border-color: #DB4437;
+      }
+
+      .btn-x {
+        border-color: #000000;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        margin: var(--spacing-lg) 0;
+        color: var(--text-secondary);
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: var(--border-color);
+      }
+
+      .divider span {
+        padding: 0 var(--spacing-md);
+        font-size: 0.9rem;
+      }
+
+      .form {
+        width: 100%;
+      }
+
+      .input-group {
+        margin-bottom: 1.25rem;
+      }
+
+      .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        transition: all 0.2s;
+        font-family: var(--font-family);
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        margin-top: 0.5rem;
+      }
+
+      .btn-submit:hover {
+        background-color: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .form-footer {
+        text-align: center;
+        margin-top: var(--spacing-lg);
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+      }
+
+      .form-footer a {
+        color: var(--primary-color);
+        font-weight: 600;
+        text-decoration: none;
+      }
+
+      .form-footer a:hover {
+        text-decoration: underline;
+      }
+
+      .terms {
+        text-align: center;
+        margin-top: var(--spacing-lg);
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        max-width: 350px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .footer {
+        background-color: var(--dark);
+        color: white;
+        padding: var(--spacing-lg) 0;
+        text-align: center;
+      }
+
+      .footer p {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
+      /* Responsive styles */
+      @media (min-width: 768px) {
+        .brand-section {
+          display: flex;
+        }
+        
+        .brand-title {
+          font-size: 1.8rem;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .brand-title {
+          font-size: 2.2rem;
+        }
+      }
+
+      @media (max-width: 767px) {
+        .register-page {
+          flex-direction: column;
+        }
+        
+        .brand-section {
+          padding: var(--spacing-2xl) var(--spacing-lg);
+        }
+        
+        .form-section {
+          padding: var(--spacing-2xl) var(--spacing-lg);
+        }
+      }
+    </style>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- شريط التنقل من styles.css -->
+    <header class="header" role="banner">
+      <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+        <div class="container">
+          <div class="brand">
+            <div class="brand-icon" aria-hidden="true">
+              <i class="fas fa-cut"></i>
+            </div>
+            <h1 class="logo">تفصيلك</h1>
+          </div>
+          <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+            <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
+            <li><a href="index.html#how-it-works" class="nav-link">كيف تعمل المنصة</a></li>
+            <li><a href="index.html#tailors" class="nav-link">الخياطين</a></li>
+            <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
+          </ul>
+          <div class="nav-actions">
+            <a href="#" class="btn btn-outline">تسجيل دخول</a>
+            <a href="register.html" class="btn btn-primary">انضم كخياط</a>
+            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+              <i class="fas fa-globe" aria-hidden="true"></i>
+              <span>العربية / EN</span>
+            </button>
+          </div>
+          <button class="nav-toggle" aria-label="فتح القائمة" aria-controls="nav-menu" aria-expanded="false" type="button">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="register-page">
+      <section class="brand-section">
+        <div class="brand-content">
+          <div class="brand-logo">
+            <i class="fas fa-cut"></i>
+            <span>تفصيلك</span>
+          </div>
+          <h1 class="brand-title">انضم إلى أكبر شبكة للخياطين والمبدعين</h1>
+          <p class="brand-subtitle">اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك</p>
+          
+          <div class="features">
+            <div class="feature">
+              <i class="fas fa-check-circle"></i>
+              <span>أكثر من 300 خياط موثوق</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-check-circle"></i>
+              <span>آلاف المشاريع المكتملة</span>
+            </div>
+            <div class="feature">
+              <i class="fas fa-check-circle"></i>
+              <span>تصميمات مخصصة وعصرية</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="form-container">
+          <div class="form-header">
+            <h2 class="form-title">إنشاء حساب</h2>
+            <p class="form-subtitle">انضم إلى شبكتنا الإبداعية المجانية بالكامل</p>
+          </div>
+
+          <div class="oauth-buttons">
+            <button class="btn-oauth btn-google">
+              <i class="fab fa-google"></i>
+              <span>التسجيل باستخدام Google</span>
+            </button>
+            <button class="btn-oauth btn-x">
+              <i class="fab fa-x-twitter"></i>
+              <span>التسجيل باستخدام X</span>
+            </button>
+          </div>
+
+          <div class="divider">
+            <span>أو</span>
+          </div>
+
+          <form class="form" id="registerForm">
+            <div class="input-group">
+              <label for="name">الاسم الكامل *</label>
+              <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
+            </div>
+
+            <div class="input-group">
+              <label for="email">البريد الإلكتروني *</label>
+              <input type="email" id="email" placeholder="أدخل بريدك الإلكتروني" required>
+            </div>
+
+            <div class="input-group">
+              <label for="password">كلمة المرور *</label>
+              <input type="password" id="password" placeholder="أنشئ كلمة مرور" required>
+            </div>
+
+            <button type="submit" class="btn-submit">إنشاء حساب</button>
+          </form>
+
+          <div class="form-footer">
+            <p>هل لديك حساب بالفعل؟ <a href="#">سجل الدخول</a></p>
+          </div>
+
+          <div class="terms">
+            <p>بإنشائك لحساب، فإنك توافق على <a href="#">شروط الاستخدام</a> الخاصة بنا.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+      </div>
+    </footer>
+
+    <script>
+      // Form validation and OAuth button handlers
+      document.addEventListener('DOMContentLoaded', function() {
+        const registerForm = document.getElementById('registerForm');
+        
+        // Form validation
+        registerForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const name = document.getElementById('name').value;
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+          
+          // Simple validation
+          if (!name || !email || !password) {
+            alert('يرجى ملء جميع الحقول المطلوبة');
+            return;
+          }
+          
+          if (password.length < 6) {
+            alert('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+            return;
+          }
+          
+          // If validation passes, submit the form (in a real app, this would send to server)
+          alert('تم إنشاء الحساب بنجاح! سيتم توجيهك إلى لوحة التحكم.');
+          // In a real application, you would submit the form data to your backend here
+        });
+        
+        // OAuth button handlers
+        document.querySelector('.btn-google').addEventListener('click', function() {
+          // In a real app, this would redirect to Google OAuth
+          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر Google');
+        });
+        
+        document.querySelector('.btn-x').addEventListener('click', function() {
+          // In a real app, this would redirect to X OAuth
+          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر X');
+        });
+        
+        // Language toggle
+        document.querySelector('.lang-toggle').addEventListener('click', function() {
+          const currentLang = document.querySelector('.lang-toggle span').textContent;
+          if (currentLang === 'العربية / EN') {
+            document.querySelector('.lang-toggle span').textContent = 'English / العربية';
+            // In a real app, you would change the language of the page
+          } else {
+            document.querySelector('.lang-toggle span').textContent = 'العربية / EN';
+          }
+        });
+
+        // Mobile navigation toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+        
+        if (navToggle && navMenu) {
+          navToggle.addEventListener('click', function() {
+            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+            navToggle.setAttribute('aria-expanded', !isExpanded);
+            navMenu.classList.toggle('active');
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
