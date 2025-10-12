@@ -6,11 +6,17 @@
     <title>تفصيلك — إنشاء حساب</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
     <style>
-      /* استيراد المتغيرات من styles.css */
+      /* Import variables from styles.css */
       :root {
         --primary-color: #2c5aa0;
         --primary-hover: #1e3f73;
@@ -49,8 +55,10 @@
         --spacing-3xl: 4rem;
 
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
 
         --radius-sm: 0.25rem;
         --radius-md: 0.5rem;
@@ -83,7 +91,7 @@
         text-align: right;
       }
 
-      /* شريط التنقل - من styles.css */
+      /* Navigation bar - from styles.css */
       .header {
         background-color: var(--background-white);
         box-shadow: var(--shadow-sm);
@@ -247,7 +255,7 @@
         }
       }
 
-      /* تصميم الصفحة الرئيسية */
+      /* Main page design */
       .register-page {
         display: flex;
         min-height: calc(100vh - 80px);
@@ -255,7 +263,11 @@
 
       .brand-section {
         flex: 1;
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--primary-hover) 100%
+        );
         color: white;
         padding: var(--spacing-3xl);
         display: none;
@@ -274,7 +286,8 @@
         right: 0;
         bottom: 0;
         left: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z" fill="white"/></svg>') repeat;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z" fill="white"/></svg>')
+          repeat;
         background-size: 200px;
       }
 
@@ -421,12 +434,12 @@
       }
 
       .btn-google {
-        border-color: #DB4437;
+        border-color: #db4437;
       }
 
       .btn-facebook {
-        border-color: #1877F2;
-        color: #1877F2;
+        border-color: #1877f2;
+        color: #1877f2;
       }
 
       .divider {
@@ -545,7 +558,7 @@
         .brand-section {
           display: flex;
         }
-        
+
         .brand-title {
           font-size: 1.8rem;
         }
@@ -561,11 +574,11 @@
         .register-page {
           flex-direction: column;
         }
-        
+
         .brand-section {
           padding: var(--spacing-2xl) var(--spacing-lg);
         }
-        
+
         .form-section {
           padding: var(--spacing-2xl) var(--spacing-lg);
         }
@@ -574,7 +587,7 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <!-- شريط التنقل من styles.css -->
+    <!-- Navigation bar from styles.css -->
     <header class="header" role="banner">
       <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
         <div class="container">
@@ -586,7 +599,11 @@
           </div>
           <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
             <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
-            <li><a href="index.html#how-it-works" class="nav-link">كيف تعمل المنصة</a></li>
+            <li>
+              <a href="index.html#how-it-works" class="nav-link"
+                >كيف تعمل المنصة</a
+              >
+            </li>
             <li><a href="index.html#tailors" class="nav-link">الخياطين</a></li>
             <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
           </ul>
@@ -598,7 +615,13 @@
               <span>العربية / EN</span>
             </button>
           </div>
-          <button class="nav-toggle" aria-label="فتح القائمة" aria-controls="nav-menu" aria-expanded="false" type="button">
+          <button
+            class="nav-toggle"
+            aria-label="فتح القائمة"
+            aria-controls="nav-menu"
+            aria-expanded="false"
+            type="button"
+          >
             <span></span>
             <span></span>
             <span></span>
@@ -607,7 +630,7 @@
       </nav>
     </header>
 
-    <!-- المحتوى الرئيسي -->
+    <!-- Main Content -->
     <main class="register-page">
       <section class="brand-section">
         <div class="brand-content">
@@ -616,8 +639,10 @@
             <span>تفصيلك</span>
           </div>
           <h1 class="brand-title">انضم إلى أكبر شبكة للخياطين والمبدعين</h1>
-          <p class="brand-subtitle">اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك</p>
-          
+          <p class="brand-subtitle">
+            اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك
+          </p>
+
           <div class="features">
             <div class="feature">
               <i class="fas fa-check-circle"></i>
@@ -639,7 +664,9 @@
         <div class="form-container">
           <div class="form-header">
             <h2 class="form-title">إنشاء حساب</h2>
-            <p class="form-subtitle">انضم إلى شبكتنا الإبداعية المجانية بالكامل</p>
+            <p class="form-subtitle">
+              انضم إلى شبكتنا الإبداعية المجانية بالكامل
+            </p>
           </div>
 
           <!-- User Type Toggle -->
@@ -676,17 +703,32 @@
           <form class="form" id="registerForm">
             <div class="input-group">
               <label for="name">الاسم الكامل *</label>
-              <input type="text" id="name" placeholder="أدخل اسمك الكامل" required>
+              <input
+                type="text"
+                id="name"
+                placeholder="أدخل اسمك الكامل"
+                required
+              />
             </div>
 
             <div class="input-group">
               <label for="email">البريد الإلكتروني *</label>
-              <input type="email" id="email" placeholder="أدخل بريدك الإلكتروني" required>
+              <input
+                type="email"
+                id="email"
+                placeholder="أدخل بريدك الإلكتروني"
+                required
+              />
             </div>
 
             <div class="input-group">
               <label for="password">كلمة المرور *</label>
-              <input type="password" id="password" placeholder="أنشئ كلمة مرور" required>
+              <input
+                type="password"
+                id="password"
+                placeholder="أنشئ كلمة مرور"
+                required
+              />
             </div>
 
             <button type="submit" class="btn-submit">إنشاء حساب</button>
@@ -697,7 +739,10 @@
           </div>
 
           <div class="terms">
-            <p>بإنشائك لحساب، فإنك توافق على <a href="#">شروط الاستخدام</a> الخاصة بنا.</p>
+            <p>
+              بإنشائك لحساب، فإنك توافق على
+              <a href="#">شروط الاستخدام</a> الخاصة بنا.
+            </p>
           </div>
         </div>
       </section>
@@ -711,86 +756,104 @@
 
     <script>
       // Form validation and OAuth button handlers
-      document.addEventListener('DOMContentLoaded', function() {
-        const registerForm = document.getElementById('registerForm');
-        const userTypeToggle = document.getElementById('userTypeToggle');
-        const userTypeOptions = document.querySelectorAll('.user-type-option');
-        let selectedUserType = 'tailor';
-        
+      document.addEventListener("DOMContentLoaded", function () {
+        const registerForm = document.getElementById("registerForm");
+        const userTypeToggle = document.getElementById("userTypeToggle");
+        const userTypeOptions = document.querySelectorAll(".user-type-option");
+        let selectedUserType = "tailor";
+
         // User type toggle functionality
-        userTypeOptions.forEach(option => {
-          option.addEventListener('click', function() {
-            userTypeOptions.forEach(opt => opt.classList.remove('active'));
-            this.classList.add('active');
-            selectedUserType = this.getAttribute('data-type');
-            
+        userTypeOptions.forEach((option) => {
+          option.addEventListener("click", function () {
+            userTypeOptions.forEach((opt) => opt.classList.remove("active"));
+            this.classList.add("active");
+            selectedUserType = this.getAttribute("data-type");
+
             // Update form title based on selected type
-            const formTitle = document.querySelector('.form-title');
-            if (selectedUserType === 'tailor') {
-              formTitle.textContent = 'انضم كخياط';
-            } else if (selectedUserType === 'customer') {
-              formTitle.textContent = 'إنشاء حساب عميل';
-            } else if (selectedUserType === 'corporate') {
-              formTitle.textContent = 'إنشاء حساب شركة';
+            const formTitle = document.querySelector(".form-title");
+            if (selectedUserType === "tailor") {
+              formTitle.textContent = "انضم كخياط";
+            } else if (selectedUserType === "customer") {
+              formTitle.textContent = "إنشاء حساب عميل";
+            } else if (selectedUserType === "corporate") {
+              formTitle.textContent = "إنشاء حساب شركة";
             }
           });
         });
-        
+
         // Form validation
-        registerForm.addEventListener('submit', function(e) {
+        registerForm.addEventListener("submit", function (e) {
           e.preventDefault();
-          
-          const name = document.getElementById('name').value;
-          const email = document.getElementById('email').value;
-          const password = document.getElementById('password').value;
-          
+
+          const name = document.getElementById("name").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
           // Simple validation
           if (!name || !email || !password) {
-            alert('يرجى ملء جميع الحقول المطلوبة');
+            alert("يرجى ملء جميع الحقول المطلوبة");
             return;
           }
-          
+
           if (password.length < 6) {
-            alert('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+            alert("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
             return;
           }
-          
+
           // If validation passes, submit the form (in a real app, this would send to server)
-          alert(`تم إنشاء الحساب بنجاح! نوع الحساب: ${selectedUserType === 'tailor' ? 'خياط' : selectedUserType === 'customer' ? 'عميل' : 'شركة'}. سيتم توجيهك إلى لوحة التحكم.`);
+          alert(
+            `Account created successfully! Account type: ${
+              selectedUserType === "tailor"
+                ? "Tailor"
+                : selectedUserType === "customer"
+                ? "Customer"
+                : "Company"
+            }. You will be redirected to the dashboard.`
+          );
           // In a real application, you would submit the form data to your backend here
         });
-        
+
         // OAuth button handlers
-        document.querySelector('.btn-google').addEventListener('click', function() {
-          // In a real app, this would redirect to Google OAuth
-          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر Google');
-        });
-        
-        document.querySelector('.btn-facebook').addEventListener('click', function() {
-          // In a real app, this would redirect to Facebook OAuth
-          alert('سيتم توجيهك إلى صفحة تسجيل الدخول عبر Facebook');
-        });
-        
+        document
+          .querySelector(".btn-google")
+          .addEventListener("click", function () {
+            // In a real app, this would redirect to Google OAuth
+            alert("You will be redirected to Google login page");
+          });
+
+        document
+          .querySelector(".btn-facebook")
+          .addEventListener("click", function () {
+            // In a real app, this would redirect to Facebook OAuth
+            alert("You will be redirected to Facebook login page");
+          });
+
         // Language toggle
-        document.querySelector('.lang-toggle').addEventListener('click', function() {
-          const currentLang = document.querySelector('.lang-toggle span').textContent;
-          if (currentLang === 'العربية / EN') {
-            document.querySelector('.lang-toggle span').textContent = 'English / العربية';
-            // In a real app, you would change the language of the page
-          } else {
-            document.querySelector('.lang-toggle span').textContent = 'العربية / EN';
-          }
-        });
+        document
+          .querySelector(".lang-toggle")
+          .addEventListener("click", function () {
+            const currentLang =
+              document.querySelector(".lang-toggle span").textContent;
+            if (currentLang === "العربية / EN") {
+              document.querySelector(".lang-toggle span").textContent =
+                "English / العربية";
+              // In a real app, you would change the language of the page
+            } else {
+              document.querySelector(".lang-toggle span").textContent =
+                "العربية / EN";
+            }
+          });
 
         // Mobile navigation toggle
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.getElementById('nav-menu');
-        
+        const navToggle = document.querySelector(".nav-toggle");
+        const navMenu = document.getElementById("nav-menu");
+
         if (navToggle && navMenu) {
-          navToggle.addEventListener('click', function() {
-            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-            navToggle.setAttribute('aria-expanded', !isExpanded);
-            navMenu.classList.toggle('active');
+          navToggle.addEventListener("click", function () {
+            const isExpanded =
+              navToggle.getAttribute("aria-expanded") === "true";
+            navToggle.setAttribute("aria-expanded", !isExpanded);
+            navMenu.classList.toggle("active");
           });
         }
       });

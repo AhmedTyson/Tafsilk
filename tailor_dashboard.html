@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>تفصيلك — لوحة تحكم الخياط</title>
@@ -8,1345 +8,1529 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="">
     <style>
-      /* استيراد المتغيرات من styles.css */
-      :root {
-        --primary-color: #2c5aa0;
-        --primary-hover: #1e3f73;
-        --primary-light: #e3f2fd;
-        --secondary-color: #f39c12;
-        --secondary-hover: #e67e22;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --error-color: #e74c3c;
-        --text-primary: #2c3e50;
-        --text-secondary: #7f8c8d;
-        --text-light: #bdc3c7;
-        --text-white: #ffffff;
-        --background-white: #ffffff;
-        --background-gray: #f8f9fa;
-        --background-light: #ecf0f1;
-        --border-color: #e1e8ed;
-        --dark: #0f172a;
+        :root {
+            --primary-color: #2c5aa0;
+            --primary-hover: #1e3f73;
+            --primary-light: #e3f2fd;
+            --secondary-color: #f39c12;
+            --secondary-hover: #e67e22;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-light: #bdc3c7;
+            --text-white: #ffffff;
+            --background-white: #ffffff;
+            --background-gray: #f8f9fa;
+            --background-light: #ecf0f1;
+            --border-color: #e1e8ed;
+            --dark: #0f172a;
 
-        --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        --font-size-xs: 0.75rem;
-        --font-size-sm: 0.875rem;
-        --font-size-base: 1rem;
-        --font-size-lg: 1.125rem;
-        --font-size-xl: 1.25rem;
-        --font-size-2xl: 1.5rem;
-        --font-size-3xl: 1.875rem;
-        --font-size-4xl: 2.25rem;
+            --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
 
-        --spacing-xs: 0.25rem;
-        --spacing-sm: 0.5rem;
-        --spacing-md: 1rem;
-        --spacing-lg: 1.5rem;
-        --spacing-xl: 2rem;
-        --spacing-2xl: 3rem;
-        --spacing-3xl: 4rem;
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
 
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-        --radius-sm: 0.25rem;
-        --radius-md: 0.5rem;
-        --radius-lg: 0.75rem;
-        --radius-xl: 1rem;
-        --radius-full: 9999px;
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
 
-        --transition-fast: 0.15s ease-in-out;
-        --transition-normal: 0.3s ease-in-out;
-        --transition-slow: 0.5s ease-in-out;
-      }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      html {
-        font-size: 16px;
-        scroll-behavior: smooth;
-      }
-
-      body {
-        font-family: var(--font-family);
-        line-height: 1.6;
-        color: var(--text-primary);
-        background-color: var(--background-white);
-        direction: rtl;
-        text-align: right;
-      }
-
-      /* شريط التنقل - من styles.css */
-      .header {
-        background-color: var(--background-white);
-        box-shadow: var(--shadow-sm);
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-      }
-
-      .navbar {
-        padding: 6px 0;
-        min-height: unset;
-      }
-
-      .navbar .container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 var(--spacing-md);
-      }
-
-      @media (min-width: 768px) {
-        .navbar .container {
-          padding: 0 var(--spacing-lg);
+            --transition-fast: 0.15s ease-in-out;
+            --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s ease-in-out;
         }
-      }
 
-      @media (min-width: 1024px) {
-        .navbar .container {
-          padding: 0 var(--spacing-xl);
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-      }
 
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 0;
-        font-size: var(--font-size-2xl);
-        font-weight: 800;
-        color: var(--primary-color);
-        line-height: 1;
-      }
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
 
-      .brand-icon {
-        display: none !important;
-      }
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-white);
+            direction: rtl;
+            text-align: right;
+        }
 
-      .logo {
-        width: 32px;
-        height: 32px;
-      }
+        /* Header Styles */
+        .header {
+            background-color: var(--background-white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-      .nav-menu {
-        display: none;
-        list-style: none;
-        gap: var(--spacing-lg);
-      }
+        .navbar {
+            padding: 6px 0;
+            min-height: unset;
+        }
 
-      .nav-link {
-        font-weight: 600;
-        transition: color var(--transition-fast);
-        color: var(--text-primary);
-        text-decoration: none;
-      }
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
 
-      .nav-link:hover {
-        color: var(--primary-color);
-      }
+        @media (min-width: 768px) {
+            .navbar .container {
+                padding: 0 var(--spacing-lg);
+            }
+        }
 
-      .nav-actions {
-        display: none;
-        gap: var(--spacing-sm);
-        align-items: center;
-      }
+        @media (min-width: 1024px) {
+            .navbar .container {
+                padding: 0 var(--spacing-xl);
+            }
+        }
 
-      .nav-toggle {
-        background: none;
-        border: none;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        cursor: pointer;
-      }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+        }
 
-      .nav-toggle span {
-        width: 24px;
-        height: 2px;
-        background-color: var(--text-primary);
-        transition: all var(--transition-fast);
-      }
+        .brand-icon {
+            display: none !important;
+        }
 
-      .lang-toggle {
-        background: var(--background-gray);
-        border: 1px solid var(--border-color);
-        border-radius: 999px;
-        padding: 6px 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-family: var(--font-family);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-
-      .lang-toggle:hover {
-        background: var(--border-color);
-      }
-
-      .btn {
-        display: inline-block;
-        padding: var(--spacing-sm) var(--spacing-lg);
-        border: none;
-        border-radius: var(--radius-md);
-        font-family: var(--font-family);
-        font-size: var(--font-size-base);
-        font-weight: 600;
-        text-align: center;
-        text-decoration: none;
-        cursor: pointer;
-        transition: all var(--transition-normal);
-        line-height: 1.5;
-      }
-
-      .btn-primary {
-        background-color: var(--primary-color);
-        color: var(--text-white);
-      }
-
-      .btn-primary:hover,
-      .btn-primary:focus {
-        background-color: var(--primary-hover);
-        color: var(--text-white);
-        transform: translateY(-1px);
-        box-shadow: var(--shadow-md);
-      }
-
-      .btn-outline {
-        background-color: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-      }
-
-      .btn-outline:hover,
-      .btn-outline:focus {
-        background-color: var(--primary-color);
-        color: var(--text-white);
-      }
-
-      @media (min-width: 768px) {
         .nav-menu {
-          display: flex;
+            display: none;
+            list-style: none;
+            gap: var(--spacing-lg);
+        }
+
+        .nav-link {
+            font-weight: 600;
+            transition: color var(--transition-fast);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
         }
 
         .nav-actions {
-          display: flex;
+            display: none;
+            gap: var(--spacing-sm);
+            align-items: center;
         }
 
         .nav-toggle {
-          display: none;
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
         }
-      }
 
-      /* تصميم لوحة التحكم */
-      .dashboard {
-        display: flex;
-        min-height: calc(100vh - 80px);
-      }
+        .nav-toggle span {
+            width: 24px;
+            height: 2px;
+            background-color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
 
-      .sidebar {
-        width: 250px;
-        background-color: var(--background-white);
-        border-left: 1px solid var(--border-color);
-        padding: var(--spacing-lg) 0;
-        display: none;
-        flex-direction: column;
-        box-shadow: var(--shadow-sm);
-      }
+        .lang-toggle {
+            background: var(--background-gray);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-family);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-      @media (min-width: 1024px) {
+        .lang-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-lg);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            line-height: 1.5;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-hover);
+            color: var(--text-white);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover,
+        .btn-outline:focus {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+
+        @media (min-width: 768px) {
+            .nav-menu {
+                display: flex;
+            }
+
+            .nav-actions {
+                display: flex;
+            }
+
+            .nav-toggle {
+                display: none;
+            }
+        }
+
+        /* Dashboard Styles */
+        .dashboard {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+
         .sidebar {
-          display: flex;
+            width: 250px;
+            background-color: var(--background-white);
+            border-left: 1px solid var(--border-color);
+            padding: var(--spacing-lg) 0;
+            display: none;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
         }
-      }
 
-      .sidebar-header {
-        padding: 0 var(--spacing-lg) var(--spacing-lg);
-        border-bottom: 1px solid var(--border-color);
-        margin-bottom: var(--spacing-lg);
-      }
+        @media (min-width: 1024px) {
+            .sidebar {
+                display: flex;
+            }
+        }
 
-      .user-profile {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-      }
+        .sidebar-header {
+            padding: 0 var(--spacing-lg) var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-lg);
+        }
 
-      .user-avatar {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-        background-color: var(--background-light);
-      }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
 
-      .user-info h3 {
-        font-size: var(--font-size-lg);
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--background-light);
+        }
 
-      .user-info p {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-      }
+        .user-info h3 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
 
-      .sidebar-nav {
-        flex: 1;
-        padding: 0 var(--spacing-lg);
-      }
+        .user-info p {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
 
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-md);
-        margin-bottom: var(--spacing-xs);
-        transition: all var(--transition-fast);
-        text-decoration: none;
-        color: var(--text-primary);
-      }
+        .sidebar-nav {
+            flex: 1;
+            padding: 0 var(--spacing-lg);
+        }
 
-      .nav-item:hover {
-        background-color: var(--background-gray);
-      }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-xs);
+            transition: all var(--transition-fast);
+            text-decoration: none;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
 
-      .nav-item.active {
-        background-color: var(--primary-light);
-        color: var(--primary-color);
-        font-weight: 600;
-      }
+        .nav-item:hover {
+            background-color: var(--background-gray);
+        }
 
-      .nav-item i {
-        width: 20px;
-        text-align: center;
-      }
+        .nav-item.active {
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
 
-      .sidebar-footer {
-        padding: var(--spacing-lg);
-        border-top: 1px solid var(--border-color);
-      }
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
 
-      .main-content {
-        flex: 1;
-        padding: var(--spacing-xl);
-        background-color: var(--background-gray);
-        overflow-y: auto;
-      }
+        .badge {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            margin-right: auto;
+        }
 
-      .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-2xl);
-      }
+        .sidebar-footer {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--border-color);
+        }
 
-      .dashboard-title {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-      }
+        .main-content {
+            flex: 1;
+            padding: var(--spacing-xl);
+            background-color: var(--background-gray);
+            overflow-y: auto;
+        }
 
-      .dashboard-actions {
-        display: flex;
-        gap: var(--spacing-md);
-      }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-2xl);
+        }
 
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(1, 1fr);
-        gap: var(--spacing-md);
-        margin-bottom: var(--spacing-2xl);
-      }
+        .dashboard-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
 
-      @media (min-width: 640px) {
+        .dashboard-actions {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
         .stats-grid {
-          grid-template-columns: repeat(2, 1fr);
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-2xl);
         }
-      }
 
-      @media (min-width: 1024px) {
-        .stats-grid {
-          grid-template-columns: repeat(4, 1fr);
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-      }
 
-      .stat-card {
-        background-color: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-lg);
-        box-shadow: var(--shadow-sm);
-        transition: all var(--transition-normal);
-      }
+        @media (min-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
-      .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-md);
-      }
+        .stat-card {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+        }
 
-      .stat-header {
-        display: flex;
-        justify-content: between;
-        align-items: center;
-        margin-bottom: var(--spacing-sm);
-      }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
 
-      .stat-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: var(--radius-full);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: var(--font-size-lg);
-      }
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-sm);
+        }
 
-      .stat-icon.primary {
-        background-color: var(--primary-color);
-      }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: var(--font-size-lg);
+        }
 
-      .stat-icon.success {
-        background-color: var(--success-color);
-      }
+        .stat-icon.primary {
+            background-color: var(--primary-color);
+        }
 
-      .stat-icon.warning {
-        background-color: var(--warning-color);
-      }
+        .stat-icon.success {
+            background-color: var(--success-color);
+        }
 
-      .stat-icon.secondary {
-        background-color: var(--secondary-color);
-      }
+        .stat-icon.warning {
+            background-color: var(--warning-color);
+        }
 
-      .stat-trend {
-        font-size: var(--font-size-sm);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
+        .stat-icon.secondary {
+            background-color: var(--secondary-color);
+        }
 
-      .stat-trend.up {
-        color: var(--success-color);
-      }
+        .stat-trend {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
 
-      .stat-trend.down {
-        color: var(--error-color);
-      }
+        .stat-trend.up {
+            color: var(--success-color);
+        }
 
-      .stat-value {
-        font-size: var(--font-size-2xl);
-        font-weight: 700;
-        margin-bottom: 4px;
-      }
+        .stat-trend.down {
+            color: var(--error-color);
+        }
 
-      .stat-label {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-      }
+        .stat-value {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
 
-      .dashboard-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xl);
-      }
+        .stat-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
 
-      @media (min-width: 1024px) {
         .dashboard-grid {
-          grid-template-columns: 2fr 1fr;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
         }
-      }
 
-      .projects-section, .activity-section {
-        background-color: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: var(--spacing-xl);
-        box-shadow: var(--shadow-sm);
-      }
+        @media (min-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 2fr 1fr;
+            }
+        }
 
-      .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--spacing-lg);
-      }
+        .projects-section, .activity-section {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+        }
 
-      .section-title {
-        font-size: var(--font-size-xl);
-        font-weight: 700;
-        color: var(--text-primary);
-      }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
 
-      .section-actions {
-        display: flex;
-        gap: var(--spacing-sm);
-      }
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
 
-      .projects-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
+        .section-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
 
-      .projects-table th {
-        text-align: right;
-        padding: var(--spacing-md);
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-        color: var(--text-secondary);
-        font-size: var(--font-size-sm);
-      }
+        .projects-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
 
-      .projects-table td {
-        padding: var(--spacing-md);
-        border-bottom: 1px solid var(--border-color);
-      }
+        .projects-table th {
+            text-align: right;
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
 
-      .project-row:hover {
-        background-color: var(--background-gray);
-      }
+        .projects-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
 
-      .project-client {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-sm);
-      }
+        .project-row:hover {
+            background-color: var(--background-gray);
+        }
 
-      .client-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        object-fit: cover;
-        background-color: var(--background-light);
-      }
+        .project-client {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
 
-      .client-info h4 {
-        font-size: var(--font-size-base);
-        font-weight: 600;
-        margin-bottom: 2px;
-      }
+        .client-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--background-light);
+        }
 
-      .client-info p {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-      }
+        .client-info h4 {
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
 
-      .project-title {
-        font-weight: 600;
-        margin-bottom: 4px;
-      }
+        .client-info p {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
 
-      .project-desc {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-      }
+        .project-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
 
-      .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 8px;
-        border-radius: var(--radius-full);
-        font-size: var(--font-size-xs);
-        font-weight: 600;
-      }
+        .project-desc {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
 
-      .status-pending {
-        background-color: #fff3cd;
-        color: #856404;
-      }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
 
-      .status-in-progress {
-        background-color: #cce7ff;
-        color: #004085;
-      }
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
 
-      .status-completed {
-        background-color: #d4edda;
-        color: #155724;
-      }
+        .status-in-progress {
+            background-color: #cce7ff;
+            color: #004085;
+        }
 
-      .status-delivered {
-        background-color: #d1ecf1;
-        color: #0c5460;
-      }
+        .status-completed {
+            background-color: #d4edda;
+            color: #155724;
+        }
 
-      .project-actions {
-        display: flex;
-        gap: var(--spacing-xs);
-      }
+        .status-delivered {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
 
-      .btn-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--background-gray);
-        color: var(--text-secondary);
-        border: none;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-      }
+        .project-actions {
+            display: flex;
+            gap: var(--spacing-xs);
+        }
 
-      .btn-icon:hover {
-        background-color: var(--primary-color);
-        color: white;
-      }
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--background-gray);
+            color: var(--text-secondary);
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
 
-      .activity-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-lg);
-      }
+        .btn-icon:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
 
-      .activity-item {
-        display: flex;
-        gap: var(--spacing-md);
-        padding-bottom: var(--spacing-lg);
-        border-bottom: 1px solid var(--border-color);
-      }
+        .activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-lg);
+        }
 
-      .activity-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
+        .activity-item {
+            display: flex;
+            gap: var(--spacing-md);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
 
-      .activity-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        object-fit: cover;
-        background-color: var(--background-light);
-        flex-shrink: 0;
-      }
+        .activity-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
 
-      .activity-content {
-        flex: 1;
-      }
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: var(--background-light);
+            flex-shrink: 0;
+        }
 
-      .activity-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 4px;
-      }
+        .activity-content {
+            flex: 1;
+        }
 
-      .activity-user {
-        font-weight: 600;
-      }
+        .activity-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
 
-      .activity-time {
-        font-size: var(--font-size-sm);
-        color: var(--text-secondary);
-      }
+        .activity-user {
+            font-weight: 600;
+        }
 
-      .activity-text {
-        font-size: var(--font-size-sm);
-        color: var(--text-primary);
-        margin-bottom: var(--spacing-xs);
-      }
+        .activity-time {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
 
-      .activity-project {
-        display: inline-block;
-        font-weight: 600;
-        color: var(--primary-color);
-      }
+        .activity-text {
+            font-size: var(--font-size-sm);
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-xs);
+        }
 
-      .mobile-nav {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        left: 0;
-        background-color: var(--background-white);
-        border-top: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-around;
-        padding: var(--spacing-sm);
-        z-index: 100;
-      }
+        .activity-project {
+            display: inline-block;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
 
-      @media (min-width: 1024px) {
         .mobile-nav {
-          display: none;
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            background-color: var(--background-white);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: var(--spacing-sm);
+            z-index: 100;
         }
-      }
 
-      .mobile-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        text-decoration: none;
-        color: var(--text-secondary);
-        font-size: var(--font-size-xs);
-        padding: var(--spacing-xs);
-        border-radius: var(--radius-md);
-        transition: all var(--transition-fast);
-      }
+        @media (min-width: 1024px) {
+            .mobile-nav {
+                display: none;
+            }
+        }
 
-      .mobile-nav-item.active {
-        color: var(--primary-color);
-        background-color: var(--primary-light);
-      }
+        .mobile-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: var(--font-size-xs);
+            padding: var(--spacing-xs);
+            border-radius: var(--radius-md);
+            transition: all var(--transition-fast);
+            cursor: pointer;
+        }
 
-      .mobile-nav-item i {
-        font-size: var(--font-size-lg);
-      }
+        .mobile-nav-item.active {
+            color: var(--primary-color);
+            background-color: var(--primary-light);
+        }
 
-      .footer {
-        background-color: var(--dark);
-        color: white;
-        padding: var(--spacing-xl) 0 var(--spacing-lg);
-        margin-top: var(--spacing-2xl);
-      }
+        .mobile-nav-item i {
+            font-size: var(--font-size-lg);
+        }
 
-      .footer-content {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: var(--spacing-xl);
-        margin-bottom: var(--spacing-xl);
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 var(--spacing-md);
-      }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
 
-      @media (min-width: 768px) {
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .modal-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: var(--font-size-xl);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Footer Styles */
+        .footer {
+            background-color: var(--dark);
+            color: white;
+            padding: var(--spacing-xl) 0 var(--spacing-lg);
+            margin-top: var(--spacing-2xl);
+        }
+
         .footer-content {
-          grid-template-columns: repeat(2, 1fr);
-          padding: 0 var(--spacing-lg);
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
         }
-      }
 
-      @media (min-width: 1024px) {
-        .footer-content {
-          grid-template-columns: repeat(4, 1fr);
-          padding: 0 var(--spacing-xl);
+        @media (min-width: 768px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                padding: 0 var(--spacing-lg);
+            }
         }
-      }
 
-      .footer-section {
-        text-align: right;
-      }
+        @media (min-width: 1024px) {
+            .footer-content {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 0 var(--spacing-xl);
+            }
+        }
 
-      .footer-title {
-        font-size: var(--font-size-lg);
-        font-weight: 700;
-        margin-bottom: var(--spacing-md);
-        color: var(--text-white);
-      }
+        .footer-section {
+            text-align: right;
+        }
 
-      .footer-links {
-        list-style: none;
-      }
+        .footer-title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-white);
+        }
 
-      .footer-links li {
-        margin-bottom: var(--spacing-sm);
-      }
+        .footer-links {
+            list-style: none;
+        }
 
-      .footer-links a {
-        color: var(--text-light);
-        transition: color var(--transition-fast);
-        text-decoration: none;
-      }
+        .footer-links li {
+            margin-bottom: var(--spacing-sm);
+        }
 
-      .footer-links a:hover {
-        color: var(--text-white);
-      }
+        .footer-links a {
+            color: var(--text-light);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+        }
 
-      .footer-bottom {
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        padding-top: var(--spacing-lg);
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
-        align-items: center;
-        text-align: center;
-        max-width: 1200px;
-        margin: 0 auto;
-        padding-left: var(--spacing-md);
-        padding-right: var(--spacing-md);
-      }
+        .footer-links a:hover {
+            color: var(--text-white);
+        }
 
-      @media (min-width: 768px) {
         .footer-bottom {
-          flex-direction: row;
-          justify-content: space-between;
-          text-align: right;
-          padding-left: var(--spacing-lg);
-          padding-right: var(--spacing-lg);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-left: var(--spacing-md);
+            padding-right: var(--spacing-md);
         }
-      }
 
-      .footer-info {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
-        align-items: center;
-      }
+        @media (min-width: 768px) {
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: right;
+                padding-left: var(--spacing-lg);
+                padding-right: var(--spacing-lg);
+            }
+        }
 
-      @media (min-width: 768px) {
         .footer-info {
-          flex-direction: row;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
         }
-      }
 
-      .footer-info p {
-        color: var(--text-light);
-        margin: 0;
-      }
+        @media (min-width: 768px) {
+            .footer-info {
+                flex-direction: row;
+            }
+        }
 
-      .social-links {
-        display: flex;
-        gap: var(--spacing-md);
-      }
+        .footer-info p {
+            color: var(--text-light);
+            margin: 0;
+        }
 
-      .social-links a {
-        color: var(--text-light);
-        transition: color var(--transition-fast);
-      }
+        .social-links {
+            display: flex;
+            gap: var(--spacing-md);
+        }
 
-      .social-links a:hover {
-        color: var(--text-white);
-      }
+        .social-links a {
+            color: var(--text-light);
+            transition: color var(--transition-fast);
+        }
+
+        .social-links a:hover {
+            color: var(--text-white);
+        }
     </style>
-  </head>
-  <body>
-    <!-- شريط التنقل من styles.css -->
+</head>
+<body>
+    <!-- Header -->
     <header class="header" role="banner">
-      <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
-        <div class="container">
-          <div class="brand">
-            <div class="brand-icon" aria-hidden="true">
-              <i class="fas fa-cut"></i>
+        <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+            <div class="container">
+                <div class="brand">
+                    <div class="brand-icon" aria-hidden="true">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <h1 class="logo">تفصيلك</h1>
+                </div>
+                <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+                    <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
+                    <li><a href="index.html#how-it-works" class="nav-link">كيف تعمل المنصة</a></li>
+                    <li><a href="index.html#tailors" class="nav-link">الخياطين</a></li>
+                    <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="#" class="btn btn-outline">تسجيل دخول</a>
+                    <a href="register.html" class="btn btn-primary">انضم كخياط</a>
+                    <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+                        <i class="fas fa-globe" aria-hidden="true"></i>
+                        <span>العربية / EN</span>
+                    </button>
+                </div>
+                <button class="nav-toggle" aria-label="فتح القائمة" aria-controls="nav-menu" aria-expanded="false" type="button">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
-            <h1 class="logo">تفصيلك</h1>
-          </div>
-          <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
-            <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
-            <li><a href="index.html#how-it-works" class="nav-link">كيف تعمل المنصة</a></li>
-            <li><a href="index.html#tailors" class="nav-link">الخياطين</a></li>
-            <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
-          </ul>
-          <div class="nav-actions">
-            <a href="#" class="btn btn-outline">تسجيل دخول</a>
-            <a href="register.html" class="btn btn-primary">انضم كخياط</a>
-            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
-              <i class="fas fa-globe" aria-hidden="true"></i>
-              <span>العربية / EN</span>
-            </button>
-          </div>
-          <button class="nav-toggle" aria-label="فتح القائمة" aria-controls="nav-menu" aria-expanded="false" type="button">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-        </div>
-      </nav>
+        </nav>
     </header>
 
-    <!-- المحتوى الرئيسي -->
+    <!-- Dashboard Content -->
     <div class="dashboard">
-      <!-- الشريط الجانبي -->
-      <aside class="sidebar">
-        <div class="sidebar-header">
-          <div class="user-profile">
-            <img src="https://placehold.co/100x100/e3f2fd/2c5aa0?text=خ" alt="أستاذ خالد" class="user-avatar">
-            <div class="user-info">
-              <h3>أستاذ خالد</h3>
-              <p>خياط محترف</p>
-            </div>
-          </div>
-        </div>
-        
-        <nav class="sidebar-nav">
-          <a href="#" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>لوحة التحكم</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-project-diagram"></i>
-            <span>المشاريع</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-inbox"></i>
-            <span>الطلبات</span>
-            <span class="badge" style="margin-right: auto; background: var(--primary-color); color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.7rem;">5</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-calendar-alt"></i>
-            <span>المواعيد</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-chart-line"></i>
-            <span>الإحصائيات</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-wallet"></i>
-            <span>المدفوعات</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-users"></i>
-            <span>العملاء</span>
-          </a>
-          <a href="#" class="nav-item">
-            <i class="fas fa-cog"></i>
-            <span>الإعدادات</span>
-          </a>
-        </nav>
-        
-        <div class="sidebar-footer">
-          <a href="#" class="nav-item">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>تسجيل الخروج</span>
-          </a>
-        </div>
-      </aside>
-
-      <!-- المحتوى الرئيسي -->
-      <main class="main-content">
-        <div class="dashboard-header">
-          <h1 class="dashboard-title">لوحة التحكم</h1>
-          <div class="dashboard-actions">
-            <button class="btn btn-primary">
-              <i class="fas fa-plus"></i>
-              <span>مشروع جديد</span>
-            </button>
-            <button class="btn btn-outline">
-              <i class="fas fa-bell"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- إحصائيات سريعة -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon primary">
-                <i class="fas fa-project-diagram"></i>
-              </div>
-              <div class="stat-trend up">
-                <i class="fas fa-arrow-up"></i>
-                <span>12%</span>
-              </div>
-            </div>
-            <div class="stat-value">15</div>
-            <div class="stat-label">مشروع نشط</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon success">
-                <i class="fas fa-check-circle"></i>
-              </div>
-              <div class="stat-trend up">
-                <i class="fas fa-arrow-up"></i>
-                <span>8%</span>
-              </div>
-            </div>
-            <div class="stat-value">32</div>
-            <div class="stat-label">مشروع مكتمل</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon warning">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="stat-trend down">
-                <i class="fas fa-arrow-down"></i>
-                <span>5%</span>
-              </div>
-            </div>
-            <div class="stat-value">7</div>
-            <div class="stat-label">في الانتظار</div>
-          </div>
-          
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon secondary">
-                <i class="fas fa-money-bill-wave"></i>
-              </div>
-              <div class="stat-trend up">
-                <i class="fas fa-arrow-up"></i>
-                <span>22%</span>
-              </div>
-            </div>
-            <div class="stat-value">8,750 ج.م</div>
-            <div class="stat-label">الإيرادات هذا الشهر</div>
-          </div>
-        </div>
-
-        <!-- الشبكة الرئيسية -->
-        <div class="dashboard-grid">
-          <!-- قسم المشاريع -->
-          <section class="projects-section">
-            <div class="section-header">
-              <h2 class="section-title">مشاريع حالية</h2>
-              <div class="section-actions">
-                <button class="btn btn-outline">عرض الكل</button>
-              </div>
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <img src="https://placehold.co/100x100/e3f2fd/2c5aa0?text=خ" alt="أستاذ خالد" class="user-avatar">
+                    <div class="user-info">
+                        <h3>أستاذ خالد</h3>
+                        <p>خياط محترف</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="table-container">
-              <table class="projects-table">
-                <thead>
-                  <tr>
-                    <th>العميل</th>
-                    <th>المشروع</th>
-                    <th>الحالة</th>
-                    <th>الموعد النهائي</th>
-                    <th>الإجراءات</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="project-row">
-                    <td>
-                      <div class="project-client">
-                        <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=م" alt="محمد" class="client-avatar">
-                        <div class="client-info">
-                          <h4>محمد أحمد</h4>
-                          <p>مصر الجديدة</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="project-title">بدلة رجالية رسمية</div>
-                      <div class="project-desc">بدلة باللون الأزرق الداكن</div>
-                    </td>
-                    <td>
-                      <span class="status-badge status-in-progress">
-                        <i class="fas fa-sync-alt"></i>
-                        قيد التنفيذ
-                      </span>
-                    </td>
-                    <td>15 أكتوبر</td>
-                    <td>
-                      <div class="project-actions">
-                        <button class="btn-icon">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-envelope"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  
-                  <tr class="project-row">
-                    <td>
-                      <div class="project-client">
-                        <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=ف" alt="فاطمة" class="client-avatar">
-                        <div class="client-info">
-                          <h4>فاطمة علي</h4>
-                          <p>المعادي</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="project-title">فساتين سهرة</div>
-                      <div class="project-desc">فستان أزرق بتصميم مميز</div>
-                    </td>
-                    <td>
-                      <span class="status-badge status-pending">
-                        <i class="fas fa-clock"></i>
-                        في الانتظار
-                      </span>
-                    </td>
-                    <td>20 أكتوبر</td>
-                    <td>
-                      <div class="project-actions">
-                        <button class="btn-icon">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-envelope"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  
-                  <tr class="project-row">
-                    <td>
-                      <div class="project-client">
-                        <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=أ" alt="أحمد" class="client-avatar">
-                        <div class="client-info">
-                          <h4>أحمد سامي</h4>
-                          <p>مدينة نصر</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="project-title">تعديلات ملابس</div>
-                      <div class="project-desc">تعديل 5 قطع ملابس</div>
-                    </td>
-                    <td>
-                      <span class="status-badge status-completed">
-                        <i class="fas fa-check"></i>
-                        مكتمل
-                      </span>
-                    </td>
-                    <td>10 أكتوبر</td>
-                    <td>
-                      <div class="project-actions">
-                        <button class="btn-icon">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-envelope"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                  
-                  <tr class="project-row">
-                    <td>
-                      <div class="project-client">
-                        <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=س" alt="سارة" class="client-avatar">
-                        <div class="client-info">
-                          <h4>سارة محمود</h4>
-                          <p>الزمالك</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="project-title">بدلة سهرة</div>
-                      <div class="project-desc">بدلة سوداء بتطريز ذهبي</div>
-                    </td>
-                    <td>
-                      <span class="status-badge status-delivered">
-                        <i class="fas fa-truck"></i>
-                        تم التسليم
-                      </span>
-                    </td>
-                    <td>5 أكتوبر</td>
-                    <td>
-                      <div class="project-actions">
-                        <button class="btn-icon">
-                          <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-envelope"></i>
-                        </button>
-                        <button class="btn-icon">
-                          <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <!-- قسم النشاط -->
-          <section class="activity-section">
-            <div class="section-header">
-              <h2 class="section-title">النشاط الحديث</h2>
-              <div class="section-actions">
-                <button class="btn btn-outline">عرض الكل</button>
-              </div>
-            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="#" class="nav-item" data-section="projects">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>المشاريع</span>
+                </a>
+                <a href="#" class="nav-item" data-section="orders">
+                    <i class="fas fa-inbox"></i>
+                    <span>الطلبات</span>
+                    <span class="badge">5</span>
+                </a>
+                <a href="#" class="nav-item" data-section="appointments">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>المواعيد</span>
+                </a>
+                <a href="#" class="nav-item" data-section="statistics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>الإحصائيات</span>
+                </a>
+                <a href="#" class="nav-item" data-section="payments">
+                    <i class="fas fa-wallet"></i>
+                    <span>المدفوعات</span>
+                </a>
+                <a href="#" class="nav-item" data-section="clients">
+                    <i class="fas fa-users"></i>
+                    <span>العملاء</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
             
-            <div class="activity-list">
-              <div class="activity-item">
-                <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=م" alt="محمد" class="activity-avatar">
-                <div class="activity-content">
-                  <div class="activity-header">
-                    <span class="activity-user">محمد أحمد</span>
-                    <span class="activity-time">منذ ساعتين</span>
-                  </div>
-                  <p class="activity-text">وافق على التصميم النهائي <span class="activity-project">لبدلته الرسمية</span></p>
-                </div>
-              </div>
-              
-              <div class="activity-item">
-                <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=ف" alt="فاطمة" class="activity-avatar">
-                <div class="activity-content">
-                  <div class="activity-header">
-                    <span class="activity-user">فاطمة علي</span>
-                    <span class="activity-time">منذ 5 ساعات</span>
-                  </div>
-                  <p class="activity-text">طلبت تعديلات على <span class="activity-project">فستان السهرة</span></p>
-                </div>
-              </div>
-              
-              <div class="activity-item">
-                <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=أ" alt="أحمد" class="activity-avatar">
-                <div class="activity-content">
-                  <div class="activity-header">
-                    <span class="activity-user">أحمد سامي</span>
-                    <span class="activity-time">منذ يوم</span>
-                  </div>
-                  <p class="activity-text">دفع المستحقات المتبقية <span class="activity-project">لتعديلات الملابس</span></p>
-                </div>
-              </div>
-              
-              <div class="activity-item">
-                <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=س" alt="سارة" class="activity-avatar">
-                <div class="activity-content">
-                  <div class="activity-header">
-                    <span class="activity-user">سارة محمود</span>
-                    <span class="activity-time">منذ يومين</span>
-                  </div>
-                  <p class="activity-text">استلمت <span class="activity-project">بدلة السهرة</span> وتركت تقييمًا إيجابيًا</p>
-                </div>
-              </div>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
             </div>
-          </section>
-        </div>
-      </main>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">لوحة التحكم</h1>
+                <div class="dashboard-actions">
+                    <button class="btn btn-primary" id="new-project-btn">
+                        <i class="fas fa-plus"></i>
+                        <span>مشروع جديد</span>
+                    </button>
+                    <button class="btn btn-outline" id="notifications-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-project-diagram"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">مشروع نشط</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">32</div>
+                    <div class="stat-label">مشروع مكتمل</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-trend down">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>5%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">في الانتظار</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon secondary">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>22%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">8,750 ج.م</div>
+                    <div class="stat-label">الإيرادات هذا الشهر</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- Projects Section -->
+                <section class="projects-section">
+                    <div class="section-header">
+                        <h2 class="section-title">مشاريع حالية</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" id="view-all-projects">عرض الكل</button>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="projects-table">
+                            <thead>
+                                <tr>
+                                    <th>العميل</th>
+                                    <th>المشروع</th>
+                                    <th>الحالة</th>
+                                    <th>الموعد النهائي</th>
+                                    <th>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projects-table-body">
+                                <!-- Projects will be dynamically loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Activity Section -->
+                <section class="activity-section">
+                    <div class="section-header">
+                        <h2 class="section-title">النشاط الحديث</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-outline" id="view-all-activities">عرض الكل</button>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-list" id="activity-list">
+                        <!-- Activities will be dynamically loaded here -->
+                    </div>
+                </section>
+            </div>
+        </main>
     </div>
 
-    <!-- التنقل للجوال -->
+    <!-- Mobile Navigation -->
     <nav class="mobile-nav">
-      <a href="#" class="mobile-nav-item active">
-        <i class="fas fa-home"></i>
-        <span>الرئيسية</span>
-      </a>
-      <a href="#" class="mobile-nav-item">
-        <i class="fas fa-project-diagram"></i>
-        <span>المشاريع</span>
-      </a>
-      <a href="#" class="mobile-nav-item">
-        <i class="fas fa-inbox"></i>
-        <span>الطلبات</span>
-      </a>
-      <a href="#" class="mobile-nav-item">
-        <i class="fas fa-user"></i>
-        <span>حسابي</span>
-      </a>
+        <a href="#" class="mobile-nav-item active" data-section="dashboard">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="projects">
+            <i class="fas fa-project-diagram"></i>
+            <span>المشاريع</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="orders">
+            <i class="fas fa-inbox"></i>
+            <span>الطلبات</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="profile">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </a>
     </nav>
 
+    <!-- New Project Modal -->
+    <div class="modal" id="new-project-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">مشروع جديد</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="new-project-form">
+                <div class="form-group">
+                    <label for="project-name">اسم المشروع</label>
+                    <input type="text" id="project-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="client-name">اسم العميل</label>
+                    <input type="text" id="client-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-type">نوع المشروع</label>
+                    <select id="project-type" class="form-control" required>
+                        <option value="">اختر نوع المشروع</option>
+                        <option value="بدلة رجالية">بدلة رجالية</option>
+                        <option value="فساتين سهرة">فساتين سهرة</option>
+                        <option value="تعديلات">تعديلات</option>
+                        <option value="ملابس أطفال">ملابس أطفال</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">الموعد النهائي</label>
+                    <input type="date" id="deadline" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="budget">الميزانية</label>
+                    <input type="number" id="budget" class="form-control" placeholder="جنيه مصري" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">إنشاء المشروع</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
     <footer class="footer">
-      <div class="footer-content">
-        <div class="footer-section">
-          <h3 class="footer-title">من نحن</h3>
-          <ul class="footer-links">
-            <li><a href="#">عن تفصيلك</a></li>
-            <li><a href="#">كيف تعمل المنصة</a></li>
-            <li><a href="#">الأسئلة الشائعة</a></li>
-          </ul>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3 class="footer-title">من نحن</h3>
+                <ul class="footer-links">
+                    <li><a href="#">عن تفصيلك</a></li>
+                    <li><a href="#">كيف تعمل المنصة</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">للعملاء</h3>
+                <ul class="footer-links">
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                    <li><a href="#">كيف تعمل المنصة</a></li>
+                    <li><a href="#">خدمة العملاء</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">للخياطين</h3>
+                <ul class="footer-links">
+                    <li><a href="#">انضم إلينا</a></li>
+                    <li><a href="#">أسئلة الخياطين الشائعة</a></li>
+                    <li><a href="#">مركز المساعدة</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3 class="footer-title">قانوني</h3>
+                <ul class="footer-links">
+                    <li><a href="#">شروط الخدمة</a></li>
+                    <li><a href="#">سياسة الخصوصية</a></li>
+                    <li><a href="#">تواصل معنا</a></li>
+                </ul>
+            </div>
         </div>
 
-        <div class="footer-section">
-          <h3 class="footer-title">للعملاء</h3>
-          <ul class="footer-links">
-            <li><a href="#">الأسئلة الشائعة</a></li>
-            <li><a href="#">كيف تعمل المنصة</a></li>
-            <li><a href="#">خدمة العملاء</a></li>
-          </ul>
+        <div class="footer-bottom">
+            <div class="footer-info">
+                <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+                <div class="social-links">
+                    <a href="#" aria-label="فيسبوك">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" aria-label="إنستغرام">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="#" aria-label="تويتر">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+                <i class="fas fa-globe" aria-hidden="true"></i>
+                <span>العربية / English</span>
+            </button>
         </div>
-
-        <div class="footer-section">
-          <h3 class="footer-title">للخياطين</h3>
-          <ul class="footer-links">
-            <li><a href="#">انضم إلينا</a></li>
-            <li><a href="#">أسئلة الخياطين الشائعة</a></li>
-            <li><a href="#">مركز المساعدة</a></li>
-          </ul>
-        </div>
-
-        <div class="footer-section">
-          <h3 class="footer-title">قانوني</h3>
-          <ul class="footer-links">
-            <li><a href="#">شروط الخدمة</a></li>
-            <li><a href="#">سياسة الخصوصية</a></li>
-            <li><a href="#">تواصل معنا</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="footer-bottom">
-        <div class="footer-info">
-          <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
-          <div class="social-links">
-            <a href="#" aria-label="فيسبوك">
-              <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" aria-label="إنستغرام">
-              <i class="fab fa-instagram"></i>
-            </a>
-            <a href="#" aria-label="تويتر">
-              <i class="fab fa-twitter"></i>
-            </a>
-          </div>
-        </div>
-        <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
-          <i class="fas fa-globe" aria-hidden="true"></i>
-          <span>العربية / English</span>
-        </button>
-      </div>
     </footer>
 
     <script>
-      // Mobile navigation toggle
-      document.addEventListener('DOMContentLoaded', function() {
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.getElementById('nav-menu');
-        
-        if (navToggle && navMenu) {
-          navToggle.addEventListener('click', function() {
-            const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
-            navToggle.setAttribute('aria-expanded', !isExpanded);
-            navMenu.classList.toggle('active');
-          });
+        // Mock Data
+        const mockData = {
+            projects: [
+                {
+                    id: 1,
+                    client: { name: "محمد أحمد", location: "مصر الجديدة", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=م" },
+                    title: "بدلة رجالية رسمية",
+                    description: "بدلة باللون الأزرق الداكن",
+                    status: "in-progress",
+                    deadline: "15 أكتوبر"
+                },
+                {
+                    id: 2,
+                    client: { name: "فاطمة علي", location: "المعادي", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=ف" },
+                    title: "فساتين سهرة",
+                    description: "فستان أزرق بتصميم مميز",
+                    status: "pending",
+                    deadline: "20 أكتوبر"
+                },
+                {
+                    id: 3,
+                    client: { name: "أحمد سامي", location: "مدينة نصر", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=أ" },
+                    title: "تعديلات ملابس",
+                    description: "تعديل 5 قطع ملابس",
+                    status: "completed",
+                    deadline: "10 أكتوبر"
+                },
+                {
+                    id: 4,
+                    client: { name: "سارة محمود", location: "الزمالك", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=س" },
+                    title: "بدلة سهرة",
+                    description: "بدلة سوداء بتطريز ذهبي",
+                    status: "delivered",
+                    deadline: "5 أكتوبر"
+                }
+            ],
+            activities: [
+                {
+                    user: { name: "محمد أحمد", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=م" },
+                    time: "منذ ساعتين",
+                    text: "وافق على التصميم النهائي",
+                    project: "بدلته الرسمية"
+                },
+                {
+                    user: { name: "فاطمة علي", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=ف" },
+                    time: "منذ 5 ساعات",
+                    text: "طلبت تعديلات على",
+                    project: "فستان السهرة"
+                },
+                {
+                    user: { name: "أحمد سامي", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=أ" },
+                    time: "منذ يوم",
+                    text: "دفع المستحقات المتبقية",
+                    project: "لتعديلات الملابس"
+                },
+                {
+                    user: { name: "سارة محمود", avatar: "https://placehold.co/40x40/e3f2fd/2c5aa0?text=س" },
+                    time: "منذ يومين",
+                    text: "استلمت",
+                    project: "بدلة السهرة وتركت تقييمًا إيجابيًا"
+                }
+            ]
+        };
+
+        // DOM Elements
+        const projectsTableBody = document.getElementById('projects-table-body');
+        const activityList = document.getElementById('activity-list');
+        const newProjectBtn = document.getElementById('new-project-btn');
+        const newProjectModal = document.getElementById('new-project-modal');
+        const closeModalBtn = document.querySelector('.close-modal');
+        const newProjectForm = document.getElementById('new-project-form');
+        const navItems = document.querySelectorAll('.nav-item');
+        const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProjects();
+            loadActivities();
+            setupEventListeners();
+        });
+
+        // Load Projects
+        function loadProjects() {
+            projectsTableBody.innerHTML = '';
+            mockData.projects.forEach(project => {
+                const statusClass = getStatusClass(project.status);
+                const statusText = getStatusText(project.status);
+                const statusIcon = getStatusIcon(project.status);
+
+                const row = document.createElement('tr');
+                row.className = 'project-row';
+                row.innerHTML = `
+                    <td>
+                        <div class="project-client">
+                            <img src="${project.client.avatar}" alt="${project.client.name}" class="client-avatar">
+                            <div class="client-info">
+                                <h4>${project.client.name}</h4>
+                                <p>${project.client.location}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="project-title">${project.title}</div>
+                        <div class="project-desc">${project.description}</div>
+                    </td>
+                    <td>
+                        <span class="status-badge ${statusClass}">
+                            ${statusIcon}
+                            ${statusText}
+                        </span>
+                    </td>
+                    <td>${project.deadline}</td>
+                    <td>
+                        <div class="project-actions">
+                            <button class="btn-icon" onclick="editProject(${project.id})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon" onclick="messageClient(${project.id})">
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                            <button class="btn-icon" onclick="showProjectOptions(${project.id})">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                projectsTableBody.appendChild(row);
+            });
         }
 
-        // Language toggle
-        document.querySelectorAll('.lang-toggle').forEach(button => {
-          button.addEventListener('click', function() {
-            const currentLang = this.querySelector('span').textContent;
-            if (currentLang === 'العربية / EN') {
-              this.querySelector('span').textContent = 'English / العربية';
-            } else {
-              this.querySelector('span').textContent = 'العربية / EN';
-            }
-          });
-        });
-
-        // Mobile nav active state
-        document.querySelectorAll('.mobile-nav-item').forEach(item => {
-          item.addEventListener('click', function(e) {
-            e.preventDefault();
-            document.querySelectorAll('.mobile-nav-item').forEach(i => {
-              i.classList.remove('active');
+        // Load Activities
+        function loadActivities() {
+            activityList.innerHTML = '';
+            mockData.activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <img src="${activity.user.avatar}" alt="${activity.user.name}" class="activity-avatar">
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <span class="activity-user">${activity.user.name}</span>
+                            <span class="activity-time">${activity.time}</span>
+                        </div>
+                        <p class="activity-text">${activity.text} <span class="activity-project">${activity.project}</span></p>
+                    </div>
+                `;
+                activityList.appendChild(activityItem);
             });
-            this.classList.add('active');
-          });
-        });
+        }
 
-        // Sidebar nav active state
-        document.querySelectorAll('.nav-item').forEach(item => {
-          item.addEventListener('click', function(e) {
-            if (this.getAttribute('href') === '#') {
-              e.preventDefault();
-            }
-            document.querySelectorAll('.nav-item').forEach(i => {
-              i.classList.remove('active');
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // New Project Modal
+            newProjectBtn.addEventListener('click', () => {
+                newProjectModal.style.display = 'flex';
             });
-            this.classList.add('active');
-          });
-        });
-      });
+
+            closeModalBtn.addEventListener('click', () => {
+                newProjectModal.style.display = 'none';
+            });
+
+            // Close modal when clicking outside
+            newProjectModal.addEventListener('click', (e) => {
+                if (e.target === newProjectModal) {
+                    newProjectModal.style.display = 'none';
+                }
+            });
+
+            // New Project Form Submission
+            newProjectForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                createNewProject();
+            });
+
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = item.getAttribute('data-section');
+                    navigateToSection(section);
+                });
+            });
+
+            mobileNavItems.forEach(item => {
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = item.getAttribute('data-section');
+                    navigateToSection(section);
+                });
+            });
+
+            // Language Toggle
+            document.querySelectorAll('.lang-toggle').forEach(button => {
+                button.addEventListener('click', function() {
+                    const currentLang = this.querySelector('span').textContent;
+                    if (currentLang === 'العربية / EN') {
+                        this.querySelector('span').textContent = 'English / العربية';
+                    } else {
+                        this.querySelector('span').textContent = 'العربية / EN';
+                    }
+                });
+            });
+
+            // Mobile Navigation Toggle
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', function() {
+                    const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                    navToggle.setAttribute('aria-expanded', !isExpanded);
+                    navMenu.classList.toggle('active');
+                });
+            }
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                    alert('تم تسجيل الخروج بنجاح');
+                    // In a real app, redirect to login page
+                }
+            });
+        }
+
+        // Helper Functions
+        function getStatusClass(status) {
+            const statusMap = {
+                'pending': 'status-pending',
+                'in-progress': 'status-in-progress',
+                'completed': 'status-completed',
+                'delivered': 'status-delivered'
+            };
+            return statusMap[status] || 'status-pending';
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'في الانتظار',
+                'in-progress': 'قيد التنفيذ',
+                'completed': 'مكتمل',
+                'delivered': 'تم التسليم'
+            };
+            return statusMap[status] || 'في الانتظار';
+        }
+
+        function getStatusIcon(status) {
+            const iconMap = {
+                'pending': '<i class="fas fa-clock"></i>',
+                'in-progress': '<i class="fas fa-sync-alt"></i>',
+                'completed': '<i class="fas fa-check"></i>',
+                'delivered': '<i class="fas fa-truck"></i>'
+            };
+            return iconMap[status] || '<i class="fas fa-clock"></i>';
+        }
+
+        // Action Functions
+        function createNewProject() {
+            const formData = new FormData(newProjectForm);
+            const projectName = document.getElementById('project-name').value;
+            const clientName = document.getElementById('client-name').value;
+            
+            alert(`تم إنشاء المشروع "${projectName}" للعميل "${clientName}" بنجاح!`);
+            newProjectModal.style.display = 'none';
+            newProjectForm.reset();
+            
+            // In a real app, you would send this to your backend
+        }
+
+        function editProject(projectId) {
+            alert(`فتح تعديل المشروع رقم ${projectId}`);
+            // In a real app, open edit modal with project data
+        }
+
+        function messageClient(projectId) {
+            alert(`فتح محادثة مع عميل المشروع رقم ${projectId}`);
+            // In a real app, open messaging interface
+        }
+
+        function showProjectOptions(projectId) {
+            alert(`عرض خيارات إضافية للمشروع رقم ${projectId}`);
+            // In a real app, show dropdown with more options
+        }
+
+        function navigateToSection(section) {
+            alert(`التنقل إلى قسم: ${section}`);
+            // In a real app, load the appropriate section content
+            
+            // Update active states
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === section) {
+                    item.classList.add('active');
+                }
+            });
+            
+            mobileNavItems.forEach(item => {
+                item.classList.remove('active');
+                if (item.getAttribute('data-section') === section) {
+                    item.classList.add('active');
+                }
+            });
+        }
     </script>
-  </body>
+</body>
 </html>

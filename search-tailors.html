@@ -99,7 +99,9 @@
         max-width: 1400px;
         margin: 0 auto;
         padding: 0 var(--spacing-md);
-        align-items: flex-start; /* prevent cross-axis stretch */
+        align-items: flex-start;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       @media (min-width: 768px) {
@@ -124,12 +126,12 @@
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-sm);
         padding: var(--spacing-md);
-        height: auto; /* fit content */
-
+        height: auto;
         top: 88px;
-        max-height: max-content; /* no internal vertical limit */
-        overflow-y: visible; /* prevent inner vertical scrollbar */
-        overflow-x: hidden; /* prevent horizontal scroll */
+        max-height: max-content;
+        overflow-y: visible;
+        overflow-x: hidden;
+        box-sizing: border-box;
       }
 
       /* Ensure long labels wrap and don't cause x-overflow */
@@ -252,6 +254,7 @@
       .portfolio-main {
         flex: 1;
         min-width: 0;
+        box-sizing: border-box;
       }
 
       /* Narrower fixed width on large screens too */
@@ -267,6 +270,7 @@
       @media (max-width: 1023px) {
         .portfolio-layout {
           flex-direction: column;
+          width: 100%;
         }
 
         .filter-sidebar {
@@ -275,9 +279,7 @@
           min-width: 0;
           position: static;
           max-height: none;
-          padding: var(
-            --spacing-lg
-          ); /* restore comfortable padding on mobile */
+          padding: var(--spacing-lg);
         }
 
         .filter-options {
@@ -422,6 +424,8 @@
         position: relative;
         overflow: hidden;
         margin-bottom: var(--spacing-xl);
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .page-header::before {
@@ -531,12 +535,16 @@
       /* Portfolio Grid */
       .portfolio-section {
         padding: var(--spacing-lg) 0;
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .portfolio-grid {
         display: grid;
         grid-template-columns: repeat(1, 1fr);
         gap: var(--spacing-lg);
+        width: 100%;
+        box-sizing: border-box;
       }
 
       @media (min-width: 640px) {
@@ -817,6 +825,8 @@
         color: white;
         padding: var(--spacing-2xl) 0 var(--spacing-lg);
         margin-top: var(--spacing-3xl);
+        width: 100%;
+        box-sizing: border-box;
       }
 
       .footer-content {
@@ -932,6 +942,7 @@
       @media (max-width: 1023px) {
         .portfolio-layout {
           flex-direction: column;
+          width: 100%;
         }
 
         .filter-sidebar {
@@ -952,6 +963,18 @@
       @media (max-width: 640px) {
         .filter-options {
           grid-template-columns: 1fr;
+        }
+
+        .page-header {
+          padding: var(--spacing-2xl) var(--spacing-md);
+        }
+
+        .page-title {
+          font-size: var(--font-size-3xl);
+        }
+
+        .page-subtitle {
+          font-size: var(--font-size-base);
         }
       }
     </style>
@@ -1412,7 +1435,7 @@
             <div class="portfolio-item" data-category="dresses">
               <div class="portfolio-image-container">
                 <img
-                  src="mohamed.png"
+                  src="img/mohamed.png"
                   alt="فستان سهرة أزرق"
                   class="portfolio-image portfolio-image--mohamed"
                 />
@@ -1467,7 +1490,7 @@
             <div class="portfolio-item" data-category="suits">
               <div class="portfolio-image-container">
                 <img
-                  src="khaled.png"
+                  src="img/khaled.png"
                   alt="بدلة رجالية رمادية"
                   class="portfolio-image portfolio-image--khaled"
                 />
@@ -1913,7 +1936,11 @@
           </button>
         </div>
         <div class="modal-body">
-          <img src="mohamed.png" alt="فستان سهرة أزرق" class="modal-image" />
+          <img
+            src="img/mohamed.png"
+            alt="فستان سهرة أزرق"
+            class="modal-image"
+          />
           <div class="modal-details">
             <div class="modal-description">
               <h3>وصف العمل</h3>

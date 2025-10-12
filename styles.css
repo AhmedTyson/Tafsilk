@@ -853,7 +853,7 @@ img {
   overflow: hidden;
 }
 
-/* جعل الفيديو يغطي كامل المساحة */
+/* Make video cover full area */
 .hero-video {
   position: absolute;
   inset: 0;
@@ -871,7 +871,7 @@ img {
   opacity: 1;
 }
 
-/* تحسين fallback */
+/* Improve fallback */
 .hero-video-fallback {
   position: absolute;
   inset: 0;
@@ -898,7 +898,7 @@ img {
   display: none !important;
 }
 
-/* إن كان fallback ظاهر نخفف الـ overlay */
+/* If fallback is visible, reduce overlay opacity */
 .hero.no-video #heroOverlay {
   opacity: 0.55;
 }
@@ -924,9 +924,9 @@ img {
   color: var(--text-light);
 }
 
-/* إصلاح متغير غير معرف */
+/* Fix undefined variable */
 .search-input {
-  /* كان border-radius: var(--radius); */
+  /* was border-radius: var(--radius); */
   border-radius: var(--radius-lg);
 }
 
