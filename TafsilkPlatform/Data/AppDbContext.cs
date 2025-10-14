@@ -16,6 +16,7 @@ public partial class AppDbContext : DbContext
     {
     }
 
+    
     public virtual DbSet<CorporateAccount> CorporateAccounts { get; set; }
 
     public virtual DbSet<CustomerProfile> CustomerProfiles { get; set; }
@@ -29,6 +30,9 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
+    public DbSet<Review> Reviews { get; set; }
+    public DbSet<RatingDimension> RatingDimensions { get; set; }
+    public DbSet<TailorBadge> TailorBadges{ get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -168,7 +172,85 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_UserAddresses_Users");
         });
 
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.ToTable("Reviews");
+            entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
+
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+            entity.Property(e => e.Rating).IsRequired();
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
+            entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
+
+            entity.HasOne<Order>()
+                  .WithOne()
+                  .HasForeignKey<Review>(r => r.OrderId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Reviews_Orders");
+
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(r => r.TailorId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Reviews_TailorProfiles");
+
+            entity.HasOne<CustomerProfile>()
+                  .WithMany()
+                  .HasForeignKey(r => r.CustomerId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Reviews_CustomerProfiles");
+
+            entity.HasMany(r => r.RatingDimensions)
+                  .WithOne(rd => rd.Review)
+                  .HasForeignKey(rd => rd.ReviewId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RatingDimension>(entity =>
+        {
+            entity.ToTable("RatingDimensions");
+            entity.HasKey(rd => rd.RatingDimensionId).HasName("PK_RatingDimensions");
+
+            entity.Property(rd => rd.DimensionName)
+                  .HasMaxLength(100)
+                  .IsRequired();
+
+            entity.Property(rd => rd.Score)
+                  .IsRequired();
+
+        });
+
+        modelBuilder.Entity<TailorBadge>(entity =>
+        {
+            entity.ToTable("TailorBadges");
+            entity.HasKey(tb => tb.TailorBadgeId).HasName("PK_TailorBadges");
+
+            entity.Property(tb => tb.BadgeName)
+                  .HasMaxLength(150)
+                  .IsRequired();
+
+            entity.Property(tb => tb.Description)
+                  .HasMaxLength(500);
+
+            entity.Property(tb => tb.EarnedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(tb => tb.TailorId).HasDatabaseName("IX_TailorBadges_TailorId");
+
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(tb => tb.TailorId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_TailorBadges_TailorProfiles");
+        });
+
         OnModelCreatingPartial(modelBuilder);
+
+
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
