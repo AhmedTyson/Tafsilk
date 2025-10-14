@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TafsilkPlatform.Data;
 
@@ -11,9 +12,11 @@ using TafsilkPlatform.Data;
 namespace TafsilkPlatform.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251014202841_CreateOrdersQuoteTables")]
+    partial class CreateOrdersQuoteTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,50 +212,6 @@ namespace TafsilkPlatform.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderItems");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Models.Payment", b =>
-                {
-                    b.Property<Guid>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("PaidAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId");
-
-                    b.HasIndex("CustomerId")
-                        .IsUnique();
-
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
-                    b.HasIndex("TailorId")
-                        .IsUnique();
-
-                    b.ToTable("Payment");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Models.Quote", b =>
@@ -511,28 +470,6 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("UserAddresses");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Wallet", b =>
-                {
-                    b.Property<int>("WalletId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("WalletId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Wallet");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Models.CorporateAccount", b =>
                 {
                     b.HasOne("TafsilkPlatform.Models.User", "User")
@@ -596,33 +533,6 @@ namespace TafsilkPlatform.Migrations
                         .IsRequired();
 
                     b.Navigation("order");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Models.Payment", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Models.CustomerProfile", "customer")
-                        .WithOne("Payment")
-                        .HasForeignKey("TafsilkPlatform.Models.Payment", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Models.Order", "Order")
-                        .WithOne("Payment")
-                        .HasForeignKey("TafsilkPlatform.Models.Payment", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
-                        .WithOne("Payment")
-                        .HasForeignKey("TafsilkPlatform.Models.Payment", "TailorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Tailor");
-
-                    b.Navigation("customer");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Models.Quote", b =>
@@ -691,29 +601,14 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Wallet", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("TafsilkPlatform.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Models.CustomerProfile", b =>
                 {
-                    b.Navigation("Payment");
-
                     b.Navigation("orders");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Models.Order", b =>
                 {
                     b.Navigation("Items");
-
-                    b.Navigation("Payment");
 
                     b.Navigation("orderImages");
 
@@ -723,11 +618,6 @@ namespace TafsilkPlatform.Migrations
             modelBuilder.Entity("TafsilkPlatform.Models.Role", b =>
                 {
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorProfile", b =>
-                {
-                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Models.User", b =>
@@ -741,8 +631,6 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("TailorProfile");
 
                     b.Navigation("UserAddresses");
-
-                    b.Navigation("Wallet");
                 });
 #pragma warning restore 612, 618
         }
