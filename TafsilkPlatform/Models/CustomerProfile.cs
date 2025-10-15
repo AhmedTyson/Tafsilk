@@ -42,8 +42,8 @@ namespace TafsilkPlatform.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
 
-        public List<Order> orders { get; set; }
-        public Payment Payment { get; set; }
+        public List<Order> orders { get; set; } = new();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
         // Custom validation method
         public static ValidationResult? ValidateDateOfBirth(DateOnly? dateOfBirth, ValidationContext context)

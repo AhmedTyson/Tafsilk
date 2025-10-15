@@ -31,6 +31,6 @@ namespace TafsilkPlatform.Models
         public ICollection<OrderImages> orderImages { get; set; } = new List<OrderImages>();
         public ICollection<Quote> quote { get; set; } = new List<Quote>();
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
-        public Payment Payment { get; set; }
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

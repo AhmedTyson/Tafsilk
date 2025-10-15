@@ -541,7 +541,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.User", "User")
                         .WithOne("CorporateAccount")
                         .HasForeignKey("TafsilkPlatform.Models.CorporateAccount", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CorporateAccounts_Users");
 
@@ -553,7 +553,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.User", "User")
                         .WithOne("CustomerProfile")
                         .HasForeignKey("TafsilkPlatform.Models.CustomerProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CustomerProfiles_Users");
 
@@ -565,13 +565,13 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.CustomerProfile", "Customer")
                         .WithMany("orders")
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Customer");
@@ -584,7 +584,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.Order", "order")
                         .WithMany("orderImages")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("order");
@@ -595,7 +595,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.Order", "order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("order");
@@ -606,19 +606,19 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.CustomerProfile", "customer")
                         .WithOne("Payment")
                         .HasForeignKey("TafsilkPlatform.Models.Payment", "CustomerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Models.Order", "Order")
                         .WithOne("Payment")
                         .HasForeignKey("TafsilkPlatform.Models.Payment", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
                         .WithOne("Payment")
                         .HasForeignKey("TafsilkPlatform.Models.Payment", "TailorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Order");
@@ -633,13 +633,13 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.Order", "order")
                         .WithMany("quote")
                         .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Tailor");
@@ -652,7 +652,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_RefreshTokens_Users");
 
@@ -664,7 +664,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.User", "User")
                         .WithOne("TailorProfile")
                         .HasForeignKey("TafsilkPlatform.Models.TailorProfile", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TailorProfiles_Users");
 
@@ -687,20 +687,9 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.User", "User")
                         .WithMany("UserAddresses")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_UserAddresses_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Models.Wallet", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("TafsilkPlatform.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("User");
                 });

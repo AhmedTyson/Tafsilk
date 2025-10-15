@@ -58,6 +58,6 @@ namespace TafsilkPlatform.Models
         // Navigation properties
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
-        public Payment Payment { get; set; }
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }

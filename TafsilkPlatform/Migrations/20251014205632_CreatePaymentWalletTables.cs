@@ -71,20 +71,17 @@ namespace TafsilkPlatform.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Payment_CustomerId",
                 table: "Payment",
-                column: "CustomerId",
-                unique: true);
+                column: "CustomerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payment_OrderId",
                 table: "Payment",
-                column: "OrderId",
-                unique: true);
+                column: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payment_TailorId",
                 table: "Payment",
-                column: "TailorId",
-                unique: true);
+                column: "TailorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wallet_UserId",
