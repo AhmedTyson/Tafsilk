@@ -8,14 +8,18 @@ using System.Threading.Tasks;
 
 namespace TafsilkPlatform.Models
 {
+    [Table("Wallet")]
     public class Wallet
     {
         [Key]
         public int WalletId { get; set; }
+
         [ForeignKey("User")]
         public Guid UserId { get; set; }
-        public User User { get; set; }
 
+        public virtual User User { get; set; } = null!;
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Balance { get; set; }
 
     }

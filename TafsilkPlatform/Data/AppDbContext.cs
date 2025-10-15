@@ -34,8 +34,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<OrderImages> OrderImages { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
     public virtual DbSet<Quote> Quotes { get; set; }
-    // public virtual DbSet<Payment> Payment { get; set; }
-    // public virtual DbSet<Wallet> Wallet { get; set; }
+    public virtual DbSet<Payment> Payment { get; set; }
+    public virtual DbSet<Wallet> Wallet { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -179,6 +179,19 @@ public partial class AppDbContext : DbContext
         {
             entity.Property(o => o.CustomerId).IsRequired();
             entity.Property(o => o.TailorId).IsRequired();
+        });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.ToTable("Wallet");
+            entity.HasKey(w => w.WalletId);
+            entity.HasIndex(w => w.UserId).IsUnique();
+            entity.Property(w => w.Balance).HasColumnType("decimal(18,2)");
+
+            entity.HasOne(w => w.User)
+                  .WithOne(u => u.Wallet)
+                  .HasForeignKey<Wallet>(w => w.UserId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         // Force NoAction (no cascading) globally for all FK relationships
