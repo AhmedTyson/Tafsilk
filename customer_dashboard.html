@@ -1,0 +1,2067 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفصيلك — لوحة تحكم العميل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      :root {
+        --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+        --secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --text-light: #bdc3c7;
+        --text-white: #ffffff;
+        --background-white: #ffffff;
+        --background-gray: #f8f9fa;
+        --background-light: #ecf0f1;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+        --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 1.875rem;
+        --font-size-4xl: 2.25rem;
+
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --spacing-3xl: 4rem;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-full: 9999px;
+
+        --transition-fast: 0.15s ease-in-out;
+        --transition-normal: 0.3s ease-in-out;
+        --transition-slow: 0.5s ease-in-out;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-family);
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: var(--background-white);
+        direction: rtl;
+        text-align: right;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      /* Header Styles */
+      .header {
+        background-color: var(--background-white);
+        box-shadow: var(--shadow-sm);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .navbar {
+        padding: 6px 0;
+        min-height: unset;
+      }
+
+      .navbar .container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      @media (min-width: 768px) {
+        .navbar .container {
+          padding: 0 var(--spacing-lg);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .navbar .container {
+          padding: 0 var(--spacing-xl);
+        }
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        font-size: var(--font-size-2xl);
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+      }
+
+      .brand-icon {
+        display: none !important;
+      }
+
+      .nav-menu {
+        display: none;
+        list-style: none;
+        gap: var(--spacing-lg);
+      }
+
+      .nav-link {
+        font-weight: 600;
+        transition: color var(--transition-fast);
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+
+      .nav-link:hover {
+        color: var(--primary-color);
+      }
+
+      .nav-actions {
+        display: none;
+        gap: var(--spacing-sm);
+        align-items: center;
+      }
+
+      .nav-toggle {
+        background: none;
+        border: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        cursor: pointer;
+      }
+
+      .nav-toggle span {
+        width: 24px;
+        height: 2px;
+        background-color: var(--text-primary);
+        transition: all var(--transition-fast);
+      }
+
+      .lang-toggle {
+        background: var(--background-gray);
+        border: 1px solid var(--border-color);
+        border-radius: 999px;
+        padding: 6px 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: var(--font-family);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .lang-toggle:hover {
+        background: var(--border-color);
+      }
+
+      .btn {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+        line-height: 1.5;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+      .btn-primary:hover,
+      .btn-primary:focus {
+        background-color: var(--primary-hover);
+        color: var(--text-white);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+      }
+
+      .btn-outline:hover,
+      .btn-outline:focus {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+      @media (min-width: 768px) {
+        .nav-menu {
+          display: flex;
+        }
+
+        .nav-actions {
+          display: flex;
+        }
+
+        .nav-toggle {
+          display: none;
+        }
+      }
+
+      /* Dashboard Styles */
+      .dashboard {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .sidebar {
+        width: 250px;
+        background-color: var(--background-white);
+        border-left: 1px solid var(--border-color);
+        padding: var(--spacing-lg) 0;
+        display: none;
+        flex-direction: column;
+        box-shadow: var(--shadow-sm);
+        box-sizing: border-box;
+      }
+
+      @media (min-width: 1024px) {
+        .sidebar {
+          display: flex;
+        }
+      }
+
+      .sidebar-header {
+        padding: 0 var(--spacing-lg) var(--spacing-lg);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .user-profile {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+      }
+
+      .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--background-light);
+      }
+
+      .user-info h3 {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .user-info p {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .sidebar-nav {
+        flex: 1;
+        padding: 0 var(--spacing-lg);
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-xs);
+        transition: all var(--transition-fast);
+        text-decoration: none;
+        color: var(--text-primary);
+        cursor: pointer;
+      }
+
+      .nav-item:hover {
+        background-color: var(--background-gray);
+      }
+
+      .nav-item.active {
+        background-color: var(--primary-light);
+        color: var(--primary-color);
+        font-weight: 600;
+      }
+
+      .nav-item i {
+        width: 20px;
+        text-align: center;
+      }
+
+      .badge {
+        background: var(--primary-color);
+        color: white;
+        border-radius: 10px;
+        padding: 2px 6px;
+        font-size: 0.7rem;
+        margin-right: auto;
+      }
+
+      .sidebar-footer {
+        padding: var(--spacing-lg);
+        border-top: 1px solid var(--border-color);
+      }
+
+      .main-content {
+        flex: 1;
+        padding: var(--spacing-xl);
+        background-color: var(--background-gray);
+        overflow-y: auto;
+        min-width: 0;
+        box-sizing: border-box;
+      }
+
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .dashboard-title {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .dashboard-actions {
+        display: flex;
+        gap: var(--spacing-md);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      @media (min-width: 640px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .stats-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .stat-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: var(--font-size-lg);
+      }
+
+      .stat-icon.primary {
+        background-color: var(--primary-color);
+      }
+
+      .stat-icon.success {
+        background-color: var(--success-color);
+      }
+
+      .stat-icon.warning {
+        background-color: var(--warning-color);
+      }
+
+      .stat-icon.secondary {
+        background-color: var(--secondary-color);
+      }
+
+      .stat-trend {
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .stat-trend.up {
+        color: var(--success-color);
+      }
+
+      .stat-trend.down {
+        color: var(--error-color);
+      }
+
+      .stat-value {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      @media (min-width: 1024px) {
+        .dashboard-grid {
+          grid-template-columns: 2fr 1fr;
+        }
+      }
+
+      .section-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .section-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .section-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+      }
+
+      /* Search Bar */
+      .search-bar {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--spacing-xl);
+      }
+
+      .search-input {
+        flex: 1;
+        padding: var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+      }
+
+      /* Tailor Cards */
+      .tailors-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @media (min-width: 640px) {
+        .tailors-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .tailors-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .tailor-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+      }
+
+      .tailor-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .tailor-image {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+      }
+
+      .tailor-info {
+        padding: var(--spacing-md);
+      }
+
+      .tailor-name-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .tailor-name {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .verified-badge {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background-color: var(--success-color);
+        color: white;
+        padding: 2px 6px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+      }
+
+      .tailor-rating {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .rating {
+        color: var(--secondary-color);
+        font-weight: 600;
+      }
+
+      .reviews {
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+      }
+
+      .tailor-specialty, .tailor-location {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-bottom: var(--spacing-xs);
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+      }
+
+      /* Orders List */
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .order-card {
+        display: flex;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all var(--transition-normal);
+      }
+
+      .order-card:hover {
+        box-shadow: var(--shadow-sm);
+      }
+
+      .order-image {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .order-details {
+        flex: 1;
+      }
+
+      .order-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .order-tailor {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+      .status-in-progress {
+        background-color: #cce7ff;
+        color: #004085;
+      }
+
+      .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+      }
+
+      /* Offers Grid */
+      .offers-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @media (min-width: 640px) {
+        .offers-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .offer-card {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+        color: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        text-align: center;
+        transition: all var(--transition-normal);
+      }
+
+      .offer-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .offer-title {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .offer-desc {
+        margin-bottom: var(--spacing-md);
+        opacity: 0.9;
+      }
+
+      /* Favorites List */
+      .favorites-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .favorite-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-sm);
+        border-radius: var(--radius-md);
+        transition: all var(--transition-normal);
+      }
+
+      .favorite-item:hover {
+        background-color: var(--background-gray);
+      }
+
+      .favorite-image {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-md);
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .favorite-details {
+        flex: 1;
+      }
+
+      .favorite-name {
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .favorite-specialty {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      /* Notifications */
+      .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .notification-item {
+        display: flex;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        background-color: var(--background-white);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--primary-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-color);
+        flex-shrink: 0;
+      }
+
+      .notification-content {
+        flex: 1;
+      }
+
+      .notification-title {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .notification-desc {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .notification-time {
+        font-size: var(--font-size-xs);
+        color: var(--text-light);
+      }
+
+      /* Mobile Navigation */
+      .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background-color: var(--background-white);
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-around;
+        padding: var(--spacing-sm);
+        z-index: 100;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      @media (min-width: 1024px) {
+        .mobile-nav {
+          display: none;
+        }
+      }
+
+      .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-xs);
+        border-radius: var(--radius-md);
+        transition: all var(--transition-fast);
+        cursor: pointer;
+      }
+
+      .mobile-nav-item.active {
+        color: var(--primary-color);
+        background-color: var(--primary-light);
+      }
+
+      .mobile-nav-item i {
+        font-size: var(--font-size-lg);
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-2xl);
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .modal-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: var(--font-size-xl);
+        cursor: pointer;
+        color: var(--text-secondary);
+      }
+
+      .form-group {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 600;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: var(--spacing-md);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      /* Footer Styles */
+      .footer {
+        background-color: var(--dark);
+        color: white;
+        padding: var(--spacing-xl) 0 var(--spacing-lg);
+        margin-top: var(--spacing-2xl);
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .footer-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          grid-template-columns: repeat(2, 1fr);
+          padding: 0 var(--spacing-lg);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .footer-content {
+          grid-template-columns: repeat(4, 1fr);
+          padding: 0 var(--spacing-xl);
+        }
+      }
+
+      .footer-section {
+        text-align: right;
+      }
+
+      .footer-title {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-white);
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .footer-links a {
+        color: var(--text-light);
+        transition: color var(--transition-fast);
+        text-decoration: none;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-white);
+      }
+
+      .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: var(--spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: center;
+        text-align: center;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+      }
+
+      @media (min-width: 768px) {
+        .footer-bottom {
+          flex-direction: row;
+          justify-content: space-between;
+          text-align: right;
+          padding-left: var(--spacing-lg);
+          padding-right: var(--spacing-lg);
+        }
+      }
+
+      .footer-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: center;
+      }
+
+      @media (min-width: 768px) {
+        .footer-info {
+          flex-direction: row;
+        }
+      }
+
+      .footer-info p {
+        color: var(--text-light);
+        margin: 0;
+      }
+
+      .social-links {
+        display: flex;
+        gap: var(--spacing-md);
+      }
+
+      .social-links a {
+        color: var(--text-light);
+        transition: color var(--transition-fast);
+      }
+
+      .social-links a:hover {
+        color: var(--text-white);
+      }
+
+      @media (max-width: 1023px) {
+        .main-content {
+          padding: var(--spacing-lg) var(--spacing-md);
+        }
+
+        .dashboard-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: var(--spacing-md);
+        }
+
+        .dashboard-actions {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .main-content {
+          padding: var(--spacing-md);
+        }
+
+        .section-card {
+          padding: var(--spacing-md);
+        }
+      }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+      <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+        <div class="container">
+          <div class="brand">
+            <div class="brand-icon" aria-hidden="true">
+              <i class="fas fa-cut"></i>
+            </div>
+            <h1 class="logo">تفصيلك</h1>
+          </div>
+          <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+            <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
+            <li>
+              <a href="index.html#how-it-works" class="nav-link"
+                >كيف تعمل المنصة</a
+              >
+            </li>
+            <li><a href="/search-tailors.html" class="nav-link">الخياطين</a></li>
+            <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
+          </ul>
+          <div class="nav-actions">
+            <a href="login.html" class="btn btn-outline">تسجيل دخول</a>
+            <a href="register.html" class="btn btn-primary">انضم كخياط</a>
+            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+              <i class="fas fa-globe" aria-hidden="true"></i>
+              <span>العربية / EN</span>
+            </button>
+          </div>
+          <button
+            class="nav-toggle"
+            aria-label="فتح القائمة"
+            aria-controls="nav-menu"
+            aria-expanded="false"
+            type="button"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <img
+                        src="https://placehold.co/100x100/e3f2fd/2c5aa0?text=أ"
+                        alt="أحمد محمد"
+                        class="user-avatar"
+                    />
+                    <div class="user-info">
+                        <h3>أحمد محمد</h3>
+                        <p>عميل منذ 2024</p>
+                    </div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>لوحة التحكم</span>
+                </a>
+                <a href="#" class="nav-item" data-section="orders">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>طلباتي</span>
+                    <span class="badge">3</span>
+                </a>
+                <a href="#" class="nav-item" data-section="favorites">
+                    <i class="fas fa-heart"></i>
+                    <span>المفضلة</span>
+                </a>
+                <a href="#" class="nav-item" data-section="recent">
+                    <i class="fas fa-history"></i>
+                    <span>المشاهدات الحديثة</span>
+                </a>
+                <a href="#" class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                    <span class="badge">5</span>
+                </a>
+                <a href="#" class="nav-item" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span>حسابي</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>الإعدادات</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>تسجيل الخروج</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">مرحباً بعودتك، أحمد!</h1>
+                <div class="dashboard-actions">
+                    <button class="btn btn-primary" id="new-order-btn">
+                        <i class="fas fa-plus"></i>
+                        <span>طلب جديد</span>
+                    </button>
+                    <button class="btn btn-outline" id="notifications-btn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">5</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Search -->
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="ابحث عن خياط أو خدمة..." />
+                <button class="btn btn-primary" id="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>12%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">طلبات نشطة</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>8%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">15</div>
+                    <div class="stat-label">طلبات مكتملة</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="stat-trend down">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>5%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">خياطين مفضلين</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon secondary">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-trend up">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>22%</span>
+                        </div>
+                    </div>
+                    <div class="stat-value">2,450 ج.م</div>
+                    <div class="stat-label">مدخرات هذا الشهر</div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="dashboard-grid">
+                <!-- Left Column -->
+                <div>
+                    <!-- Active Orders -->
+                    <section class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">طلباتي النشطة</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-outline" id="view-all-orders">
+                                    عرض الكل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="orders-list" id="orders-list">
+                            <!-- Orders will be dynamically loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Suggested Tailors -->
+                    <section class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">خياطين مقترحون في منطقتك</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-outline" id="view-all-tailors">
+                                    عرض الكل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="tailors-grid" id="suggested-tailors">
+                            <!-- Tailors will be dynamically loaded here -->
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Column -->
+                <div>
+                    <!-- Special Offers -->
+                    <section class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">عروض خاصة</h2>
+                        </div>
+
+                        <div class="offers-grid" id="offers-grid">
+                            <!-- Offers will be dynamically loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Favorites -->
+                    <section class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">خياطين مفضلين</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-outline" id="view-all-favorites">
+                                    عرض الكل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="favorites-list" id="favorites-list">
+                            <!-- Favorites will be dynamically loaded here -->
+                        </div>
+                    </section>
+
+                    <!-- Notifications -->
+                    <section class="section-card">
+                        <div class="section-header">
+                            <h2 class="section-title">إشعارات حديثة</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-outline" id="view-all-notifications">
+                                    عرض الكل
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="notifications-list" id="notifications-list">
+                            <!-- Notifications will be dynamically loaded here -->
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav">
+        <a href="#" class="mobile-nav-item active" data-section="dashboard">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="orders">
+            <i class="fas fa-shopping-bag"></i>
+            <span>طلباتي</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="favorites">
+            <i class="fas fa-heart"></i>
+            <span>المفضلة</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="profile">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </a>
+    </nav>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3 class="footer-title">عن تفصيلك</h3>
+            <ul class="footer-links">
+              <li><a href="#">قصتنا</a></li>
+              <li><a href="#">فريق العمل</a></li>
+              <li><a href="#">وظائف</a></li>
+              <li><a href="#">الأخبار</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h3 class="footer-title">خدماتنا</h3>
+            <ul class="footer-links">
+              <li><a href="#">البحث عن خياط</a></li>
+              <li><a href="#">حجز موعد</a></li>
+              <li><a href="#">التقييمات</a></li>
+              <li><a href="#">المساعدة</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h3 class="footer-title">للخياطين</h3>
+            <ul class="footer-links">
+              <li><a href="#">انضم إلينا</a></li>
+              <li><a href="#">لوحة التحكم</a></li>
+              <li><a href="#">نصائح للنجاح</a></li>
+              <li><a href="#">الأسئلة الشائعة</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h3 class="footer-title">تواصل معنا</h3>
+            <ul class="footer-links">
+              <li><a href="#">اتصل بنا</a></li>
+              <li><a href="#">الدعم الفني</a></li>
+              <li><a href="#">الشكاوى والمقترحات</a></li>
+              <li><a href="#">وسائل التواصل الاجتماعي</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <div class="footer-info">
+            <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-facebook-f"></i></a>
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-instagram"></i></a>
+              <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modal for New Order -->
+    <div class="modal" id="new-order-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">طلب جديد</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <form id="new-order-form">
+          <div class="form-group">
+            <label for="order-type">نوع الطلب</label>
+            <select id="order-type" class="form-control" required>
+              <option value="">اختر نوع الطلب</option>
+              <option value="بدلة رجالية">بدلة رجالية</option>
+              <option value="فساتين سهرة">فساتين سهرة</option>
+              <option value="تعديلات">تعديلات</option>
+              <option value="ملابس أطفال">ملابس أطفال</option>
+              <option value="فساتين زفاف">فساتين زفاف</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="order-description">وصف الطلب</label>
+            <textarea id="order-description" class="form-control" rows="3" placeholder="صف طلبك بالتفصيل..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="order-budget">الميزانية المتوقعة</label>
+            <input type="number" id="order-budget" class="form-control" placeholder="جنيه مصري" required />
+          </div>
+          <div class="form-group">
+            <label for="order-deadline">الموعد النهائي</label>
+            <input type="date" id="order-deadline" class="form-control" required />
+          </div>
+          <div class="form-group">
+            <label for="order-location">الموقع</label>
+            <input type="text" id="order-location" class="form-control" placeholder="المدينة والمنطقة" required />
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%">
+            إنشاء الطلب
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing Tailor Profile -->
+    <div class="modal" id="tailor-profile-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">ملف الخياط</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div id="tailor-profile-content">
+          <!-- Tailor profile content will be dynamically loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Using Offers -->
+    <div class="modal" id="offer-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">استخدام العرض</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div id="offer-content">
+          <!-- Offer content will be dynamically loaded here -->
+        </div>
+        <button class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-lg)" id="apply-offer-btn">
+          تطبيق العرض
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal for Search Results -->
+    <div class="modal" id="search-results-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title">نتائج البحث</h2>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div id="search-results-content">
+          <!-- Search results will be dynamically loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+        // Mock Data
+        const mockData = {
+            orders: [
+                {
+                    id: 1,
+                    title: "بدلة رجالية رسمية",
+                    tailor: "أستاذ خالد للتفصيل",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=بدلة+رجالية",
+                    status: "in-progress",
+                    date: "15 أكتوبر 2024"
+                },
+                {
+                    id: 2,
+                    title: "تعديل فستان سهرة",
+                    tailor: "أستاذة فاطمة علي",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=فساتين+سهرة",
+                    status: "pending",
+                    date: "20 أكتوبر 2024"
+                },
+                {
+                    id: 3,
+                    title: "تعديل 3 قطع ملابس",
+                    tailor: "أستاذ أحمد حسن",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=تعديل+ملابس",
+                    status: "completed",
+                    date: "10 أكتوبر 2024"
+                }
+            ],
+            suggestedTailors: [
+                {
+                    id: 1,
+                    name: "أستاذ خالد للتفصيل",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=خياط+محترف",
+                    rating: 4.8,
+                    reviews: 120,
+                    specialty: "فساتين سهرة",
+                    location: "مصر الجديدة",
+                    verified: true,
+                    description: "خياط محترف بخبرة أكثر من 5 سنوات في تفصيل فساتين السهرة والبدل الرجالية. أقدم لكم أجود أنواع الخياطة بأفضل الأسعار والتزام تام بالمواعيد.",
+                    services: ["فساتين سهرة", "بدل رجالية", "تعديلات", "فساتين زفاف"],
+                    priceRange: "تبدأ من 400 جنيه"
+                },
+                {
+                    id: 2,
+                    name: "أستاذة فاطمة علي",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=خياطة+محترفة",
+                    rating: 4.9,
+                    reviews: 89,
+                    specialty: "بدل رجالي",
+                    location: "المعادي",
+                    verified: true,
+                    description: "خياطة محترفة متخصصة في تفصيل البدل الرجالية والفساتين الرسمية. خبرة أكثر من 7 سنوات في مجال الخياطة والتعديلات الدقيقة.",
+                    services: ["بدل رجالية", "فساتين رسمية", "تعديلات", "ملابس أطفال"],
+                    priceRange: "تبدأ من 350 جنيه"
+                },
+                {
+                    id: 3,
+                    name: "أستاذ أحمد حسن",
+                    image: "https://placehold.co/400x300/e3f2fd/2c5aa0?text=خياط+محترف",
+                    rating: 4.7,
+                    reviews: 156,
+                    specialty: "تعديل ملابس",
+                    location: "الزمالك",
+                    verified: true,
+                    description: "متخصص في تعديل جميع أنواع الملابس بدقة واحترافية. خبرة 10 سنوات في مجال التعديلات السريعة والدقيقة.",
+                    services: ["تعديلات", "إصلاحات", "تصميمات بسيطة"],
+                    priceRange: "تبدأ من 50 جنيه"
+                }
+            ],
+            offers: [
+                {
+                    id: 1,
+                    title: "خصم 20% للطلبات الأولى",
+                    description: "احصل على خصم 20% على أول طلب لك مع أي خياط",
+                    details: "هذا العرض متاح للعملاء الجدد فقط. يمكن استخدامه مع أي خياط مسجل في المنصة. الحد الأقصى للخصم 200 جنيه.",
+                    code: "FIRST20"
+                },
+                {
+                    id: 2,
+                    title: "توصيل مجاني",
+                    description: "توصيل مجاني لجميع الطلبات فوق 500 جنيه",
+                    details: "احصل على خدمة التوصيل مجاناً لجميع الطلبات التي تزيد قيمتها عن 500 جنيه. الخدمة تشمل جميع مناطق القاهرة والجيزة.",
+                    code: "FREE500"
+                }
+            ],
+            favorites: [
+                {
+                    id: 1,
+                    name: "أستاذ خالد للتفصيل",
+                    image: "https://placehold.co/100x100/e3f2fd/2c5aa0?text=خ",
+                    specialty: "فساتين سهرة"
+                },
+                {
+                    id: 2,
+                    name: "أستاذة فاطمة علي",
+                    image: "https://placehold.co/100x100/e3f2fd/2c5aa0?text=ف",
+                    specialty: "بدل رجالي"
+                },
+                {
+                    id: 3,
+                    name: "أستاذ أحمد حسن",
+                    image: "https://placehold.co/100x100/e3f2fd/2c5aa0?text=أ",
+                    specialty: "تعديل ملابس"
+                }
+            ],
+            notifications: [
+                {
+                    id: 1,
+                    icon: "fas fa-shopping-bag",
+                    title: "طلبك جاهز للتسليم",
+                    description: "طلب البدلة الرجالية جاهز للتسليم من أستاذ خالد",
+                    time: "منذ ساعتين"
+                },
+                {
+                    id: 2,
+                    icon: "fas fa-tag",
+                    title: "عرض خاص",
+                    description: "خصم 15% على جميع خدمات التعديلات هذا الأسبوع",
+                    time: "منذ يوم"
+                },
+                {
+                    id: 3,
+                    icon: "fas fa-star",
+                    title: "تقييم مطلوب",
+                    description: "يرجى تقييم خدمة أستاذة فاطمة علي",
+                    time: "منذ 3 أيام"
+                }
+            ]
+        };
+
+        // DOM Elements
+        const ordersList = document.getElementById("orders-list");
+        const suggestedTailors = document.getElementById("suggested-tailors");
+        const offersGrid = document.getElementById("offers-grid");
+        const favoritesList = document.getElementById("favorites-list");
+        const notificationsList = document.getElementById("notifications-list");
+        const newOrderBtn = document.getElementById("new-order-btn");
+        const newOrderModal = document.getElementById("new-order-modal");
+        const newOrderForm = document.getElementById("new-order-form");
+        const tailorProfileModal = document.getElementById("tailor-profile-modal");
+        const tailorProfileContent = document.getElementById("tailor-profile-content");
+        const offerModal = document.getElementById("offer-modal");
+        const offerContent = document.getElementById("offer-content");
+        const applyOfferBtn = document.getElementById("apply-offer-btn");
+        const searchBtn = document.getElementById("search-btn");
+        const searchResultsModal = document.getElementById("search-results-modal");
+        const searchResultsContent = document.getElementById("search-results-content");
+        const closeModalBtns = document.querySelectorAll(".close-modal");
+        const navItems = document.querySelectorAll(".nav-item");
+        const mobileNavItems = document.querySelectorAll(".mobile-nav-item");
+
+        // Initialize Dashboard
+        document.addEventListener("DOMContentLoaded", function () {
+            loadOrders();
+            loadSuggestedTailors();
+            loadOffers();
+            loadFavorites();
+            loadNotifications();
+            setupEventListeners();
+        });
+
+        // Load Orders
+        function loadOrders() {
+            ordersList.innerHTML = "";
+            mockData.orders.forEach((order) => {
+                const statusClass = getStatusClass(order.status);
+                const statusText = getStatusText(order.status);
+
+                const orderCard = document.createElement("div");
+                orderCard.className = "order-card";
+                orderCard.innerHTML = `
+                    <img src="${order.image}" alt="${order.title}" class="order-image">
+                    <div class="order-details">
+                        <div class="order-title">${order.title}</div>
+                        <div class="order-tailor">${order.tailor}</div>
+                        <div class="order-status ${statusClass}">
+                            ${statusText}
+                        </div>
+                    </div>
+                `;
+                ordersList.appendChild(orderCard);
+            });
+        }
+
+        // Load Suggested Tailors
+        function loadSuggestedTailors() {
+            suggestedTailors.innerHTML = "";
+            mockData.suggestedTailors.forEach((tailor) => {
+                const tailorCard = document.createElement("div");
+                tailorCard.className = "tailor-card";
+                tailorCard.innerHTML = `
+                    <img src="${tailor.image}" alt="${tailor.name}" class="tailor-image">
+                    <div class="tailor-info">
+                        <div class="tailor-name-row">
+                            <h3 class="tailor-name">${tailor.name}</h3>
+                            ${tailor.verified ? '<span class="verified-badge"><i class="fas fa-check-circle"></i>موثق</span>' : ''}
+                        </div>
+                        <div class="tailor-rating">
+                            <span class="rating"><i class="fas fa-star"></i> ${tailor.rating}</span>
+                            <span class="reviews">(${tailor.reviews} تقييم)</span>
+                        </div>
+                        <p class="tailor-specialty">
+                            <i class="fas fa-tshirt"></i>
+                            <span>${tailor.specialty}</span>
+                        </p>
+                        <p class="tailor-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>${tailor.location}</span>
+                        </p>
+                        <button class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-sm);" data-tailor-id="${tailor.id}">عرض الملف</button>
+                    </div>
+                `;
+                suggestedTailors.appendChild(tailorCard);
+            });
+        }
+
+        // Load Offers
+        function loadOffers() {
+            offersGrid.innerHTML = "";
+            mockData.offers.forEach((offer) => {
+                const offerCard = document.createElement("div");
+                offerCard.className = "offer-card";
+                offerCard.innerHTML = `
+                    <h3 class="offer-title">${offer.title}</h3>
+                    <p class="offer-desc">${offer.description}</p>
+                    <button class="btn btn-light" data-offer-id="${offer.id}">استفد الآن</button>
+                `;
+                offersGrid.appendChild(offerCard);
+            });
+        }
+
+        // Load Favorites
+        function loadFavorites() {
+            favoritesList.innerHTML = "";
+            mockData.favorites.forEach((favorite) => {
+                const favoriteItem = document.createElement("div");
+                favoriteItem.className = "favorite-item";
+                favoriteItem.innerHTML = `
+                    <img src="${favorite.image}" alt="${favorite.name}" class="favorite-image">
+                    <div class="favorite-details">
+                        <div class="favorite-name">${favorite.name}</div>
+                        <div class="favorite-specialty">${favorite.specialty}</div>
+                    </div>
+                    <button class="btn-icon" data-favorite-id="${favorite.id}">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                `;
+                favoritesList.appendChild(favoriteItem);
+            });
+        }
+
+        // Load Notifications
+        function loadNotifications() {
+            notificationsList.innerHTML = "";
+            mockData.notifications.forEach((notification) => {
+                const notificationItem = document.createElement("div");
+                notificationItem.className = "notification-item";
+                notificationItem.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="${notification.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <p class="notification-desc">${notification.description}</p>
+                        <div class="notification-time">${notification.time}</div>
+                    </div>
+                `;
+                notificationsList.appendChild(notificationItem);
+            });
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // New Order Button
+            newOrderBtn.addEventListener("click", () => {
+                newOrderModal.style.display = "flex";
+            });
+
+            // New Order Form Submission
+            newOrderForm.addEventListener("submit", (e) => {
+                e.preventDefault();
+                createNewOrder();
+            });
+
+            // View Tailor Profile Buttons
+            document.querySelectorAll('[data-tailor-id]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const tailorId = e.target.getAttribute('data-tailor-id');
+                    openTailorProfile(tailorId);
+                });
+            });
+
+            // Use Offer Buttons
+            document.querySelectorAll('[data-offer-id]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const offerId = e.target.getAttribute('data-offer-id');
+                    openOfferModal(offerId);
+                });
+            });
+
+            // Apply Offer Button
+            applyOfferBtn.addEventListener('click', () => {
+                applyOffer();
+            });
+
+            // Search Button
+            searchBtn.addEventListener('click', () => {
+                const searchInput = document.querySelector('.search-input');
+                if (searchInput.value.trim() !== '') {
+                    openSearchResults(searchInput.value);
+                } else {
+                    alert('يرجى إدخال كلمة البحث');
+                }
+            });
+
+            // Close Modal Buttons
+            closeModalBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.modal').forEach(modal => {
+                        modal.style.display = 'none';
+                    });
+                });
+            });
+
+            // Close modal when clicking outside
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            // Navigation
+            navItems.forEach((item) => {
+                item.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const section = item.getAttribute("data-section");
+                    navigateToSection(section);
+                });
+            });
+
+            mobileNavItems.forEach((item) => {
+                item.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const section = item.getAttribute("data-section");
+                    navigateToSection(section);
+                });
+            });
+
+            // Language Toggle
+            document.querySelectorAll(".lang-toggle").forEach((button) => {
+                button.addEventListener("click", function () {
+                    const currentLang = this.querySelector("span").textContent;
+                    if (currentLang === "العربية / EN") {
+                        this.querySelector("span").textContent = "English / العربية";
+                    } else {
+                        this.querySelector("span").textContent = "العربية / EN";
+                    }
+                });
+            });
+
+            // Mobile Navigation Toggle
+            const navToggle = document.querySelector(".nav-toggle");
+            const navMenu = document.getElementById("nav-menu");
+
+            if (navToggle && navMenu) {
+                navToggle.addEventListener("click", function () {
+                    const isExpanded =
+                        navToggle.getAttribute("aria-expanded") === "true";
+                    navToggle.setAttribute("aria-expanded", !isExpanded);
+                    navMenu.classList.toggle("active");
+                });
+            }
+
+            // Logout
+            document.getElementById("logout-btn").addEventListener("click", (e) => {
+                e.preventDefault();
+                if (confirm("هل أنت متأكد من تسجيل الخروج؟")) {
+                    alert("تم تسجيل الخروج بنجاح");
+                    // In a real app, redirect to login page
+                }
+            });
+
+            // View All Buttons
+            document.getElementById("view-all-orders").addEventListener("click", () => {
+                alert("عرض جميع الطلبات");
+            });
+
+            document.getElementById("view-all-tailors").addEventListener("click", () => {
+                alert("عرض جميع الخياطين");
+            });
+
+            document.getElementById("view-all-favorites").addEventListener("click", () => {
+                alert("عرض جميع المفضلة");
+            });
+
+            document.getElementById("view-all-notifications").addEventListener("click", () => {
+                alert("عرض جميع الإشعارات");
+            });
+        }
+
+        // Helper Functions
+        function getStatusClass(status) {
+            const statusMap = {
+                pending: "status-pending",
+                "in-progress": "status-in-progress",
+                completed: "status-completed"
+            };
+            return statusMap[status] || "status-pending";
+        }
+
+        function getStatusText(status) {
+            const statusMap = {
+                pending: "في الانتظار",
+                "in-progress": "قيد التنفيذ",
+                completed: "مكتمل"
+            };
+            return statusMap[status] || "في الانتظار";
+        }
+
+        function navigateToSection(section) {
+            alert(`التنقل إلى قسم: ${section}`);
+            // In a real app, load the appropriate section content
+
+            // Update active states
+            navItems.forEach((item) => {
+                item.classList.remove("active");
+                if (item.getAttribute("data-section") === section) {
+                    item.classList.add("active");
+                }
+            });
+
+            mobileNavItems.forEach((item) => {
+                item.classList.remove("active");
+                if (item.getAttribute("data-section") === section) {
+                    item.classList.add("active");
+                }
+            });
+        }
+
+        // Action Functions
+        function createNewOrder() {
+            const formData = new FormData(newOrderForm);
+            const orderType = document.getElementById("order-type").value;
+            const orderDescription = document.getElementById("order-description").value;
+
+            alert(
+                `تم إنشاء الطلب "${orderType}" بنجاح! سيتم إرسال طلبك إلى الخياطين المناسبين.`
+            );
+            newOrderModal.style.display = "none";
+            newOrderForm.reset();
+
+            // In a real app, you would send this to your backend
+        }
+
+        function openTailorProfile(tailorId) {
+            const tailor = mockData.suggestedTailors.find(t => t.id == tailorId);
+            if (tailor) {
+                tailorProfileContent.innerHTML = `
+                    <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                        <img src="${tailor.image}" alt="${tailor.name}" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; margin-bottom: var(--spacing-md);">
+                        <h3 style="margin-bottom: var(--spacing-sm);">${tailor.name}</h3>
+                        <div style="display: flex; justify-content: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                            <span class="verified-badge" style="margin: 0;">
+                                <i class="fas fa-check-circle"></i>
+                                موثق
+                            </span>
+                            <span style="background: var(--secondary-color); color: white; padding: 4px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-sm);">
+                                <i class="fas fa-star"></i> ${tailor.rating} (${tailor.reviews} تقييم)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>التخصص</label>
+                        <p>${tailor.specialty}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>الموقع</label>
+                        <p>${tailor.location}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>نبذة</label>
+                        <p>${tailor.description}</p>
+                    </div>
+                    <div class="form-group">
+                        <label>الخدمات</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+                            ${tailor.services.map(service => `
+                                <span style="background: var(--primary-light); color: var(--primary-color); padding: 4px 8px; border-radius: var(--radius-sm); font-size: var(--font-size-sm);">
+                                    ${service}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>نطاق الأسعار</label>
+                        <p>${tailor.priceRange}</p>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="bookTailor(${tailor.id})">حجز موعد</button>
+                `;
+                tailorProfileModal.style.display = "flex";
+            }
+        }
+
+        function bookTailor(tailorId) {
+            const tailor = mockData.suggestedTailors.find(t => t.id == tailorId);
+            alert(`سيتم توجيهك إلى صفحة حجز موعد مع ${tailor.name}`);
+            tailorProfileModal.style.display = "none";
+        }
+
+        function openOfferModal(offerId) {
+            const offer = mockData.offers.find(o => o.id == offerId);
+            if (offer) {
+                offerContent.innerHTML = `
+                    <h3 style="margin-bottom: var(--spacing-md); text-align: center;">${offer.title}</h3>
+                    <p style="margin-bottom: var(--spacing-md);">${offer.details}</p>
+                    <div style="background: var(--primary-light); padding: var(--spacing-md); border-radius: var(--radius-md); text-align: center;">
+                        <p style="margin-bottom: var(--spacing-sm); font-weight: 600;">كود الخصم:</p>
+                        <p style="font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-color);">${offer.code}</p>
+                    </div>
+                `;
+                offerModal.style.display = "flex";
+            }
+        }
+
+        function applyOffer() {
+            alert("تم تطبيق العرض بنجاح! يمكنك استخدام كود الخصم عند الدفع.");
+            offerModal.style.display = "none";
+        }
+
+        function openSearchResults(query) {
+            searchResultsContent.innerHTML = `
+                <h3 style="margin-bottom: var(--spacing-lg); text-align: center;">نتائج البحث عن "${query}"</h3>
+                <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                    ${mockData.suggestedTailors.map(tailor => `
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                            <img src="${tailor.image}" alt="${tailor.name}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <h4 style="margin-bottom: 4px;">${tailor.name}</h4>
+                                <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">${tailor.specialty} - ${tailor.location}</p>
+                            </div>
+                            <button class="btn btn-primary" data-tailor-id="${tailor.id}" onclick="openTailorProfile(${tailor.id})">عرض الملف</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            searchResultsModal.style.display = "flex";
+        }
+    </script>
+</body>
+</html>
