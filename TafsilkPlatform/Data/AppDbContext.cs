@@ -33,6 +33,16 @@ public partial class AppDbContext : DbContext
     public DbSet<Review> Reviews { get; set; }
     public DbSet<RatingDimension> RatingDimensions { get; set; }
     public DbSet<TailorBadge> TailorBadges{ get; set; }
+    public DbSet<PortfolioImage> PortfolioImages { get; set; }
+    public DbSet<TailorService> TailorServices { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
+    public DbSet<SystemMessage> SystemMessages { get; set; }
+    public DbSet<DeviceToken> DeviceTokens { get; set; }
+    public DbSet<TailorPerformanceView> TailorPerformanceViews { get; set; }
+    public DbSet<RevenueReport> RevenueReports { get; set; }
+    public DbSet<UserActivityLog> UserActivityLogs { get; set; }
+    public DbSet<ErrorLog> ErrorLogs { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -351,8 +361,7 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.SystemMessageId)
                   .ValueGeneratedOnAdd();
-            entity.Property(e => e.SystemMessageId)
-                  .ValueGeneratedOnAdd();
+
             entity.Property(e => e.Title)
                   .IsRequired()
                   .HasMaxLength(200);
@@ -362,7 +371,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt)
                   .HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.AudienceType)
-                    .IsRequired()
+                  .IsRequired()
                     .HasMaxLength(50);
 
             entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_SystemMessages_CreatedAt");
@@ -402,10 +411,95 @@ public partial class AppDbContext : DbContext
 
         });
 
+        modelBuilder.Entity<TailorPerformanceView>(entity =>
+        {
+            entity.ToView("TailorPerformanceView"); 
+            entity.HasNoKey();
 
-        OnModelCreatingPartial(modelBuilder);
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(tpv => tpv.TailorId)
+                  .HasConstraintName("FK_TailorPerformanceView_TailorProfiles")
+                  .OnDelete(DeleteBehavior.ClientSetNull) 
+                  .IsRequired(false);
+        });
 
 
+        modelBuilder.Entity<RevenueReport>(entity =>
+        {
+
+            entity.HasKey(e => new { e.TailorId, e.Month }).HasName("PK_RevenueReports");
+
+            entity.Property(e => e.Month)
+                  .IsRequired()
+                  .HasColumnType("date");
+
+            entity.Property(e => e.TotalRevenue)
+                  .HasColumnType("decimal(18,2)");
+
+            entity.Property(e => e.GeneratedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(rr => rr.TailorId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_RevenueReports_TailorProfiles");
+        });
+
+        modelBuilder.Entity<UserActivityLog>(entity =>
+        {
+            entity.ToTable("UserActivityLogs");
+            entity.HasKey(e => e.UserActivityLogId).HasName("PK_UserActivityLogs");
+
+            entity.Property(e => e.Action)
+                  .IsRequired()
+                  .HasMaxLength(100);
+            entity.Property(e => e.EntityType)
+                  .HasMaxLength(50);
+            entity.Property(e => e.IpAddress)
+                  .HasMaxLength(45); // Supports IPv6
+            entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
+            entity.HasIndex(e => e.Action).HasDatabaseName("IX_UserActivityLogs_Action");
+            entity.HasIndex(e => e.EntityType).HasDatabaseName("IX_UserActivityLogs_EntityType");
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_UserActivityLogs_CreatedAt");
+            entity.HasIndex(e => new { e.UserId, e.Action, e.CreatedAt })
+                  .HasDatabaseName("IX_UserActivityLogs_User_Action_Date");
+
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(ual => ual.UserId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_UserActivityLogs_Users");
+        });
+
+        modelBuilder.Entity<ErrorLog>(entity =>
+        {
+            entity.ToTable("ErrorLogs");
+            entity.HasKey(e => e.ErrorLogId).HasName("PK_ErrorLogs");
+
+            entity.Property(e => e.Message)
+                  .IsRequired()
+                  .HasMaxLength(2000);
+
+            entity.Property(e => e.Severity)
+                  .IsRequired()
+                  .HasMaxLength(20)
+                  .HasDefaultValue("Error");
+
+            entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.Severity).HasDatabaseName("IX_ErrorLogs_Severity");
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_ErrorLogs_CreatedAt");
+            entity.HasIndex(e => new { e.Severity, e.CreatedAt })
+                  .HasDatabaseName("IX_ErrorLogs_Severity_CreatedAt");
+        });
+
+      OnModelCreatingPartial(modelBuilder);
 
     }
 
