@@ -8,7 +8,7 @@ namespace TafsilkPlatform.Models
 {
     public class SystemMessage
     {
-        public int SystemMessageId { get; set; }
+        public Guid SystemMessageId { get; set; }
         public string Title { get; set; }
         public string Content { get; set; }
         public string AudienceType { get; set; }

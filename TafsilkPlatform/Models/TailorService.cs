@@ -8,8 +8,8 @@ namespace TafsilkPlatform.Models
 {
     public class TailorService
     {
-        public int TailorServiceId { get; set; }
-        public int TailorId { get; set; }
+        public Guid TailorServiceId { get; set; }
+        public Guid TailorId { get; set; }
         public string ServiceName { get; set; }
         public string Description { get; set; }
         public decimal BasePrice { get; set; }

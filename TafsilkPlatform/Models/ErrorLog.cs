@@ -8,7 +8,7 @@ namespace TafsilkPlatform.Models
 {
     internal class ErrorLog
     {
-        public int ErrorLogId { get; set; }
+        public Guid ErrorLogId { get; set; }
         public string Message { get; set; }
         public string StackTrace { get; set; }
         public string Severity { get; set; } 

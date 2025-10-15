@@ -8,10 +8,10 @@ namespace TafsilkPlatform.Models
 {
     public class Review
     {
-        public int ReviewId { get; set; }
-        public int OrderId { get; set; }
-        public int TailorId { get; set; }
-        public int CustomerId { get; set; }
+        public Guid ReviewId { get; set; }
+        public Guid OrderId { get; set; }
+        public Guid TailorId { get; set; }
+        public Guid CustomerId { get; set; }
         public int Rating { get; set; }
 
         public string Comment { get; set; }

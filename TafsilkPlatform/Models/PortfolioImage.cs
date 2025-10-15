@@ -8,8 +8,8 @@ namespace TafsilkPlatform.Models
 {
     public class PortfolioImage
     {
-        public int PortfolioImageId { get; set; }
-        public int TailorId { get; set; }
+        public Guid PortfolioImageId { get; set; }
+        public Guid TailorId { get; set; }
         public string ImageUrl { get; set; }
         public bool IsBeforeAfter { get; set; }
         public DateTime UploadedAt { get; set; }

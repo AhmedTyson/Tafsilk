@@ -8,8 +8,8 @@ namespace TafsilkPlatform.Models
 {
     public class RatingDimension
     {
-        public int RatingDimensionId { get; set; }
-        public int ReviewId { get; set; }
+        public Guid RatingDimensionId { get; set; }
+        public Guid ReviewId { get; set; }
 
         public string DimensionName { get; set; }
         public int Score  { get; set; }

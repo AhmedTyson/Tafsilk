@@ -8,7 +8,7 @@ namespace TafsilkPlatform.Models
 {
     public class TailorPerformanceView
     {
-        public int TailorId { get; set; }
+        public Guid TailorId { get; set; }
         public decimal AverageRating { get; set; }
         public int TotalOrders { get; set; }
         public decimal Revenue { get; set; }

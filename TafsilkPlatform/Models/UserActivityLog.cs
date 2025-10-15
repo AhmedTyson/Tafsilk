@@ -8,8 +8,8 @@ namespace TafsilkPlatform.Models
 {
     public class UserActivityLog
     {
-        public int UserActivityLogId { get; set; }
-        public int UserId { get; set; }
+        public Guid UserActivityLogId { get; set; }
+        public Guid UserId { get; set; }
         public string Action { get; set; }
         public string EntityType { get; set; }
         public int? EntityId { get; set; } 

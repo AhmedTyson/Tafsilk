@@ -8,7 +8,7 @@ namespace TafsilkPlatform.Models
 {
     public class RevenueReport
     {
-        public int TailorId { get; set; }
+        public Guid TailorId { get; set; }
         public DateTime Month { get; set; } 
         public decimal TotalRevenue { get; set; }
         public int CompletedOrders { get; set; }

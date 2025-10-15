@@ -8,8 +8,8 @@ namespace TafsilkPlatform.Models
 {
     public class TailorBadge
     {
-        public int TailorBadgeId { get; set; }
-        public int TailorId { get; set; }
+        public Guid TailorBadgeId { get; set; }
+        public Guid TailorId { get; set; }
         public string BadgeName { get; set; }
         public DateTime EarnedAt { get; set; }
         public string Description { get; set; }
