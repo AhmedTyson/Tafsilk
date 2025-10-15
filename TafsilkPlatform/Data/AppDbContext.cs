@@ -188,9 +188,12 @@ public partial class AppDbContext : DbContext
             entity.ToTable("Reviews");
             entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
 
-            entity.Property(e => e.Comment).HasMaxLength(1000);
-            entity.Property(e => e.Rating).IsRequired();
+            entity.Property(e => e.Comment).HasMaxLength(1000).HasComment("Comment cannot exceed 1000 characters"); ;
+            entity.Property(e => e.Rating).IsRequired().HasComment("Rating is required");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property<bool>("IsDeleted") 
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
             entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
@@ -227,10 +230,18 @@ public partial class AppDbContext : DbContext
 
             entity.Property(rd => rd.DimensionName)
                   .HasMaxLength(100)
-                  .IsRequired();
+                  .IsRequired()
+                  .HasComment("Dimension name is required, max 100 chars");
+
 
             entity.Property(rd => rd.Score)
-                  .IsRequired();
+                  .IsRequired()
+                  .HasComment("Score is required");
+
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
+
 
         });
 
@@ -241,13 +252,19 @@ public partial class AppDbContext : DbContext
 
             entity.Property(tb => tb.BadgeName)
                   .HasMaxLength(150)
-                  .IsRequired();
+                  .IsRequired()
+                  .HasComment("Badge name is required, max 150 chars");
 
             entity.Property(tb => tb.Description)
-                  .HasMaxLength(500);
+                  .HasMaxLength(500)
+                  .HasComment("Description max 500 chars");
 
             entity.Property(tb => tb.EarnedAt)
                   .HasDefaultValueSql("(getutcdate())");
+
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(tb => tb.TailorId).HasDatabaseName("IX_TailorBadges_TailorId");
 
@@ -269,8 +286,16 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ImageUrl)
                   .IsRequired()
                   .HasMaxLength(500);
+
             entity.Property(e => e.UploadedAt)
                   .HasDefaultValueSql("(getutcdate())");
+
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
+            entity.Property(e => e.IsBeforeAfter)
+                  .IsRequired()
+                  .HasComment("Indicates if image is before/after");
 
 
             entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
@@ -297,16 +322,24 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.ServiceName)
                   .IsRequired()
-                  .HasMaxLength(100);
+                  .HasMaxLength(100)
+                  .HasComment("Service name is required, max 100 chars");
+
 
             entity.Property(e => e.Description)
-                  .HasMaxLength(500);
+                  .HasMaxLength(500)
+                  .HasComment("Description max 500 chars");
 
             entity.Property(e => e.BasePrice)
                   .HasColumnType("decimal(18,2)");
 
             entity.Property(e => e.EstimatedDuration)
-                  .IsRequired();
+                  .IsRequired()
+                  .HasComment("Estimated duration is required in minutes");
+
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
             entity.HasIndex(e => e.ServiceName).HasDatabaseName("IX_TailorServices_ServiceName");
@@ -327,10 +360,13 @@ public partial class AppDbContext : DbContext
                   .ValueGeneratedOnAdd();
             entity.Property(e => e.Title)
                   .IsRequired()
-                  .HasMaxLength(200);
+                  .HasMaxLength(200)
+                  .HasComment("Notification title is required, max 200 chars");
+
             entity.Property(e => e.Message)
                   .IsRequired()
-                  .HasMaxLength(2000);
+                  .HasMaxLength(2000)
+                  .HasComment("Notification message is required, max 2000 chars");
             entity.Property(e => e.Type)
                   .IsRequired()
                   .HasMaxLength(50);
@@ -338,6 +374,10 @@ public partial class AppDbContext : DbContext
                   .HasDefaultValue(false);
             entity.Property(e => e.SentAt)
                   .HasDefaultValueSql("(getutcdate())");
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
+                  
 
             entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
             entity.HasIndex(e => e.IsRead).HasDatabaseName("IX_Notifications_IsRead");
@@ -364,15 +404,20 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Title)
                   .IsRequired()
-                  .HasMaxLength(200);
+                  .HasMaxLength(200)
+                  .HasComment("Message title is required, max 200 chars");
             entity.Property(e => e.Content)
                   .IsRequired()
-                  .HasMaxLength(4000);
+                  .HasMaxLength(4000)
+                  .HasComment("Message content is required, max 4000 chars");
             entity.Property(e => e.CreatedAt)
                   .HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.AudienceType)
                   .IsRequired()
-                    .HasMaxLength(50);
+                  .HasMaxLength(50);
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_SystemMessages_CreatedAt");
             entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_SystemMessages_AudienceType");
@@ -398,7 +443,10 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.RegisteredAt)
                   .HasDefaultValueSql("(getutcdate())");
-            
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
+
             entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
             entity.HasIndex(e => e.Platform).HasDatabaseName("IX_DeviceTokens_Platform");
             entity.HasIndex(e => e.DeviceToken).HasDatabaseName("IX_DeviceTokens_Token");
@@ -439,6 +487,9 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.GeneratedAt)
                   .HasDefaultValueSql("(getutcdate())");
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasOne<TailorProfile>()
                   .WithMany()
@@ -454,13 +505,19 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.Action)
                   .IsRequired()
-                  .HasMaxLength(100);
+                  .HasMaxLength(100)
+                  .HasComment("Action description is required, max 100 chars");
             entity.Property(e => e.EntityType)
-                  .HasMaxLength(50);
+                  .HasMaxLength(50)
+                  .HasComment("Entity type max 50 chars");
             entity.Property(e => e.IpAddress)
-                  .HasMaxLength(45); // Supports IPv6
+                  .HasMaxLength(45) 
+                  .HasComment("IP address max 45 chars, supports IPv6");
             entity.Property(e => e.CreatedAt)
                   .HasDefaultValueSql("(getutcdate())");
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
             entity.HasIndex(e => e.Action).HasDatabaseName("IX_UserActivityLogs_Action");
@@ -481,17 +538,23 @@ public partial class AppDbContext : DbContext
             entity.ToTable("ErrorLogs");
             entity.HasKey(e => e.ErrorLogId).HasName("PK_ErrorLogs");
 
+
             entity.Property(e => e.Message)
                   .IsRequired()
-                  .HasMaxLength(2000);
+                  .HasMaxLength(2000)
+                  .HasComment("Error message is required, max 2000 chars");
 
             entity.Property(e => e.Severity)
                   .IsRequired()
                   .HasMaxLength(20)
-                  .HasDefaultValue("Error");
+                  .HasDefaultValue("Error")
+                  .HasComment("Severity level required, default 'Error', max 20 chars");
 
             entity.Property(e => e.CreatedAt)
                   .HasDefaultValueSql("(getutcdate())");
+            entity.Property<bool>("IsDeleted")
+                  .HasDefaultValue(false)
+                  .HasComment("Soft delete flag");
 
             entity.HasIndex(e => e.Severity).HasDatabaseName("IX_ErrorLogs_Severity");
             entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_ErrorLogs_CreatedAt");
