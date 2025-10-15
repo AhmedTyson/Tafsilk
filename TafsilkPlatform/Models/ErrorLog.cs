@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TafsilkPlatform.Models
 {
-    internal class ErrorLog
+    public class ErrorLog
     {
         public Guid ErrorLogId { get; set; }
         public string Message { get; set; }

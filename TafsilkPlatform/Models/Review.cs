@@ -18,8 +18,8 @@ namespace TafsilkPlatform.Models
         public DateTime CreatedAt { get; set; }
 
         public Order Order { get; set; }
-        public Tailor Tailor { get; set; }
-        public Customer Customer { get; set; }
+        public TailorProfile Tailor { get; set; }
+        public CustomerProfile Customer { get; set; }
         public ICollection<RatingDimension> RatingDimensions { get; set; } = new List<RatingDimension>();
     }
 }

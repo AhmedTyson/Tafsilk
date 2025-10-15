@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace TafsilkPlatform.Models
 {
-    internal class DeviceToken
+    public class DeviceToken
     {
         public Guid DeviceTokenId { get; set; }
         public Guid UserId { get; set; }
-        public string DeviceToken { get; set; }
+        public string Devicetoken { get; set; }
         public string Platform { get; set; }
         public DateTime RegisteredAt { get; set; }
 

@@ -433,7 +433,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.DeviceTokenId)
                   .ValueGeneratedOnAdd();
 
-            entity.Property(e => e.DeviceToken)
+            entity.Property(e => e.Devicetoken)
                   .IsRequired()
                   .HasMaxLength(500);
 
@@ -449,7 +449,7 @@ public partial class AppDbContext : DbContext
 
             entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
             entity.HasIndex(e => e.Platform).HasDatabaseName("IX_DeviceTokens_Platform");
-            entity.HasIndex(e => e.DeviceToken).HasDatabaseName("IX_DeviceTokens_Token");
+            entity.HasIndex(e => e.Devicetoken).HasDatabaseName("IX_DeviceTokens_Token");
 
             entity.HasOne<User>()
                   .WithMany()
