@@ -92,8 +92,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
             entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK_RefreshTokens_Users");
+                  .HasForeignKey(d => d.UserId)
+                  .HasConstraintName("FK_RefreshTokens_Users");
         });
 
         modelBuilder.Entity<Role>(entity =>
@@ -125,8 +125,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ShopName).HasMaxLength(255);
 
             entity.HasOne(d => d.User).WithOne(p => p.TailorProfile)
-                .HasForeignKey<TailorProfile>(d => d.UserId)
-                .HasConstraintName("FK_TailorProfiles_Users");
+                  .HasForeignKey<TailorProfile>(d => d.UserId)
+                  .HasConstraintName("FK_TailorProfiles_Users");
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -172,6 +172,7 @@ public partial class AppDbContext : DbContext
                 .HasConstraintName("FK_UserAddresses_Users");
         });
 
+        //Eriny Domain
         modelBuilder.Entity<Review>(entity =>
         {
             entity.ToTable("Reviews");
@@ -246,6 +247,161 @@ public partial class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.Restrict)
                   .HasConstraintName("FK_TailorBadges_TailorProfiles");
         });
+
+        modelBuilder.Entity<PortfolioImage>(entity =>
+        {
+            entity.ToTable("PortfolioImages");
+            entity.HasKey(e => e.PortfolioImageId).HasName("PK_PortfolioImages");
+
+            entity.Property(e => e.PortfolioImageId)
+                  .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.ImageUrl)
+                  .IsRequired()
+                  .HasMaxLength(500);
+            entity.Property(e => e.UploadedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
+            entity.HasIndex(e => e.IsBeforeAfter).HasDatabaseName("IX_PortfolioImages_IsBeforeAfter");
+            entity.HasIndex(e => e.UploadedAt).HasDatabaseName("IX_PortfolioImages_UploadedAt");
+
+            entity.HasIndex(e => new { e.TailorId, e.UploadedAt })
+                  .HasDatabaseName("IX_PortfolioImages_TailorId_UploadedAt");
+
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(pi => pi.TailorId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_PortfolioImages_TailorProfiles");
+        });
+
+        modelBuilder.Entity<TailorService>(entity =>
+        {
+            entity.ToTable("TailorServices");
+            entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
+
+            entity.Property(e => e.TailorServiceId)
+                  .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.ServiceName)
+                  .IsRequired()
+                  .HasMaxLength(100);
+
+            entity.Property(e => e.Description)
+                  .HasMaxLength(500);
+
+            entity.Property(e => e.BasePrice)
+                  .HasColumnType("decimal(18,2)");
+
+            entity.Property(e => e.EstimatedDuration)
+                  .IsRequired();
+
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
+            entity.HasIndex(e => e.ServiceName).HasDatabaseName("IX_TailorServices_ServiceName");
+
+            entity.HasOne<TailorProfile>()
+                  .WithMany()
+                  .HasForeignKey(ts => ts.TailorId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_TailorServices_TailorProfiles");
+
+        });
+
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.ToTable("Notifications");
+            entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
+            entity.Property(e => e.NotificationId)
+                  .ValueGeneratedOnAdd();
+            entity.Property(e => e.Title)
+                  .IsRequired()
+                  .HasMaxLength(200);
+            entity.Property(e => e.Message)
+                  .IsRequired()
+                  .HasMaxLength(2000);
+            entity.Property(e => e.Type)
+                  .IsRequired()
+                  .HasMaxLength(50);
+            entity.Property(e => e.IsRead)
+                  .HasDefaultValue(false);
+            entity.Property(e => e.SentAt)
+                  .HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
+            entity.HasIndex(e => e.IsRead).HasDatabaseName("IX_Notifications_IsRead");
+            entity.HasIndex(e => e.SentAt).HasDatabaseName("IX_Notifications_SentAt");
+            entity.HasIndex(e => e.Type).HasDatabaseName("IX_Notifications_Type");
+            entity.HasIndex(e => new { e.UserId, e.IsRead, e.SentAt })
+                  .HasDatabaseName("IX_Notifications_User_Read_Date");
+
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(n => n.UserId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_Notifications_Users");
+
+        });
+
+        modelBuilder.Entity<SystemMessage>(entity =>
+        {
+            entity.ToTable("SystemMessages");
+            entity.HasKey(e => e.SystemMessageId).HasName("PK_SystemMessages");
+
+            entity.Property(e => e.SystemMessageId)
+                  .ValueGeneratedOnAdd();
+            entity.Property(e => e.SystemMessageId)
+                  .ValueGeneratedOnAdd();
+            entity.Property(e => e.Title)
+                  .IsRequired()
+                  .HasMaxLength(200);
+            entity.Property(e => e.Content)
+                  .IsRequired()
+                  .HasMaxLength(4000);
+            entity.Property(e => e.CreatedAt)
+                  .HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.AudienceType)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_SystemMessages_CreatedAt");
+            entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_SystemMessages_AudienceType");
+
+
+        });
+
+        modelBuilder.Entity<DeviceToken>(entity =>
+        {
+            entity.ToTable("DeviceTokens");
+            entity.HasKey(e => e.DeviceTokenId).HasName("PK_DeviceTokens");
+
+            entity.Property(e => e.DeviceTokenId)
+                  .ValueGeneratedOnAdd();
+
+            entity.Property(e => e.DeviceToken)
+                  .IsRequired()
+                  .HasMaxLength(500);
+
+            entity.Property(e => e.Platform)
+                  .IsRequired()
+                  .HasMaxLength(20);
+
+            entity.Property(e => e.RegisteredAt)
+                  .HasDefaultValueSql("(getutcdate())");
+            
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
+            entity.HasIndex(e => e.Platform).HasDatabaseName("IX_DeviceTokens_Platform");
+            entity.HasIndex(e => e.DeviceToken).HasDatabaseName("IX_DeviceTokens_Token");
+
+            entity.HasOne<User>()
+                  .WithMany()
+                  .HasForeignKey(dt => dt.UserId)
+                  .OnDelete(DeleteBehavior.Cascade)
+                  .HasConstraintName("FK_DeviceTokens_Users");
+
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
 
