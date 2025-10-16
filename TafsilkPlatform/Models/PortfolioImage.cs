@@ -10,10 +10,10 @@ namespace TafsilkPlatform.Models
     {
         public Guid PortfolioImageId { get; set; }
         public Guid TailorId { get; set; }
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
         public bool IsBeforeAfter { get; set; }
         public DateTime UploadedAt { get; set; }
-        public TailorProfile Tailor { get; set; }
+        public TailorProfile? Tailor { get; set; } // Made nullable to fix CS8618
         public bool IsDeleted { get; set; } // Add this property to fix CS1061
     }
 }

@@ -10,10 +10,10 @@ namespace TafsilkPlatform.Models
     {
         public Guid DeviceTokenId { get; set; }
         public Guid UserId { get; set; }
-        public string Devicetoken { get; set; }
-        public string Platform { get; set; }
+        public string? Devicetoken { get; set; }
+        public string Platform { get; set; } = string.Empty;
         public DateTime RegisteredAt { get; set; }
-        public User User { get; set; }
+        public User? User { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

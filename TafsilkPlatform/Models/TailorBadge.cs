@@ -10,9 +10,9 @@ namespace TafsilkPlatform.Models
     {
         public Guid TailorBadgeId { get; set; }
         public Guid TailorId { get; set; }
-        public string BadgeName { get; set; }
+        public string BadgeName { get; set; } = string.Empty;
         public DateTime EarnedAt { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
         public bool IsDeleted { get; set; } // Add this property to fix CS1061
     }
 }

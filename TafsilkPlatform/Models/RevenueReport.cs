@@ -13,7 +13,7 @@ namespace TafsilkPlatform.Models
         public decimal TotalRevenue { get; set; }
         public int CompletedOrders { get; set; }
         public DateTime GeneratedAt { get; set; }
-        public TailorProfile Tailor { get; set; }
+        public TailorProfile? Tailor { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

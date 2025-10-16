@@ -13,6 +13,6 @@ namespace TafsilkPlatform.Models
         public int TotalOrders { get; set; }
         public decimal Revenue { get; set; }
        
-        public TailorProfile Tailor { get; set; }
+        public TailorProfile? Tailor { get; set; }
     }
 }

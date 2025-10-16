@@ -10,12 +10,14 @@ namespace TafsilkPlatform.Models
     {
         public Guid UserActivityLogId { get; set; }
         public Guid UserId { get; set; }
-        public string Action { get; set; }
-        public string EntityType { get; set; }
+        public string Action { get; set; } = string.Empty;
+        public string EntityType { get; set; } = string.Empty;
         public int? EntityId { get; set; } 
         public DateTime CreatedAt { get; set; }
-        public string IpAddress { get; set; }
-        public User User { get; set; }
+        public string IpAddress { get; set; } = string.Empty;
+
+        public User? User { get; set; }
+
         public bool IsDeleted { get; set; }
     }
 }
