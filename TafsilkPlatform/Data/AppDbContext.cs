@@ -44,11 +44,21 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<UserActivityLog> UserActivityLogs { get; set; }
     public virtual DbSet<ErrorLog> ErrorLogs { get; set; }
 
+    public virtual DbSet<Dispute> Disputes { get; set; }
+    public virtual DbSet<RefundRequest> RefundRequests { get; set; }
+    public virtual DbSet<RFQ> RFQs { get; set; }
+    public virtual DbSet<RFQBid> RFQBids { get; set; }
+    public virtual DbSet<Contract> Contracts { get; set; }
+    public virtual DbSet<Admin> Admins { get; set; }
+    public virtual DbSet<AppSetting> AppSettings { get; set; }
+    public virtual DbSet<AuditLog> AuditLogs { get; set; }
+    public virtual DbSet<BannedUser> BannedUsers { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Use the connection string from configuration (appsettings.json or user secrets)
+            // Fallback to named connection string (resolved from IConfiguration when available)
             optionsBuilder.UseSqlServer("Name=ConnectionStrings:TafsilkPlatform");
         }
     }
@@ -108,6 +118,7 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User)
                   .WithOne(p => p.CorporateAccount)
                   .HasForeignKey<CorporateAccount>(d => d.UserId)
+                  .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_CorporateAccounts_Users");
         });
 
@@ -128,6 +139,7 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User)
                   .WithOne(p => p.CustomerProfile)
                   .HasForeignKey<CustomerProfile>(d => d.UserId)
+                  .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_CustomerProfiles_Users");
         });
 
@@ -152,6 +164,7 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User)
                   .WithOne(p => p.TailorProfile)
                   .HasForeignKey<TailorProfile>(d => d.UserId)
+                  .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_TailorProfiles_Users");
         });
 
@@ -174,6 +187,7 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User)
                   .WithMany(p => p.UserAddresses)
                   .HasForeignKey(d => d.UserId)
+                  .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_UserAddresses_Users");
         });
 
@@ -191,14 +205,78 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User)
                   .WithMany(p => p.RefreshTokens)
                   .HasForeignKey(d => d.UserId)
+                  .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_RefreshTokens_Users");
         });
 
-        // Order Entity
+        // Order Entity + relations
         modelBuilder.Entity<Order>(entity =>
         {
             entity.Property(o => o.CustomerId).IsRequired();
             entity.Property(o => o.TailorId).IsRequired();
+
+            entity.HasOne(o => o.Customer)
+                  .WithMany(c => c.orders)
+                  .HasForeignKey(o => o.CustomerId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(o => o.Tailor)
+                  .WithMany()
+                  .HasForeignKey(o => o.TailorId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasMany(o => o.Items)
+                  .WithOne()
+                  .HasForeignKey(oi => oi.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasMany(o => o.orderImages)
+                  .WithOne()
+                  .HasForeignKey(oi => oi.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasMany(o => o.Payments)
+                  .WithOne()
+                  .HasForeignKey(p => p.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasMany(o => o.quote)
+                  .WithOne()
+                  .HasForeignKey(q => q.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Payment Entity relations
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasOne(p => p.Customer)
+                  .WithMany(cp => cp.Payments)
+                  .HasForeignKey(p => p.CustomerId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(p => p.Order)
+                  .WithMany(o => o.Payments)
+                  .HasForeignKey(p => p.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(p => p.Tailor)
+                  .WithMany(tp => tp.Payments)
+                  .HasForeignKey(p => p.TailorId)
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Quote Entity relations
+        modelBuilder.Entity<Quote>(entity =>
+        {
+            entity.HasOne(q => q.order)
+                  .WithMany(o => o.quote)
+                  .HasForeignKey(q => q.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(q => q.Tailor)
+                  .WithMany()
+                  .HasForeignKey(q => q.TailorId)
+                  .OnDelete(DeleteBehavior.NoAction);
         });
 
         // Wallet Entity
@@ -419,6 +497,26 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_SystemMessages_AudienceType");
         });
 
+        // Dispute Entity
+        modelBuilder.Entity<Dispute>(entity =>
+        {
+            entity.ToTable("Disputes");
+            entity.HasKey(e => e.Id);
+
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Reason).HasMaxLength(200);
+            entity.Property(e => e.Description).HasMaxLength(1000);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.ResolutionDetails).HasMaxLength(2000);
+
+            entity.HasOne(d => d.Order)
+                  .WithMany()
+                  .HasForeignKey(d => d.OrderId)
+                  .OnDelete(DeleteBehavior.NoAction)
+                  .HasConstraintName("FK_Disputes_Orders");
+        });
+
         // DeviceToken Entity
         modelBuilder.Entity<DeviceToken>(entity =>
         {
@@ -527,11 +625,7 @@ public partial class AppDbContext : DbContext
             entity.HasIndex(e => new { e.Severity, e.CreatedAt }).HasDatabaseName("IX_ErrorLogs_Severity_CreatedAt");
         });
 
-        // Global NoAction for all FK relationships (from first file)
-        foreach (var fk in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
-        {
-            fk.DeleteBehavior = DeleteBehavior.NoAction;
-        }
+        // IMPORTANT: Removed global FK DeleteBehavior override to honor per-relation delete behaviors
 
         OnModelCreatingPartial(modelBuilder);
     }
