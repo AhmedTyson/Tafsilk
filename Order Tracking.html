@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفصيلك — تتبع طلبك</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --primary-hover: #1e3f73;
+            --primary-light: #e3f2fd;
+            --secondary-color: #f39c12;
+            --secondary-hover: #e67e22;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-light: #bdc3c7;
+            --text-white: #ffffff;
+            --background-white: #ffffff;
+            --background-gray: #f8f9fa;
+            --background-light: #ecf0f1;
+            --border-color: #e1e8ed;
+            --dark: #0f172a;
+
+            --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+                0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+                0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-full: 9999px;
+
+            --transition-fast: 0.15s ease-in-out;
+            --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-gray);
+            direction: rtl;
+            text-align: right;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-md);
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 0 var(--spacing-lg);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 var(--spacing-xl);
+            }
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: var(--background-white);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar {
+            padding: var(--spacing-sm) 0;
+        }
+
+        .navbar .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            font-size: var(--font-size-lg);
+            font-weight: 800;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo {
+            font-size: var(--font-size-xl);
+        }
+
+        .nav-menu {
+            display: none;
+            list-style: none;
+            gap: var(--spacing-lg);
+        }
+
+        .nav-link {
+            font-weight: 600;
+            transition: color var(--transition-fast);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: center;
+        }
+
+        .nav-toggle {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            cursor: pointer;
+        }
+
+        .nav-toggle span {
+            width: 20px;
+            height: 2px;
+            background-color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .lang-toggle {
+            background: var(--background-gray);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-family);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+
+        .lang-toggle:hover {
+            background: var(--border-color);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            line-height: 1.4;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: var(--primary-hover);
+            color: var(--text-white);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-outline:hover,
+        .btn-outline:focus {
+            background-color: var(--primary-color);
+            color: var(--text-white);
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            color: var(--text-white);
+        }
+
+        .btn-danger:hover,
+        .btn-danger:focus {
+            background-color: #c0392b;
+            color: var(--text-white);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: var(--text-white);
+        }
+
+        .btn-warning:hover,
+        .btn-warning:focus {
+            background-color: #e67e22;
+            color: var(--text-white);
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            background-color: var(--secondary-color);
+            color: var(--text-white);
+            border-radius: var(--radius-full);
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+
+        @media (min-width: 768px) {
+            .nav-menu {
+                display: flex;
+            }
+
+            .nav-toggle {
+                display: none;
+            }
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(
+                135deg,
+                var(--primary-color) 0%,
+                var(--primary-hover) 100%
+            );
+            color: white;
+            padding: var(--spacing-xl) 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .page-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z" fill="white"/></svg>')
+                repeat;
+            background-size: 150px;
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: var(--font-size-2xl);
+            font-weight: 800;
+            margin-bottom: var(--spacing-sm);
+            line-height: 1.2;
+        }
+
+        .page-subtitle {
+            font-size: var(--font-size-base);
+            opacity: 0.9;
+        }
+
+        /* Order Tracking Layout */
+        .tracking-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-lg) var(--spacing-md);
+        }
+
+        @media (min-width: 1024px) {
+            .tracking-layout {
+                grid-template-columns: 2fr 1fr;
+                padding: var(--spacing-lg);
+            }
+        }
+
+        /* Order Status Section */
+        .order-status {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xl);
+            padding-bottom: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-title {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .order-number {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        @media (min-width: 768px) {
+            .order-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
+        }
+
+        .detail-label {
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: var(--font-size-base);
+        }
+
+        .delivery-date {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* Progress Timeline */
+        .progress-timeline {
+            position: relative;
+            margin: var(--spacing-2xl) 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            left: 0;
+            height: 4px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 30px;
+            right: 0;
+            height: 4px;
+            background-color: var(--success-color);
+            z-index: 2;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .timeline-steps {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            z-index: 3;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 25%;
+            position: relative;
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--background-white);
+            border: 3px solid var(--border-color);
+            margin-bottom: var(--spacing-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 4;
+        }
+
+        .step-icon.active {
+            border-color: var(--success-color);
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .step-icon.completed {
+            border-color: var(--success-color);
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .step-label {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .step-date {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+        }
+
+        .step-description {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+        }
+
+        /* Progress Images */
+        .progress-images {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+        }
+
+        @media (min-width: 768px) {
+            .progress-images {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .progress-image-card {
+            background-color: var(--background-white);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-normal);
+        }
+
+        .progress-image-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .progress-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .image-stage {
+            padding: var(--spacing-sm);
+            text-align: center;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Messages Section */
+        .messages-section {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            margin-top: var(--spacing-xl);
+        }
+
+        .section-title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text-primary);
+            padding-bottom: var(--spacing-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .messages-container {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: var(--background-gray);
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: var(--spacing-md);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            max-width: 80%;
+        }
+
+        .message.customer {
+            margin-right: auto;
+            background-color: var(--primary-light);
+            border-bottom-right-radius: 0;
+        }
+
+        .message.tailor {
+            margin-left: auto;
+            background-color: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-bottom-left-radius: 0;
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+            font-size: var(--font-size-sm);
+        }
+
+        .message-text {
+            font-size: var(--font-size-sm);
+            line-height: 1.5;
+        }
+
+        .message-time {
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            margin-top: var(--spacing-xs);
+            text-align: left;
+        }
+
+        .new-message-form {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .message-input {
+            flex: 1;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-size: var(--font-size-sm);
+            resize: none;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* Order Summary */
+        .order-summary {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .summary-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-weight: 600;
+        }
+
+        .summary-image {
+            width: 100%;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .emergency-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-xl);
+        }
+
+        .emergency-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--dark);
+            color: white;
+            padding: var(--spacing-xl) 0 var(--spacing-lg);
+            margin-top: var(--spacing-2xl);
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        @media (min-width: 768px) {
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .footer-content {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .footer-section {
+            text-align: right;
+        }
+
+        .footer-title {
+            font-size: var(--font-size-base);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-white);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .footer-links a {
+            color: var(--text-light);
+            transition: color var(--transition-fast);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+        }
+
+        .footer-links a:hover {
+            color: var(--text-white);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .footer-bottom {
+                flex-direction: row;
+                justify-content: space-between;
+                text-align: right;
+            }
+        }
+
+        .footer-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .footer-info {
+                flex-direction: row;
+            }
+        }
+
+        .footer-info p {
+            color: var(--text-light);
+            margin: 0;
+            font-size: var(--font-size-sm);
+        }
+
+        .social-links {
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .social-links a {
+            color: var(--text-light);
+            transition: color var(--transition-fast);
+        }
+
+        .social-links a:hover {
+            color: var(--text-white);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+        }
+
+        .modal-content {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .form-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: var(--spacing-xs);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            transition: border-color var(--transition-normal);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .modal-actions {
+            margin-top: var(--spacing-lg);
+            display: flex;
+            gap: var(--spacing-md);
+        }
+
+        .modal-actions .btn {
+            flex: 1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 640px) {
+            .order-status,
+            .messages-section,
+            .order-summary {
+                padding: var(--spacing-lg);
+            }
+
+            .timeline-steps {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .timeline-step {
+                width: 50%;
+                margin-bottom: var(--spacing-lg);
+            }
+
+            .progress-line,
+            .progress-fill {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" role="banner">
+        <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+            <div class="container">
+                <a href="index.html" class="brand">
+                    <div class="brand-icon" aria-hidden="true">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <h1 class="logo">تفصيلك</h1>
+                </a>
+                <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+                    <li><a href="index.html" class="nav-link">الرئيسية</a></li>
+                    <li><a href="portfolios-test1.html" class="nav-link">الخياطين</a></li>
+                    <li><a href="store.html" class="nav-link">المتجر</a></li>
+                    <li><a href="order-tracking.html" class="nav-link">تتبع الطلبات</a></li>
+                    <li><a href="contact.html" class="nav-link">تواصل معنا</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="#" class="btn btn-outline">تسجيل دخول</a>
+                    <a href="register.html" class="btn btn-primary">انضم كخياط</a>
+                    <div class="cart-icon" id="cartIcon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </div>
+                    <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+                        <i class="fas fa-globe" aria-hidden="true"></i>
+                        <span>العربية / EN</span>
+                    </button>
+                </div>
+                <button
+                    class="nav-toggle"
+                    aria-label="فتح القائمة"
+                    aria-controls="nav-menu"
+                    aria-expanded="false"
+                    type="button"
+                >
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <div class="page-header-content">
+                <h1 class="page-title">تتبع طلبك</h1>
+                <p class="page-subtitle">
+                    تابع حالة طلبك في الوقت الفعلي وتواصل مع الخياط بسهولة
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tracking Layout -->
+    <div class="tracking-layout">
+        <!-- Main Content -->
+        <div class="tracking-main">
+            <!-- Order Status -->
+            <section class="order-status">
+                <div class="order-header">
+                    <h2 class="order-title">طلب بدلة رجالية رمادية</h2>
+                    <div class="order-number">رقم الطلب: #ORD-2023-5874</div>
+                </div>
+
+                <div class="order-details">
+                    <div class="detail-item">
+                        <span class="detail-label">الخياط:</span>
+                        <span class="detail-value">أستاذ خالد محمود</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">تاريخ الطلب:</span>
+                        <span class="detail-value">15 أكتوبر 2023</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">التكلفة الإجمالية:</span>
+                        <span class="detail-value">750 ج.م</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">تاريخ التسليم المتوقع:</span>
+                        <span class="detail-value delivery-date">30 أكتوبر 2023</span>
+                    </div>
+                </div>
+
+                <!-- Progress Timeline -->
+                <div class="progress-timeline">
+                    <div class="progress-line"></div>
+                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="timeline-steps">
+                        <div class="timeline-step">
+                            <div class="step-icon completed">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <div class="step-label">تم الاستلام</div>
+                            <div class="step-date">15 أكتوبر</div>
+                            <div class="step-description">تم استلام طلبك</div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-icon completed">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <div class="step-label">عرض السعر</div>
+                            <div class="step-date">16 أكتوبر</div>
+                            <div class="step-description">تم إرسال عرض السعر</div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-icon active">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="step-label">قيد التنفيذ</div>
+                            <div class="step-date">18 أكتوبر</div>
+                            <div class="step-description">جارٍ تنفيذ طلبك</div>
+                        </div>
+                        <div class="timeline-step">
+                            <div class="step-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="step-label">جاهز للتسليم</div>
+                            <div class="step-date">30 أكتوبر</div>
+                            <div class="step-description">سيتم إعلامك عند الانتهاء</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Images -->
+                <h3 class="section-title">صور تقدم العمل</h3>
+                <div class="progress-images">
+                    <div class="progress-image-card">
+                        <img src="https://placehold.co/400x300/e3f2fd/2c5aa0?text=مرحلة+القياسات" alt="مرحلة القياسات" class="progress-image">
+                        <div class="image-stage">القياسات الأولية</div>
+                    </div>
+                    <div class="progress-image-card">
+                        <img src="https://placehold.co/400x300/e3f2fd/2c5aa0?text=مرحلة+التصميم" alt="مرحلة التصميم" class="progress-image">
+                        <div class="image-stage">التصميم والتخطيط</div>
+                    </div>
+                    <div class="progress-image-card">
+                        <img src="https://placehold.co/400x300/e3f2fd/2c5aa0?text=مرحلة+التنفيذ" alt="مرحلة التنفيذ" class="progress-image">
+                        <div class="image-stage">التنفيذ والقص</div>
+                    </div>
+                    <div class="progress-image-card">
+                        <img src="https://placehold.co/400x300/e3f2fd/2c5aa0?text=مرحلة+التجربة" alt="مرحلة التجربة" class="progress-image">
+                        <div class="image-stage">تجربة أولية</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Messages Section -->
+            <section class="messages-section">
+                <h3 class="section-title">التواصل مع الخياط</h3>
+                <div class="messages-container" id="messagesContainer">
+                    <div class="message tailor">
+                        <div class="message-content">
+                            <div class="message-sender">أستاذ خالد محمود</div>
+                            <div class="message-text">مرحباً، لقد استلمت طلبك وسأبدأ العمل عليه خلال 24 ساعة. هل لديك أي متطلبات إضافية؟</div>
+                            <div class="message-time">15 أكتوبر، 10:30 ص</div>
+                        </div>
+                    </div>
+                    <div class="message customer">
+                        <div class="message-content">
+                            <div class="message-sender">أنت</div>
+                            <div class="message-text">شكراً لك. أتمنى أن تكون القياسات دقيقة كما ناقشنا. هل يمكنك إرسال صورة للقماش قبل البدء؟</div>
+                            <div class="message-time">15 أكتوبر، 11:45 ص</div>
+                        </div>
+                    </div>
+                    <div class="message tailor">
+                        <div class="message-content">
+                            <div class="message-sender">أستاذ خالد محمود</div>
+                            <div class="message-text">بالتأكيد، هذه صورة للقماش الذي اخترناه معاً. إنه قماش عالي الجودة ومناسب جداً للبدلة.</div>
+                            <div class="message-time">16 أكتوبر، 9:15 ص</div>
+                        </div>
+                    </div>
+                    <div class="message tailor">
+                        <div class="message-content">
+                            <div class="message-sender">أستاذ خالد محمود</div>
+                            <div class="message-text">لقد انتهيت من القص والبدء في الخياطة. سأرسل لك صورة للتقدم غداً.</div>
+                            <div class="message-time">18 أكتوبر، 2:30 م</div>
+                        </div>
+                    </div>
+                </div>
+                <form class="new-message-form" id="messageForm">
+                    <textarea class="message-input" id="messageInput" placeholder="اكتب رسالتك هنا..." required></textarea>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </section>
+        </div>
+
+        <!-- Order Summary & Actions -->
+        <div class="order-summary">
+            <h3 class="section-title">ملخص الطلب</h3>
+            
+            <div class="summary-section">
+                <div class="summary-item">
+                    <span class="summary-label">الخدمة:</span>
+                    <span class="summary-value">بدلة رجالية</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">الخياط:</span>
+                    <span class="summary-value">أستاذ خالد محمود</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">الحالة:</span>
+                    <span class="summary-value">قيد التنفيذ</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">تاريخ التسليم:</span>
+                    <span class="summary-value">30 أكتوبر 2023</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">التكلفة:</span>
+                    <span class="summary-value">750 ج.م</span>
+                </div>
+            </div>
+
+            <div class="summary-section">
+                <h3 class="section-title">تفاصيل الطلب</h3>
+                <div class="summary-item">
+                    <span class="summary-label">المقاس:</span>
+                    <span class="summary-value">L</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">اللون:</span>
+                    <span class="summary-value">رمادي</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">نوع القماش:</span>
+                    <span class="summary-value">صوف ممزوج</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">الموعد:</span>
+                    <span class="summary-value">20 أكتوبر، 3:00 م</span>
+                </div>
+            </div>
+
+            <div class="emergency-actions">
+                <button class="btn btn-danger" id="cancelOrderBtn">
+                    <i class="fas fa-times-circle"></i>
+                    إلغاء الطلب
+                </button>
+                <button class="btn btn-warning" id="complaintBtn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    تقديم شكوى
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Order Modal -->
+    <div id="cancelOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">إلغاء الطلب</h2>
+                <button class="modal-close" id="cancelModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من رغبتك في إلغاء الطلب؟ قد يتم تطبيق رسوم إلغاء حسب سياسة الإلغاء.</p>
+                <form class="modal-form" id="cancelOrderForm">
+                    <div class="form-group">
+                        <label for="cancelReason" class="form-label">سبب الإلغاء:</label>
+                        <select id="cancelReason" class="form-control" required>
+                            <option value="">اختر سبب الإلغاء</option>
+                            <option value="changed-mind">تغيرت الفكرة</option>
+                            <option value="delay">تأخر في التنفيذ</option>
+                            <option value="quality">مشكلة في الجودة</option>
+                            <option value="other">سبب آخر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="cancelDetails" class="form-label">تفاصيل إضافية:</label>
+                        <textarea id="cancelDetails" class="form-control" placeholder="يرجى توضيح سبب الإلغاء..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline" id="cancelCancelBtn">تراجع</button>
+                        <button type="submit" class="btn btn-danger">تأكيد الإلغاء</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaint Modal -->
+    <div id="complaintModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">تقديم شكوى</h2>
+                <button class="modal-close" id="complaintModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>يرجى تقديم تفاصيل شكواك وسنقوم بالتواصل معك خلال 24 ساعة.</p>
+                <form class="modal-form" id="complaintForm">
+                    <div class="form-group">
+                        <label for="complaintType" class="form-label">نوع الشكوى:</label>
+                        <select id="complaintType" class="form-control" required>
+                            <option value="">اختر نوع الشكوى</option>
+                            <option value="delay">تأخر في التنفيذ</option>
+                            <option value="quality">جودة غير مرضية</option>
+                            <option value="communication">مشكلة في التواصل</option>
+                            <option value="other">سبب آخر</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="complaintDetails" class="form-label">تفاصيل الشكوى:</label>
+                        <textarea id="complaintDetails" class="form-control" placeholder="يرجى وصف المشكلة بالتفصيل..." required></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-outline" id="cancelComplaintBtn">تراجع</button>
+                        <button type="submit" class="btn btn-warning">إرسال الشكوى</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3 class="footer-title">من نحن</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">عن تفصيلك</a></li>
+                        <li><a href="#">كيف تعمل المنصة</a></li>
+                        <li><a href="#">الأسئلة الشائعة</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="footer-title">للعملاء</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">الأسئلة الشائعة</a></li>
+                        <li><a href="#">كيف تعمل المنصة</a></li>
+                        <li><a href="#">خدمة العملاء</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="footer-title">للخياطين</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">انضم إلينا</a></li>
+                        <li><a href="#">أسئلة الخياطين الشائعة</a></li>
+                        <li><a href="#">مركز المساعدة</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h3 class="footer-title">قانوني</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">شروط الخدمة</a></li>
+                        <li><a href="#">سياسة الخصوصية</a></li>
+                        <li><a href="#">تواصل معنا</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div class="footer-info">
+                    <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="فيسبوك">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" aria-label="إنستغرام">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" aria-label="تويتر">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                    </div>
+                </div>
+                <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+                    <i class="fas fa-globe" aria-hidden="true"></i>
+                    <span>العربية / English</span>
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize progress bar
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = '66%'; // 2 out of 3 steps completed
+
+            // Message form functionality
+            const messageForm = document.getElementById('messageForm');
+            const messageInput = document.getElementById('messageInput');
+            const messagesContainer = document.getElementById('messagesContainer');
+
+            messageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const messageText = messageInput.value.trim();
+                if (!messageText) return;
+
+                // Create new message element
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message customer';
+                messageElement.innerHTML = `
+                    <div class="message-content">
+                        <div class="message-sender">أنت</div>
+                        <div class="message-text">${messageText}</div>
+                        <div class="message-time">الآن</div>
+                    </div>
+                `;
+
+                // Add message to container
+                messagesContainer.appendChild(messageElement);
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Simulate tailor response after delay
+                setTimeout(() => {
+                    const responseElement = document.createElement('div');
+                    responseElement.className = 'message tailor';
+                    responseElement.innerHTML = `
+                        <div class="message-content">
+                            <div class="message-sender">أستاذ خالد محمود</div>
+                            <div class="message-text">شكراً على رسالتك. سأراجع ملاحظاتك وأعمل عليها.</div>
+                            <div class="message-time">الآن</div>
+                        </div>
+                    `;
+                    
+                    messagesContainer.appendChild(responseElement);
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 2000);
+            });
+
+            // Modal functionality
+            const cancelOrderBtn = document.getElementById('cancelOrderBtn');
+            const complaintBtn = document.getElementById('complaintBtn');
+            const cancelOrderModal = document.getElementById('cancelOrderModal');
+            const complaintModal = document.getElementById('complaintModal');
+            
+            // Cancel Order Modal
+            cancelOrderBtn.addEventListener('click', function() {
+                cancelOrderModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            document.getElementById('cancelModalClose').addEventListener('click', function() {
+                cancelOrderModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            document.getElementById('cancelCancelBtn').addEventListener('click', function() {
+                cancelOrderModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            document.getElementById('cancelOrderForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('تم إرسال طلب الإلغاء بنجاح. سيتواصل معك فريق الدعم قريباً.');
+                cancelOrderModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            // Complaint Modal
+            complaintBtn.addEventListener('click', function() {
+                complaintModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
+            
+            document.getElementById('complaintModalClose').addEventListener('click', function() {
+                complaintModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            document.getElementById('cancelComplaintBtn').addEventListener('click', function() {
+                complaintModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            document.getElementById('complaintForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('تم إرسال شكواك بنجاح. سيتواصل معك فريق الدعم خلال 24 ساعة.');
+                complaintModal.style.display = 'none';
+                document.body.style.overflow = '';
+            });
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === cancelOrderModal) {
+                    cancelOrderModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+                if (e.target === complaintModal) {
+                    complaintModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // Mobile navigation toggle
+            const navToggle = document.querySelector('.nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', function() {
+                    const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+                    navToggle.setAttribute('aria-expanded', !isExpanded);
+                    navMenu.style.display = isExpanded ? 'none' : 'flex';
+                    navMenu.style.position = 'absolute';
+                    navMenu.style.top = '100%';
+                    navMenu.style.right = '0';
+                    navMenu.style.backgroundColor = 'var(--background-white)';
+                    navMenu.style.padding = 'var(--spacing-lg)';
+                    navMenu.style.boxShadow = 'var(--shadow-md)';
+                    navMenu.style.flexDirection = 'column';
+                    navMenu.style.minWidth = '200px';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
