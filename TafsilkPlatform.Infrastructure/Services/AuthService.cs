@@ -4,6 +4,7 @@ using TafsilkPlatform.Core.Interfaces;
 using TafsilkPlatform.Core.Models;
 using TafsilkPlatform.Infrastructure.Persistence;
 using TafsilkPlatform.Infrastructure.Security;
+using TafsilkPlatform.Application.Models.Auth;
 
 namespace TafsilkPlatform.Infrastructure.Services
 {
