@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Application.csproj" />
+    <ProjectReference Include="..\TafsilkPlatform.Core\TafsilkPlatform.Core.csproj" />
   </ItemGroup>
 
 </Project>
