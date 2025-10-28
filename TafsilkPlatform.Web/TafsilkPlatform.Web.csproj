@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TafsilkPlatform.Infrastructure\TafsilkPlatform.Infrastructure.csproj" />
     <ProjectReference Include="..\TafsilkPlatform.Core\TafsilkPlatform.Core.csproj" />
+    <ProjectReference Include="..\TafsilkPlatform.Application\TafsilkPlatform.Application.csproj" />
   </ItemGroup>
 
 </Project>
