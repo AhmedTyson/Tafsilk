@@ -1,0 +1,22 @@
+@page
+@model TafsilkPlatform.Web.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+<h2>Login</h2>
+<form method="post">
+    <div><label>Email</label><input asp-for="Email" /></div>
+    <div><label>Password</label><input asp-for="Password" type="password" /></div>
+    <button type="submit">Login</button>
+</form>
+
+<form method="post" asp-page-handler="ExternalLogin">
+    <input type="hidden" name="returnUrl" value="/" />
+    <button type="submit" name="provider" value="Google">Continue with Google</button>
+    <button type="submit" name="provider" value="Facebook">Continue with Facebook</button>
+</form>
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="text-danger">@Model.Error</div>
+}
