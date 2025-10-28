@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TafsilkPlatform.Core\TafsilkPlatform.Core.csproj" />
+    <ProjectReference Include="..\TafsilkPlatform.Application\TafsilkPlatform.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +17,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
