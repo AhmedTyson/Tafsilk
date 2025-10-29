@@ -73,6 +73,18 @@ namespace TafsilkPlatform.Web.ViewModels
  [Display(Name = "العنوان")]
  public string? Address { get; set; }
 
+<<<<<<< Updated upstream
+=======
+ [Display(Name = "سنوات الخبرة")]
+ public int? ExperienceYears { get; set; }
+
+ [Display(Name = "نطاق الأسعار")]
+ public string? PricingRange { get; set; }
+
+ [Display(Name = "الجنس")]
+ public string? Gender { get; set; }
+
+>>>>>>> Stashed changes
  // For Corporate
  [Display(Name = "اسم الشركة")]
  public string? CompanyName { get; set; }
@@ -98,5 +110,11 @@ namespace TafsilkPlatform.Web.ViewModels
  public string? Address { get; set; }
  public string? CompanyName { get; set; }
  public string? ContactPerson { get; set; }
+<<<<<<< Updated upstream
+=======
+ public int? ExperienceYears { get; set; }
+ public string? PricingRange { get; set; }
+ public string? Gender { get; set; }
+>>>>>>> Stashed changes
  }
 }

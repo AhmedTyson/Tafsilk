@@ -25,6 +25,12 @@ public class AccountSettingsViewModel
     [Display(Name = "تحميل صورة جديدة")]
  public IFormFile? ProfilePictureFile { get; set; }
 
+<<<<<<< Updated upstream
+=======
+    [Display(Name = "حذف الصورة الشخصية")]
+    public bool DeleteProfilePicture { get; set; }
+
+>>>>>>> Stashed changes
  // User Role Information
     [Display(Name = "الدور الحالي")]
     public string CurrentRole { get; set; } = string.Empty;

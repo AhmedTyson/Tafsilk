@@ -51,8 +51,22 @@ namespace TafsilkPlatform.Web.Models
         // New optional fields
         [StringLength(100)]
         public string? City { get; set; }
+<<<<<<< Updated upstream
         public string? ProfilePictureUrl { get; set; }
 
+=======
+
+        [Obsolete("Use ProfilePictureData instead. This field is kept for backward compatibility.")]
+        public string? ProfilePictureUrl { get; set; }
+
+        // New properties for storing image in database
+        [MaxLength]
+        public byte[]? ProfilePictureData { get; set; }
+
+        [StringLength(100)]
+        public string? ProfilePictureContentType { get; set; }
+
+>>>>>>> Stashed changes
         [Display(Name = "Verified Status")]
         public bool IsVerified { get; set; } = false;
 

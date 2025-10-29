@@ -639,22 +639,48 @@ public partial class AppDbContext : DbContext
         modelBuilder.Entity<CustomerProfile>(entity =>
         {
             entity.Property(e => e.Bio).HasMaxLength(1000);
+<<<<<<< Updated upstream
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+=======
+#pragma warning disable CS0618 // Type or member is obsolete
+      entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618 // Type or member is obsolete
+       entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+     entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+>>>>>>> Stashed changes
         });
 
         // TailorProfile extras
         modelBuilder.Entity<TailorProfile>(entity =>
         {
             entity.Property(e => e.FullName).HasMaxLength(255);
+<<<<<<< Updated upstream
             entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+=======
+    entity.Property(e => e.City).HasMaxLength(100);
+#pragma warning disable CS0618 // Type or member is obsolete
+ entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618 // Type or member is obsolete
+            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+    entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+>>>>>>> Stashed changes
         });
 
         // CorporateAccount extras
         modelBuilder.Entity<CorporateAccount>(entity =>
         {
+<<<<<<< Updated upstream
             entity.Property(e => e.Bio).HasMaxLength(1000);
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+=======
+         entity.Property(e => e.Bio).HasMaxLength(1000);
+#pragma warning disable CS0618 // Type or member is obsolete
+     entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618 // Type or member is obsolete
+     entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+      entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+>>>>>>> Stashed changes
         });
 
         OnModelCreatingPartial(modelBuilder);

@@ -5,20 +5,22 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using TafsilkPlatform.Infrastructure.Persistence; 
+using TafsilkPlatform.Web.Data;
 
-namespace TafsilkPlatform.Migrations
+#nullable disable
+
+namespace TafsilkPlatform.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251018223954_FixFluentApiAndRelations")]
-    partial class FixFluentApiAndRelations
+    [Migration("20251029202206_AddProfilePictureBinaryData")]
+    partial class AddProfilePictureBinaryData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -45,7 +47,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("AppSettings");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Admin", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Admin", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,7 +70,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Admins");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.AuditLog", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,7 +97,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("AuditLogs");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.BannedUser", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.BannedUser", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,7 +123,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("BannedUsers");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Contract", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -155,12 +157,16 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Contracts");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.CorporateAccount", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("(newid())");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("CompanyName")
                         .IsRequired()
@@ -186,6 +192,17 @@ namespace TafsilkPlatform.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<string>("ProfilePictureContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfilePictureData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("TaxNumber")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -207,12 +224,16 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("CorporateAccounts");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.CustomerProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("(newid())");
+
+                    b.Property<string>("Bio")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("City")
                         .HasMaxLength(100)
@@ -235,6 +256,17 @@ namespace TafsilkPlatform.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("ProfilePictureContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfilePictureData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -252,7 +284,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("CustomerProfiles");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.DeviceToken", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
                 {
                     b.Property<Guid>("DeviceTokenId")
                         .ValueGeneratedOnAdd()
@@ -302,7 +334,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("DeviceTokens", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Dispute", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -356,7 +388,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Disputes", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.ErrorLog", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.ErrorLog", b =>
                 {
                     b.Property<Guid>("ErrorLogId")
                         .ValueGeneratedOnAdd()
@@ -406,7 +438,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("ErrorLogs", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Notification", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
                 {
                     b.Property<Guid>("NotificationId")
                         .ValueGeneratedOnAdd()
@@ -474,7 +506,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Notifications", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Order", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
                 {
                     b.Property<Guid>("OrderId")
                         .ValueGeneratedOnAdd()
@@ -515,7 +547,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Orders");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.OrderImages", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderImages", b =>
                 {
                     b.Property<Guid>("OrderImageId")
                         .ValueGeneratedOnAdd()
@@ -547,7 +579,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("OrderImages");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.OrderItem", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderItem", b =>
                 {
                     b.Property<Guid>("OrderItemId")
                         .ValueGeneratedOnAdd()
@@ -581,7 +613,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("OrderItems");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Payment", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Payment", b =>
                 {
                     b.Property<Guid>("PaymentId")
                         .ValueGeneratedOnAdd()
@@ -622,7 +654,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Payment");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.PortfolioImage", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.PortfolioImage", b =>
                 {
                     b.Property<Guid>("PortfolioImageId")
                         .ValueGeneratedOnAdd()
@@ -674,7 +706,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("PortfolioImages", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Quote", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
                 {
                     b.Property<Guid>("QuoteId")
                         .ValueGeneratedOnAdd()
@@ -705,7 +737,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Quotes");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RFQ", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -745,7 +777,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RFQs");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RFQBid", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -779,7 +811,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RFQBids");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RatingDimension", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
                 {
                     b.Property<Guid>("RatingDimensionId")
                         .ValueGeneratedOnAdd()
@@ -812,7 +844,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RatingDimensions", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RefreshToken", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -847,7 +879,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RefundRequest", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -881,7 +913,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RefundRequests");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RevenueReport", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RevenueReport", b =>
                 {
                     b.Property<Guid>("TailorId")
                         .HasColumnType("uniqueidentifier");
@@ -917,7 +949,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("RevenueReports");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Review", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
                 {
                     b.Property<Guid>("ReviewId")
                         .ValueGeneratedOnAdd()
@@ -983,7 +1015,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Reviews", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Role", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1010,7 +1042,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.SystemMessage", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.SystemMessage", b =>
                 {
                     b.Property<Guid>("SystemMessageId")
                         .ValueGeneratedOnAdd()
@@ -1056,7 +1088,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("SystemMessages", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorBadge", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorBadge", b =>
                 {
                     b.Property<Guid>("TailorBadgeId")
                         .ValueGeneratedOnAdd()
@@ -1097,7 +1129,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("TailorBadges", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorPerformanceView", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorPerformanceView", b =>
                 {
                     b.Property<decimal>("AverageRating")
                         .HasColumnType("decimal(18,2)");
@@ -1123,7 +1155,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToView("TailorPerformanceView", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1139,6 +1171,10 @@ namespace TafsilkPlatform.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -1146,6 +1182,10 @@ namespace TafsilkPlatform.Migrations
 
                     b.Property<int?>("ExperienceYears")
                         .HasColumnType("int");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<bool>("IsVerified")
                         .ValueGeneratedOnAdd()
@@ -1161,6 +1201,17 @@ namespace TafsilkPlatform.Migrations
                     b.Property<string>("PricingRange")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProfilePictureContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfilePictureData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ShopName")
                         .IsRequired()
@@ -1184,7 +1235,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("TailorProfiles");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorService", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorService", b =>
                 {
                     b.Property<Guid>("TailorServiceId")
                         .ValueGeneratedOnAdd()
@@ -1235,7 +1286,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("TailorServices", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.User", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1251,6 +1302,11 @@ namespace TafsilkPlatform.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("EmailNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
@@ -1270,8 +1326,18 @@ namespace TafsilkPlatform.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("PromotionalNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("SmsNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1289,7 +1355,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.UserActivityLog", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserActivityLog", b =>
                 {
                     b.Property<Guid>("UserActivityLogId")
                         .ValueGeneratedOnAdd()
@@ -1356,7 +1422,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("UserActivityLogs", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.UserAddress", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserAddress", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -1405,7 +1471,7 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("UserAddresses");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Wallet", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
                 {
                     b.Property<int>("WalletId")
                         .ValueGeneratedOnAdd()
@@ -1427,9 +1493,9 @@ namespace TafsilkPlatform.Migrations
                     b.ToTable("Wallet", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Admin", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Admin", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1438,9 +1504,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.AuditLog", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.AuditLog", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Admin", "Admin")
+                    b.HasOne("TafsilkPlatform.Web.Models.Admin", "Admin")
                         .WithMany()
                         .HasForeignKey("AdminId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1449,9 +1515,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Admin");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.BannedUser", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.BannedUser", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1460,15 +1526,15 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Contract", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.RFQ", "RFQ")
+                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
                         .WithMany()
                         .HasForeignKey("RFQId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1479,11 +1545,11 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.CorporateAccount", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithOne("CorporateAccount")
-                        .HasForeignKey("TafsilkPlatform.Models.CorporateAccount", "UserId")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.CorporateAccount", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CorporateAccounts_Users");
@@ -1491,11 +1557,11 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.CustomerProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithOne("CustomerProfile")
-                        .HasForeignKey("TafsilkPlatform.Models.CustomerProfile", "UserId")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.CustomerProfile", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_CustomerProfiles_Users");
@@ -1503,38 +1569,38 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.DeviceToken", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_DeviceTokens_Users");
 
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Dispute", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "OpenedByUser")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "OpenedByUser")
                         .WithMany()
                         .HasForeignKey("OpenedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_Disputes_Orders");
 
-                    b.HasOne("TafsilkPlatform.Models.User", "ResolvedByAdmin")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "ResolvedByAdmin")
                         .WithMany()
                         .HasForeignKey("ResolvedByAdminId");
 
@@ -1545,31 +1611,31 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("ResolvedByAdmin");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Notification", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Notifications_Users");
 
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Order", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.CustomerProfile", "Customer")
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
                         .WithMany("orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1580,15 +1646,15 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.OrderImages", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderImages", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Order", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", null)
                         .WithMany("orderImages")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.Order", "order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
                         .WithMany()
                         .HasForeignKey("OrderId1")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1597,15 +1663,15 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("order");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.OrderItem", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderItem", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Order", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.Order", "order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
                         .WithMany()
                         .HasForeignKey("OrderId1")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1614,21 +1680,21 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("order");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Payment", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Payment", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.CustomerProfile", "Customer")
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
                         .WithMany("Payments")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
                         .WithMany("Payments")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany("Payments")
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1641,31 +1707,31 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.PortfolioImage", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.PortfolioImage", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_PortfolioImages_TailorProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Quote", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Order", "order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
                         .WithMany("quote")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1676,9 +1742,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("order");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RFQ", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.CorporateAccount", "CorporateAccount")
+                    b.HasOne("TafsilkPlatform.Web.Models.CorporateAccount", "CorporateAccount")
                         .WithMany()
                         .HasForeignKey("CorporateAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1687,15 +1753,15 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("CorporateAccount");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RFQBid", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.RFQ", "RFQ")
+                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
                         .WithMany("Bids")
                         .HasForeignKey("RFQId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1706,9 +1772,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RatingDimension", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Review", "Review")
+                    b.HasOne("TafsilkPlatform.Web.Models.Review", "Review")
                         .WithMany("RatingDimensions")
                         .HasForeignKey("ReviewId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1717,9 +1783,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Review");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RefreshToken", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1729,15 +1795,15 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RefundRequest", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TafsilkPlatform.Models.User", "RequestedByUser")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "RequestedByUser")
                         .WithMany()
                         .HasForeignKey("RequestedBy")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1748,54 +1814,54 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("RequestedByUser");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RevenueReport", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RevenueReport", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_RevenueReports_TailorProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Review", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.CustomerProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", null)
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_CustomerProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.CustomerProfile", "Customer")
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId1");
 
-                    b.HasOne("TafsilkPlatform.Models.Order", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", null)
                         .WithOne()
-                        .HasForeignKey("TafsilkPlatform.Models.Review", "OrderId")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.Review", "OrderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_Orders");
 
-                    b.HasOne("TafsilkPlatform.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId1");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_TailorProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId1");
 
@@ -1806,9 +1872,9 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorBadge", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorBadge", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -1816,25 +1882,25 @@ namespace TafsilkPlatform.Migrations
                         .HasConstraintName("FK_TailorBadges_TailorProfiles");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorPerformanceView", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorPerformanceView", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .HasConstraintName("FK_TailorPerformanceView_TailorProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithOne("TailorProfile")
-                        .HasForeignKey("TafsilkPlatform.Models.TailorProfile", "UserId")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.TailorProfile", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TailorProfiles_Users");
@@ -1842,25 +1908,25 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorService", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorService", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_TailorServices_TailorProfiles");
 
-                    b.HasOne("TafsilkPlatform.Models.TailorProfile", "Tailor")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
                         .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.User", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.Role", "Role")
+                    b.HasOne("TafsilkPlatform.Web.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .IsRequired()
@@ -1869,25 +1935,25 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.UserActivityLog", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserActivityLog", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", null)
+                    b.HasOne("TafsilkPlatform.Web.Models.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_UserActivityLogs_Users");
 
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId1");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.UserAddress", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserAddress", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithMany("UserAddresses")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1897,25 +1963,25 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Wallet", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Models.User", "User")
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
                         .WithOne("Wallet")
-                        .HasForeignKey("TafsilkPlatform.Models.Wallet", "UserId")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.Wallet", "UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.CustomerProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.Navigation("Payments");
 
                     b.Navigation("orders");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Order", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
                 {
                     b.Navigation("Items");
 
@@ -1926,27 +1992,27 @@ namespace TafsilkPlatform.Migrations
                     b.Navigation("quote");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.RFQ", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
                 {
                     b.Navigation("Bids");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Review", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
                 {
                     b.Navigation("RatingDimensions");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.Role", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
                 {
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.TailorProfile", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
                 {
                     b.Navigation("Payments");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Models.User", b =>
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.Navigation("CorporateAccount");
 

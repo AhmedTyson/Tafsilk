@@ -163,8 +163,14 @@ position: relative;
 }
 
 .form-container {
+<<<<<<< Updated upstream
     width: 100%;
     max-width: 450px;
+=======
+ width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+>>>>>>> Stashed changes
 }
 
 .form-header {
@@ -191,6 +197,10 @@ position: relative;
     align-items: center;
     margin-bottom: var(--spacing-xl);
     position: relative;
+<<<<<<< Updated upstream
+=======
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .progress-bar {
@@ -208,16 +218,26 @@ position: relative;
     flex-direction: column;
     align-items: center;
     gap: 4px;
+<<<<<<< Updated upstream
     flex: 1;
+=======
+  flex: 1;
+>>>>>>> Stashed changes
     position: relative;
     z-index: 1;
 }
 
 .step-number {
  width: 32px;
+<<<<<<< Updated upstream
     height: 32px;
     border-radius: 50%;
     background: var(--background-gray);
+=======
+ height: 32px;
+    border-radius: 50%;
+ background: var(--background-gray);
+>>>>>>> Stashed changes
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -245,13 +265,22 @@ position: relative;
     padding: 4px;
     margin-bottom: var(--spacing-lg);
     gap: 4px;
+<<<<<<< Updated upstream
+=======
+    width: 100%;
+    box-sizing: border-box;
+>>>>>>> Stashed changes
 }
 
 .user-type-option {
     flex: 1;
     text-align: center;
     padding: var(--spacing-sm) var(--spacing-md);
+<<<<<<< Updated upstream
     border-radius: var(--radius-sm);
+=======
+border-radius: var(--radius-sm);
+>>>>>>> Stashed changes
     cursor: pointer;
     transition: all var(--transition-fast);
     font-weight: 600;
@@ -279,35 +308,60 @@ position: relative;
     flex-direction: column;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
+<<<<<<< Updated upstream
+=======
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .btn-oauth {
     display: flex;
     align-items: center;
     justify-content: center;
+<<<<<<< Updated upstream
 gap: var(--spacing-sm);
+=======
+    gap: var(--spacing-sm);
+>>>>>>> Stashed changes
     padding: 0.875rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     background: var(--background-white);
     color: var(--text-primary);
+<<<<<<< Updated upstream
     font-weight: 600;
+=======
+  font-weight: 600;
+>>>>>>> Stashed changes
     transition: all var(--transition-normal);
     width: 100%;
     font-size: 0.95rem;
     cursor: pointer;
     font-family: var(--font-family);
+<<<<<<< Updated upstream
+=======
+    text-decoration: none;
+    box-sizing: border-box;
+>>>>>>> Stashed changes
 }
 
 .btn-oauth:hover {
     background: var(--background-gray);
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
+<<<<<<< Updated upstream
+=======
+    text-decoration: none;
+>>>>>>> Stashed changes
 }
 
 .btn-google {
     border-color: #db4437;
+<<<<<<< Updated upstream
     color: #db4437;
+=======
+  color: #db4437;
+>>>>>>> Stashed changes
 }
 
 .btn-facebook {
@@ -321,6 +375,10 @@ gap: var(--spacing-sm);
     align-items: center;
     margin: var(--spacing-lg) 0;
     color: var(--text-secondary);
+<<<<<<< Updated upstream
+=======
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .divider::before,
@@ -328,26 +386,48 @@ gap: var(--spacing-sm);
     content: "";
     flex: 1;
     height: 1px;
+<<<<<<< Updated upstream
   background-color: var(--border-color);
 }
 
 .divider span {
 padding: 0 var(--spacing-md);
     font-size: 0.9rem;
+=======
+    background-color: var(--border-color);
+}
+
+.divider span {
+    padding: 0 var(--spacing-md);
+ font-size: 0.9rem;
+>>>>>>> Stashed changes
 }
 
 /* Form Styles */
 .form {
     width: 100%;
+<<<<<<< Updated upstream
 }
 
 .input-group {
     margin-bottom: 1.25rem;
     position: relative;
+=======
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .input-group label {
     display: block;
+<<<<<<< Updated upstream
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -360,16 +440,38 @@ padding: 0 var(--spacing-md);
     top: 38px;
     color: var(--text-secondary);
     pointer-events: none;
+=======
+ margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.input-group > div {
+    position: relative;
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .input-group input {
     width: 100%;
+<<<<<<< Updated upstream
     padding: 0.875rem 1rem 0.875rem 2.5rem;
+=======
+    padding: 0.875rem 1rem;
+>>>>>>> Stashed changes
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 1rem;
     transition: all 0.2s;
     font-family: var(--font-family);
+<<<<<<< Updated upstream
+=======
+    direction: rtl;
+    text-align: right;
+    box-sizing: border-box;
+>>>>>>> Stashed changes
 }
 
 .input-group input:focus {
@@ -378,6 +480,7 @@ padding: 0 var(--spacing-md);
     box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
 }
 
+<<<<<<< Updated upstream
 /* Password Toggle */
 .password-toggle {
     position: absolute;
@@ -391,6 +494,14 @@ padding: 0 var(--spacing-md);
     transition: color 0.2s;
 }
 
+=======
+.input-group input::placeholder {
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+/* Password Toggle */
+>>>>>>> Stashed changes
 .password-toggle:hover {
     color: var(--primary-color);
 }
@@ -400,8 +511,14 @@ padding: 0 var(--spacing-md);
     height: 4px;
     background: var(--background-gray);
     border-radius: 2px;
+<<<<<<< Updated upstream
     margin-top: 8px;
     overflow: hidden;
+=======
+    margin-top: 0.5rem;
+    overflow: hidden;
+    width: 100%;
+>>>>>>> Stashed changes
 }
 
 .password-strength-bar {
@@ -428,7 +545,11 @@ padding: 0 var(--spacing-md);
 /* Submit Button */
 .btn-submit {
     width: 100%;
+<<<<<<< Updated upstream
     padding: 0.875rem 1rem;
+=======
+    padding: 1rem 1.5rem;
+>>>>>>> Stashed changes
     background-color: var(--primary-color);
     color: white;
     border: none;
@@ -437,7 +558,13 @@ padding: 0 var(--spacing-md);
     font-weight: 600;
     cursor: pointer;
     transition: all var(--transition-normal);
+<<<<<<< Updated upstream
     margin-top: 0.5rem;
+=======
+    margin-top: 1rem;
+    font-family: var(--font-family);
+    box-sizing: border-box;
+>>>>>>> Stashed changes
 }
 
 .btn-submit:hover {
@@ -446,10 +573,21 @@ padding: 0 var(--spacing-md);
     box-shadow: var(--shadow-md);
 }
 
+<<<<<<< Updated upstream
 /* Form Footer */
 .form-footer {
     text-align: center;
     margin-top: var(--spacing-lg);
+=======
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Form Footer */
+.form-footer {
+    text-align: center;
+    margin-top: var(--spacing-xl);
+>>>>>>> Stashed changes
     font-size: 0.9rem;
     color: var(--text-secondary);
 }
@@ -470,9 +608,14 @@ color: var(--primary-color);
     margin-top: var(--spacing-lg);
     font-size: 0.8rem;
     color: var(--text-secondary);
+<<<<<<< Updated upstream
     max-width: 350px;
     margin-left: auto;
     margin-right: auto;
+=======
+    max-width: 100%;
+    padding: 0 var(--spacing-md);
+>>>>>>> Stashed changes
 }
 
 .terms a {
@@ -489,12 +632,22 @@ color: var(--primary-color);
     padding: 12px 16px;
     margin-bottom: var(--spacing-lg);
     border-radius: var(--radius-md);
+<<<<<<< Updated upstream
+=======
+    width: 100%;
+    box-sizing: border-box;
+>>>>>>> Stashed changes
 }
 
 .alert-danger {
     background-color: #f8d7da;
+<<<<<<< Updated upstream
   border: 1px solid #f5c6cb;
     color: #721c24;
+=======
+    border: 1px solid #f5c6cb;
+  color: #721c24;
+>>>>>>> Stashed changes
 }
 
 /* Responsive Styles */
