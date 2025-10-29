@@ -4,9 +4,9 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using TafsilkPlatform.Application.Models.Auth;
-using TafsilkPlatform.Core.Interfaces;
-using TafsilkPlatform.Core.Models;
+using TafsilkPlatform.Web.ViewModels;
+using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Models;
 
 
 namespace TafsilkPlatform.Web.Controllers;

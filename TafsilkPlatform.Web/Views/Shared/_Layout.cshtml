@@ -1,49 +1,647 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TafsilkPlatform.Web</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - تفصيلك</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+    
+ <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TafsilkPlatform.Web.styles.css" asp-append-version="true" />
+    
+    @await RenderSectionAsync("Styles", required: false)
+    
+    <style>
+        /* Global body styling */
+        body {
+       font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     min-height: 100vh;
+       display: flex;
+flex-direction: column;
+ }
+
+        main {
+    flex: 1;
+        }
+
+   /* Header Styles */
+        .header {
+background-color: var(--background-white);
+   box-shadow: var(--shadow-sm);
+position: sticky;
+            top: 0;
+    z-index: 1000;
+}
+
+    .navbar {
+      padding: 6px 0;
+  min-height: unset;
+  }
+
+.navbar .container {
+ display: flex;
+     align-items: center;
+ justify-content: space-between;
+      max-width: 1200px;
+        margin: 0 auto;
+     padding: 0 var(--spacing-md);
+    }
+
+  .brand {
+       display: flex;
+    align-items: center;
+  gap: 0;
+            font-size: var(--font-size-2xl);
+         font-weight: 800;
+   color: var(--primary-color);
+   line-height: 1;
+    text-decoration: none;
+        }
+
+   .brand:hover {
+      color: var(--primary-hover);
+        }
+
+        .brand-icon {
+      display: none !important;
+        }
+
+     .logo {
+         font-size: var(--font-size-2xl);
+  margin: 0;
+    }
+
+        .nav-menu {
+    display: none;
+list-style: none;
+  gap: var(--spacing-lg);
+ margin: 0;
+         padding: 0;
+  }
+
+        .nav-link {
+ font-weight: 600;
+            transition: color var(--transition-fast);
+        color: var(--text-primary);
+         text-decoration: none;
+     padding: 8px 12px;
+ display: inline-block;
+        }
+
+        .nav-link:hover {
+         color: var(--primary-color);
+        }
+
+   .nav-actions {
+    display: none;
+          gap: var(--spacing-sm);
+    align-items: center;
+        }
+
+     .nav-toggle {
+   background: none;
+            border: none;
+  display: flex;
+   flex-direction: column;
+  gap: 4px;
+   cursor: pointer;
+padding: 8px;
+        }
+
+        .nav-toggle span {
+width: 24px;
+      height: 2px;
+ background-color: var(--text-primary);
+    transition: all var(--transition-fast);
+     }
+
+        .lang-toggle {
+       background: var(--background-gray);
+    border: 1px solid var(--border-color);
+  border-radius: 999px;
+         padding: 6px 12px;
+    cursor: pointer;
+        transition: all 0.2s;
+    font-family: var(--font-family);
+    display: flex;
+       align-items: center;
+     gap: 6px;
+   font-size: 0.9rem;
+    }
+
+      .lang-toggle:hover {
+   background: var(--border-color);
+   }
+
+   /* User Menu Dropdown */
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu-toggle {
+    background: var(--background-gray);
+   border: 1px solid var(--border-color);
+   border-radius: var(--radius-md);
+       padding: 6px 12px;
+  cursor: pointer;
+   display: flex;
+        align-items: center;
+            gap: 8px;
+     font-weight: 600;
+      color: var(--text-primary);
+        transition: all 0.2s;
+        }
+
+   .user-menu-toggle:hover {
+     background: var(--border-color);
+        }
+
+        .user-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+          left: 0;
+background: var(--background-white);
+     border: 1px solid var(--border-color);
+     border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+     min-width: 200px;
+      display: none;
+          z-index: 1001;
+}
+
+      .user-menu-dropdown.show {
+  display: block;
+     }
+
+    .user-menu-dropdown a,
+  .user-menu-dropdown button {
+            display: block;
+  width: 100%;
+   padding: 10px 16px;
+    text-align: right;
+   background: none;
+        border: none;
+ color: var(--text-primary);
+text-decoration: none;
+ transition: background 0.2s;
+   font-family: var(--font-family);
+     font-size: 0.95rem;
+        }
+
+        .user-menu-dropdown a:hover,
+   .user-menu-dropdown button:hover {
+background: var(--background-gray);
+        }
+
+      .user-menu-dropdown hr {
+  margin: 4px 0;
+            border: none;
+      border-top: 1px solid var(--border-color);
+        }
+
+ /* Desktop Navigation */
+   @@media (min-width: 768px) {
+        .navbar .container {
+        padding: 0 var(--spacing-lg);
+      }
+
+        .nav-menu {
+       display: flex;
+         }
+
+   .nav-actions {
+ display: flex;
+        }
+
+ .nav-toggle {
+   display: none;
+            }
+        }
+
+     @@media (min-width: 1024px) {
+       .navbar .container {
+        padding: 0 var(--spacing-xl);
+       }
+ }
+
+    /* Mobile Navigation */
+        @@media (max-width: 767px) {
+   .nav-menu {
+     position: fixed;
+      top: 0;
+      left: 0;
+    height: 100vh;
+      width: 260px;
+          background: var(--background-white);
+         flex-direction: column;
+    align-items: flex-start;
+    padding: var(--spacing-xl) var(--spacing-lg);
+  gap: var(--spacing-lg);
+     box-shadow: var(--shadow-lg);
+     transform: translateX(-100%);
+ transition: transform var(--transition-normal);
+          z-index: 1500;
+    }
+
+            body.drawer-open .nav-menu {
+    transform: translateX(0);
+    }
+
+  .nav-overlay {
+        position: fixed;
+      inset: 0;
+     background: rgba(0, 0, 0, 0.45);
+   opacity: 0;
+pointer-events: none;
+ transition: opacity var(--transition-normal);
+         z-index: 1400;
+   }
+
+  body.drawer-open .nav-overlay {
+       opacity: 1;
+pointer-events: auto;
+ }
+
+  .nav-actions {
+        display: flex;
+    flex-direction: column;
+           width: 100%;
+         gap: var(--spacing-sm);
+   }
+
+     .nav-actions .btn {
+  width: 100%;
+         justify-content: center;
+ }
+      }
+
+        /* Full Footer (Default for most pages) */
+   .footer {
+     background-color: var(--dark);
+   color: white;
+          padding: var(--spacing-2xl) 0 var(--spacing-lg) 0;
+       margin-top: auto;
+        }
+
+        .footer-content {
+            display: grid;
+  grid-template-columns: 1fr;
+         gap: var(--spacing-xl);
+      margin-bottom: var(--spacing-xl);
+      }
+
+        .footer-section {
+      text-align: right;
+     }
+
+        .footer-title {
+            font-size: var(--font-size-lg);
+   font-weight: 700;
+          margin-bottom: var(--spacing-md);
+       color: var(--text-white);
+        }
+
+   .footer-links {
+       list-style: none;
+    padding: 0;
+            margin: 0;
+  }
+
+        .footer-links li {
+   margin-bottom: var(--spacing-sm);
+  }
+
+        .footer-links a {
+            color: var(--text-light);
+        transition: color var(--transition-fast);
+  text-decoration: none;
+   }
+
+        .footer-links a:hover {
+color: var(--text-white);
+  }
+
+        .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: var(--spacing-lg);
+ text-align: center;
+      }
+
+.footer-bottom p {
+       color: var(--text-light);
+     margin: 0;
+    font-size: 0.9rem;
+        }
+
+   @@media (min-width: 768px) {
+            .footer-content {
+ grid-template-columns: repeat(2, 1fr);
+ }
+ }
+
+     @@media (min-width: 1024px) {
+  .footer-content {
+     grid-template-columns: repeat(4, 1fr);
+     }
+  }
+
+     /* Minimal Auth Footer (for Login/Register pages) */
+        .auth-footer {
+   background-color: var(--dark);
+ color: white;
+            padding: var(--spacing-lg) 0;
+            margin-top: auto;
+  }
+
+ .auth-footer-content {
+    display: flex;
+        justify-content: space-between;
+align-items: center;
+          flex-wrap: wrap;
+       gap: var(--spacing-md);
+        }
+
+        .auth-footer-content p {
+     margin: 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+     }
+
+        .auth-footer-links {
+            display: flex;
+            gap: var(--spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .auth-footer-links a {
+        color: var(--text-light);
+    text-decoration: none;
+            font-size: 0.9rem;
+     transition: color var(--transition-fast);
+ }
+
+  .auth-footer-links a:hover {
+            color: var(--text-white);
+}
+
+        @@media (max-width: 768px) {
+ .auth-footer-content {
+    flex-direction: column;
+       text-align: center;
+            }
+
+     .auth-footer-links {
+          justify-content: center;
+         }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TafsilkPlatform.Web</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    <!-- Navigation Overlay for Mobile -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- Header -->
+    <header class="header" role="banner">
+        <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+     <div class="container">
+    <!-- Brand Logo -->
+ <a asp-controller="Home" asp-action="Index" class="brand">
+    <div class="brand-icon" aria-hidden="true">
+<i class="fas fa-cut"></i>
+       </div>
+    <h1 class="logo">تفصيلك</h1>
+   </a>
+
+        <!-- Navigation Menu -->
+      <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+         <li><a href="@Url.Action("Index","Home")#home" class="nav-link">الرئيسية</a></li>
+      <li><a href="@Url.Action("Index","Home")#how-it-works" class="nav-link">كيف تعمل المنصة</a></li>
+    <li><a href="@Url.Action("Index","Home")#tailors" class="nav-link">الخياطين</a></li>
+  <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
+        
+     @if (User.Identity?.IsAuthenticated == true)
+          {
+     var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+         
+      @if (role == "Customer")
+             {
+     <li><a asp-controller="Dashboards" asp-action="Customer" class="nav-link">لوحة التحكم</a></li>
+    }
+        else if (role == "Tailor")
+         {
+  <li><a asp-controller="Dashboards" asp-action="Tailor" class="nav-link">لوحة التحكم</a></li>
+}
+            else if (role == "Corporate")
+      {
+     <li><a asp-controller="Dashboards" asp-action="Corporate" class="nav-link">لوحة التحكم</a></li>
+}
+      }
+   </ul>
+
+   <!-- Navigation Actions -->
+   <div class="nav-actions">
+       @if (User.Identity?.IsAuthenticated == true)
+    {
+    <!-- User Menu -->
+   <div class="user-menu">
+      <button type="button" class="user-menu-toggle" id="userMenuToggle">
+   <i class="fas fa-user-circle"></i>
+        <span>@User.Identity.Name</span>
+ <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
+   </button>
+    <div class="user-menu-dropdown" id="userMenuDropdown">
+     <a asp-controller="Account" asp-action="Settings">
+   <i class="fas fa-cog me-2"></i> الإعدادات
+      </a>
+      <hr />
+    <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
+@Html.AntiForgeryToken()
+        <button type="submit">
+      <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
+      </button>
+      </form>
+    </div>
+      </div>
+     }
+    else
+         {
+<a asp-controller="Account" asp-action="Login" class="btn btn-outline">تسجيل دخول</a>
+       <a asp-controller="Account" asp-action="Register" class="btn btn-primary">انضم كخياط</a>
+     }
+          
+   <button class="lang-toggle" type="button" aria-label="تبديل اللغة" id="langToggle">
+     <i class="fas fa-globe" aria-hidden="true"></i>
+      <span>العربية / EN</span>
+    </button>
     </div>
 
-    <footer class="border-top footer text-muted">
+        <!-- Mobile Menu Toggle -->
+      <button class="nav-toggle" aria-label="فتح القائمة" aria-controls="nav-menu" aria-expanded="false" type="button" id="navToggle">
+       <span></span>
+         <span></span>
+    <span></span>
+    </button>
+       </div>
+        </nav>
+    </header>
+
+  <!-- Main Content -->
+    <main role="main">
+ @RenderBody()
+    </main>
+
+    @{
+        // Check if current page is Login or Register
+        var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+        var isAuthPage = (currentController == "Account" && (currentAction == "Login" || currentAction == "Register"));
+    }
+
+    @if (isAuthPage)
+    {
+        <!-- Minimal Auth Footer (for Login/Register pages) -->
+        <footer class="auth-footer" id="contact">
         <div class="container">
-            &copy; 2025 - TafsilkPlatform.Web - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <div class="auth-footer-content">
+   <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+            <div class="auth-footer-links">
+         <a asp-controller="Home" asp-action="Privacy">سياسة الخصوصية</a>
+     <a href="#">شروط الاستخدام</a>
+       <a href="#">المساعدة</a>
         </div>
-    </footer>
+ </div>
+       </div>
+        </footer>
+    }
+    else
+    {
+      <!-- Full Footer (for all other pages) -->
+        <footer class="footer" id="contact">
+        <div class="container">
+      <div class="footer-content">
+         <!-- About Section -->
+           <div class="footer-section">
+            <h3 class="footer-title">عن تفصيلك</h3>
+             <p style="color: var(--text-light); font-size: 0.9rem;">
+    منصة رقمية تربطك بأمهر الخياطين في منطقتك. نوفر لك خدمات خياطة موثوقة وبأسعار شفافة.
+        </p>
+           </div>
+
+     <!-- Quick Links -->
+          <div class="footer-section">
+            <h3 class="footer-title">روابط سريعة</h3>
+       <ul class="footer-links">
+         <li><a href="@Url.Action("Index","Home")#home">الرئيسية</a></li>
+              <li><a href="@Url.Action("Index","Home")#how-it-works">كيف تعمل المنصة</a></li>
+          <li><a href="@Url.Action("Index","Home")#tailors">الخياطين</a></li>
+           <li><a asp-controller="Account" asp-action="Register">انضم كخياط</a></li>
+  </ul>
+    </div>
+
+    <!-- Legal -->
+        <div class="footer-section">
+         <h3 class="footer-title">الشروط والأحكام</h3>
+                 <ul class="footer-links">
+               <li><a asp-controller="Home" asp-action="Privacy">سياسة الخصوصية</a></li>
+         <li><a href="#">شروط الاستخدام</a></li>
+         <li><a href="#">سياسة الاسترجاع</a></li>
+    <li><a href="#">الأسئلة الشائعة</a></li>
+   </ul>
+     </div>
+
+        <!-- Contact -->
+       <div class="footer-section">
+        <h3 class="footer-title">تواصل معنا</h3>
+     <ul class="footer-links">
+        <li><i class="fas fa-envelope me-2"></i> info@tafsilk.com</li>
+      <li><i class="fas fa-phone me-2"></i> +20 123 456 7890</li>
+    <li style="margin-top: 12px;">
+        <a href="#" style="margin-left: 12px;"><i class="fab fa-facebook fa-lg"></i></a>
+  <a href="#" style="margin-left: 12px;"><i class="fab fa-twitter fa-lg"></i></a>
+     <a href="#" style="margin-left: 12px;"><i class="fab fa-instagram fa-lg"></i></a>
+       </li>
+ </ul>
+         </div>
+          </div>
+
+       <div class="footer-bottom">
+        <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+    </div>
+            </div>
+        </footer>
+    }
+
+    <!-- Scripts -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+ // Mobile navigation toggle
+     const navToggle = document.getElementById('navToggle');
+            const navMenu = document.getElementById('nav-menu');
+      const navOverlay = document.getElementById('navOverlay');
+            const body = document.body;
+
+ if (navToggle && navMenu) {
+    navToggle.addEventListener('click', function () {
+   const isExpanded = navToggle.getAttribute('aria-expanded') === 'true';
+        navToggle.setAttribute('aria-expanded', !isExpanded);
+    body.classList.toggle('drawer-open');
+  });
+
+     // Close menu when clicking overlay
+       if (navOverlay) {
+ navOverlay.addEventListener('click', function () {
+       navToggle.setAttribute('aria-expanded', 'false');
+      body.classList.remove('drawer-open');
+        });
+     }
+       }
+
+    // User menu dropdown
+ const userMenuToggle = document.getElementById('userMenuToggle');
+        const userMenuDropdown = document.getElementById('userMenuDropdown');
+
+   if (userMenuToggle && userMenuDropdown) {
+       userMenuToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+      userMenuDropdown.classList.toggle('show');
+          });
+
+      // Close dropdown when clicking outside
+         document.addEventListener('click', function (e) {
+         if (!userMenuToggle.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+    userMenuDropdown.classList.remove('show');
+    }
+   });
+      }
+
+   // Language toggle (placeholder)
+  const langToggle = document.getElementById('langToggle');
+   if (langToggle) {
+     langToggle.addEventListener('click', function () {
+     const currentLang = this.querySelector('span').textContent;
+   if (currentLang === 'العربية / EN') {
+       this.querySelector('span').textContent = 'English / العربية';
+ } else {
+       this.querySelector('span').textContent = 'العربية / EN';
+         }
+          });
+      }
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

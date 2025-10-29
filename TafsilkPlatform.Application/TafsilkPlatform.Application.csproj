@@ -10,4 +10,8 @@
     <ProjectReference Include="..\TafsilkPlatform.Core\TafsilkPlatform.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
 </Project>

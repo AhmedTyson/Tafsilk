@@ -43,6 +43,11 @@ namespace TafsilkPlatform.Core.Models
         [Display(Name = "Deleted Status")]
         public bool IsDeleted { get; set; } = false;
 
+        // New notification preferences
+        public bool EmailNotifications { get; set; } = true;
+        public bool SmsNotifications { get; set; } = true;
+        public bool PromotionalNotifications { get; set; } = true;
+
         // Navigation properties
         [ForeignKey("RoleId")]
         public virtual Role Role { get; set; } = null!;

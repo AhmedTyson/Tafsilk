@@ -25,6 +25,10 @@ namespace TafsilkPlatform.Core.Models
         [StringLength(100, ErrorMessage = "City cannot exceed 100 characters")]
         public string? City { get; set; }
 
+        [StringLength(1000)]
+        public string? Bio { get; set; }
+        public string? ProfilePictureUrl { get; set; }
+
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [CustomValidation(typeof(CustomerProfile), nameof(ValidateDateOfBirth))]

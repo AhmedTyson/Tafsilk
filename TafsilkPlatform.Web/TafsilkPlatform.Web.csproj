@@ -6,11 +6,19 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- All dependencies consolidated here -->
   <ItemGroup>
-    <ProjectReference Include="..\TafsilkPlatform.Infrastructure\TafsilkPlatform.Infrastructure.csproj" />
-    <ProjectReference Include="..\TafsilkPlatform.Core\TafsilkPlatform.Core.csproj" />
-    <ProjectReference Include="..\TafsilkPlatform.Application\TafsilkPlatform.Application.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
   </ItemGroup>
 
 </Project>
-    

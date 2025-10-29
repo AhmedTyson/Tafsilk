@@ -36,7 +36,8 @@ public class TailorRepository : EfRepository<TailorProfile>, ITailorRepository
         var query = _db.TailorProfiles.AsQueryable();
         if (!string.IsNullOrWhiteSpace(searchTerm))
             query = query.Where(t => t.ShopName.Contains(searchTerm) || (t.Bio ?? "").Contains(searchTerm));
-        // city is not part of TailorProfile currently; if added via address, join accordingly
+        if (!string.IsNullOrWhiteSpace(city))
+            query = query.Where(t => t.City == city);
         return await query.AsNoTracking().ToListAsync();
     }
 
@@ -54,4 +55,7 @@ public class TailorRepository : EfRepository<TailorProfile>, ITailorRepository
 
     public async Task<IEnumerable<TailorProfile>> GetTopRatedTailorsAsync(int count)
         => await _db.TailorProfiles.AsNoTracking().Take(count).ToListAsync();
+
+    public Task<TailorProfile?> GetByUserIdAsync(Guid userId)
+        => _db.TailorProfiles.AsNoTracking().FirstOrDefaultAsync(t => t.UserId == userId);
 }

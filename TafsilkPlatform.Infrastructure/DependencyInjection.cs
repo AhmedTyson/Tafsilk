@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TafsilkPlatform.Core.Interfaces;
 using TafsilkPlatform.Infrastructure.Persistence;
 using TafsilkPlatform.Infrastructure.Repositories;
+using TafsilkPlatform.Infrastructure.Services;
 
 namespace TafsilkPlatform.Infrastructure;
 
@@ -41,6 +42,10 @@ public static class DependencyInjection
 
         // Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // Services
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserService, UserService>();
 
         return services;
     }

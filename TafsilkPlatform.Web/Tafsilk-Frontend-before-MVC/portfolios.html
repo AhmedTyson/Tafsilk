@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفصيلك — ورشة خالد للتفصيل</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Import variables from styles.css */
+      :root {
+        --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+        --secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --text-light: #bdc3c7;
+        --text-white: #ffffff;
+        --background-white: #ffffff;
+        --background-gray: #f8f9fa;
+        --background-light: #ecf0f1;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+        --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+        --font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+        --font-size-2xl: 1.5rem;
+        --font-size-3xl: 1.875rem;
+        --font-size-4xl: 2.25rem;
+
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --spacing-3xl: 4rem;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+          0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-full: 9999px;
+
+        --transition-fast: 0.15s ease-in-out;
+        --transition-normal: 0.3s ease-in-out;
+        --transition-slow: 0.5s ease-in-out;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        font-size: 16px;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-family);
+        line-height: 1.6;
+        color: var(--text-primary);
+        background-color: #f4f4f4;
+        direction: rtl;
+        text-align: right;
+      }
+
+      /* Navigation bar relies on styles.css */
+      /* Removed any local header/navbar styles to ensure consistency with portfolios-test1 */
+
+      /* This block was removed because it was changing the logo appearance inside the navbar */
+      /* .logo {
+        width: auto;
+        height: auto;
+        font-weight: 800;
+        font-size: var(--font-size-2xl);
+        color: var(--primary-color);
+        line-height: 1;
+        margin: 0;
+      } */
+
+      /* Tailor portfolio page design */
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 var(--spacing-md);
+      }
+
+      @media (min-width: 768px) {
+        .container {
+          padding: 0 var(--spacing-lg);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .container {
+          padding: 0 var(--spacing-xl);
+        }
+      }
+
+      .tailor-profile {
+        margin: var(--spacing-2xl) 0;
+      }
+
+      .profile-header {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .profile-banner {
+        height: 200px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--primary-hover) 100%
+        );
+        position: relative;
+      }
+
+      .profile-content {
+        padding: var(--spacing-2xl);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      @media (min-width: 768px) {
+        .profile-content {
+          grid-template-columns: 1fr 2fr;
+        }
+      }
+
+      .profile-image {
+        text-align: center;
+      }
+
+      .profile-img {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--background-white);
+        box-shadow: var(--shadow-lg);
+        margin-top: -100px;
+        background-color: var(--background-light);
+        position: relative;
+        z-index: 2;
+      }
+
+      .profile-info {
+        padding: var(--spacing-md);
+      }
+
+      .profile-name {
+        font-size: var(--font-size-3xl);
+        font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        background-color: var(--success-color);
+        color: var(--text-white);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-sm);
+        font-weight: 600;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .profile-stats {
+        display: flex;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        flex-wrap: wrap;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-value {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .stat-label {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .profile-details {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      @media (min-width: 480px) {
+        .profile-details {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+      }
+
+      .detail-item i {
+        color: var(--primary-color);
+        width: 20px;
+      }
+
+      .profile-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+      }
+
+      .section-title {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--spacing-lg);
+        color: var(--text-primary);
+        padding-bottom: var(--spacing-sm);
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .portfolio-section {
+        margin-bottom: var(--spacing-3xl);
+      }
+
+      .portfolio-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @media (min-width: 640px) {
+        .portfolio-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .portfolio-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .portfolio-item {
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+        position: relative;
+        aspect-ratio: 1 / 1;
+      }
+
+      .portfolio-item:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .portfolio-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-normal);
+      }
+
+      .portfolio-item:hover .portfolio-img {
+        transform: scale(1.05);
+      }
+
+      .portfolio-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        color: white;
+        padding: var(--spacing-md);
+        transform: translateY(100%);
+        transition: transform var(--transition-normal);
+      }
+
+      .portfolio-item:hover .portfolio-overlay {
+        transform: translateY(0);
+      }
+
+      .portfolio-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .portfolio-desc {
+        font-size: var(--font-size-sm);
+        opacity: 0.9;
+      }
+
+      .reviews-section {
+        margin-bottom: var(--spacing-3xl);
+      }
+
+      .reviews-summary {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: var(--spacing-xl);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      @media (min-width: 768px) {
+        .reviews-summary {
+          flex-direction: row;
+          text-align: right;
+          align-items: flex-start;
+        }
+      }
+
+      .rating-overview {
+        flex: 1;
+        padding: var(--spacing-md);
+      }
+
+      .rating-score {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .rating-stars {
+        color: var(--secondary-color);
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .rating-count {
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+      }
+
+      .rating-bars {
+        flex: 2;
+        padding: var(--spacing-md);
+      }
+
+      .rating-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .rating-label {
+        width: 80px;
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .rating-bar-inner {
+        flex: 1;
+        height: 8px;
+        background-color: var(--background-light);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        margin: 0 var(--spacing-sm);
+      }
+
+      .rating-bar-fill {
+        height: 100%;
+        background-color: var(--secondary-color);
+        border-radius: var(--radius-full);
+      }
+
+      .rating-value {
+        width: 30px;
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        text-align: left;
+      }
+
+      .reviews-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-lg);
+      }
+
+      @media (min-width: 768px) {
+        .reviews-list {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .review-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .reviewer {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+      }
+
+      .reviewer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--background-light);
+      }
+
+      .reviewer-info h4 {
+        font-size: var(--font-size-base);
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .reviewer-info p {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .review-stars {
+        color: var(--secondary-color);
+      }
+
+      .review-content {
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .review-date {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin-top: var(--spacing-sm);
+      }
+
+      .services-section {
+        margin-bottom: var(--spacing-3xl);
+      }
+
+      .services-grid {
+        display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @media (min-width: 640px) {
+        .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .services-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .service-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+        text-align: center;
+      }
+
+      .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .service-icon {
+        width: 60px;
+        height: 60px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-md);
+        color: var(--primary-color);
+        font-size: var(--font-size-xl);
+      }
+
+      .service-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .service-desc {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+        font-size: var(--font-size-sm);
+      }
+
+      .service-price {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .footer {
+        background-color: var(--dark);
+        color: white;
+        padding: var(--spacing-2xl) 0 var(--spacing-lg);
+      }
+
+      .footer-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-xl);
+      }
+
+      @media (min-width: 768px) {
+        .footer-content {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (min-width: 1024px) {
+        .footer-content {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .footer-section {
+        text-align: right;
+      }
+
+      .footer-title {
+        font-size: var(--font-size-lg);
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-white);
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: var(--spacing-sm);
+      }
+
+      .footer-links a {
+        color: var(--text-light);
+        transition: color var(--transition-fast);
+        text-decoration: none;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-white);
+      }
+
+      .footer-bottom {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        padding-top: var(--spacing-lg);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: center;
+        text-align: center;
+      }
+
+      @media (min-width: 768px) {
+        .footer-bottom {
+          flex-direction: row;
+          justify-content: space-between;
+          text-align: right;
+        }
+      }
+
+      .footer-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: center;
+      }
+
+      @media (min-width: 768px) {
+        .footer-info {
+          flex-direction: row;
+        }
+      }
+
+      .footer-info p {
+        color: var(--text-light);
+        margin: 0;
+      }
+
+      .social-links {
+        display: flex;
+        gap: var(--spacing-md);
+      }
+
+      .social-links a {
+        color: var(--text-light);
+        transition: color var(--transition-fast);
+      }
+
+      .social-links a:hover {
+        color: var(--text-white);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navigation bar from styles.css -->
+    <header class="header" role="banner">
+      <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+        <div class="container">
+          <div class="brand">
+            <div class="brand-icon" aria-hidden="true">
+              <i class="fas fa-cut"></i>
+            </div>
+            <h1 class="logo">تفصيلك</h1>
+          </div>
+          <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+            <li><a href="index.html#home" class="nav-link">الرئيسية</a></li>
+            <li>
+              <a href="index.html#how-it-works" class="nav-link"
+                >كيف تعمل المنصة</a
+              >
+            </li>
+            <li><a href="index.html#tailors" class="nav-link">الخياطين</a></li>
+            <li><a href="#contact" class="nav-link">تواصل معنا</a></li>
+          </ul>
+          <div class="nav-actions">
+            <a href="#" class="btn btn-outline">تسجيل دخول</a>
+            <a href="register.html" class="btn btn-primary">انضم كخياط</a>
+            <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+              <i class="fas fa-globe" aria-hidden="true"></i>
+              <span>العربية / EN</span>
+            </button>
+          </div>
+          <button
+            class="nav-toggle"
+            aria-label="فتح القائمة"
+            aria-controls="nav-menu"
+            aria-expanded="false"
+            type="button"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+      <section class="tailor-profile">
+        <div class="profile-header">
+          <div class="profile-banner"></div>
+          <div class="profile-content">
+            <div class="profile-image">
+              <img
+                src="https://placehold.co/400x400/e3f2fd/2c5aa0?text=خياط+محترف"
+                alt="أستاذ خالد"
+                class="profile-img"
+              />
+            </div>
+            <div class="profile-info">
+              <h1 class="profile-name">أستاذ خالد للتفصيل</h1>
+              <div class="profile-badge">
+                <i class="fas fa-check-circle"></i>
+                <span>خياط موثوق</span>
+              </div>
+
+              <div class="profile-stats">
+                <div class="stat">
+                  <span class="stat-value">4.8</span>
+                  <span class="stat-label">التقييم</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">120</span>
+                  <span class="stat-label">تقييم</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-value">5</span>
+                  <span class="stat-label">سنوات خبرة</span>
+                </div>
+              </div>
+
+              <div class="profile-details">
+                <div class="detail-item">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span>مصر الجديدة، القاهرة</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-tshirt"></i>
+                  <span>فساتين سهرة وبدل رجالية</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-clock"></i>
+                  <span>يستقبل طلبات حتى 10 مساءً</span>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-bolt"></i>
+                  <span>خدمة عاجلة متاحة</span>
+                </div>
+              </div>
+
+              <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
+                خياط محترف بخبرة أكثر من 5 سنوات في تفصيل فساتين السهرة والبدل
+                الرجالية. أقدم لكم أجود أنواع الخياطة بأفضل الأسعار والتزام تام
+                بالمواعيد.
+              </p>
+
+              <div class="profile-actions">
+                <a href="#" class="btn btn-primary">احجز موعد</a>
+                <a href="#" class="btn btn-outline">مراسلة</a>
+                <a href="#" class="btn btn-outline">
+                  <i class="far fa-heart"></i>
+                  <span>إضافة إلى المفضلة</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="portfolio-section">
+        <h2 class="section-title">معرض الأعمال</h2>
+        <div class="portfolio-grid">
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+1"
+              alt="فساتين سهرة"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">فساتين سهرة</h3>
+              <p class="portfolio-desc">تصميمات مخصصة لفساتين السهرة</p>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+2"
+              alt="بدل رجالية"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">بدل رجالية</h3>
+              <p class="portfolio-desc">بدل رسمية بتصميمات عصرية</p>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+3"
+              alt="تعديلات الملابس"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">تعديلات الملابس</h3>
+              <p class="portfolio-desc">تعديلات دقيقة لملابسكم</p>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+4"
+              alt="فساتين أطفال"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">فساتين أطفال</h3>
+              <p class="portfolio-desc">تصميمات خاصة للأطفال</p>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+5"
+              alt="فساتين زفاف"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">فساتين زفاف</h3>
+              <p class="portfolio-desc">تصميمات حصرية لفساتين الزفاف</p>
+            </div>
+          </div>
+          <div class="portfolio-item">
+            <img
+              src="https://placehold.co/600x600/e3f2fd/2c5aa0?text=عمل+6"
+              alt="ملابس تقليدية"
+              class="portfolio-img"
+            />
+            <div class="portfolio-overlay">
+              <h3 class="portfolio-title">ملابس تقليدية</h3>
+              <p class="portfolio-desc">ملابس تراثية بتصميمات عصرية</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-section">
+        <h2 class="section-title">الخدمات والأسعار</h2>
+        <div class="services-grid">
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-tshirt"></i>
+            </div>
+            <h3 class="service-title">فساتين سهرة</h3>
+            <p class="service-desc">
+              تفصيل فساتين السهرة بتصميمات مخصصة تناسب جميع الأذواق
+            </p>
+            <div class="service-price">تبدأ من 500 جنيه</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-user-tie"></i>
+            </div>
+            <h3 class="service-title">بدل رجالية</h3>
+            <p class="service-desc">
+              تفصيل بدل رجالية رسمية وعصرية بجودة عالية
+            </p>
+            <div class="service-price">تبدأ من 400 جنيه</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-tools"></i>
+            </div>
+            <h3 class="service-title">تعديل الملابس</h3>
+            <p class="service-desc">تعديل جميع أنواع الملابس بدقة واحترافية</p>
+            <div class="service-price">تبدأ من 50 جنيه</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-child"></i>
+            </div>
+            <h3 class="service-title">ملابس أطفال</h3>
+            <p class="service-desc">تفصيل ملابس أطفال بتصميمات مميزة وآمنة</p>
+            <div class="service-price">تبدأ من 150 جنيه</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-ring"></i>
+            </div>
+            <h3 class="service-title">فساتين زفاف</h3>
+            <p class="service-desc">
+              تصميم وتفصيل فساتين زفاف حصرية وبجودة فائقة
+            </p>
+            <div class="service-price">تبدأ من 1500 جنيه</div>
+          </div>
+          <div class="service-card">
+            <div class="service-icon">
+              <i class="fas fa-bolt"></i>
+            </div>
+            <h3 class="service-title">خدمة عاجلة</h3>
+            <p class="service-desc">
+              إنجاز الطلبات في وقت قياسي مع الحفاظ على الجودة
+            </p>
+            <div class="service-price">+30% على السعر</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reviews-section">
+        <h2 class="section-title">تقييمات العملاء</h2>
+
+        <div class="reviews-summary">
+          <div class="rating-overview">
+            <div class="rating-score">4.8</div>
+            <div class="rating-stars">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star-half-alt"></i>
+            </div>
+            <div class="rating-count">بناءً على 120 تقييم</div>
+          </div>
+          <div class="rating-bars">
+            <div class="rating-bar">
+              <div class="rating-label">5 نجوم</div>
+              <div class="rating-bar-inner">
+                <div class="rating-bar-fill" style="width: 75%"></div>
+              </div>
+              <div class="rating-value">75%</div>
+            </div>
+            <div class="rating-bar">
+              <div class="rating-label">4 نجوم</div>
+              <div class="rating-bar-inner">
+                <div class="rating-bar-fill" style="width: 15%"></div>
+              </div>
+              <div class="rating-value">15%</div>
+            </div>
+            <div class="rating-bar">
+              <div class="rating-label">3 نجوم</div>
+              <div class="rating-bar-inner">
+                <div class="rating-bar-fill" style="width: 7%"></div>
+              </div>
+              <div class="rating-value">7%</div>
+            </div>
+            <div class="rating-bar">
+              <div class="rating-label">2 نجوم</div>
+              <div class="rating-bar-inner">
+                <div class="rating-bar-fill" style="width: 2%"></div>
+              </div>
+              <div class="rating-value">2%</div>
+            </div>
+            <div class="rating-bar">
+              <div class="rating-label">1 نجمة</div>
+              <div class="rating-bar-inner">
+                <div class="rating-bar-fill" style="width: 1%"></div>
+              </div>
+              <div class="rating-value">1%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reviews-list">
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer">
+                <img
+                  src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=م"
+                  alt="محمد"
+                  class="reviewer-avatar"
+                />
+                <div class="reviewer-info">
+                  <h4>محمد أحمد</h4>
+                  <p>عميل منذ 6 أشهر</p>
+                </div>
+              </div>
+              <div class="review-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+            <div class="review-content">
+              <p>
+                أستاذ خالد ممتاز في تفصيل البدل الرجالية. الالتزام بالمواعيد
+                والدقة في التنفيذ. أنصح بالتعامل معه.
+              </p>
+            </div>
+            <div class="review-date">منذ أسبوعين</div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer">
+                <img
+                  src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=ف"
+                  alt="فاطمة"
+                  class="reviewer-avatar"
+                />
+                <div class="reviewer-info">
+                  <h4>فاطمة علي</h4>
+                  <p>عميلة منذ سنة</p>
+                </div>
+              </div>
+              <div class="review-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star-half-alt"></i>
+              </div>
+            </div>
+            <div class="review-content">
+              <p>
+                فستان السهرة الذي قام بتفصيله لي كان رائعًا. التصميم والتنفيذ
+                أكثر من رائع. شكرًا جزيلاً.
+              </p>
+            </div>
+            <div class="review-date">منذ شهر</div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer">
+                <img
+                  src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=أ"
+                  alt="أحمد"
+                  class="reviewer-avatar"
+                />
+                <div class="reviewer-info">
+                  <h4>أحمد سامي</h4>
+                  <p>عميل منذ 3 أشهر</p>
+                </div>
+              </div>
+              <div class="review-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+            </div>
+            <div class="review-content">
+              <p>
+                خدمة التعديلات سريعة وممتازة. عدلت لي عدة ملابس وكانت النتيجة
+                ممتازة. الأسعار معقولة جدًا.
+              </p>
+            </div>
+            <div class="review-date">منذ 3 أيام</div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-header">
+              <div class="reviewer">
+                <img
+                  src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=س"
+                  alt="سارة"
+                  class="reviewer-avatar"
+                />
+                <div class="reviewer-info">
+                  <h4>سارة محمود</h4>
+                  <p>عميلة منذ 8 أشهر</p>
+                </div>
+              </div>
+              <div class="review-stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="far fa-star"></i>
+              </div>
+            </div>
+            <div class="review-content">
+              <p>
+                فستان ابنتي للعيد كان جميلاً، لكنه تأخر يومين عن الموعد المتفق
+                عليه. بشكل عام الخدمة جيدة.
+              </p>
+            </div>
+            <div class="review-date">منذ أسبوع</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3 class="footer-title">من نحن</h3>
+            <ul class="footer-links">
+              <li><a href="#">عن تفصيلك</a></li>
+              <li><a href="#">كيف تعمل المنصة</a></li>
+              <li><a href="#">الأسئلة الشائعة</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h3 class="footer-title">للعملاء</h3>
+            <ul class="footer-links">
+              <li><a href="#">الأسئلة الشائعة</a></li>
+              <li><a href="#">كيف تعمل المنصة</a></li>
+              <li><a href="#">خدمة العملاء</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h3 class="footer-title">للخياطين</h3>
+            <ul class="footer-links">
+              <li><a href="#">انضم إلينا</a></li>
+              <li><a href="#">أسئلة الخياطين الشائعة</a></li>
+              <li><a href="#">مركز المساعدة</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h3 class="footer-title">قانوني</h3>
+            <ul class="footer-links">
+              <li><a href="#">شروط الخدمة</a></li>
+              <li><a href="#">سياسة الخصوصية</a></li>
+              <li><a href="#">تواصل معنا</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="footer-info">
+            <p>© 2025 تفصيلك. جميع الحقوق محفوظة</p>
+            <div class="social-links">
+              <a href="#" aria-label="فيسبوك">
+                <i class="fab fa-facebook-f"></i>
+              </a>
+              <a href="#" aria-label="إنستغرام">
+                <i class="fab fa-instagram"></i>
+              </a>
+              <a href="#" aria-label="تويتر">
+                <i class="fab fa-twitter"></i>
+              </a>
+            </div>
+          </div>
+          <button class="lang-toggle" type="button" aria-label="تبديل اللغة">
+            <i class="fas fa-globe" aria-hidden="true"></i>
+            <span>العربية / English</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile navigation toggle
+      document.addEventListener("DOMContentLoaded", function () {
+        const navToggle = document.querySelector(".nav-toggle");
+        const navMenu = document.getElementById("nav-menu");
+
+        if (navToggle && navMenu) {
+          navToggle.addEventListener("click", function () {
+            const isExpanded =
+              navToggle.getAttribute("aria-expanded") === "true";
+            navToggle.setAttribute("aria-expanded", !isExpanded);
+            navMenu.classList.toggle("active");
+          });
+        }
+
+        // Language toggle
+        document
+          .querySelector(".lang-toggle")
+          .addEventListener("click", function () {
+            const currentLang =
+              document.querySelector(".lang-toggle span").textContent;
+            if (currentLang === "العربية / EN") {
+              document.querySelector(".lang-toggle span").textContent =
+                "English / العربية";
+            } else {
+              document.querySelector(".lang-toggle span").textContent =
+                "العربية / EN";
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

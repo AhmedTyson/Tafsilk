@@ -1,0 +1,13 @@
+using TafsilkPlatform.Web.Models;
+
+namespace TafsilkPlatform.Web.Interfaces
+{
+    public interface IWalletRepository : IRepository<Wallet>
+    {
+        Task<Wallet?> GetByUserIdAsync(Guid userId);
+        Task<decimal> GetBalanceAsync(Guid userId);
+        Task<bool> CreditAsync(Guid userId, decimal amount, string description);
+        Task<bool> DebitAsync(Guid userId, decimal amount, string description);
+        Task<bool> TransferAsync(Guid fromUserId, Guid toUserId, decimal amount, string description);
+    }
+}

@@ -31,6 +31,11 @@ namespace TafsilkPlatform.Core.Models
         [Display(Name = "Tax Number")]
         public string? TaxNumber { get; set; }
 
+        [StringLength(1000)]
+        public string? Bio { get; set; }
+
+        public string? ProfilePictureUrl { get; set; }
+
         [Display(Name = "Approval Status")]
         public bool IsApproved { get; set; } = false;
 

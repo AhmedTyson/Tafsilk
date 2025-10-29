@@ -14,5 +14,6 @@ namespace TafsilkPlatform.Core.Interfaces
         Task<TailorProfile?> GetTailorWithReviewsAsync(Guid tailorId);
         Task UpdateTailorRatingAsync(Guid tailorId);
         Task<IEnumerable<TailorProfile>> GetTopRatedTailorsAsync(int count);
+        Task<TailorProfile?> GetByUserIdAsync(Guid userId);
     }
 }

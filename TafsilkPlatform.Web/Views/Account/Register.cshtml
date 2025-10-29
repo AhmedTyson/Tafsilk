@@ -1,0 +1,252 @@
+@{
+    ViewBag.Title = "تفصيلك — إنشاء حساب";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account/register.css" asp-append-version="true" />
+}
+
+<main class="register-page">
+    <!-- Brand Section (Left Side) -->
+    <section class="brand-section">
+     <div class="brand-content">
+            <div class="brand-logo">
+        <i class="fas fa-cut"></i>
+ <span>تفصيلك</span>
+  </div>
+     <h1 class="brand-title">انضم إلى أكبر شبكة للخياطين والمبدعين</h1>
+            <p class="brand-subtitle">اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك</p>
+
+            <div class="features">
+         <div class="feature">
+       <i class="fas fa-check-circle"></i>
+     <span>أكثر من 300 خياط موثوق</span>
+       </div>
+     <div class="feature">
+     <i class="fas fa-check-circle"></i>
+      <span>آلاف المشاريع المكتملة</span>
+                </div>
+    <div class="feature">
+  <i class="fas fa-check-circle"></i>
+         <span>تصميمات مخصصة وعصرية</span>
+    </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Section (Right Side) -->
+    <section class="form-section">
+        <div class="form-container">
+            <div class="form-header">
+             <h2 class="form-title" id="formTitle">إنشاء حساب</h2>
+            <p class="form-subtitle">انضم إلى شبكتنا الإبداعية المجانية بالكامل</p>
+            </div>
+
+       <!-- Progress Steps (Optional Enhancement) -->
+ <div class="progress-steps">
+    <div class="progress-bar" style="width:33%"></div>
+    <div class="step active">
+  <div class="step-number">1</div>
+           <div class="step-label">المعلومات الأساسية</div>
+        </div>
+ <div class="step">
+    <div class="step-number">2</div>
+   <div class="step-label">التفاصيل المهنية</div>
+        </div>
+  <div class="step">
+         <div class="step-number">3</div>
+            <div class="step-label">الانتهاء</div>
+        </div>
+          </div>
+
+            <!-- User Type Toggle -->
+            <div class="user-type-toggle" id="userTypeToggle">
+                <div class="user-type-option active" data-type="tailor">
+     <i class="fas fa-cut"></i>
+         <span>خياط</span>
+          </div>
+          <div class="user-type-option" data-type="customer">
+           <i class="fas fa-user"></i>
+    <span>عميل</span>
+   </div>
+ <div class="user-type-option" data-type="corporate">
+     <i class="fas fa-building"></i>
+          <span>شركة</span>
+ </div>
+       </div>
+
+      <!-- OAuth Buttons -->
+            <div class="oauth-buttons">
+   <a href="@Url.Action("GoogleLogin", "Account")" class="btn-oauth btn-google">
+        <i class="fab fa-google"></i>
+         <span>التسجيل باستخدام Google</span>
+</a>
+    <button type="button" class="btn-oauth btn-facebook">
+     <i class="fab fa-facebook-f"></i>
+       <span>التسجيل باستخدام Facebook</span>
+      </button>
+     </div>
+
+  <div class="divider">
+             <span>أو</span>
+ </div>
+
+     <!-- Registration Form -->
+         @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form", id = "registerForm" }))
+       {
+         @Html.AntiForgeryToken()
+
+         @if (!ViewData.ModelState.IsValid)
+                {
+       <div class="alert alert-danger" role="alert">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+           </div>
+     }
+
+     <div class="input-group">
+  <label for="name">الاسم الكامل *</label>
+       <div class="input-icon"><i class="fas fa-user"></i></div>
+             <input type="text" id="name" name="name" placeholder="أدخل اسمك الكامل" required />
+                </div>
+
+   <div class="input-group">
+    <label for="email">البريد الإلكتروني *</label>
+      <div class="input-icon"><i class="fas fa-envelope"></i></div>
+         <input type="email" id="email" name="email" placeholder="أدخل بريدك الإلكتروني" required />
+             </div>
+
+    <div class="input-group">
+       <label for="phone">رقم الهاتف</label>
+          <div class="input-icon"><i class="fas fa-phone"></i></div>
+             <input type="tel" id="phone" name="phoneNumber" placeholder="أدخل رقم هاتفك" />
+             </div>
+
+           <div class="input-group">
+            <label for="password">كلمة المرور *</label>
+              <div class="input-icon"><i class="fas fa-lock"></i></div>
+                <input type="password" id="password" name="password" placeholder="أنشئ كلمة مرور قوية" required />
+    <button type="button" class="password-toggle" id="passwordToggle">
+          <i class="fas fa-eye"></i>
+    </button>
+    <div class="password-strength" id="passwordStrength">
+    <div class="password-strength-bar"></div>
+       </div>
+           </div>
+
+       <div class="input-group">
+         <label for="confirmPassword">تأكيد كلمة المرور *</label>
+           <div class="input-icon"><i class="fas fa-lock"></i></div>
+ <input type="password" id="confirmPassword" name="confirmPassword" placeholder="أعد إدخال كلمة المرور" required />
+    </div>
+
+    <input type="hidden" id="userType" name="userType" value="tailor" />
+
+          <button type="submit" class="btn-submit">إنشاء حساب</button>
+     }
+
+     <div class="form-footer">
+      <p>هل لديك حساب بالفعل؟ <a href="@Url.Action("Login", "Account")">سجل الدخول</a></p>
+    </div>
+
+       <div class="terms">
+        <p>
+ بإنشائك لحساب، فإنك توافق على
+  <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a> الخاصة بنا.
+             </p>
+            </div>
+        </div>
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const registerForm = document.getElementById("registerForm");
+  const userTypeOptions = document.querySelectorAll(".user-type-option");
+    const userTypeInput = document.getElementById("userType");
+ const passwordInput = document.getElementById("password");
+     const confirmPasswordInput = document.getElementById("confirmPassword");
+ const passwordToggle = document.getElementById("passwordToggle");
+  const passwordStrength = document.getElementById("passwordStrength");
+  const formTitle = document.getElementById("formTitle");
+   let selectedUserType = "tailor";
+            let isPasswordVisible = false;
+
+     // User type toggle functionality
+    userTypeOptions.forEach((option) => {
+           option.addEventListener("click", function () {
+    userTypeOptions.forEach((opt) => opt.classList.remove("active"));
+      this.classList.add("active");
+        selectedUserType = this.getAttribute("data-type");
+       userTypeInput.value = selectedUserType;
+
+    // Update form title based on selected type
+  if (selectedUserType === "tailor") {
+    formTitle.textContent = "انضم كخياط";
+        } else if (selectedUserType === "customer") {
+   formTitle.textContent = "إنشاء حساب عميل";
+   } else if (selectedUserType === "corporate") {
+     formTitle.textContent = "إنشاء حساب شركة";
+    }
+ });
+      });
+
+         // Password visibility toggle
+       passwordToggle.addEventListener("click", function () {
+     isPasswordVisible = !isPasswordVisible;
+    passwordInput.type = isPasswordVisible ? "text" : "password";
+     this.innerHTML = isPasswordVisible ?
+    '<i class="fas fa-eye-slash"></i>' :
+         '<i class="fas fa-eye"></i>';
+            });
+
+    // Password strength indicator
+            passwordInput.addEventListener("input", function () {
+      const password = this.value;
+     let strength = 0;
+
+       if (password.length >= 8) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+       if (/[0-9]/.test(password)) strength++;
+          if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+        passwordStrength.className = "password-strength";
+    if (password.length > 0) {
+   if (strength < 2) {
+  passwordStrength.classList.add("weak");
+             } else if (strength < 4) {
+      passwordStrength.classList.add("medium");
+              } else {
+    passwordStrength.classList.add("strong");
+ }
+       }
+});
+
+      // Form validation
+ registerForm.addEventListener("submit", function (e) {
+     const name = (document.getElementById("name").value || '').trim();
+       const email = (document.getElementById("email").value || '').trim();
+     const password = passwordInput.value || '';
+    const confirmPassword = (confirmPasswordInput.value || '');
+
+ if (!name || !email || !password || !confirmPassword) {
+   e.preventDefault();
+         alert("يرجى ملء جميع الحقول المطلوبة");
+    return;
+    }
+
+            if (password.length < 6) {
+     e.preventDefault();
+  alert("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
+   return;
+      }
+
+        if (password !== confirmPassword) {
+    e.preventDefault();
+        alert("كلمات المرور غير متطابقة");
+       }
+  });
+        });
+    </script>
+}

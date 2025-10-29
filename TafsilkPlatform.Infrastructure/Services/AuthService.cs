@@ -54,6 +54,8 @@ namespace TafsilkPlatform.Infrastructure.Services
                     {
                         Id = Guid.NewGuid(),
                         UserId = user.Id,
+                        // store the provided full name as display name for tailor
+                        FullName = request.FullName,
                         ShopName = request.ShopName ?? string.Empty,
                         Address = request.Address ?? string.Empty,
                         CreatedAt = DateTime.UtcNow,
@@ -66,7 +68,8 @@ namespace TafsilkPlatform.Infrastructure.Services
                         Id = Guid.NewGuid(),
                         UserId = user.Id,
                         CompanyName = request.CompanyName ?? string.Empty,
-                        ContactPerson = request.ContactPerson ?? string.Empty,
+                        // store the provided full name as contact person if none provided
+                        ContactPerson = request.ContactPerson ?? request.FullName ?? string.Empty,
                         CreatedAt = DateTime.UtcNow,
                         IsApproved = false
                     });
@@ -79,7 +82,12 @@ namespace TafsilkPlatform.Infrastructure.Services
 
         public async Task<(bool Succeeded, string? Error, User? User)> ValidateUserAsync(string email, string password)
         {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
+            // Load Role for role-based claims/redirects
+            var user = await _db.Users
+                .AsNoTracking()
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+
             if (user is null) return (false, "Invalid credentials", null);
             if (!PasswordHasher.Verify(user.PasswordHash, password)) return (false, "Invalid credentials", null);
             if (!user.IsActive || user.IsDeleted) return (false, "User is inactive", null);

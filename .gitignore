@@ -365,3 +365,10 @@ FodyWeavers.xsd
 /GOOGLE_OAUTH_PRODUCTION_CHECKLIST.md
 /GOOGLE_OAUTH_PRODUCTION_READY.md
 /SETTINGS_IMPLEMENTATION_GUIDE.md
+/TafsilkPlatform.Web/appsettings.Production.json
+/TafsilkPlatform.Web/appsettings.json
+/TafsilkPlatform.Web/appsettings.json
+/TafsilkPlatform.Web/appsettings.json
+
+# Sensitive configuration files with secrets
+appsettings.Development.json

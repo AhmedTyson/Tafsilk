@@ -1,0 +1,91 @@
+@{
+    ViewBag.Title = "تفصيلك — تسجيل الدخول";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account/login.css" asp-append-version="true" />
+}
+
+<main class="login-page">
+    <div class="login-container">
+        @if (TempData["RegisterSuccess"] != null)
+        {
+       <div class="alert alert-success alert-dismissible fade show" role="alert">
+    @TempData["RegisterSuccess"]
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق">×</button>
+            </div>
+        }
+
+        <div class="form-header">
+            <h2 class="form-title">مرحباً بعودتك</h2>
+            <p class="form-subtitle">يرجى إدخال بياناتك لتسجيل الدخول</p>
+        </div>
+
+        <div class="oauth-buttons">
+  <a href="@Url.Action("GoogleLogin", "Account")" class="btn-oauth btn-google">
+   <i class="fab fa-google"></i>
+   </a>
+      <button type="button" class="btn-oauth btn-facebook">
+       <i class="fab fa-facebook-f"></i>
+       </button>
+        </div>
+
+        <div class="divider"><span>أو</span></div>
+
+ @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form", id = "loginForm" }))
+        {
+  @Html.AntiForgeryToken()
+
+  @if (!ViewData.ModelState.IsValid)
+ {
+    <div class="alert alert-danger" role="alert">
+          @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+         </div>
+            }
+
+            <div class="input-group">
+                <label for="email">البريد الإلكتروني</label>
+    <input type="email" id="email" name="email" placeholder="أدخل بريدك الإلكتروني" required />
+            </div>
+
+            <div class="input-group">
+    <label for="password">كلمة المرور</label>
+       <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور" required />
+ </div>
+
+   <div class="form-options">
+      <div class="remember-me">
+  <input type="checkbox" id="rememberMe" name="rememberMe" value="true" />
+             <label for="rememberMe">تذكرني</label>
+      </div>
+         <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
+       </div>
+
+         <button type="submit" class="btn-submit">تسجيل الدخول</button>
+        }
+
+        <div class="form-footer">
+  <p>ليس لديك حساب بعد؟ <a href="@Url.Action("Register","Account")">اشترك الآن</a></p>
+      </div>
+    </div>
+</main>
+
+@section Scripts {
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+     const loginForm = document.getElementById("loginForm");
+
+          // Form validation
+       loginForm.addEventListener("submit", function (e) {
+     const email = document.getElementById("email").value;
+     const password = document.getElementById("password").value;
+
+         if (!email || !password) {
+    e.preventDefault();
+  alert("يرجى ملء جميع الحقول المطلوبة");
+   }
+      });
+     });
+    </script>
+}

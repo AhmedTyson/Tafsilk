@@ -627,6 +627,36 @@ public partial class AppDbContext : DbContext
 
         // IMPORTANT: Removed global FK DeleteBehavior override to honor per-relation delete behaviors
 
+        // Extend User properties
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
+            entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
+            entity.Property(e => e.PromotionalNotifications).HasDefaultValue(true);
+        });
+
+        // Extend CustomerProfile optional fields
+        modelBuilder.Entity<CustomerProfile>(entity =>
+        {
+            entity.Property(e => e.Bio).HasMaxLength(1000);
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+        });
+
+        // TailorProfile extras
+        modelBuilder.Entity<TailorProfile>(entity =>
+        {
+            entity.Property(e => e.FullName).HasMaxLength(255);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+        });
+
+        // CorporateAccount extras
+        modelBuilder.Entity<CorporateAccount>(entity =>
+        {
+            entity.Property(e => e.Bio).HasMaxLength(1000);
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

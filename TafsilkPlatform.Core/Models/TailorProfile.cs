@@ -14,6 +14,10 @@ namespace TafsilkPlatform.Core.Models
         [Required(ErrorMessage = "User ID is required")]
         public Guid UserId { get; set; }
 
+        // New optional name for display
+        [StringLength(255)]
+        public string? FullName { get; set; }
+
         [Required(ErrorMessage = "Shop name is required")]
         [StringLength(255, ErrorMessage = "Shop name cannot exceed 255 characters")]
         [Display(Name = "Shop Name")]
@@ -43,6 +47,11 @@ namespace TafsilkPlatform.Core.Models
         [StringLength(1000, ErrorMessage = "Bio cannot exceed 1000 characters")]
         [DataType(DataType.MultilineText)]
         public string? Bio { get; set; }
+
+        // New optional fields
+        [StringLength(100)]
+        public string? City { get; set; }
+        public string? ProfilePictureUrl { get; set; }
 
         [Display(Name = "Verified Status")]
         public bool IsVerified { get; set; } = false;
