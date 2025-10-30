@@ -1,91 +1,396 @@
 @{
-    ViewBag.Title = "تفصيلك — تسجيل الدخول";
+    ViewData["Title"] = "تسجيل الدخول | تفصيلك - منصة الخياطين";
+    ViewData["Description"] = "سجل دخولك إلى منصة تفصيلك للوصول إلى أمهر الخياطين في منطقتك وإدارة طلباتك بسهولة";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/account/login.css" asp-append-version="true" />
+@section Meta {
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="@ViewData["Description"]" />
+  <meta name="robots" content="noindex, nofollow" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@ViewData["Title"]" />
+    <meta property="og:description" content="@ViewData["Description"]" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 }
 
-<main class="login-page">
+@section Styles {
+ <link rel="stylesheet" href="~/css/account/login.css" asp-append-version="true" />
+}
+
+<main class="login-page" role="main">
     <div class="login-container">
-        @if (TempData["RegisterSuccess"] != null)
-        {
-       <div class="alert alert-success alert-dismissible fade show" role="alert">
-    @TempData["RegisterSuccess"]
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق">×</button>
-            </div>
+      @if (TempData["RegisterSuccess"] != null)
+  {
+            <div class="alert alert-success alert-dismissible" role="alert">
+    <i class="fas fa-check-circle alert-icon" aria-hidden="true"></i>
+            <div class="alert-content">
+           <strong>تم التسجيل بنجاح!</strong>
+  <p>@TempData["RegisterSuccess"]</p>
+    </div>
+<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="إغلاق">×</button>
+    </div>
         }
 
         <div class="form-header">
-            <h2 class="form-title">مرحباً بعودتك</h2>
-            <p class="form-subtitle">يرجى إدخال بياناتك لتسجيل الدخول</p>
-        </div>
-
-        <div class="oauth-buttons">
-  <a href="@Url.Action("GoogleLogin", "Account")" class="btn-oauth btn-google">
-   <i class="fab fa-google"></i>
-   </a>
-   <a href="@Url.Action("FacebookLogin", "Account")" class="btn-oauth btn-facebook">
-       <i class="fab fa-facebook-f"></i>
-     </a>
-        </div>
-
-        <div class="divider"><span>أو</span></div>
-
- @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form", id = "loginForm" }))
-        {
-  @Html.AntiForgeryToken()
-
-  @if (!ViewData.ModelState.IsValid)
- {
-    <div class="alert alert-danger" role="alert">
-          @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+            <div class="form-icon" aria-hidden="true">
+        <i class="fas fa-user-circle"></i>
          </div>
+    <h1 class="form-title">مرحباً بعودتك</h1>
+   <p class="form-subtitle">يرجى إدخال بياناتك لتسجيل الدخول إلى حسابك</p>
+        </div>
+
+     <!-- Login Benefits -->
+        <div class="login-benefits">
+            <h3>
+     <i class="fas fa-star" aria-hidden="true"></i>
+  <span>لماذا تسجل الدخول؟</span>
+ </h3>
+        <ul class="benefits-list">
+       <li>تصفح أمهر الخياطين في منطقتك</li>
+           <li>إدارة طلباتك ومتابعة تقدمها</li>
+          <li>الوصول إلى عروض حصرية</li>
+            </ul>
+  </div>
+
+ <!-- OAuth Buttons -->
+ <div class="oauth-buttons" role="group" aria-label="تسجيل الدخول عبر الشبكات الاجتماعية">
+            <a href="@Url.Action("GoogleLogin", "Account")" 
+      class="btn-oauth btn-google" 
+   id="googleLoginBtn"
+      aria-label="تسجيل الدخول باستخدام Google">
+      <i class="fab fa-google" aria-hidden="true"></i>
+                <span>Google</span>
+            </a>
+ <a href="@Url.Action("FacebookLogin", "Account")" 
+               class="btn-oauth btn-facebook"
+        id="facebookLoginBtn"
+aria-label="تسجيل الدخول باستخدام Facebook">
+     <i class="fab fa-facebook-f" aria-hidden="true"></i>
+       <span>Facebook</span>
+            </a>
+        </div>
+
+     <div class="divider" aria-hidden="true"><span>أو</span></div>
+
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form", id = "loginForm", novalidate = "novalidate" }))
+{
+            @Html.AntiForgeryToken()
+
+          @if (!ViewData.ModelState.IsValid)
+            {
+      <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-circle alert-icon" aria-hidden="true"></i>
+       <div class="alert-content">
+     <strong>حدث خطأ!</strong>
+        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+     </div>
+       </div>
             }
 
-            <div class="input-group">
-                <label for="email">البريد الإلكتروني</label>
-    <input type="email" id="email" name="email" placeholder="أدخل بريدك الإلكتروني" required />
-            </div>
+     <div class="input-group">
+    <label for="email">
+     البريد الإلكتروني
+        <span class="text-danger" aria-label="حقل مطلوب">*</span>
+  </label>
+       <input type="email" 
+            id="email" 
+      name="email" 
+   placeholder="example@domain.com"
+    required 
+      autocomplete="email"
+        aria-required="true"
+       aria-describedby="email-error" />
+     <div id="email-error" class="error-message" role="alert" style="display: none;">
+   <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+         <span></span>
+           </div>
+   </div>
 
-            <div class="input-group">
-    <label for="password">كلمة المرور</label>
-       <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور" required />
- </div>
+<div class="input-group">
+        <label for="password">
+        كلمة المرور
+         <span class="text-danger" aria-label="حقل مطلوب">*</span>
+      </label>
+         <div class="password-wrapper">
+      <input type="password" 
+    id="password" 
+       name="password" 
+                 placeholder="أدخل كلمة المرور"
+        required 
+       autocomplete="current-password"
+     aria-required="true"
+         aria-describedby="password-error" />
+        <button type="button" 
+    class="password-toggle" 
+            id="togglePassword"
+             aria-label="إظهار كلمة المرور">
+   <i class="fas fa-eye" aria-hidden="true"></i>
+              </button>
+         </div>
+<div id="password-error" class="error-message" role="alert" style="display: none;">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+<span></span>
+        </div>
+     </div>
 
-   <div class="form-options">
+         <div class="form-options">
       <div class="remember-me">
-  <input type="checkbox" id="rememberMe" name="rememberMe" value="true" />
-             <label for="rememberMe">تذكرني</label>
-      </div>
-         <a href="#" class="forgot-password">نسيت كلمة المرور؟</a>
-       </div>
+      <input type="checkbox" 
+         id="rememberMe" 
+       name="rememberMe" 
+        value="true" />
+        <label for="rememberMe">تذكرني</label>
+     </div>
+                <a href="@Url.Action("ForgotPassword", "Account")" 
+         class="forgot-password">
+      نسيت كلمة المرور؟
+ </a>
+  </div>
 
-         <button type="submit" class="btn-submit">تسجيل الدخول</button>
-        }
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span>تسجيل الدخول</span>
+     </button>
+  }
 
-        <div class="form-footer">
-  <p>ليس لديك حساب بعد؟ <a href="@Url.Action("Register","Account")">اشترك الآن</a></p>
-      </div>
+     <div class="form-footer">
+    <p>ليس لديك حساب بعد؟ 
+          <a href="@Url.Action("Register","Account")">اشترك الآن مجاناً</a>
+            </p>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+        <i class="fas fa-shield-alt" aria-hidden="true"></i>
+     <p>
+    <strong>اتصال آمن</strong><br />
+     بياناتك محمية بتشفير SSL من الدرجة البنكية
+            </p>
+        </div>
     </div>
 </main>
 
 @section Scripts {
     <script>
-  document.addEventListener("DOMContentLoaded", function () {
-     const loginForm = document.getElementById("loginForm");
+        document.addEventListener("DOMContentLoaded", function () {
+            const loginForm = document.getElementById("loginForm");
+            const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+            const submitBtn = document.getElementById("submitBtn");
+ const togglePasswordBtn = document.getElementById("togglePassword");
+            const googleBtn = document.getElementById("googleLoginBtn");
+    const facebookBtn = document.getElementById("facebookLoginBtn");
 
-          // Form validation
-       loginForm.addEventListener("submit", function (e) {
-     const email = document.getElementById("email").value;
-     const password = document.getElementById("password").value;
+            // ========== PASSWORD VISIBILITY TOGGLE ==========
+            if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener("click", function () {
+ const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+     passwordInput.setAttribute("type", type);
+           
+      const icon = this.querySelector("i");
+     if (type === "text") {
+     icon.classList.remove("fa-eye");
+         icon.classList.add("fa-eye-slash");
+        this.setAttribute("aria-label", "إخفاء كلمة المرور");
+      } else {
+         icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+      this.setAttribute("aria-label", "إظهار كلمة المرور");
+       }
+    });
+     }
 
-         if (!email || !password) {
-    e.preventDefault();
-  alert("يرجى ملء جميع الحقول المطلوبة");
+       // ========== FORM VALIDATION ==========
+       function validateEmail(email) {
+             const re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+      return re.test(email);
+            }
+
+     function showError(input, message) {
+     const inputGroup = input.closest('.input-group');
+       const errorDiv = inputGroup.querySelector('.error-message');
+      const errorSpan = errorDiv.querySelector('span');
+                
+                input.classList.add('error');
+       errorSpan.textContent = message;
+        errorDiv.style.display = 'flex';
+      input.setAttribute('aria-invalid', 'true');
+            }
+
+            function clearError(input) {
+            const inputGroup = input.closest('.input-group');
+    const errorDiv = inputGroup.querySelector('.error-message');
+         
+      input.classList.remove('error');
+        errorDiv.style.display = 'none';
+                input.setAttribute('aria-invalid', 'false');
+         }
+
+   // Real-time validation
+     emailInput.addEventListener("blur", function () {
+           if (!this.value) {
+          showError(this, "البريد الإلكتروني مطلوب");
+       } else if (!validateEmail(this.value)) {
+      showError(this, "البريد الإلكتروني غير صالح");
+       } else {
+            clearError(this);
+      }
+            });
+
+      emailInput.addEventListener("input", function () {
+                if (this.value) {
+      clearError(this);
+        }
+ });
+
+     passwordInput.addEventListener("blur", function () {
+        if (!this.value) {
+      showError(this, "كلمة المرور مطلوبة");
+    } else if (this.value.length < 6) {
+         showError(this, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+        } else {
+   clearError(this);
+    }
+            });
+
+            passwordInput.addEventListener("input", function () {
+     if (this.value) {
+      clearError(this);
    }
       });
-     });
+
+  // ========== FORM SUBMISSION ==========
+       loginForm.addEventListener("submit", function (e) {
+             e.preventDefault();
+      
+      let isValid = true;
+
+       // Validate email
+      if (!emailInput.value) {
+  showError(emailInput, "البريد الإلكتروني مطلوب");
+        isValid = false;
+            } else if (!validateEmail(emailInput.value)) {
+             showError(emailInput, "البريد الإلكتروني غير صالح");
+           isValid = false;
+          } else {
+        clearError(emailInput);
+           }
+
+     // Validate password
+   if (!passwordInput.value) {
+       showError(passwordInput, "كلمة المرور مطلوبة");
+        isValid = false;
+     } else if (passwordInput.value.length < 6) {
+       showError(passwordInput, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+         isValid = false;
+         } else {
+          clearError(passwordInput);
+       }
+
+           if (isValid) {
+      // Show loading state
+      submitBtn.classList.add('loading');
+         submitBtn.disabled = true;
+         
+   // Submit form
+           this.submit();
+ } else {
+         // Focus first invalid input
+   const firstError = this.querySelector('.error');
+   if (firstError) {
+  firstError.focus();
+    }
+        }
+       });
+
+  // ========== OAUTH LOADING STATES ==========
+if (googleBtn) {
+     googleBtn.addEventListener('click', function(e) {
+          this.classList.add('loading');
+ this.style.pointerEvents = 'none';
+           });
+            }
+
+        if (facebookBtn) {
+     facebookBtn.addEventListener('click', function(e) {
+        this.classList.add('loading');
+         this.style.pointerEvents = 'none';
+       });
+       }
+
+     // ========== AUTO-DISMISS ALERTS ==========
+        const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+        setTimeout(() => {
+           alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-20px)';
+         setTimeout(() => {
+          alert.remove();
+              }, 300);
+        }, 5000);
+   });
+
+            // ========== ANALYTICS TRACKING ==========
+          if (typeof gtag !== 'undefined') {
+        loginForm.addEventListener('submit', function() {
+                    gtag('event', 'login_attempt', {
+               'event_category': 'authentication',
+        'event_label': 'email'
+    });
+       });
+
+        if (googleBtn) {
+         googleBtn.addEventListener('click', function() {
+      gtag('event', 'login_attempt', {
+  'event_category': 'authentication',
+     'event_label': 'google'
+            });
+  });
+   }
+
+    if (facebookBtn) {
+          facebookBtn.addEventListener('click', function() {
+ gtag('event', 'login_attempt', {
+       'event_category': 'authentication',
+         'event_label': 'facebook'
+              });
+       });
+  }
+            }
+
+        // ========== ACCESSIBILITY ENHANCEMENTS ==========
+            // Announce errors to screen readers
+       function announceError(message) {
+                const announcement = document.createElement('div');
+   announcement.setAttribute('role', 'status');
+      announcement.setAttribute('aria-live', 'polite');
+     announcement.className = 'sr-only';
+        announcement.textContent = message;
+          document.body.appendChild(announcement);
+        setTimeout(() => announcement.remove(), 1000);
+     }
+
+            // Monitor form errors
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+    if (mutation.attributeName === 'style') {
+  const errorDiv = mutation.target;
+   if (errorDiv.classList.contains('error-message') && 
+  errorDiv.style.display !== 'none') {
+         const message = errorDiv.querySelector('span').textContent;
+      announceError(message);
+            }
+   }
+      });
+            });
+
+            document.querySelectorAll('.error-message').forEach(errorDiv => {
+    observer.observe(errorDiv, { attributes: true });
+            });
+        });
     </script>
 }
