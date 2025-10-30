@@ -453,9 +453,12 @@ align-items: center;
     {
     <!-- User Menu -->
    <div class="user-menu">
-      <button type="button" class="user-menu-toggle" id="userMenuToggle">
+    @{
+         var fullName = User.FindFirst("FullName")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? User.Identity.Name ?? "مستخدم";
+     }
+<button type="button" class="user-menu-toggle" id="userMenuToggle">
    <i class="fas fa-user-circle"></i>
-        <span>@User.Identity.Name</span>
+      <span>@fullName</span>
  <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
    </button>
     <div class="user-menu-dropdown" id="userMenuDropdown">

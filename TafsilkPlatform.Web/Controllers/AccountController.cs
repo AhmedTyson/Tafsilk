@@ -108,17 +108,43 @@ public class AccountController : Controller
             return View();
         }
 
-        // Build claims with role
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(ClaimTypes.Name, user.Email ?? string.Empty)
-        };
-        
+        // Get full name from profile based on role
+      string fullName = user.Email ?? "مستخدم";
         var roleName = user.Role?.Name ?? string.Empty;
+        
         if (!string.IsNullOrEmpty(roleName))
+          {
+      switch (roleName.ToLower())
+   {
+         case "customer":
+        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+      fullName = customer.FullName;
+     break;
+        case "tailor":
+            var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+        if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+      fullName = tailor.FullName;
+         break;
+   case "corporate":
+        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
+          if (corporate != null)
+      fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
+   break;
+            }
+        }
+
+        // Build claims with role and full name
+  var claims = new List<Claim>
         {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+         new Claim(ClaimTypes.Name, fullName),
+     new Claim("FullName", fullName)
+  };
+        
+        if (!string.IsNullOrEmpty(roleName))
+{
             claims.Add(new Claim(ClaimTypes.Role, roleName));
         }
 
@@ -447,14 +473,40 @@ picture = claims?.FirstOrDefault(c => c.Type == "urn:facebook:picture:url")?.Val
   if (existingUser != null)
 {
   // User exists, sign them in
-                var userClaims = new List<Claim>
-       {
+          // Get full name from profile
+      string fullName = existingUser.Email ?? "مستخدم";
+var roleName = existingUser.Role?.Name ?? string.Empty;
+        
+       if (!string.IsNullOrEmpty(roleName))
+        {
+           switch (roleName.ToLower())
+   {
+   case "customer":
+       var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
+     if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+     fullName = customer.FullName;
+       break;
+       case "tailor":
+          var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
+    if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+       fullName = tailor.FullName;
+      break;
+       case "corporate":
+      var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(existingUser.Id);
+        if (corporate != null)
+    fullName = corporate.ContactPerson ?? corporate.CompanyName ?? existingUser.Email ?? "مستخدم";
+  break;
+          }
+   }
+  
+   var userClaims = new List<Claim>
+   {
  new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString()),
         new Claim(ClaimTypes.Email, existingUser.Email ?? string.Empty),
-  new Claim(ClaimTypes.Name, existingUser.Email ?? string.Empty)
+  new Claim(ClaimTypes.Name, fullName),
+    new Claim("FullName", fullName)
      };
 
-      var roleName = existingUser.Role?.Name ?? string.Empty;
      if (!string.IsNullOrEmpty(roleName))
            {
      userClaims.Add(new Claim(ClaimTypes.Role, roleName));
@@ -623,18 +675,44 @@ ViewData["Provider"] = provider;
             }
 
    // Sign in the user
-          var userClaims = new List<Claim>
+          // Get full name from profile
+        string fullName = model.FullName;
+ var roleName = user.Role?.Name ?? string.Empty;
+        
+  if (!string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(fullName))
+      {
+      switch (roleName.ToLower())
+   {
+         case "customer":
+        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+      fullName = customer.FullName;
+     break;
+        case "tailor":
+            var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+        if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+      fullName = tailor.FullName;
+         break;
+   case "corporate":
+        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
+          if (corporate != null)
+      fullName = corporate.ContactPerson ?? corporate.CompanyName ?? fullName;
+   break;
+            }
+        }
+  
+  var userClaims = new List<Claim>
             {
  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
   new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-        new Claim(ClaimTypes.Name, user.Email ?? string.Empty)
+  new Claim(ClaimTypes.Name, fullName),
+   new Claim("FullName", fullName)
             };
 
-            var roleName = user.Role?.Name ?? string.Empty;
      if (!string.IsNullOrEmpty(roleName))
          {
   userClaims.Add(new Claim(ClaimTypes.Role, roleName));
-            }
+     }
 
   var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
   var principal = new ClaimsPrincipal(identity);
