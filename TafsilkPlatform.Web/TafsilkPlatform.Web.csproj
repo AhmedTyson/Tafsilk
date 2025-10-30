@@ -5,6 +5,24 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>53d19473-2fd6-4a7c-906f-dda85cf58376</UserSecretsId>
+  
+    <!-- Publishing Optimizations -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <!-- Version Information -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Company>Tafsilk Platform</Company>
+    <Product>Tafsilk Platform</Product>
+    <Description>Tafsilk - منصة الخياطين والتفصيل</Description>
+    <Copyright>Copyright © 2025 Tafsilk Platform</Copyright>
+    
+    <!-- Development Settings -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <!-- All dependencies consolidated here -->
@@ -22,6 +40,11 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+  </ItemGroup>
+  
+  <!-- Development-only files -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Content Remove="appsettings.Development.json" />
   </ItemGroup>
 
 </Project>
