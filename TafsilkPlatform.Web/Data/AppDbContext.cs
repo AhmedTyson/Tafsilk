@@ -70,102 +70,124 @@ public partial class AppDbContext : DbContext
         {
             entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07AA820590");
 
-            entity.HasIndex(e => e.Email, "IX_Users_Email");
-            entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
+     entity.HasIndex(e => e.Email, "IX_Users_Email");
+       entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
             entity.HasIndex(e => e.Email, "UQ__Users__A9D10534975288F0").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Email).HasMaxLength(255);
-            entity.Property(e => e.IsActive).HasDefaultValue(true);
+       entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+        entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+     entity.Property(e => e.Email).HasMaxLength(255);
+      entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+      entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
+ entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
+      entity.Property(e => e.PromotionalNotifications).HasDefaultValue(true);
 
             entity.HasOne(d => d.Role)
-                  .WithMany(p => p.Users)
-                  .HasForeignKey(d => d.RoleId)
-                  .OnDelete(DeleteBehavior.ClientSetNull)
-                  .HasConstraintName("FK_Users_Roles");
+    .WithMany(p => p.Users)
+       .HasForeignKey(d => d.RoleId)
+ .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("FK_Users_Roles");
         });
 
         // Role Entity
-        modelBuilder.Entity<Role>(entity =>
+   modelBuilder.Entity<Role>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+  entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.Description).HasMaxLength(255);
-            entity.Property(e => e.Name).HasMaxLength(50);
+   entity.Property(e => e.Name).HasMaxLength(50);
         });
 
         // CorporateAccount Entity
         modelBuilder.Entity<CorporateAccount>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Corporat__3214EC07AC002547");
+    entity.HasKey(e => e.Id).HasName("PK__Corporat__3214EC07AC002547");
 
-            entity.HasIndex(e => e.UserId, "IX_CorporateAccounts_UserId");
+   entity.HasIndex(e => e.UserId, "IX_CorporateAccounts_UserId");
             entity.HasIndex(e => e.UserId, "UQ__Corporat__1788CC4D39440DF8").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+ entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CompanyName).HasMaxLength(255);
             entity.Property(e => e.ContactPerson).HasMaxLength(255);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Industry).HasMaxLength(100);
-            entity.Property(e => e.IsApproved).HasDefaultValue(false);
+    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+   entity.Property(e => e.Industry).HasMaxLength(100);
+      entity.Property(e => e.IsApproved).HasDefaultValue(false);
             entity.Property(e => e.TaxNumber).HasMaxLength(100);
+    entity.Property(e => e.Bio).HasMaxLength(1000);
+#pragma warning disable CS0618
+  entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
+     entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+   entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
-            entity.HasOne(d => d.User)
-                  .WithOne(p => p.CorporateAccount)
-                  .HasForeignKey<CorporateAccount>(d => d.UserId)
-                  .OnDelete(DeleteBehavior.NoAction)
-                  .HasConstraintName("FK_CorporateAccounts_Users");
-        });
+       entity.HasOne(d => d.User)
+   .WithOne(p => p.CorporateAccount)
+   .HasForeignKey<CorporateAccount>(d => d.UserId)
+        .OnDelete(DeleteBehavior.NoAction)
+    .HasConstraintName("FK_CorporateAccounts_Users");
+});
 
         // CustomerProfile Entity
-        modelBuilder.Entity<CustomerProfile>(entity =>
+      modelBuilder.Entity<CustomerProfile>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
+    entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
 
-            entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
-            entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
+   entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
+    entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.City).HasMaxLength(100);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+    entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+     entity.Property(e => e.City).HasMaxLength(100);
+          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.FullName).HasMaxLength(255);
-            entity.Property(e => e.Gender).HasMaxLength(20);
+       entity.Property(e => e.Gender).HasMaxLength(20);
+          entity.Property(e => e.Bio).HasMaxLength(1000);
+#pragma warning disable CS0618
+      entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
+            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+            entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
             entity.HasOne(d => d.User)
-                  .WithOne(p => p.CustomerProfile)
+       .WithOne(p => p.CustomerProfile)
                   .HasForeignKey<CustomerProfile>(d => d.UserId)
-                  .OnDelete(DeleteBehavior.NoAction)
-                  .HasConstraintName("FK_CustomerProfiles_Users");
-        });
+       .OnDelete(DeleteBehavior.NoAction)
+.HasConstraintName("FK_CustomerProfiles_Users");
+ });
 
-        // TailorProfile Entity
+   // TailorProfile Entity
         modelBuilder.Entity<TailorProfile>(entity =>
         {
-            entity.HasKey(e => e.Id).HasName("PK__TailorPr__3214EC07A3FCF42C");
+          entity.HasKey(e => e.Id).HasName("PK__TailorPr__3214EC07A3FCF42C");
 
-            entity.HasIndex(e => e.UserId, "IX_TailorProfiles_UserId");
+ entity.HasIndex(e => e.UserId, "IX_TailorProfiles_UserId");
             entity.HasIndex(e => e.UserId, "UQ__TailorPr__1788CC4D37A4BF4A").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+        entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.FullName).HasMaxLength(255);
+  entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.Address).HasMaxLength(500);
-            entity.Property(e => e.Bio).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsVerified).HasDefaultValue(false);
-            entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
-            entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
+     entity.Property(e => e.Bio).HasMaxLength(1000);
+     entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+          entity.Property(e => e.IsVerified).HasDefaultValue(false);
+          entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
+      entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
             entity.Property(e => e.PricingRange).HasMaxLength(100);
-            entity.Property(e => e.ShopName).HasMaxLength(255);
+    entity.Property(e => e.ShopName).HasMaxLength(255);
+#pragma warning disable CS0618
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
+            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+            entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
             entity.HasOne(d => d.User)
-                  .WithOne(p => p.TailorProfile)
-                  .HasForeignKey<TailorProfile>(d => d.UserId)
-                  .OnDelete(DeleteBehavior.NoAction)
-                  .HasConstraintName("FK_TailorProfiles_Users");
+           .WithOne(p => p.TailorProfile)
+            .HasForeignKey<TailorProfile>(d => d.UserId)
+         .OnDelete(DeleteBehavior.NoAction)
+           .HasConstraintName("FK_TailorProfiles_Users");
         });
 
         // UserAddress Entity
@@ -246,427 +268,243 @@ public partial class AppDbContext : DbContext
                   .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Payment Entity relations
+        // OrderItem Entity - Fix decimal precision
+        modelBuilder.Entity<OrderItem>(entity =>
+  {
+    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+       entity.Property(e => e.Total).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+       
+   entity.HasOne(e => e.order)
+         .WithMany(o => o.Items)
+      .HasForeignKey(e => e.OrderId)
+      .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Payment Entity - Fix decimal precision
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasOne(p => p.Customer)
+         entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+        
+       entity.HasOne(p => p.Customer)
                   .WithMany(cp => cp.Payments)
-                  .HasForeignKey(p => p.CustomerId)
-                  .OnDelete(DeleteBehavior.NoAction);
+       .HasForeignKey(p => p.CustomerId)
+       .OnDelete(DeleteBehavior.NoAction);
 
-            entity.HasOne(p => p.Order)
-                  .WithMany(o => o.Payments)
-                  .HasForeignKey(p => p.OrderId)
-                  .OnDelete(DeleteBehavior.NoAction);
+  entity.HasOne(p => p.Order)
+ .WithMany(o => o.Payments)
+           .HasForeignKey(p => p.OrderId)
+     .OnDelete(DeleteBehavior.NoAction);
 
-            entity.HasOne(p => p.Tailor)
-                  .WithMany(tp => tp.Payments)
-                  .HasForeignKey(p => p.TailorId)
-                  .OnDelete(DeleteBehavior.NoAction);
-        });
+      entity.HasOne(p => p.Tailor)
+ .WithMany(tp => tp.Payments)
+    .HasForeignKey(p => p.TailorId)
+.OnDelete(DeleteBehavior.NoAction);
+  });
 
-        // Quote Entity relations
+        // Quote Entity - Fix decimal precision
         modelBuilder.Entity<Quote>(entity =>
         {
-            entity.HasOne(q => q.order)
-                  .WithMany(o => o.quote)
-                  .HasForeignKey(q => q.OrderId)
-                  .OnDelete(DeleteBehavior.NoAction);
+        entity.Property(e => e.ProposedPrice).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+            
+         entity.HasOne(q => q.order)
+       .WithMany(o => o.quote)
+          .HasForeignKey(q => q.OrderId)
+         .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasOne(q => q.Tailor)
-                  .WithMany()
-                  .HasForeignKey(q => q.TailorId)
-                  .OnDelete(DeleteBehavior.NoAction);
+       .WithMany()
+    .HasForeignKey(q => q.TailorId)
+    .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Wallet Entity
-        modelBuilder.Entity<Wallet>(entity =>
+        // Contract Entity - Fix decimal precision
+        modelBuilder.Entity<Contract>(entity =>
         {
-            entity.ToTable("Wallet");
-            entity.HasKey(w => w.WalletId);
-            entity.HasIndex(w => w.UserId).IsUnique();
-            entity.Property(w => w.Balance).HasColumnType("decimal(18,2)");
-
-            entity.HasOne(w => w.User)
-                  .WithOne(u => u.Wallet)
-                  .HasForeignKey<Wallet>(w => w.UserId)
-                  .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
         });
 
-        // Review Entity
-        modelBuilder.Entity<Review>(entity =>
+    // RFQ Entity - Fix decimal precision
+        modelBuilder.Entity<RFQ>(entity =>
         {
-            entity.ToTable("Reviews");
-            entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
+          entity.Property(e => e.Budget).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+        });
 
-            entity.Property(e => e.Comment).HasMaxLength(1000).HasComment("Comment cannot exceed 1000 characters");
-            entity.Property(e => e.Rating).IsRequired().HasComment("Rating is required");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
+        // RFQBid Entity - Fix decimal precision
+        modelBuilder.Entity<RFQBid>(entity =>
+        {
+ entity.Property(e => e.BidAmount).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+ });
 
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
-            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
-            entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
+        // RefundRequest Entity - Fix decimal precision
+        modelBuilder.Entity<RefundRequest>(entity =>
+        {
+  entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+        });
 
-            entity.HasOne<Order>()
-                  .WithOne()
-                  .HasForeignKey<Review>(r => r.OrderId)
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .HasConstraintName("FK_Reviews_Orders");
+        // TailorPerformanceView Entity - Fix decimal precision
+    modelBuilder.Entity<TailorPerformanceView>(entity =>
+        {
+   entity.ToView("TailorPerformanceView");
+            entity.HasNoKey();
+            
+            entity.Property(e => e.AverageRating).HasColumnType("decimal(3, 2)").HasPrecision(3, 2);
+        entity.Property(e => e.Revenue).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+        });
 
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(r => r.TailorId)
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .HasConstraintName("FK_Reviews_TailorProfiles");
+    // Notification Entity - Fix shadow property warning
+    modelBuilder.Entity<Notification>(entity =>
+        {
+         entity.ToTable("Notifications");
+  entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
 
-            entity.HasOne<CustomerProfile>()
-                  .WithMany()
-                  .HasForeignKey(r => r.CustomerId)
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .HasConstraintName("FK_Reviews_CustomerProfiles");
+        entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
+entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
+        entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+     entity.Property(e => e.IsRead).HasDefaultValue(false);
+            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
+        entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-            entity.HasMany(r => r.RatingDimensions)
-                  .WithOne(rd => rd.Review)
-                  .HasForeignKey(rd => rd.ReviewId)
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
+
+        entity.HasOne<User>()
+          .WithMany()
+       .HasForeignKey(n => n.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // RatingDimension Entity
-        modelBuilder.Entity<RatingDimension>(entity =>
-        {
-            entity.ToTable("RatingDimensions");
-            entity.HasKey(rd => rd.RatingDimensionId).HasName("PK_RatingDimensions");
-
-            entity.Property(rd => rd.DimensionName)
-                  .HasMaxLength(100)
-                  .IsRequired()
-                  .HasComment("Dimension name is required, max 100 chars");
-
-            entity.Property(rd => rd.Score)
-                  .IsRequired()
-                  .HasComment("Score is required");
-
-            entity.Property(rd => rd.IsDeleted)
-                  .HasDefaultValue(false)
-                  .HasComment("Soft delete flag");
-        });
-
-        // TailorBadge Entity
-        modelBuilder.Entity<TailorBadge>(entity =>
-        {
-            entity.ToTable("TailorBadges");
-            entity.HasKey(tb => tb.TailorBadgeId).HasName("PK_TailorBadges");
-
-            entity.Property(tb => tb.BadgeName)
-                  .HasMaxLength(150)
-                  .IsRequired()
-                  .HasComment("Badge name is required, max 150 chars");
-
-            entity.Property(tb => tb.Description)
-                  .HasMaxLength(500)
-                  .HasComment("Description max 500 chars");
-
-            entity.Property(tb => tb.EarnedAt)
-                  .HasDefaultValueSql("(getutcdate())");
-
-            entity.Property(tb => tb.IsDeleted)
-                  .HasDefaultValue(false)
-                  .HasComment("Soft delete flag");
-
-            entity.HasIndex(tb => tb.TailorId).HasDatabaseName("IX_TailorBadges_TailorId");
-
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(tb => tb.TailorId)
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .HasConstraintName("FK_TailorBadges_TailorProfiles");
-        });
-
-        // PortfolioImage Entity
-        modelBuilder.Entity<PortfolioImage>(entity =>
-        {
-            entity.ToTable("PortfolioImages");
-            entity.HasKey(e => e.PortfolioImageId).HasName("PK_PortfolioImages");
-
-            entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
-            entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-            entity.Property(e => e.IsBeforeAfter).IsRequired().HasComment("Indicates if image is before/after");
-
-            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
-            entity.HasIndex(e => e.IsBeforeAfter).HasDatabaseName("IX_PortfolioImages_IsBeforeAfter");
-            entity.HasIndex(e => e.UploadedAt).HasDatabaseName("IX_PortfolioImages_UploadedAt");
-            entity.HasIndex(e => new { e.TailorId, e.UploadedAt }).HasDatabaseName("IX_PortfolioImages_TailorId_UploadedAt");
-
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(pi => pi.TailorId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_PortfolioImages_TailorProfiles");
-        });
-
-        // TailorService Entity
-        modelBuilder.Entity<TailorService>(entity =>
-        {
-            entity.ToTable("TailorServices");
-            entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
-
-            entity.Property(e => e.TailorServiceId).ValueGeneratedOnAdd();
-            entity.Property(e => e.ServiceName)
-                  .IsRequired()
-                  .HasMaxLength(100)
-                  .HasComment("Service name is required, max 100 chars");
-
-            entity.Property(e => e.Description)
-                  .HasMaxLength(500)
-                  .HasComment("Description max 500 chars");
-
-            entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.EstimatedDuration).IsRequired().HasComment("Estimated duration is required in minutes");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-
-            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
-            entity.HasIndex(e => e.ServiceName).HasDatabaseName("IX_TailorServices_ServiceName");
-
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(ts => ts.TailorId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_TailorServices_TailorProfiles");
-        });
-
-        // Notification Entity
-        modelBuilder.Entity<Notification>(entity =>
-        {
-            entity.ToTable("Notifications");
-            entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
-
-            entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Title)
-                  .IsRequired()
-                  .HasMaxLength(200)
-                  .HasComment("Notification title is required, max 200 chars");
-
-            entity.Property(e => e.Message)
-                  .IsRequired()
-                  .HasMaxLength(2000)
-                  .HasComment("Notification message is required, max 2000 chars");
-
-            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.IsRead).HasDefaultValue(false);
-            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
-            entity.HasIndex(e => e.IsRead).HasDatabaseName("IX_Notifications_IsRead");
-            entity.HasIndex(e => e.SentAt).HasDatabaseName("IX_Notifications_SentAt");
-            entity.HasIndex(e => e.Type).HasDatabaseName("IX_Notifications_Type");
-            entity.HasIndex(e => new { e.UserId, e.IsRead, e.SentAt }).HasDatabaseName("IX_Notifications_User_Read_Date");
-
-            entity.HasOne<User>()
-                  .WithMany()
-                  .HasForeignKey(n => n.UserId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_Notifications_Users");
-        });
-
-        // SystemMessage Entity
-        modelBuilder.Entity<SystemMessage>(entity =>
-        {
-            entity.ToTable("SystemMessages");
-            entity.HasKey(e => e.SystemMessageId).HasName("PK_SystemMessages");
-
-            entity.Property(e => e.SystemMessageId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Title)
-                  .IsRequired()
-                  .HasMaxLength(200)
-                  .HasComment("Message title is required, max 200 chars");
-
-            entity.Property(e => e.Content)
-                  .IsRequired()
-                  .HasMaxLength(4000)
-                  .HasComment("Message content is required, max 4000 chars");
-
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.AudienceType).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_SystemMessages_CreatedAt");
-            entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_SystemMessages_AudienceType");
-        });
-
-        // Dispute Entity
-        modelBuilder.Entity<Dispute>(entity =>
-        {
-            entity.ToTable("Disputes");
-            entity.HasKey(e => e.Id);
-
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Reason).HasMaxLength(200);
-            entity.Property(e => e.Description).HasMaxLength(1000);
-            entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.ResolutionDetails).HasMaxLength(2000);
-
-            entity.HasOne(d => d.Order)
-                  .WithMany()
-                  .HasForeignKey(d => d.OrderId)
-                  .OnDelete(DeleteBehavior.NoAction)
-                  .HasConstraintName("FK_Disputes_Orders");
-        });
-
-        // DeviceToken Entity
+// DeviceToken Entity - Fix shadow property warning
         modelBuilder.Entity<DeviceToken>(entity =>
         {
             entity.ToTable("DeviceTokens");
-            entity.HasKey(e => e.DeviceTokenId).HasName("PK_DeviceTokens");
+       entity.HasKey(e => e.DeviceTokenId).HasName("PK_DeviceTokens");
 
             entity.Property(e => e.DeviceTokenId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Devicetoken).IsRequired().HasMaxLength(500);
-            entity.Property(e => e.Platform).IsRequired().HasMaxLength(20);
-            entity.Property(e => e.RegisteredAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
+    entity.Property(e => e.Devicetoken).IsRequired().HasMaxLength(500);
+  entity.Property(e => e.Platform).IsRequired().HasMaxLength(20);
+   entity.Property(e => e.RegisteredAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
-            entity.HasIndex(e => e.Platform).HasDatabaseName("IX_DeviceTokens_Platform");
-            entity.HasIndex(e => e.Devicetoken).HasDatabaseName("IX_DeviceTokens_Token");
+     entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
 
-            entity.HasOne<User>()
-                  .WithMany()
-                  .HasForeignKey(dt => dt.UserId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_DeviceTokens_Users");
-        });
+   entity.HasOne<User>()
+           .WithMany()
+   .HasForeignKey(dt => dt.UserId)
+     .OnDelete(DeleteBehavior.Cascade);
+      });
 
-        // TailorPerformanceView Entity
-        modelBuilder.Entity<TailorPerformanceView>(entity =>
-        {
-            entity.ToView("TailorPerformanceView");
-            entity.HasNoKey();
-
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(tpv => tpv.TailorId)
-                  .HasConstraintName("FK_TailorPerformanceView_TailorProfiles")
-                  .OnDelete(DeleteBehavior.ClientSetNull)
-                  .IsRequired(false);
-        });
-
-        // RevenueReport Entity
-        modelBuilder.Entity<RevenueReport>(entity =>
-        {
-            entity.HasKey(e => new { e.TailorId, e.Month }).HasName("PK_RevenueReports");
-
-            entity.Property(e => e.Month).IsRequired().HasColumnType("date");
-            entity.Property(e => e.TotalRevenue).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-
-            entity.HasOne<TailorProfile>()
-                  .WithMany()
-                  .HasForeignKey(rr => rr.TailorId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_RevenueReports_TailorProfiles");
-        });
-
-        // UserActivityLog Entity
+ // UserActivityLog Entity - Fix shadow property warning
         modelBuilder.Entity<UserActivityLog>(entity =>
         {
             entity.ToTable("UserActivityLogs");
-            entity.HasKey(e => e.UserActivityLogId).HasName("PK_UserActivityLogs");
+          entity.HasKey(e => e.UserActivityLogId).HasName("PK_UserActivityLogs");
 
-            entity.Property(e => e.Action)
-                  .IsRequired()
-                  .HasMaxLength(100)
-                  .HasComment("Action description is required, max 100 chars");
+    entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
+     entity.Property(e => e.EntityType).HasMaxLength(50);
+    entity.Property(e => e.IpAddress).HasMaxLength(45);
+         entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.Property(e => e.EntityType).HasMaxLength(50).HasComment("Entity type max 50 chars");
-            entity.Property(e => e.IpAddress).HasMaxLength(45).HasComment("IP address max 45 chars, supports IPv6");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
-
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
-            entity.HasIndex(e => e.Action).HasDatabaseName("IX_UserActivityLogs_Action");
-            entity.HasIndex(e => e.EntityType).HasDatabaseName("IX_UserActivityLogs_EntityType");
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_UserActivityLogs_CreatedAt");
-            entity.HasIndex(e => new { e.UserId, e.Action, e.CreatedAt }).HasDatabaseName("IX_UserActivityLogs_User_Action_Date");
+          entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
 
             entity.HasOne<User>()
-                  .WithMany()
-                  .HasForeignKey(ual => ual.UserId)
-                  .OnDelete(DeleteBehavior.Cascade)
-                  .HasConstraintName("FK_UserActivityLogs_Users");
-        });
+      .WithMany()
+  .HasForeignKey(ual => ual.UserId)
+       .OnDelete(DeleteBehavior.Cascade);
+      });
 
-        // ErrorLog Entity
-        modelBuilder.Entity<ErrorLog>(entity =>
+        // PortfolioImage Entity - Fix shadow property warning
+     modelBuilder.Entity<PortfolioImage>(entity =>
+      {
+            entity.ToTable("PortfolioImages");
+       entity.HasKey(e => e.PortfolioImageId).HasName("PK_PortfolioImages");
+
+   entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
+     entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+       entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+
+     entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
+
+         entity.HasOne<TailorProfile>()
+      .WithMany()
+  .HasForeignKey(pi => pi.TailorId)
+      .OnDelete(DeleteBehavior.Cascade);
+      });
+
+    // TailorService Entity - Fix shadow property warning
+  modelBuilder.Entity<TailorService>(entity =>
+     {
+     entity.ToTable("TailorServices");
+            entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
+
+       entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).HasMaxLength(500);
+     entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
+
+   entity.HasOne<TailorProfile>()
+      .WithMany()
+              .HasForeignKey(ts => ts.TailorId)
+        .OnDelete(DeleteBehavior.Cascade);
+ });
+
+        // Review Entity - Fix shadow property warnings
+   modelBuilder.Entity<Review>(entity =>
         {
-            entity.ToTable("ErrorLogs");
-            entity.HasKey(e => e.ErrorLogId).HasName("PK_ErrorLogs");
+      entity.ToTable("Reviews");
+            entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
 
-            entity.Property(e => e.Message)
-                  .IsRequired()
-                  .HasMaxLength(2000)
-                  .HasComment("Error message is required, max 2000 chars");
-
-            entity.Property(e => e.Severity)
-                  .IsRequired()
-                  .HasMaxLength(20)
-                  .HasDefaultValue("Error")
-                  .HasComment("Severity level required, default 'Error', max 20 chars");
-
+            entity.Property(e => e.Comment).HasMaxLength(1000);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false).HasComment("Soft delete flag");
 
-            entity.HasIndex(e => e.Severity).HasDatabaseName("IX_ErrorLogs_Severity");
-            entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_ErrorLogs_CreatedAt");
-            entity.HasIndex(e => new { e.Severity, e.CreatedAt }).HasDatabaseName("IX_ErrorLogs_Severity_CreatedAt");
+            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
+  entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
+ entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
+
+         entity.HasOne<Order>()
+        .WithOne()
+           .HasForeignKey<Review>(r => r.OrderId)
+           .OnDelete(DeleteBehavior.Restrict);
+
+        entity.HasOne<TailorProfile>()
+     .WithMany()
+        .HasForeignKey(r => r.TailorId)
+  .OnDelete(DeleteBehavior.Restrict);
+
+       entity.HasOne<CustomerProfile>()
+ .WithMany()
+  .HasForeignKey(r => r.CustomerId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+      entity.HasMany(r => r.RatingDimensions)
+   .WithOne(rd => rd.Review)
+          .HasForeignKey(rd => rd.ReviewId)
+       .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // IMPORTANT: Removed global FK DeleteBehavior override to honor per-relation delete behaviors
-
-        // Extend User properties
-        modelBuilder.Entity<User>(entity =>
+ // OrderImages Entity - Fix shadow property warning
+        modelBuilder.Entity<OrderImages>(entity =>
         {
-            entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
-            entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
-            entity.Property(e => e.PromotionalNotifications).HasDefaultValue(true);
+            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
+
+   entity.HasOne<Order>()
+        .WithMany(o => o.orderImages)
+      .HasForeignKey(oi => oi.OrderId)
+      .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Extend CustomerProfile optional fields
-        modelBuilder.Entity<CustomerProfile>(entity =>
-        {
-            entity.Property(e => e.Bio).HasMaxLength(1000);
-#pragma warning disable CS0618 // Type or member is obsolete
-      entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-#pragma warning restore CS0618 // Type or member is obsolete
-       entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-     entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
-        });
+        // RevenueReport Entity - Fix shadow property warning
+        modelBuilder.Entity<RevenueReport>(entity =>
+      {
+            entity.HasKey(e => new { e.TailorId, e.Month }).HasName("PK_RevenueReports");
 
-        // TailorProfile extras
-        modelBuilder.Entity<TailorProfile>(entity =>
-        {
-            entity.Property(e => e.FullName).HasMaxLength(255);
-    entity.Property(e => e.City).HasMaxLength(100);
-#pragma warning disable CS0618 // Type or member is obsolete
- entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-#pragma warning restore CS0618 // Type or member is obsolete
-            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-    entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
-        });
+            entity.Property(e => e.Month).IsRequired().HasColumnType("date");
+       entity.Property(e => e.TotalRevenue).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+            entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(getutcdate())");
 
-        // CorporateAccount extras
-        modelBuilder.Entity<CorporateAccount>(entity =>
-        {
-         entity.Property(e => e.Bio).HasMaxLength(1000);
-#pragma warning disable CS0618 // Type or member is obsolete
-     entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-#pragma warning restore CS0618 // Type or member is obsolete
-     entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-      entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+  entity.HasOne<TailorProfile>()
+           .WithMany()
+       .HasForeignKey(rr => rr.TailorId)
+   .OnDelete(DeleteBehavior.Cascade);
         });
 
         OnModelCreatingPartial(modelBuilder);
