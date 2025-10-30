@@ -25,6 +25,10 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="Properties\PublishProfiles\RunASP.pubxml.user" />
+  </ItemGroup>
+
   <!-- All dependencies consolidated here -->
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.0" />

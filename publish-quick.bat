@@ -5,7 +5,7 @@ echo   Quick Publish to tafsilk.runasp.net
 echo ================================================
 echo.
 
-dotnet publish TafsilkPlatform.Web\TafsilkPlatform.Web.csproj -c Release /p:PublishProfile=RunASP /p:Password=oC@3D4w_+K7i --nologo
+dotnet publish TafsilkPlatform.Web\TafsilkPlatform.Web.csproj -c Release /p:DeployOnBuild=true /p:PublishProfile=RunASP /p:Password=oC@3D4w_+K7i --nologo
 
 if %ERRORLEVEL% EQU 0 (
     echo.
@@ -16,14 +16,16 @@ if %ERRORLEVEL% EQU 0 (
     echo Your site: http://tafsilk.runasp.net
     echo Control Panel: https://panel.runasp.net
     echo.
+    echo Opening site in browser...
+    timeout /t 3
     start http://tafsilk.runasp.net
 ) else (
     echo.
     echo ================================================
     echo   Deployment Failed!
-echo ================================================
+    echo ================================================
     echo.
-    echo Run: publish-runasp.ps1 -Verbose
+    echo Try: publish-runasp.ps1 -Verbose
     echo For detailed error information
 )
 

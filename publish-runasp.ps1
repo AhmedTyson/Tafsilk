@@ -15,6 +15,7 @@ Write-Host ""
 
 $ProjectPath = "TafsilkPlatform.Web\TafsilkPlatform.Web.csproj"
 $PublishProfile = "RunASP"
+$Password = "oC@3D4w_+K7i"
 
 # Step 1: Clean old publish files (optional but recommended for speed)
 if (-not $SkipBuild) {
@@ -56,8 +57,10 @@ $publishArgs = @(
     "publish",
     $ProjectPath,
     "-c", "Release",
-    "/p:PublishProfile=$PublishProfile",
-    "/p:Password=oC@3D4w_+K7i",
+    "/p:DeployOnBuild=true",
+  "/p:PublishProfile=$PublishProfile",
+ "/p:UserName=site41423",
+    "/p:Password=$Password",
     "--nologo"
 )
 
@@ -66,7 +69,9 @@ if ($SkipBuild) {
 }
 
 if (-not $Verbose) {
-    $publishArgs += "-v", "q"
+    $publishArgs += "-v", "m"
+} else {
+    $publishArgs += "-v", "n"
 }
 
 $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
@@ -83,6 +88,9 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "2. Verify RunASP.NET credentials are correct" -ForegroundColor White
     Write-Host "3. Ensure Web Deploy is accessible: site41423.siteasp.net" -ForegroundColor White
     Write-Host "4. Try running with -Verbose flag for more details" -ForegroundColor White
+  Write-Host ""
+    Write-Host "Manual publish command:" -ForegroundColor Cyan
+    Write-Host "dotnet publish $ProjectPath -c Release /p:DeployOnBuild=true /p:PublishProfile=$PublishProfile /p:Password=$Password" -ForegroundColor Gray
     exit 1
 }
 
@@ -92,13 +100,15 @@ Write-Host ""
 # Step 4: Verify deployment
 Write-Host "[4/4] Verifying deployment..." -ForegroundColor Yellow
 
+Start-Sleep -Seconds 5
+
 try {
     $response = Invoke-WebRequest -Uri "http://tafsilk.runasp.net" -TimeoutSec 30 -UseBasicParsing -ErrorAction SilentlyContinue
     if ($response.StatusCode -eq 200) {
-        Write-Host "✓ Site is accessible!" -ForegroundColor Green
+      Write-Host "✓ Site is accessible!" -ForegroundColor Green
     } else {
-        Write-Host "⚠ Site returned status: $($response.StatusCode)" -ForegroundColor Yellow
-    }
+  Write-Host "⚠ Site returned status: $($response.StatusCode)" -ForegroundColor Yellow
+  }
 } catch {
     Write-Host "⚠ Could not verify site (may take a few moments to start)" -ForegroundColor Yellow
 }
