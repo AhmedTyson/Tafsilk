@@ -165,18 +165,18 @@ if (settings == null)
             if (succeeded)
          {
         _logger.LogInformation("Settings updated successfully for user: {UserId}", userId);
-         
+      
   // Set success message
     if (profilePictureUpdated)
                 {
-       TempData["Success"] = "تم حفظ جميع التعديلات بنجاح وتحديث صورة الملف الشخصي! ✅";
+       TempData["Success"] = "تم حفظ جميع التعديلات بنجاح وتحديث صورة الملف الشخصي!";
 }
-       else
+    else
        {
-      TempData["Success"] = "تم حفظ التعديلات بنجاح! ✅";
+ TempData["Success"] = "تم حفظ التعديلات بنجاح!";
          }
 
-                // Redirect to refresh the page with updated data
+      // Redirect to refresh the page with updated data
   return RedirectToAction("Edit");
  }
             else
@@ -225,9 +225,9 @@ if (settings == null)
 var success = await _userService.RemoveProfilePictureAsync(userId);
 
             if (success)
-  {
-        _logger.LogInformation("Profile picture removed successfully for user: {UserId}", userId);
-          TempData["Success"] = "تم حذف صورة الملف الشخصي بنجاح ✅";
+{
+     _logger.LogInformation("Profile picture removed successfully for user: {UserId}", userId);
+    TempData["Success"] = "تم حذف صورة الملف الشخصي بنجاح";
          }
             else
 {
