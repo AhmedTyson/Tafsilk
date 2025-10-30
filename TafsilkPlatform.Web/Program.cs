@@ -34,11 +34,17 @@ builder.Services.AddSession(options =>
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
-// Check OAuth configuration
+// Check OAuth configuration - ensure we're reading the config correctly
 var googleClientId = builder.Configuration["Google:client_id"];
 var googleClientSecret = builder.Configuration["Google:client_secret"];
 var facebookAppId = builder.Configuration["Facebook:app_id"];
 var facebookAppSecret = builder.Configuration["Facebook:app_secret"];
+
+// Log configuration status for debugging
+Console.WriteLine($"Google ClientId configured: {!string.IsNullOrWhiteSpace(googleClientId)}");
+Console.WriteLine($"Google ClientSecret configured: {!string.IsNullOrWhiteSpace(googleClientSecret)}");
+Console.WriteLine($"Facebook AppId configured: {!string.IsNullOrWhiteSpace(facebookAppId)} (Value: {facebookAppId?.Substring(0, Math.Min(10, facebookAppId?.Length ?? 0))}...)");
+Console.WriteLine($"Facebook AppSecret configured: {!string.IsNullOrWhiteSpace(facebookAppSecret)} (Value: {facebookAppSecret?.Substring(0, Math.Min(10, facebookAppSecret?.Length ?? 0))}...)");
 
 var googleConfigured = !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret);
 var facebookConfigured = !string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret);
