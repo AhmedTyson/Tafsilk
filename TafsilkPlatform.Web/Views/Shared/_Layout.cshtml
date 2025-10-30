@@ -454,7 +454,20 @@ align-items: center;
     <!-- User Menu -->
    <div class="user-menu">
     @{
-         var fullName = User.FindFirst("FullName")?.Value ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? User.Identity.Name ?? "مستخدم";
+         // Retrieve full name from claims with proper fallback chain
+        var fullName = User.FindFirst("FullName")?.Value;
+ if (string.IsNullOrEmpty(fullName))
+        {
+         fullName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        }
+        if (string.IsNullOrEmpty(fullName))
+        {
+   fullName = User.Identity?.Name;
+        }
+     if (string.IsNullOrEmpty(fullName))
+        {
+         fullName = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "مستخدم";
+     }
      }
 <button type="button" class="user-menu-toggle" id="userMenuToggle">
    <i class="fas fa-user-circle"></i>
@@ -462,15 +475,15 @@ align-items: center;
  <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
    </button>
     <div class="user-menu-dropdown" id="userMenuDropdown">
-     <a asp-controller="UserSettings" asp-action="Edit">
+ <a asp-controller="UserSettings" asp-action="Edit">
    <i class="fas fa-cog me-2"></i> الإعدادات
     </a>
-      <hr />
+   <hr />
     <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
 @Html.AntiForgeryToken()
       <button type="submit">
       <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
-      </button>
+  </button>
       </form>
     </div>
       </div>
