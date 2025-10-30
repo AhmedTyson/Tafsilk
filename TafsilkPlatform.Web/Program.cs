@@ -48,12 +48,12 @@ var authBuilder = builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
- options.LoginPath = "/Account/Login";
-  options.LogoutPath = "/Account/Logout";
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
         options.AccessDeniedPath = "/Account/Login";
         options.Cookie.Name = ".Tafsilk.Auth";
         options.Cookie.HttpOnly = true;
-      options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.SlidingExpiration = true;
@@ -85,11 +85,11 @@ if (googleConfigured)
      // Increase timeout for OAuth flow
     googleOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
     });
-    Console.WriteLine("✅ Google OAuth configured");
+    Console.WriteLine("Google OAuth configured");
 }
 else
 {
-    Console.WriteLine("⚠️  WARNING: Google OAuth not configured - social login will not work");
+    Console.WriteLine("WARNING: Google OAuth not configured - social login will not work");
     Console.WriteLine(" Configure: dotnet user-secrets set \"Google:client_id\" \"YOUR_ID\"");
     Console.WriteLine("   Configure: dotnet user-secrets set \"Google:client_secret\" \"YOUR_SECRET\"");
 }
@@ -125,11 +125,11 @@ if (facebookConfigured)
       // Increase timeout for OAuth flow
       facebookOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
     });
-    Console.WriteLine("✅ Facebook OAuth configured");
+    Console.WriteLine("Facebook OAuth configured");
 }
 else
 {
-    Console.WriteLine("⚠️  WARNING: Facebook OAuth not configured - social login will not work");
+    Console.WriteLine("WARNING: Facebook OAuth not configured - social login will not work");
     Console.WriteLine("   Configure: dotnet user-secrets set \"Facebook:app_id\" \"YOUR_ID\"");
     Console.WriteLine("   Configure: dotnet user-secrets set \"Facebook:app_secret\" \"YOUR_SECRET\"");
 }
@@ -188,45 +188,45 @@ if (app.Environment.IsDevelopment())
   
             if (canConnect)
          {
-       logger.LogInformation("✅ Database connection successful");
+       logger.LogInformation("Database connection successful");
         
     // Check for pending migrations
                 var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
     if (pendingMigrations.Any())
          {
-      logger.LogWarning("⚠️  Pending migrations found: {Migrations}", 
+      logger.LogWarning("Pending migrations found: {Migrations}", 
           string.Join(", ", pendingMigrations));
-      logger.LogWarning("   Run: dotnet ef database update");
+      logger.LogWarning("Run: dotnet ef database update");
        }
        else
   {
-         logger.LogInformation("✅ Database schema is up to date");
+         logger.LogInformation("Database schema is up to date");
                 }
        }
           else
             {
-        logger.LogError("❌ Cannot connect to database");
+        logger.LogError("Cannot connect to database");
     }
         }
         catch (Exception ex)
         {
-        logger.LogError(ex, "❌ Database validation failed");
+        logger.LogError(ex, "Database validation failed");
     }
  
         // OAuth configuration summary
         if (googleConfigured)
-  logger.LogInformation("✅ Google OAuth configured");
+  logger.LogInformation("Google OAuth configured");
         else
-  logger.LogWarning("⚠️  Google OAuth not configured - social login disabled");
+  logger.LogWarning("Google OAuth not configured - social login disabled");
         
         if (facebookConfigured)
-            logger.LogInformation("✅ Facebook OAuth configured");
+            logger.LogInformation("Facebook OAuth configured");
         else
-logger.LogWarning("⚠️  Facebook OAuth not configured - social login disabled");
+logger.LogWarning("Facebook OAuth not configured - social login disabled");
         
         if (!googleConfigured || !facebookConfigured)
     {
-            logger.LogWarning("💡 To enable social login, configure OAuth secrets using user-secrets");
+            logger.LogWarning("To enable social login, configure OAuth secrets using user-secrets");
         }
     }
 }
@@ -259,8 +259,8 @@ app.MapControllerRoute(
 
 // Log startup success
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
-startupLogger.LogInformation("🚀 Tafsilk Platform started successfully");
-startupLogger.LogInformation("📍 Environment: {Environment}", app.Environment.EnvironmentName);
-startupLogger.LogInformation("🌐 Application URLs: {Urls}", string.Join(", ", app.Urls));
+startupLogger.LogInformation("Tafsilk Platform started successfully");
+startupLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
+startupLogger.LogInformation("Application URLs: {Urls}", string.Join(", ", app.Urls));
 
 app.Run();
