@@ -6,7 +6,6 @@ using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Repositories;
 using TafsilkPlatform.Web.Security;
-using TafsilkPlatform.Web.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,11 +16,6 @@ builder.Logging.AddDebug();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// Add health checks
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>("database")
-    .AddCheck<DatabaseHealthCheck>("database_detailed");
 
 // Add distributed memory cache for better state persistence
 builder.Services.AddDistributedMemoryCache();
@@ -247,10 +241,6 @@ else
 {
     app.UseDeveloperExceptionPage();
 }
-
-// Map health checks
-app.MapHealthChecks("/health");
-app.MapHealthChecks("/health/ready");
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
