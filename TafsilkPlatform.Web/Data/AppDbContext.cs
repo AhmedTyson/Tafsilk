@@ -353,63 +353,66 @@ public partial class AppDbContext : DbContext
 
     // Notification Entity - Fix shadow property warning
     modelBuilder.Entity<Notification>(entity =>
-        {
+ {
          entity.ToTable("Notifications");
   entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
 
-        entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
+     entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
 entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
+         entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
         entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
      entity.Property(e => e.IsRead).HasDefaultValue(false);
-            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
-        entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+   entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
+ entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
+      entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
 
-        entity.HasOne<User>()
-          .WithMany()
+        entity.HasOne(n => n.User)
+       .WithMany()
        .HasForeignKey(n => n.UserId)
-                  .OnDelete(DeleteBehavior.Cascade);
+      .HasPrincipalKey(u => u.Id)
+       .OnDelete(DeleteBehavior.Cascade);
         });
 
 // DeviceToken Entity - Fix shadow property warning
         modelBuilder.Entity<DeviceToken>(entity =>
-        {
-            entity.ToTable("DeviceTokens");
+     {
+    entity.ToTable("DeviceTokens");
        entity.HasKey(e => e.DeviceTokenId).HasName("PK_DeviceTokens");
 
-            entity.Property(e => e.DeviceTokenId).ValueGeneratedOnAdd();
+  entity.Property(e => e.DeviceTokenId).ValueGeneratedOnAdd();
     entity.Property(e => e.Devicetoken).IsRequired().HasMaxLength(500);
   entity.Property(e => e.Platform).IsRequired().HasMaxLength(20);
    entity.Property(e => e.RegisteredAt).HasDefaultValueSql("(getutcdate())");
 
      entity.HasIndex(e => e.UserId).HasDatabaseName("IX_DeviceTokens_UserId");
 
-   entity.HasOne<User>()
-           .WithMany()
+   entity.HasOne(dt => dt.User)
+     .WithMany()
    .HasForeignKey(dt => dt.UserId)
+    .HasPrincipalKey(u => u.Id)
      .OnDelete(DeleteBehavior.Cascade);
-      });
+   });
 
  // UserActivityLog Entity - Fix shadow property warning
-        modelBuilder.Entity<UserActivityLog>(entity =>
-        {
-            entity.ToTable("UserActivityLogs");
-          entity.HasKey(e => e.UserActivityLogId).HasName("PK_UserActivityLogs");
+    modelBuilder.Entity<UserActivityLog>(entity =>
+    {
+       entity.ToTable("UserActivityLogs");
+        entity.HasKey(e => e.UserActivityLogId).HasName("PK_UserActivityLogs");
 
     entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
      entity.Property(e => e.EntityType).HasMaxLength(50);
     entity.Property(e => e.IpAddress).HasMaxLength(45);
          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-          entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
+  entity.HasIndex(e => e.UserId).HasDatabaseName("IX_UserActivityLogs_UserId");
 
-            entity.HasOne<User>()
+  entity.HasOne(ual => ual.User)
       .WithMany()
   .HasForeignKey(ual => ual.UserId)
-       .OnDelete(DeleteBehavior.Cascade);
-      });
+       .HasPrincipalKey(u => u.Id)
+   .OnDelete(DeleteBehavior.Cascade);
+   });
 
         // PortfolioImage Entity - Fix shadow property warning
      modelBuilder.Entity<PortfolioImage>(entity =>
@@ -426,84 +429,91 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
          entity.HasOne<TailorProfile>()
       .WithMany()
   .HasForeignKey(pi => pi.TailorId)
+     .HasPrincipalKey(t => t.Id)
       .OnDelete(DeleteBehavior.Cascade);
-      });
+  });
 
     // TailorService Entity - Fix shadow property warning
   modelBuilder.Entity<TailorService>(entity =>
-     {
+{
      entity.ToTable("TailorServices");
             entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
 
        entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(500);
-     entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+  entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
 
-            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
+  entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
 
    entity.HasOne<TailorProfile>()
       .WithMany()
-              .HasForeignKey(ts => ts.TailorId)
-        .OnDelete(DeleteBehavior.Cascade);
+   .HasForeignKey(ts => ts.TailorId)
+   .HasPrincipalKey(t => t.Id)
+ .OnDelete(DeleteBehavior.Cascade);
  });
 
         // Review Entity - Fix shadow property warnings
    modelBuilder.Entity<Review>(entity =>
-        {
-      entity.ToTable("Reviews");
+   {
+   entity.ToTable("Reviews");
             entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
 
-            entity.Property(e => e.Comment).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+    entity.Property(e => e.Comment).HasMaxLength(1000);
+   entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
+        entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
  entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
 
-         entity.HasOne<Order>()
+entity.HasOne<Order>()
         .WithOne()
            .HasForeignKey<Review>(r => r.OrderId)
+       .HasPrincipalKey<Order>(o => o.OrderId)
            .OnDelete(DeleteBehavior.Restrict);
 
         entity.HasOne<TailorProfile>()
      .WithMany()
-        .HasForeignKey(r => r.TailorId)
+  .HasForeignKey(r => r.TailorId)
+      .HasPrincipalKey(t => t.Id)
   .OnDelete(DeleteBehavior.Restrict);
 
        entity.HasOne<CustomerProfile>()
  .WithMany()
   .HasForeignKey(r => r.CustomerId)
-                  .OnDelete(DeleteBehavior.Restrict);
+       .HasPrincipalKey(c => c.Id)
+        .OnDelete(DeleteBehavior.Restrict);
 
       entity.HasMany(r => r.RatingDimensions)
    .WithOne(rd => rd.Review)
-          .HasForeignKey(rd => rd.ReviewId)
+   .HasForeignKey(rd => rd.ReviewId)
        .OnDelete(DeleteBehavior.Cascade);
-        });
+ });
 
  // OrderImages Entity - Fix shadow property warning
         modelBuilder.Entity<OrderImages>(entity =>
-        {
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
+  {
+        entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
 
    entity.HasOne<Order>()
         .WithMany(o => o.orderImages)
-      .HasForeignKey(oi => oi.OrderId)
+    .HasForeignKey(oi => oi.OrderId)
+   .HasPrincipalKey(o => o.OrderId)
       .OnDelete(DeleteBehavior.Cascade);
         });
 
         // RevenueReport Entity - Fix shadow property warning
         modelBuilder.Entity<RevenueReport>(entity =>
       {
-            entity.HasKey(e => new { e.TailorId, e.Month }).HasName("PK_RevenueReports");
+       entity.HasKey(e => new { e.TailorId, e.Month }).HasName("PK_RevenueReports");
 
             entity.Property(e => e.Month).IsRequired().HasColumnType("date");
        entity.Property(e => e.TotalRevenue).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
             entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(getutcdate())");
 
   entity.HasOne<TailorProfile>()
-           .WithMany()
+    .WithMany()
        .HasForeignKey(rr => rr.TailorId)
+            .HasPrincipalKey(t => t.Id)
    .OnDelete(DeleteBehavior.Cascade);
         });
 
