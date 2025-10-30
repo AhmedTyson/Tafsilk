@@ -1,320 +1,265 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels;
-using TafsilkPlatform.Web.Models;
 
 namespace TafsilkPlatform.Web.Controllers;
 
+/// <summary>
+/// Controller for managing user settings and profile information
+/// </summary>
 [Authorize]
+[Route("[controller]")]
 public class UserSettingsController : Controller
 {
     private readonly IUserService _userService;
     private readonly ILogger<UserSettingsController> _logger;
 
-    public UserSettingsController(IUserService userService, ILogger<UserSettingsController> logger)
+    public UserSettingsController(
+        IUserService userService,
+ ILogger<UserSettingsController> logger)
     {
-        _userService = userService;
-        _logger = logger;
+   _userService = userService;
+    _logger = logger;
     }
 
-<<<<<<< Updated upstream
+ /// <summary>
+    /// Display user settings page
+    /// GET: /UserSettings
+    /// GET: /UserSettings/Index
+    /// </summary>
     [HttpGet]
+    [HttpGet("[action]")]
+    public async Task<IActionResult> Index()
+    {
+        return await Edit();
+}
+
+    /// <summary>
+    /// Display edit settings form
+    /// GET: /UserSettings/Edit
+    /// </summary>
+    [HttpGet("[action]")]
     public async Task<IActionResult> Edit()
     {
         var userId = GetCurrentUserId();
         if (userId == Guid.Empty)
-            return RedirectToAction("Login", "Account");
-
-        var settings = await _userService.GetUserSettingsAsync(userId);
-        if (settings == null)
-        {
-            TempData["Error"] = "تعذر تحميل إعدادات المستخدم";
-            return RedirectToAction("Index", "Home");
+    {
+            _logger.LogWarning("Unauthorized access attempt - no valid user ID found");
+            TempData["Error"] = "يجب تسجيل الدخول للوصول إلى الإعدادات";
+      return RedirectToAction("Login", "Account");
         }
 
-        return View(settings);
+        try
+     {
+      var settings = await _userService.GetUserSettingsAsync(userId);
+     
+if (settings == null)
+          {
+      _logger.LogError("Failed to load settings for user: {UserId}", userId);
+           TempData["Error"] = "تعذر تحميل إعدادات المستخدم";
+            
+    // Create minimal fallback model
+    settings = new UserSettingsViewModel
+    {
+           UserId = userId,
+       Email = User.FindFirstValue(ClaimTypes.Email) ?? "",
+   FullName = User.FindFirstValue(ClaimTypes.Name) ?? User.Identity?.Name ?? "مستخدم",
+   Role = User.FindFirstValue(ClaimTypes.Role) ?? "Customer"
+    };
+       }
+
+       return View(settings);
+        }
+        catch (Exception ex)
+     {
+            _logger.LogError(ex, "Error loading settings for user: {UserId}", userId);
+         TempData["Error"] = "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
+        return RedirectToAction("Index", "Home");
+        }
     }
 
-    [HttpPost]
+    /// <summary>
+    /// Save user settings
+    /// POST: /UserSettings/Edit
+    /// </summary>
+    [HttpPost("[action]")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(UserSettingsViewModel model)
     {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+     _logger.LogWarning("Unauthorized settings update attempt");
+        return RedirectToAction("Login", "Account");
+        }
+
+        // Security check: Ensure user can only update their own settings
+        if (model.UserId != userId)
+        {
+        _logger.LogWarning(
+       "Security violation: User {ActualUserId} attempted to update settings for user {TargetUserId}",
+        userId, model.UserId);
+     TempData["Error"] = "غير مصرح لك بتعديل هذه الإعدادات";
+            return RedirectToAction("Edit");
+        }
+
         if (!ModelState.IsValid)
         {
+            TempData["Error"] = "يرجى التحقق من صحة البيانات المدخلة";
             return View(model);
         }
 
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty)
-            return RedirectToAction("Login", "Account");
-
-        if (model.ProfilePicture != null)
-        {
-            var success = await _userService.UpdateProfilePictureAsync(userId, model.ProfilePicture);
-            if (!success)
-            {
-                ModelState.AddModelError("ProfilePicture", "تعذر رفع صورة الملف الشخصي. يرجى التأكد من أن الملف صورة بحجم أقل من5MB");
-                return View(model);
-            }
-        }
-
-        var request = new UpdateUserSettingsRequest
-        {
-            FullName = model.FullName,
-            Email = model.Email,
-            PhoneNumber = model.PhoneNumber,
-            City = model.City,
-            DateOfBirth = model.DateOfBirth,
-            Bio = model.Bio,
-            CurrentPassword = model.CurrentPassword,
-            NewPassword = model.NewPassword,
-            EmailNotifications = model.EmailNotifications,
-            SmsNotifications = model.SmsNotifications,
-            PromotionalNotifications = model.PromotionalNotifications,
-            ShopName = model.ShopName,
-            Address = model.Address,
-            CompanyName = model.CompanyName,
-            ContactPerson = model.ContactPerson
-        };
-
-        var (succeeded, error) = await _userService.UpdateUserSettingsAsync(userId, request);
-        if (succeeded)
-        {
-            TempData["Success"] = "تم حفظ التعديلات بنجاح";
-            return RedirectToAction("Edit");
-        }
-        ModelState.AddModelError(string.Empty, error ?? "حدث خطأ أثناء حفظ التعديلات");
-        return View(model);
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RemoveProfilePicture()
-    {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty)
-            return RedirectToAction("Login", "Account");
-
-        var user = await _userService.GetUserSettingsAsync(userId);
-        if (user == null)
-            return NotFound();
-
-        TempData["Success"] = "تم حذف صورة الملف الشخصي بنجاح";
-        return RedirectToAction("Edit");
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        return (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId)) ? userId : Guid.Empty;
-=======
-    /// <summary>
-    /// Displays the user settings page - This action should ALWAYS be accessible to authenticated users
-    /// </summary>
-    [HttpGet]
-    public async Task<IActionResult> Index()
-    {
-      return await Edit();
-    }
-
-    /// <summary>
-    /// Main settings view - Protected to ensure it's always available
-    /// </summary>
-    [HttpGet]
-    public async Task<IActionResult> Edit()
-    {
-     var userId = GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-         _logger.LogWarning("Unauthorized access attempt to settings page");
-       return RedirectToAction("Login", "Account");
- }
-
         try
         {
-       var settings = await _userService.GetUserSettingsAsync(userId);
-  if (settings == null)
-  {
-                _logger.LogError("Unable to load user settings for user: {UserId}", userId);
-     TempData["Error"] = "تعذر تحميل إعدادات المستخدم. يرجى المحاولة مرة أخرى.";
-                
-         // Don't redirect away - show error but keep user on settings page
-        // Create a minimal view model to prevent crashes
-     settings = new UserSettingsViewModel
-         {
-              UserId = userId,
- FullName = User.Identity?.Name ?? "مستخدم",
-        Email = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Email)?.Value ?? "",
-     Role = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value ?? "Customer"
-              };
-       }
+        bool profilePictureUpdated = false;
 
-  return View(settings);
-        }
-    catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading settings for user: {UserId}", userId);
-            TempData["Error"] = "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
-          return View(new UserSettingsViewModel { UserId = userId });
-        }
-    }
-
-    /// <summary>
-    /// Updates user settings with comprehensive validation
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
- public async Task<IActionResult> Edit(UserSettingsViewModel model)
-    {
-        if (!ModelState.IsValid)
+            // Handle profile picture upload first (if provided)
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
  {
-            TempData["Error"] = "يرجى التحقق من صحة البيانات المدخلة";
- return View(model);
-   }
-
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty)
+     _logger.LogInformation("Processing profile picture upload for user: {UserId}", userId);
+            
+    var uploadSuccess = await _userService.UpdateProfilePictureAsync(userId, model.ProfilePicture);
+    
+            if (uploadSuccess)
         {
-            _logger.LogWarning("Unauthorized settings update attempt");
-          return RedirectToAction("Login", "Account");
-        }
-
-    // Security check: Ensure user can only update their own settings
-        if (model.UserId != userId)
+    profilePictureUpdated = true;
+      _logger.LogInformation("Profile picture uploaded successfully for user: {UserId}", userId);
+                }
+              else
         {
-        _logger.LogWarning("User {UserId} attempted to update settings for user {TargetUserId}", userId, model.UserId);
-TempData["Error"] = "غير مصرح لك بتعديل هذه الإعدادات";
-            return RedirectToAction("Edit");
-     }
-
-        try
-        {
-            // Handle profile picture upload separately to avoid data loss
-       if (model.ProfilePicture != null)
-    {
-   var uploadSuccess = await _userService.UpdateProfilePictureAsync(userId, model.ProfilePicture);
-    if (!uploadSuccess)
-   {
-       ModelState.AddModelError("ProfilePicture", "تعذر رفع صورة الملف الشخصي. يرجى التأكد من أن الملف صورة بحجم أقل من 5MB");
-             TempData["Warning"] = "لم يتم تحديث صورة الملف الشخصي";
-  // Continue with other updates
+         _logger.LogWarning("Profile picture upload failed for user: {UserId}", userId);
+                ModelState.AddModelError("ProfilePicture", "تعذر رفع الصورة. تأكد من أن الملف صورة صالحة (JPG, PNG, GIF, WEBP) وأقل من 5 ميجابايت");
+        TempData["Warning"] = "لم يتم تحديث صورة الملف الشخصي";
+      }
        }
-      else
-          {
-           TempData["ProfilePictureSuccess"] = "تم تحديث صورة الملف الشخصي بنجاح";
-     }
-        }
 
- // Update settings
-      var request = new UpdateUserSettingsRequest
-          {
-    FullName = model.FullName,
-  Email = model.Email,
-        PhoneNumber = model.PhoneNumber,
-           City = model.City,
+            // Update user settings
+          var request = new UpdateUserSettingsRequest
+        {
+ FullName = model.FullName?.Trim() ?? string.Empty,
+    Email = model.Email?.Trim() ?? string.Empty,
+     PhoneNumber = model.PhoneNumber?.Trim(),
+              City = model.City?.Trim(),
           DateOfBirth = model.DateOfBirth,
-    Bio = model.Bio,
-     CurrentPassword = model.CurrentPassword,
+         Bio = model.Bio?.Trim(),
+            Gender = model.Gender?.Trim(),
+  CurrentPassword = model.CurrentPassword,
      NewPassword = model.NewPassword,
-   EmailNotifications = model.EmailNotifications,
-       SmsNotifications = model.SmsNotifications,
-   PromotionalNotifications = model.PromotionalNotifications,
-              ShopName = model.ShopName,
-        Address = model.Address,
-        CompanyName = model.CompanyName,
-  ContactPerson = model.ContactPerson
+        EmailNotifications = model.EmailNotifications,
+     SmsNotifications = model.SmsNotifications,
+      PromotionalNotifications = model.PromotionalNotifications,
+                // Tailor-specific
+    ShopName = model.ShopName?.Trim(),
+           Address = model.Address?.Trim(),
+    ExperienceYears = model.ExperienceYears,
+  PricingRange = model.PricingRange?.Trim(),
+                // Corporate-specific
+       CompanyName = model.CompanyName?.Trim(),
+  ContactPerson = model.ContactPerson?.Trim()
             };
 
- var (succeeded, error) = await _userService.UpdateUserSettingsAsync(userId, request);
-            
- if (succeeded)
+    var (succeeded, errorMessage) = await _userService.UpdateUserSettingsAsync(userId, request);
+
+            if (succeeded)
+         {
+        _logger.LogInformation("Settings updated successfully for user: {UserId}", userId);
+         
+  // Set success message
+    if (profilePictureUpdated)
+                {
+       TempData["Success"] = "تم حفظ جميع التعديلات بنجاح وتحديث صورة الملف الشخصي! ✅";
+}
+       else
        {
-         _logger.LogInformation("Settings updated successfully for user: {UserId}", userId);
-     TempData["Success"] = "تم حفظ التعديلات بنجاح";
-      return RedirectToAction("Edit");
-            }
-     
-     _logger.LogWarning("Failed to update settings for user {UserId}: {Error}", userId, error);
-      ModelState.AddModelError(string.Empty, error ?? "حدث خطأ أثناء حفظ التعديلات");
+      TempData["Success"] = "تم حفظ التعديلات بنجاح! ✅";
+         }
+
+                // Redirect to refresh the page with updated data
+  return RedirectToAction("Edit");
+ }
+            else
+            {
+  _logger.LogWarning("Failed to update settings for user {UserId}: {Error}", userId, errorMessage);
+ TempData["Error"] = errorMessage ?? "حدث خطأ أثناء حفظ التعديلات";
+              ModelState.AddModelError(string.Empty, errorMessage ?? "فشل حفظ التعديلات");
+     return View(model);
+          }
+        }
+        catch (Exception ex)
+        {
+     _logger.LogError(ex, "Exception while updating settings for user: {UserId}", userId);
+            TempData["Error"] = "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.";
        return View(model);
+   }
+    }
+
+    /// <summary>
+    /// Remove profile picture
+    /// POST: /UserSettings/RemoveProfilePicture
+    /// </summary>
+    [HttpPost("[action]")]
+ [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RemoveProfilePicture()
+    {
+     var userId = GetCurrentUserId();
+      if (userId == Guid.Empty)
+        {
+            _logger.LogWarning("Unauthorized profile picture removal attempt");
+ return Json(new { success = false, message = "غير مصرح" });
+        }
+
+        try
+        {
+            // Check if user has a profile picture
+     var userSettings = await _userService.GetUserSettingsAsync(userId);
+            if (userSettings == null || string.IsNullOrEmpty(userSettings.ProfilePictureUrl))
+            {
+       _logger.LogInformation("No profile picture to remove for user: {UserId}", userId);
+      TempData["Warning"] = "لا توجد صورة ملف شخصي لحذفها";
+     return RedirectToAction("Edit");
+ }
+
+            // Remove the profile picture
+var success = await _userService.RemoveProfilePictureAsync(userId);
+
+            if (success)
+  {
+        _logger.LogInformation("Profile picture removed successfully for user: {UserId}", userId);
+          TempData["Success"] = "تم حذف صورة الملف الشخصي بنجاح ✅";
+         }
+            else
+{
+          _logger.LogWarning("Failed to remove profile picture for user: {UserId}", userId);
+              TempData["Error"] = "تعذر حذف صورة الملف الشخصي";
+    }
+
+        return RedirectToAction("Edit");
         }
       catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception while updating settings for user: {UserId}", userId);
-            TempData["Error"] = "حدث خطأ غير متوقع أثناء حفظ التعديلات. يرجى المحاولة مرة أخرى.";
-       return View(model);
-        }
+            _logger.LogError(ex, "Error removing profile picture for user: {UserId}", userId);
+            TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
+    return RedirectToAction("Edit");
+}
     }
 
     /// <summary>
-    /// Removes profile picture with confirmation - Protected against accidental deletion
+/// Get the current authenticated user's ID
     /// </summary>
-    [HttpPost]
-  [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RemoveProfilePicture()
-    {
-var userId = GetCurrentUserId();
-      if (userId == Guid.Empty)
- {
-    _logger.LogWarning("Unauthorized profile picture removal attempt");
-     return RedirectToAction("Login", "Account");
-    }
-
-        try
-   {
-        var user = await _userService.GetUserSettingsAsync(userId);
-if (user == null)
-         {
-    _logger.LogError("User not found for profile picture removal: {UserId}", userId);
-        TempData["Error"] = "تعذر العثور على المستخدم";
-    return RedirectToAction("Edit");
-   }
-
-         // Check if user actually has a profile picture
-   if (string.IsNullOrEmpty(user.ProfilePictureUrl))
-{
-  TempData["Warning"] = "لا توجد صورة ملف شخصي لحذفها";
-    return RedirectToAction("Edit");
-       }
-
-       // Remove the profile picture
-            var success = await _userService.RemoveProfilePictureAsync(userId);
-            
-   if (success)
-            {
-   _logger.LogInformation("Profile picture removed for user: {UserId}", userId);
-         TempData["Success"] = "تم حذف صورة الملف الشخصي بنجاح";
-            }
-            else
-            {
-    TempData["Error"] = "تعذر حذف صورة الملف الشخصي";
- }
-        
-     return RedirectToAction("Edit");
-     }
-        catch (Exception ex)
-     {
-    _logger.LogError(ex, "Error removing profile picture for user: {UserId}", userId);
- TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
-            return RedirectToAction("Edit");
-  }
-    }
-
-    /// <summary>
- /// Helper method to get current user ID from claims
-    /// </summary>
+    /// <returns>User ID or Guid.Empty if not found</returns>
     private Guid GetCurrentUserId()
- {
-        var userIdClaim = User.FindFirst("sub") ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-        
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) 
+         ?? User.FindFirst("sub");
+
         if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
         {
-return userId;
- }
+    return userId;
+        }
 
-  _logger.LogWarning("Unable to extract user ID from claims");
-     return Guid.Empty;
->>>>>>> Stashed changes
+        _logger.LogWarning("Unable to extract valid user ID from claims");
+        return Guid.Empty;
     }
 }

@@ -15,17 +15,6 @@ namespace TafsilkPlatform.Web.Models
 
         [ForeignKey("Order")]
         public Guid OrderId { get; set; }
-<<<<<<< Updated upstream
-        public Order Order { get; set; }
-
-        [ForeignKey("Customer")]
-        public Guid CustomerId { get; set; }
-        public CustomerProfile Customer { get; set; }
-
-        [ForeignKey("Tailor")]
-        public Guid TailorId { get; set; }
-        public TailorProfile Tailor { get; set; }
-=======
         public required Order Order { get; set; }
 
         [ForeignKey("Customer")]
@@ -35,7 +24,6 @@ namespace TafsilkPlatform.Web.Models
         [ForeignKey("Tailor")]
         public Guid TailorId { get; set; }
         public required TailorProfile Tailor { get; set; }
->>>>>>> Stashed changes
 
         public decimal Amount { get; set; }
         public Enums.PaymentType PaymentType { get; set; }

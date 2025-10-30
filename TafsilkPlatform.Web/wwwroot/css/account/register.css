@@ -1,4 +1,4 @@
-﻿/* Import variables */
+﻿/* Import variables from styles.css */
 :root {
     --primary-color: #2c5aa0;
     --primary-hover: #1e3f73;
@@ -12,30 +12,16 @@
     --text-secondary: #7f8c8d;
     --text-light: #bdc3c7;
     --text-white: #ffffff;
-    --background-white: #ffffff;
+ --background-white: #ffffff;
     --background-gray: #f8f9fa;
-  --background-light: #ecf0f1;
+    --background-light: #ecf0f1;
     --border-color: #e1e8ed;
- --dark: #0f172a;
+    --dark: #0f172a;
     --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    --font-size-xs: 0.75rem;
-    --font-size-sm: 0.875rem;
-    --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-    --font-size-2xl: 1.5rem;
-    --font-size-3xl: 1.875rem;
-    --font-size-4xl: 2.25rem;
-    --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-    --spacing-md: 1rem;
-    --spacing-lg: 1.5rem;
-    --spacing-xl: 2rem;
-    --spacing-2xl: 3rem;
-    --spacing-3xl: 4rem;
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     --radius-sm: 0.25rem;
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
@@ -44,6 +30,13 @@
     --transition-fast: 0.15s ease-in-out;
     --transition-normal: 0.3s ease-in-out;
     --transition-slow: 0.5s ease-in-out;
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+--spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
 }
 
 * {
@@ -54,7 +47,7 @@
 
 html {
     font-size: 16px;
-scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -66,13 +59,14 @@ body {
     text-align: right;
 }
 
-/* Main Page Design - Split Screen */
+/* Main page design */
 .register-page {
-  display: flex;
- min-height: calc(100vh - 80px);
+    display: flex;
+    min-height: calc(100vh - 80px);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* Brand Section (Left Side) */
+/* Brand Section with enhanced design */
 .brand-section {
     flex: 1;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
@@ -81,8 +75,8 @@ body {
     display: none;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    text-align: center;
+ align-items: center;
+  text-align: center;
     position: relative;
     overflow: hidden;
 }
@@ -90,45 +84,85 @@ body {
 .brand-section::before {
     content: "";
     position: absolute;
-    top: 0;
-    right: 0;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 30s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.brand-section::after {
+    content: "";
+    position: absolute;
     bottom: 0;
     left: 0;
-    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" opacity="0.1"><path d="M30,30 Q50,10 70,30 T90,50 T70,70 T50,90 T30,70 T10,50 T30,30 Z" fill="white"/></svg>') repeat;
-    background-size: 200px;
+    right: 0;
+    height: 100px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="rgba(255,255,255,0.1)"/></svg>') no-repeat bottom;
+    background-size: cover;
+    opacity: 0.3;
 }
 
 .brand-content {
 position: relative;
     z-index: 1;
     max-width: 500px;
+    animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+   transform: translateY(30px);
+    }
+    to {
+     opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .brand-logo {
-    font-size: 2.5rem;
+ font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: var(--spacing-lg);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
+    animation: bounceIn 1s ease-out;
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+ 70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .brand-logo i {
     font-size: 2rem;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
 .brand-title {
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: var(--spacing-md);
-    line-height: 1.2;
+    line-height: 1.3;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .brand-subtitle {
     font-size: 1.2rem;
-  opacity: 0.9;
+    opacity: 0.95;
     margin-bottom: var(--spacing-2xl);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .features {
@@ -143,14 +177,25 @@ position: relative;
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    font-size: 0.9rem;
+    font-size: 1rem;
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--radius-full);
+    backdrop-filter: blur(10px);
+    transition: all var(--transition-normal);
+}
+
+.feature:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-2px);
 }
 
 .feature i {
     color: var(--secondary-color);
+    font-size: 1.2rem;
 }
 
-/* Form Section (Right Side) */
+/* Form Section with enhanced design */
 .form-section {
     flex: 1;
     display: flex;
@@ -159,18 +204,27 @@ position: relative;
     align-items: center;
     padding: var(--spacing-2xl);
     background-color: var(--background-white);
-    overflow-y: auto;
 }
 
 .form-container {
-<<<<<<< Updated upstream
     width: 100%;
-    max-width: 450px;
-=======
- width: 100%;
     max-width: 480px;
-    margin: 0 auto;
->>>>>>> Stashed changes
+    background: white;
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    animation: slideInRight 0.6s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+  opacity: 0;
+    transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .form-header {
@@ -183,6 +237,10 @@ position: relative;
     font-weight: 700;
     margin-bottom: var(--spacing-sm);
     color: var(--text-primary);
+background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .form-subtitle {
@@ -190,74 +248,13 @@ position: relative;
     font-size: 1rem;
 }
 
-/* Progress Steps */
+/* Progress Steps - Enhanced */
 .progress-steps {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xl);
-    position: relative;
-<<<<<<< Updated upstream
-=======
-    width: 100%;
->>>>>>> Stashed changes
+    display: none; /* Hidden by default, can be enabled */
+ margin-bottom: var(--spacing-xl);
 }
 
-.progress-bar {
-    position: absolute;
-    top: 15px;
-    right: 0;
-    height: 2px;
-    background: var(--primary-color);
-    transition: width 0.3s;
-    z-index: 0;
-}
-
-.step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-<<<<<<< Updated upstream
-    flex: 1;
-=======
-  flex: 1;
->>>>>>> Stashed changes
-    position: relative;
-    z-index: 1;
-}
-
-.step-number {
- width: 32px;
-<<<<<<< Updated upstream
-    height: 32px;
-    border-radius: 50%;
-    background: var(--background-gray);
-=======
- height: 32px;
-    border-radius: 50%;
- background: var(--background-gray);
->>>>>>> Stashed changes
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.9rem;
-}
-
-.step.active .step-number {
-    background: var(--primary-color);
-    color: white;
-}
-
-.step-label {
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    text-align: center;
-}
-
-/* User Type Toggle */
+/* User Type Toggle - Enhanced */
 .user-type-toggle {
     display: flex;
     background: var(--background-gray);
@@ -265,24 +262,16 @@ position: relative;
     padding: 4px;
     margin-bottom: var(--spacing-lg);
     gap: 4px;
-<<<<<<< Updated upstream
-=======
-    width: 100%;
-    box-sizing: border-box;
->>>>>>> Stashed changes
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .user-type-option {
     flex: 1;
     text-align: center;
     padding: var(--spacing-sm) var(--spacing-md);
-<<<<<<< Updated upstream
     border-radius: var(--radius-sm);
-=======
-border-radius: var(--radius-sm);
->>>>>>> Stashed changes
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
     font-weight: 600;
     font-size: 0.9rem;
     color: var(--text-secondary);
@@ -296,72 +285,89 @@ border-radius: var(--radius-sm);
     font-size: 1.2rem;
 }
 
+.user-type-option:hover {
+    background: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+}
+
 .user-type-option.active {
     background: var(--background-white);
     color: var(--primary-color);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
-/* OAuth Buttons */
+/* OAuth Buttons - Enhanced */
 .oauth-buttons {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
     margin-bottom: var(--spacing-lg);
-<<<<<<< Updated upstream
-=======
-    width: 100%;
->>>>>>> Stashed changes
 }
 
 .btn-oauth {
     display: flex;
     align-items: center;
     justify-content: center;
-<<<<<<< Updated upstream
-gap: var(--spacing-sm);
-=======
     gap: var(--spacing-sm);
->>>>>>> Stashed changes
     padding: 0.875rem 1rem;
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     background: var(--background-white);
     color: var(--text-primary);
-<<<<<<< Updated upstream
     font-weight: 600;
-=======
-  font-weight: 600;
->>>>>>> Stashed changes
     transition: all var(--transition-normal);
     width: 100%;
     font-size: 0.95rem;
     cursor: pointer;
-    font-family: var(--font-family);
-<<<<<<< Updated upstream
-=======
     text-decoration: none;
-    box-sizing: border-box;
->>>>>>> Stashed changes
+  position: relative;
+    overflow: hidden;
+}
+
+.btn-oauth::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.05);
+  transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-oauth:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .btn-oauth:hover {
-    background: var(--background-gray);
+    border-color: currentColor;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-<<<<<<< Updated upstream
-=======
-    text-decoration: none;
->>>>>>> Stashed changes
+    box-shadow: var(--shadow-md);
+}
+
+.btn-oauth i {
+    font-size: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-oauth span {
+    position: relative;
+    z-index: 1;
 }
 
 .btn-google {
     border-color: #db4437;
-<<<<<<< Updated upstream
     color: #db4437;
-=======
-  color: #db4437;
->>>>>>> Stashed changes
+}
+
+.btn-google:hover {
+    background: #db4437;
+    color: white;
 }
 
 .btn-facebook {
@@ -369,16 +375,17 @@ gap: var(--spacing-sm);
     color: #1877f2;
 }
 
-/* Divider */
+.btn-facebook:hover {
+    background: #1877f2;
+  color: white;
+}
+
+/* Divider - Enhanced */
 .divider {
     display: flex;
     align-items: center;
     margin: var(--spacing-lg) 0;
     color: var(--text-secondary);
-<<<<<<< Updated upstream
-=======
-    width: 100%;
->>>>>>> Stashed changes
 }
 
 .divider::before,
@@ -386,199 +393,171 @@ gap: var(--spacing-sm);
     content: "";
     flex: 1;
     height: 1px;
-<<<<<<< Updated upstream
-  background-color: var(--border-color);
+    background: linear-gradient(to right, transparent, var(--border-color), transparent);
 }
 
 .divider span {
-padding: 0 var(--spacing-md);
+  padding: 0 var(--spacing-md);
     font-size: 0.9rem;
-=======
-    background-color: var(--border-color);
+    font-weight: 600;
+    background: white;
 }
 
-.divider span {
-    padding: 0 var(--spacing-md);
- font-size: 0.9rem;
->>>>>>> Stashed changes
-}
-
-/* Form Styles */
+/* Form Inputs - Enhanced */
 .form {
-    width: 100%;
-<<<<<<< Updated upstream
+width: 100%;
 }
 
 .input-group {
     margin-bottom: 1.25rem;
     position: relative;
-=======
-    display: flex;
-    flex-direction: column;
-}
-
-.input-group {
-    margin-bottom: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
->>>>>>> Stashed changes
 }
 
 .input-group label {
     display: block;
-<<<<<<< Updated upstream
     margin-bottom: 0.5rem;
     font-weight: 600;
     color: var(--text-primary);
     font-size: 0.95rem;
 }
 
-.input-icon {
-    position: absolute;
-    right: 12px;
-    top: 38px;
-    color: var(--text-secondary);
-    pointer-events: none;
-=======
- margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    text-align: right;
-}
-
-.input-group > div {
-    position: relative;
-    width: 100%;
->>>>>>> Stashed changes
-}
-
 .input-group input {
-    width: 100%;
-<<<<<<< Updated upstream
-    padding: 0.875rem 1rem 0.875rem 2.5rem;
-=======
+ width: 100%;
     padding: 0.875rem 1rem;
->>>>>>> Stashed changes
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
+    padding-right: 2.75rem;
+    border: 2px solid var(--border-color);
+border-radius: var(--radius-md);
     font-size: 1rem;
-    transition: all 0.2s;
+    transition: all var(--transition-normal);
     font-family: var(--font-family);
-<<<<<<< Updated upstream
-=======
-    direction: rtl;
-    text-align: right;
-    box-sizing: border-box;
->>>>>>> Stashed changes
+    background: var(--background-white);
 }
 
 .input-group input:focus {
     outline: none;
-  border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.1);
+    background: white;
 }
 
-<<<<<<< Updated upstream
-/* Password Toggle */
+.input-group input::placeholder {
+    color: var(--text-light);
+}
+
+/* Input icons styling */
+.input-group .fa-user,
+.input-group .fa-envelope,
+.input-group .fa-phone,
+.input-group .fa-lock {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+    transition: color var(--transition-normal);
+}
+
+.input-group input:focus + .fa-user,
+.input-group input:focus + .fa-envelope,
+.input-group input:focus + .fa-phone,
+.input-group input:focus + .fa-lock {
+    color: var(--primary-color);
+}
+
+/* Password Toggle Button */
 .password-toggle {
     position: absolute;
     left: 12px;
-    top: 38px;
+    top: 50%;
+    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--text-secondary);
     cursor: pointer;
-    padding: 4px;
-    transition: color 0.2s;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
 }
 
-=======
-.input-group input::placeholder {
-    color: var(--text-light);
-    opacity: 0.8;
-}
-
-/* Password Toggle */
->>>>>>> Stashed changes
 .password-toggle:hover {
     color: var(--primary-color);
+  background: var(--background-gray);
 }
 
 /* Password Strength Indicator */
 .password-strength {
     height: 4px;
     background: var(--background-gray);
-    border-radius: 2px;
-<<<<<<< Updated upstream
+    border-radius: var(--radius-full);
     margin-top: 8px;
     overflow: hidden;
-=======
-    margin-top: 0.5rem;
-    overflow: hidden;
-    width: 100%;
->>>>>>> Stashed changes
+    position: relative;
 }
 
 .password-strength-bar {
     height: 100%;
     width: 0;
-    transition: all 0.3s;
+  transition: all var(--transition-normal);
+    border-radius: var(--radius-full);
 }
 
 .password-strength.weak .password-strength-bar {
     width: 33%;
-    background: var(--error-color);
+    background: linear-gradient(90deg, var(--error-color), #ff6b6b);
 }
 
 .password-strength.medium .password-strength-bar {
     width: 66%;
- background: var(--warning-color);
+    background: linear-gradient(90deg, var(--warning-color), #ffd93d);
 }
 
 .password-strength.strong .password-strength-bar {
     width: 100%;
- background: var(--success-color);
+    background: linear-gradient(90deg, var(--success-color), #6bcf7f);
 }
 
-/* Submit Button */
+/* Submit Button - Enhanced */
 .btn-submit {
     width: 100%;
-<<<<<<< Updated upstream
-    padding: 0.875rem 1rem;
-=======
-    padding: 1rem 1.5rem;
->>>>>>> Stashed changes
-    background-color: var(--primary-color);
+    padding: 1rem 1rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
     color: white;
     border: none;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
+  border-radius: var(--radius-md);
+ font-size: 1.05rem;
+    font-weight: 700;
+  cursor: pointer;
     transition: all var(--transition-normal);
-<<<<<<< Updated upstream
-    margin-top: 0.5rem;
-=======
-    margin-top: 1rem;
-    font-family: var(--font-family);
-    box-sizing: border-box;
->>>>>>> Stashed changes
+  margin-top: 0.5rem;
+    box-shadow: 0 4px 12px rgba(44, 90, 160, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-submit::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+  height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-submit:hover::before {
+    width: 400px;
+    height: 400px;
 }
 
 .btn-submit:hover {
-    background-color: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 6px 20px rgba(44, 90, 160, 0.4);
 }
 
-<<<<<<< Updated upstream
-/* Form Footer */
-.form-footer {
-    text-align: center;
-    margin-top: var(--spacing-lg);
-=======
 .btn-submit:active {
     transform: translateY(0);
 }
@@ -586,111 +565,202 @@ padding: 0 var(--spacing-md);
 /* Form Footer */
 .form-footer {
     text-align: center;
-    margin-top: var(--spacing-xl);
->>>>>>> Stashed changes
-    font-size: 0.9rem;
+    margin-top: var(--spacing-lg);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    font-size: 0.95rem;
     color: var(--text-secondary);
 }
 
 .form-footer a {
-color: var(--primary-color);
+    color: var(--primary-color);
     font-weight: 600;
     text-decoration: none;
+    transition: all var(--transition-fast);
 }
 
 .form-footer a:hover {
     text-decoration: underline;
+    color: var(--primary-hover);
 }
 
 /* Terms */
 .terms {
     text-align: center;
-    margin-top: var(--spacing-lg);
-    font-size: 0.8rem;
+    margin-top: var(--spacing-md);
+    font-size: 0.85rem;
     color: var(--text-secondary);
-<<<<<<< Updated upstream
-    max-width: 350px;
-    margin-left: auto;
-    margin-right: auto;
-=======
-    max-width: 100%;
-    padding: 0 var(--spacing-md);
->>>>>>> Stashed changes
+    line-height: 1.6;
 }
 
 .terms a {
     color: var(--primary-color);
     text-decoration: none;
+  font-weight: 600;
 }
 
 .terms a:hover {
     text-decoration: underline;
 }
 
-/* Alert Styles */
+/* Alert Messages */
 .alert {
-    padding: 12px 16px;
-    margin-bottom: var(--spacing-lg);
+    padding: 1rem;
     border-radius: var(--radius-md);
-<<<<<<< Updated upstream
-=======
-    width: 100%;
-    box-sizing: border-box;
->>>>>>> Stashed changes
+    margin-bottom: var(--spacing-lg);
+    border-left: 4px solid;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-<<<<<<< Updated upstream
-  border: 1px solid #f5c6cb;
-    color: #721c24;
-=======
-    border: 1px solid #f5c6cb;
-  color: #721c24;
->>>>>>> Stashed changes
+    background: #fee;
+    color: var(--error-color);
+    border-color: var(--error-color);
 }
 
-/* Responsive Styles */
+.alert-success {
+    background: #efe;
+    color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+/* Responsive Design - Enhanced */
 @media (min-width: 768px) {
     .brand-section {
         display: flex;
     }
 
-    .brand-title {
-        font-size: 1.8rem;
+    .register-page {
+      background: var(--background-white);
     }
+
+    .form-container {
+    padding: var(--spacing-3xl);
+}
 }
 
 @media (min-width: 1024px) {
     .brand-title {
-        font-size: 2.2rem;
+        font-size: 2.5rem;
+    }
+
+    .form-container {
+     max-width: 520px;
     }
 }
 
 @media (max-width: 767px) {
     .register-page {
-   flex-direction: column;
+        flex-direction: column;
+        min-height: 100vh;
     }
 
-.brand-section {
-     padding: var(--spacing-2xl) var(--spacing-lg);
+    .brand-section {
+        padding: var(--spacing-2xl) var(--spacing-lg);
         min-height: auto;
     }
 
+    .brand-title {
+   font-size: 1.75rem;
+    }
+
+    .brand-subtitle {
+        font-size: 1rem;
+    }
+
+.features {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
     .form-section {
- padding: var(--spacing-2xl) var(--spacing-lg);
+        padding: var(--spacing-xl) var(--spacing-lg);
     }
 
     .form-container {
-  max-width: 100%;
+        padding: var(--spacing-xl);
+        box-shadow: none;
+        border-radius: 0;
     }
 
-    .step-label {
-        display: none;
+    .form-title {
+        font-size: 1.75rem;
     }
 
-    .progress-steps {
-    justify-content: center;
-        gap: var(--spacing-md);
+    .user-type-option {
+        font-size: 0.85rem;
+        padding: 0.5rem;
     }
+
+    .user-type-option span {
+      display: none;
+    }
+
+    .user-type-option i {
+    font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .oauth-buttons {
+        gap: 0.75rem;
+}
+
+    .btn-oauth {
+        padding: 0.75rem 0.875rem;
+   font-size: 0.9rem;
+    }
+
+    .btn-oauth span {
+   font-size: 0.85rem;
+    }
+}
+
+/* Loading State */
+.btn-submit.loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-submit.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Focus Visible for Accessibility */
+*:focus-visible {
+    outline: 2px solid var(--primary-color);
+ outline-offset: 2px;
+}
+
+/* Smooth transitions for theme changes */
+* {
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--transition-fast);
+    transition-timing-function: ease-in-out;
 }

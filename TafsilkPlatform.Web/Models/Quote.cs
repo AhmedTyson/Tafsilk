@@ -14,17 +14,6 @@ namespace TafsilkPlatform.Web.Models
         public Guid QuoteId { get; set; }
         [ForeignKey("order")]
         public Guid OrderId { get; set; }
-<<<<<<< Updated upstream
-        public Order order { get; set; }
-        [ForeignKey("Tailor")]
-        public Guid TailorId { get; set; }
-        public TailorProfile Tailor { get; set; }
-        public decimal ProposedPrice { get; set; }
-        public int EstimatedDays { get; set; }
-        public string Message { get; set; }
-
-
-=======
         public required Order order { get; set; }
         [ForeignKey("Tailor")]
         public Guid TailorId { get; set; }
@@ -32,6 +21,5 @@ namespace TafsilkPlatform.Web.Models
         public decimal ProposedPrice { get; set; }
         public int EstimatedDays { get; set; }
         public required string Message { get; set; }
->>>>>>> Stashed changes
     }
 }

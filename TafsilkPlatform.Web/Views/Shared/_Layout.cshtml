@@ -449,7 +449,7 @@ align-items: center;
 
    <!-- Navigation Actions -->
    <div class="nav-actions">
-       @if (User.Identity?.IsAuthenticated == true)
+     @if (User.Identity?.IsAuthenticated == true)
     {
     <!-- User Menu -->
    <div class="user-menu">
@@ -459,13 +459,13 @@ align-items: center;
  <i class="fas fa-chevron-down" style="font-size: 0.8rem;"></i>
    </button>
     <div class="user-menu-dropdown" id="userMenuDropdown">
-     <a asp-controller="Account" asp-action="Settings">
+     <a asp-controller="UserSettings" asp-action="Edit">
    <i class="fas fa-cog me-2"></i> الإعدادات
-      </a>
+    </a>
       <hr />
     <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
 @Html.AntiForgeryToken()
-        <button type="submit">
+      <button type="submit">
       <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
       </button>
       </form>
@@ -473,11 +473,11 @@ align-items: center;
       </div>
      }
     else
-         {
+    {
 <a asp-controller="Account" asp-action="Login" class="btn btn-outline">تسجيل دخول</a>
-       <a asp-controller="Account" asp-action="Register" class="btn btn-primary">انضم كخياط</a>
+  <a asp-controller="Account" asp-action="Register" class="btn btn-primary">انضم كخياط</a>
      }
-          
+    
    <button class="lang-toggle" type="button" aria-label="تبديل اللغة" id="langToggle">
      <i class="fas fa-globe" aria-hidden="true"></i>
       <span>العربية / EN</span>

@@ -2,37 +2,14 @@
 
 @{
     ViewData["Title"] = "إكمال التسجيل - تفصيلك";
-<<<<<<< Updated upstream
-=======
     var provider = ViewData["Provider"]?.ToString() ?? "Google";
     var providerName = provider == "Google" ? "Google" : "Facebook";
     var providerIcon = provider == "Google" ? "fab fa-google" : "fab fa-facebook-f";
     var providerColor = provider == "Google" ? "#db4437" : "#1877f2";
->>>>>>> Stashed changes
 }
 
 @section Styles {
     <style>
-<<<<<<< Updated upstream
-    .complete-registration-page {
-   background-color: var(--background-gray);
-         min-height: calc(100vh - 200px);
-     padding: var(--spacing-3xl) 0;
-        }
-
-        .registration-container {
-   max-width: 600px;
-   margin: 0 auto;
-        }
-
-    .card {
-       background: var(--background-white);
-     border: 1px solid var(--border-color);
-   border-radius: var(--radius-xl);
- padding: var(--spacing-2xl);
-            box-shadow: var(--shadow-lg);
-  }
-=======
   .complete-registration-page {
       background-color: var(--background-gray);
          min-height: calc(100vh - 200px);
@@ -51,36 +28,19 @@
  padding: var(--spacing-2xl);
      box-shadow: var(--shadow-lg);
         }
->>>>>>> Stashed changes
 
     .page-header {
    text-align: center;
   margin-bottom: var(--spacing-2xl);
-<<<<<<< Updated upstream
-        }
-
-        .page-title {
-      font-size: var(--font-size-3xl);
-=======
    }
 
   .page-title {
    font-size: var(--font-size-3xl);
->>>>>>> Stashed changes
   font-weight: 700;
    color: var(--text-primary);
    margin-bottom: var(--spacing-sm);
         }
 
-<<<<<<< Updated upstream
-  .page-subtitle {
-  color: var(--text-secondary);
-font-size: var(--font-size-base);
- }
-
-     .google-info {
-       background: var(--primary-light);
-=======
      .page-subtitle {
   color: var(--text-secondary);
 font-size: var(--font-size-base);
@@ -88,30 +48,11 @@ font-size: var(--font-size-base);
 
  .@(provider.ToLower())-info {
      background: var(--primary-light);
->>>>>>> Stashed changes
  padding: var(--spacing-md);
    border-radius: var(--radius-md);
  margin-bottom: var(--spacing-xl);
  display: flex;
 align-items: center;
-<<<<<<< Updated upstream
-   gap: var(--spacing-md);
-  }
-
-.google-info img {
-   width: 60px;
-       height: 60px;
-    border-radius: 50%;
-    border: 3px solid white;
-        }
-
-        .google-info-text {
-     flex: 1;
-        }
-
-  .google-info-text strong {
-      display: block;
-=======
       gap: var(--spacing-md);
         }
 
@@ -128,16 +69,10 @@ align-items: center;
 
   .@(provider.ToLower())-info-text strong {
    display: block;
->>>>>>> Stashed changes
    font-size: 1.1rem;
         color: var(--text-primary);
    }
 
-<<<<<<< Updated upstream
-        .google-info-text small {
- color: var(--text-secondary);
-    }
-=======
    .@(provider.ToLower())-info-text small {
  color: var(--text-secondary);
       }
@@ -151,7 +86,6 @@ align-items: center;
    font-size: 0.75rem;
  margin-top: 0.25rem;
       }
->>>>>>> Stashed changes
 
    .form-group {
      margin-bottom: 1.25rem;
@@ -168,11 +102,7 @@ align-items: center;
    width: 100%;
 padding: 0.875rem 1rem;
      border: 1px solid var(--border-color);
-<<<<<<< Updated upstream
-  border-radius: var(--radius-md);
-=======
 border-radius: var(--radius-md);
->>>>>>> Stashed changes
  font-size: 1rem;
   font-family: var(--font-family);
     transition: all 0.2s;
@@ -221,11 +151,7 @@ border-color: var(--primary-color);
    .user-type-option.active {
      background: var(--background-white);
     color: var(--primary-color);
-<<<<<<< Updated upstream
-       box-shadow: var(--shadow-sm);
-=======
     box-shadow: var(--shadow-sm);
->>>>>>> Stashed changes
         }
 
         .btn-submit {
@@ -239,11 +165,7 @@ width: 100%;
    font-weight: 600;
  cursor: pointer;
       transition: all 0.2s;
-<<<<<<< Updated upstream
-     margin-top: var(--spacing-md);
-=======
   margin-top: var(--spacing-md);
->>>>>>> Stashed changes
    }
 
       .btn-submit:hover {
@@ -257,11 +179,7 @@ width: 100%;
       font-size: 0.85rem;
     margin-top: 0.25rem;
   display: block;
-<<<<<<< Updated upstream
-        }
-=======
    }
->>>>>>> Stashed changes
 
  @@media (max-width: 768px) {
       .complete-registration-page {
@@ -272,9 +190,6 @@ width: 100%;
    padding: var(--spacing-lg);
    }
       }
-<<<<<<< Updated upstream
-    </style>
-=======
 
   .google-info {
       background: var(--primary-light);
@@ -317,7 +232,6 @@ width: 100%;
       margin-top: 0.25rem;
   }
 </style>
->>>>>>> Stashed changes
 }
 
 <div class="complete-registration-page">
@@ -328,30 +242,12 @@ width: 100%;
      <p class="page-subtitle">قم بإكمال معلومات حسابك للمتابعة</p>
   </div>
 
-<<<<<<< Updated upstream
-       <div class="google-info">
-=======
        <div class="@(provider.ToLower())-info">
->>>>>>> Stashed changes
        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
        {
          <img src="@Model.ProfilePictureUrl" alt="صورة الملف الشخصي" />
     }
   else
-<<<<<<< Updated upstream
-            {
-       <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--background-gray); display: flex; align-items: center; justify-content: center;">
-        <i class="fab fa-google" style="font-size: 1.5rem; color: var(--primary-color);"></i>
-       </div>
-    }
-    <div class="google-info-text">
-        <strong>@Model.FullName</strong>
-     <small>@Model.Email</small>
-     </div>
- </div>
-
-    <form asp-action="CompleteGoogleRegistration" method="post">
-=======
    {
        <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--background-gray); display: flex; align-items: center; justify-content: center;">
         <i class="@providerIcon" style="font-size: 1.5rem; color: @providerColor;"></i>
@@ -368,7 +264,6 @@ width: 100%;
  </div>
 
     <form asp-action="CompleteSocialRegistration" method="post">
->>>>>>> Stashed changes
   @Html.AntiForgeryToken()
 
       <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
@@ -378,11 +273,7 @@ width: 100%;
 
      <div class="form-group">
      <label asp-for="FullName" class="form-label">الاسم الكامل</label>
-<<<<<<< Updated upstream
-      <input asp-for="FullName" class="form-control" placeholder="أدخل اسمك الكامل" />
-=======
 <input asp-for="FullName" class="form-control" placeholder="أدخل اسمك الكامل" />
->>>>>>> Stashed changes
         <span asp-validation-for="FullName" class="text-danger"></span>
   </div>
 
@@ -390,11 +281,7 @@ width: 100%;
       <label asp-for="PhoneNumber" class="form-label">رقم الهاتف (اختياري)</label>
        <input asp-for="PhoneNumber" class="form-control" placeholder="أدخل رقم هاتفك" />
      <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-<<<<<<< Updated upstream
-      </div>
-=======
  </div>
->>>>>>> Stashed changes
 
     <div class="form-group">
    <label class="form-label">اختر نوع الحساب</label>
@@ -404,36 +291,22 @@ width: 100%;
 <span>عميل</span>
   </div>
      <div class="user-type-option active" data-type="tailor">
-<<<<<<< Updated upstream
-  <i class="fas fa-cut"></i>
-=======
 <i class="fas fa-cut"></i>
->>>>>>> Stashed changes
      <span>خياط</span>
       </div>
     <div class="user-type-option" data-type="corporate">
    <i class="fas fa-building"></i>
  <span>شركة</span>
-<<<<<<< Updated upstream
-  </div>
-      </div>
-       <input type="hidden" asp-for="UserType" id="userTypeInput" value="tailor" />
-=======
 </div>
    </div>
   <input type="hidden" asp-for="UserType" id="userTypeInput" value="tailor" />
->>>>>>> Stashed changes
  </div>
 
         <button type="submit" class="btn-submit">
   <i class="fas fa-check me-2"></i>
  إنشاء الحساب
    </button>
-<<<<<<< Updated upstream
-      </form>
-=======
   </form>
->>>>>>> Stashed changes
         </div>
   </div>
 </div>
@@ -448,15 +321,6 @@ width: 100%;
 
     userTypeOptions.forEach(option => {
       option.addEventListener("click", function () {
-<<<<<<< Updated upstream
-     userTypeOptions.forEach(opt => opt.classList.remove("active"));
-       this.classList.add("active");
-   const selectedType = this.getAttribute("data-type");
-       userTypeInput.value = selectedType;
- });
-     });
-      });
-=======
   userTypeOptions.forEach(opt => opt.classList.remove("active"));
        this.classList.add("active");
    const selectedType = this.getAttribute("data-type");
@@ -464,6 +328,5 @@ width: 100%;
  });
      });
     });
->>>>>>> Stashed changes
     </script>
 }

@@ -27,10 +27,6 @@ namespace TafsilkPlatform.Web.Models
 
         [StringLength(1000)]
         public string? Bio { get; set; }
-<<<<<<< Updated upstream
-        public string? ProfilePictureUrl { get; set; }
-
-=======
 
         [Obsolete("Use ProfilePictureData instead. This field is kept for backward compatibility.")]
         public string? ProfilePictureUrl { get; set; }
@@ -42,7 +38,6 @@ namespace TafsilkPlatform.Web.Models
         [StringLength(100)]
         public string? ProfilePictureContentType { get; set; }
 
->>>>>>> Stashed changes
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [CustomValidation(typeof(CustomerProfile), nameof(ValidateDateOfBirth))]
