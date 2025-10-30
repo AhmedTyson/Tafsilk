@@ -1,169 +1,264 @@
 @{
-    ViewBag.Title = "تفصيلك — إنشاء حساب";
+    ViewData["Title"] = "إنشاء حساب | تفصيلك - منصة الخياطين";
+    ViewData["Description"] = "انضم إلى منصة تفصيلك وابدأ رحلتك مع أمهر الخياطين أو كعميل مميز";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/account/register.css" asp-append-version="true" />
+@section Meta {
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="@ViewData["Description"]" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@ViewData["Title"]" />
+    <meta property="og:description" content="@ViewData["Description"]" />
+    <meta property="og:type" content="website" />
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
 }
 
-<main class="register-page">
-    <!-- Brand Section (Left Side) -->
-    <section class="brand-section">
-     <div class="brand-content">
-            <div class="brand-logo">
-        <i class="fas fa-cut"></i>
- <span>تفصيلك</span>
-  </div>
-     <h1 class="brand-title">انضم إلى أكبر شبكة للخياطين والمبدعين</h1>
-            <p class="brand-subtitle">اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك</p>
+@section Styles {
+  <link rel="stylesheet" href="~/css/account/register.css" asp-append-version="true" />
+}
 
-            <div class="features">
-         <div class="feature">
-       <i class="fas fa-check-circle"></i>
-     <span>أكثر من 300 خياط موثوق</span>
-       </div>
-     <div class="feature">
-     <i class="fas fa-check-circle"></i>
-      <span>آلاف المشاريع المكتملة</span>
-                </div>
-    <div class="feature">
-  <i class="fas fa-check-circle"></i>
-         <span>تصميمات مخصصة وعصرية</span>
-    </div>
+<main class="register-page" role="main">
+    <!-- Brand Section (Left Side) -->
+ <section class="brand-section" aria-label="معلومات المنصة">
+        <div class="brand-content">
+            <div class="brand-logo" aria-hidden="true">
+                <i class="fas fa-cut"></i>
+<span>تفصيلك</span>
+            </div>
+       <h1 class="brand-title">انضم إلى أكبر شبكة للخياطين والمبدعين</h1>
+     <p class="brand-subtitle">اكتشف عالمًا من الإبداع والفرص مع منصة تفصيلك</p>
+
+   <div class="features" role="list">
+           <div class="feature" role="listitem">
+          <i class="fas fa-check-circle" aria-hidden="true"></i>
+ <span>أكثر من 300 خياط موثوق</span>
+      </div>
+      <div class="feature" role="listitem">
+      <i class="fas fa-check-circle" aria-hidden="true"></i>
+          <span>آلاف المشاريع المكتملة</span>
+     </div>
+            <div class="feature" role="listitem">
+ <i class="fas fa-check-circle" aria-hidden="true"></i>
+        <span>تصميمات مخصصة وعصرية</span>
+         </div>
             </div>
         </div>
     </section>
 
-    <!-- Form Section (Right Side) -->
+  <!-- Form Section (Right Side) -->
     <section class="form-section">
         <div class="form-container">
-            <div class="form-header">
-             <h2 class="form-title" id="formTitle">إنشاء حساب</h2>
-            <p class="form-subtitle">انضم إلى شبكتنا الإبداعية المجانية بالكامل</p>
+      <div class="form-header">
+           <h2 class="form-title" id="formTitle">إنشاء حساب جديد</h2>
+  <p class="form-subtitle">انضم إلى شبكتنا الإبداعية مجاناً</p>
             </div>
 
-       <!-- Progress Steps (Optional Enhancement) -->
- <div class="progress-steps">
-    <div class="progress-bar" style="width:33%"></div>
-    <div class="step active">
-  <div class="step-number">1</div>
-           <div class="step-label">المعلومات الأساسية</div>
-        </div>
- <div class="step">
-    <div class="step-number">2</div>
-   <div class="step-label">التفاصيل المهنية</div>
-        </div>
-  <div class="step">
-         <div class="step-number">3</div>
-            <div class="step-label">الانتهاء</div>
-        </div>
-          </div>
+  <!-- User Type Toggle -->
+         <div class="user-type-toggle" id="userTypeToggle" role="group" aria-label="اختر نوع الحساب">
+   <button type="button" class="user-type-option active" data-type="tailor" aria-pressed="true">
+  <i class="fas fa-cut" aria-hidden="true"></i>
+  <span>خياط</span>
+   </button>
+           <button type="button" class="user-type-option" data-type="customer" aria-pressed="false">
+    <i class="fas fa-user" aria-hidden="true"></i>
+  <span>عميل</span>
+     </button>
+      <button type="button" class="user-type-option" data-type="corporate" aria-pressed="false">
+          <i class="fas fa-building" aria-hidden="true"></i>
+       <span>شركة</span>
+                </button>
+            </div>
 
-            <!-- User Type Toggle -->
-            <div class="user-type-toggle" id="userTypeToggle">
-                <div class="user-type-option active" data-type="tailor">
-     <i class="fas fa-cut"></i>
-         <span>خياط</span>
-          </div>
-          <div class="user-type-option" data-type="customer">
-           <i class="fas fa-user"></i>
-    <span>عميل</span>
+          <!-- OAuth Buttons -->
+    <div class="oauth-buttons" role="group" aria-label="التسجيل عبر الشبكات الاجتماعية">
+      <a href="@Url.Action("GoogleLogin", "Account")" 
+        class="btn-oauth btn-google"
+  aria-label="التسجيل باستخدام Google">
+   <i class="fab fa-google" aria-hidden="true"></i>
+   <span>التسجيل باستخدام Google</span>
+     </a>
+     <a href="@Url.Action("FacebookLogin", "Account")" 
+        class="btn-oauth btn-facebook"
+       aria-label="التسجيل باستخدام Facebook">
+   <i class="fab fa-facebook-f" aria-hidden="true"></i>
+    <span>التسجيل باستخدام Facebook</span>
+            </a>
    </div>
- <div class="user-type-option" data-type="corporate">
-     <i class="fas fa-building"></i>
-          <span>شركة</span>
- </div>
-       </div>
 
-      <!-- OAuth Buttons -->
-   <div class="oauth-buttons">
-         <a href="@Url.Action("GoogleLogin", "Account")" class="btn-oauth btn-google">
-      <i class="fab fa-google"></i>
-    <span>التسجيل باستخدام Google</span>
-</a>
-<a href="@Url.Action("FacebookLogin", "Account")" class="btn-oauth btn-facebook">
-   <i class="fab fa-facebook-f"></i>
-  <span>التسجيل باستخدام Facebook</span>
- </a>
-     </div>
+  <div class="divider" aria-hidden="true">
+       <span>أو</span>
+    </div>
 
-  <div class="divider">
-             <span>أو</span>
- </div>
-
-     <!-- Registration Form -->
-         @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form", id = "registerForm" }))
-       {
+            <!-- Registration Form -->
+         @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form", id = "registerForm", novalidate = "novalidate" }))
+ {
          @Html.AntiForgeryToken()
 
-         @if (!ViewData.ModelState.IsValid)
-                {
-       <div class="alert alert-danger" role="alert">
-    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-           </div>
-     }
+        @if (!ViewData.ModelState.IsValid)
+            {
+               <div class="alert alert-danger" role="alert">
+      <i class="fas fa-exclamation-circle alert-icon" aria-hidden="true"></i>
+              <div class="alert-content">
+         <strong>حدث خطأ!</strong>
+         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+     </div>
+        </div>
+           }
 
+         <!-- Full Name Input -->
      <div class="input-group">
-  <label for="name">الاسم الكامل</label>
-       <div style="position: relative;">
-         <i class="fas fa-user" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
-           <input type="text" id="name" name="name" placeholder="أدخل اسمك الكامل" required style="padding-right: 2.5rem;" />
+        <label for="name">
+        الاسم الكامل
+       <span class="required" aria-label="حقل مطلوب">*</span>
+        </label>
+        <div class="input-wrapper">
+       <i class="fas fa-user input-icon" aria-hidden="true"></i>
+     <input type="text" 
+          id="name" 
+   name="name" 
+       placeholder="أدخل اسمك الكامل" 
+       required 
+            autocomplete="name"
+         aria-required="true"
+    aria-describedby="name-error" />
        </div>
-    </div>
-
-   <div class="input-group">
-    <label for="email">البريد الإلكتروني</label>
-      <div style="position: relative;">
- <i class="fas fa-envelope" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
-          <input type="email" id="email" name="email" placeholder="أدخل بريدك الإلكتروني" required style="padding-right: 2.5rem;" />
-      </div>
- </div>
-
-    <div class="input-group">
-       <label for="phone">رقم الهاتف</label>
-          <div style="position: relative;">
-              <i class="fas fa-phone" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
-           <input type="tel" id="phone" name="phoneNumber" placeholder="أدخل رقم هاتفك" style="padding-right: 2.5rem;" />
-     </div>
-             </div>
-
-           <div class="input-group">
-   <label for="password">كلمة المرور</label>
-      <div style="position: relative;">
-   <i class="fas fa-lock" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
-    <input type="password" id="password" name="password" placeholder="أنشئ كلمة مرور قوية" required style="padding-right: 2.5rem; padding-left: 2.5rem;" />
-           <button type="button" class="password-toggle" id="passwordToggle" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px;">
- <i class="fas fa-eye"></i>
-       </button>
+ <div id="name-error" class="error-message" role="alert" style="display: none;">
+        <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                <span></span>
               </div>
-    <div class="password-strength" id="passwordStrength">
-    <div class="password-strength-bar"></div>
+    </div>
+
+    <!-- Email Input -->
+     <div class="input-group">
+          <label for="email">
+      البريد الإلكتروني
+        <span class="required" aria-label="حقل مطلوب">*</span>
+         </label>
+          <div class="input-wrapper">
+    <i class="fas fa-envelope input-icon" aria-hidden="true"></i>
+        <input type="email" 
+       id="email" 
+             name="email" 
+placeholder="example@domain.com" 
+     required 
+           autocomplete="email"
+      aria-required="true"
+           aria-describedby="email-error" />
+ </div>
+          <div id="email-error" class="error-message" role="alert" style="display: none;">
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+           <span></span>
+                 </div>
+      </div>
+
+       <!-- Phone Number Input -->
+  <div class="input-group">
+    <label for="phone">
+             رقم الهاتف
+       <span class="optional">(اختياري)</span>
+           </label>
+      <div class="input-wrapper">
+        <i class="fas fa-phone input-icon" aria-hidden="true"></i>
+  <input type="tel" 
+id="phone" 
+           name="phoneNumber" 
+         placeholder="+20 123 456 7890" 
+        autocomplete="tel"
+  aria-describedby="phone-error" />
        </div>
+        <div id="phone-error" class="error-message" role="alert" style="display: none;">
+            <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        <span></span>
+   </div>
+      </div>
+
+      <!-- Password Input -->
+          <div class="input-group">
+           <label for="password">
+        كلمة المرور
+     <span class="required" aria-label="حقل مطلوب">*</span>
+ </label>
+         <div class="input-wrapper password-wrapper">
+    <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+       <input type="password" 
+    id="password" 
+                  name="password" 
+   placeholder="أنشئ كلمة مرور قوية (6 أحرف على الأقل)" 
+ required 
+          autocomplete="new-password"
+  aria-required="true"
+         aria-describedby="password-error password-strength" />
+        <button type="button" 
+         class="password-toggle" 
+      id="passwordToggle"
+  aria-label="إظهار كلمة المرور">
+            <i class="fas fa-eye" aria-hidden="true"></i>
+         </button>
+        </div>
+   <div class="password-strength" id="passwordStrength" role="status" aria-live="polite">
+    <div class="password-strength-bar"></div>
+                <span class="password-strength-text"></span>
            </div>
+          <div id="password-error" class="error-message" role="alert" style="display: none;">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+          <span></span>
+        </div>
+                </div>
 
-    <div class="input-group">
-         <label for="confirmPassword">تأكيد كلمة المرور</label>
-           <div style="position: relative;">
-         <i class="fas fa-lock" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;"></i>
-        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="أعد إدخال كلمة المرور" required style="padding-right: 2.5rem;" />
-     </div>
+            <!-- Confirm Password Input -->
+             <div class="input-group">
+            <label for="confirmPassword">
+       تأكيد كلمة المرور
+          <span class="required" aria-label="حقل مطلوب">*</span>
+    </label>
+      <div class="input-wrapper">
+  <i class="fas fa-lock input-icon" aria-hidden="true"></i>
+         <input type="password" 
+        id="confirmPassword" 
+     name="confirmPassword" 
+       placeholder="أعد إدخال كلمة المرور" 
+      required 
+   autocomplete="new-password"
+aria-required="true"
+   aria-describedby="confirm-password-error" />
     </div>
+           <div id="confirm-password-error" class="error-message" role="alert" style="display: none;">
+   <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+         <span></span>
+      </div>
+        </div>
 
-    <input type="hidden" id="userType" name="userType" value="tailor" />
+      <input type="hidden" id="userType" name="userType" value="tailor" />
 
-          <button type="submit" class="btn-submit">إنشاء حساب</button>
-     }
+                <button type="submit" class="btn-submit" id="submitBtn">
+     <span>إنشاء حساب</span>
+          </button>
+  }
 
-     <div class="form-footer">
-      <p>هل لديك حساب بالفعل؟ <a href="@Url.Action("Login", "Account")">سجل الدخول</a></p>
-    </div>
+  <div class="form-footer">
+            <p>هل لديك حساب بالفعل؟ <a href="@Url.Action("Login", "Account")">سجل الدخول</a></p>
+   </div>
 
-       <div class="terms">
-        <p>
- بإنشائك لحساب، فإنك توافق على
-  <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a> الخاصة بنا.
-             </p>
+     <div class="terms">
+  <p>
+    بإنشائك لحساب، فإنك توافق على
+                    <a href="@Url.Action("Privacy", "Home")">شروط الاستخدام</a> و 
+                  <a href="@Url.Action("Privacy", "Home")">سياسة الخصوصية</a> الخاصة بنا.
+       </p>
+          </div>
+
+    <!-- Security Notice -->
+    <div class="security-notice">
+    <i class="fas fa-shield-alt" aria-hidden="true"></i>
+      <p>
+          <strong>اتصال آمن</strong><br />
+         بياناتك محمية بتشفير SSL من الدرجة البنكية
+    </p>
             </div>
         </div>
     </section>
@@ -171,92 +266,241 @@
 
 @section Scripts {
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+   document.addEventListener("DOMContentLoaded", function () {
             const registerForm = document.getElementById("registerForm");
-  const userTypeOptions = document.querySelectorAll(".user-type-option");
-    const userTypeInput = document.getElementById("userType");
- const passwordInput = document.getElementById("password");
-     const confirmPasswordInput = document.getElementById("confirmPassword");
- const passwordToggle = document.getElementById("passwordToggle");
+       const userTypeOptions = document.querySelectorAll(".user-type-option");
+            const userTypeInput = document.getElementById("userType");
+            const passwordInput = document.getElementById("password");
+         const confirmPasswordInput = document.getElementById("confirmPassword");
+            const passwordToggle = document.getElementById("passwordToggle");
   const passwordStrength = document.getElementById("passwordStrength");
-  const formTitle = document.getElementById("formTitle");
-   let selectedUserType = "tailor";
-            let isPasswordVisible = false;
+       const formTitle = document.getElementById("formTitle");
+  const submitBtn = document.getElementById("submitBtn");
+            
+    let selectedUserType = "tailor";
+      let isPasswordVisible = false;
 
-     // User type toggle functionality
+         // ========== USER TYPE TOGGLE ==========
     userTypeOptions.forEach((option) => {
-           option.addEventListener("click", function () {
-    userTypeOptions.forEach((opt) => opt.classList.remove("active"));
-      this.classList.add("active");
-        selectedUserType = this.getAttribute("data-type");
-       userTypeInput.value = selectedUserType;
+   option.addEventListener("click", function () {
+   userTypeOptions.forEach((opt) => {
+          opt.classList.remove("active");
+          opt.setAttribute("aria-pressed", "false");
+        });
+     this.classList.add("active");
+     this.setAttribute("aria-pressed", "true");
+selectedUserType = this.getAttribute("data-type");
+      userTypeInput.value = selectedUserType;
 
-    // Update form title based on selected type
-  if (selectedUserType === "tailor") {
-    formTitle.textContent = "انضم كخياط";
-        } else if (selectedUserType === "customer") {
-   formTitle.textContent = "إنشاء حساب عميل";
-   } else if (selectedUserType === "corporate") {
-     formTitle.textContent = "إنشاء حساب شركة";
-    }
- });
-      });
+                // Update form title based on selected type
+      if (selectedUserType === "tailor") {
+       formTitle.textContent = "انضم كخياط محترف";
+      } else if (selectedUserType === "customer") {
+       formTitle.textContent = "إنشاء حساب عميل";
+    } else if (selectedUserType === "corporate") {
+          formTitle.textContent = "إنشاء حساب شركة";
+        }
+    });
+    });
 
-         // Password visibility toggle
-       passwordToggle.addEventListener("click", function () {
-     isPasswordVisible = !isPasswordVisible;
-    passwordInput.type = isPasswordVisible ? "text" : "password";
-     this.innerHTML = isPasswordVisible ?
-    '<i class="fas fa-eye-slash"></i>' :
-         '<i class="fas fa-eye"></i>';
-            });
+         // ========== PASSWORD VISIBILITY TOGGLE ==========
+   if (passwordToggle && passwordInput) {
+        passwordToggle.addEventListener("click", function () {
+          isPasswordVisible = !isPasswordVisible;
+       passwordInput.type = isPasswordVisible ? "text" : "password";
+  
+         const icon = this.querySelector("i");
+       if (isPasswordVisible) {
+          icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+                this.setAttribute("aria-label", "إخفاء كلمة المرور");
+             } else {
+     icon.classList.remove("fa-eye-slash");
+         icon.classList.add("fa-eye");
+     this.setAttribute("aria-label", "إظهار كلمة المرور");
+              }
+    });
+     }
 
-    // Password strength indicator
-            passwordInput.addEventListener("input", function () {
+       // ========== PASSWORD STRENGTH INDICATOR ==========
+    passwordInput.addEventListener("input", function () {
       const password = this.value;
-     let strength = 0;
+  let strength = 0;
+         let strengthText = "";
 
-       if (password.length >= 8) strength++;
-        if (/[A-Z]/.test(password)) strength++;
+           if (password.length >= 8) strength++;
+           if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
        if (/[0-9]/.test(password)) strength++;
-          if (/[^A-Za-z0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
 
-        passwordStrength.className = "password-strength";
-    if (password.length > 0) {
-   if (strength < 2) {
+         passwordStrength.className = "password-strength";
+    const strengthTextEl = passwordStrength.querySelector(".password-strength-text");
+        
+      if (password.length > 0) {
+  if (strength < 2) {
   passwordStrength.classList.add("weak");
-             } else if (strength < 4) {
-      passwordStrength.classList.add("medium");
+            strengthText = "ضعيفة";
+      } else if (strength < 4) {
+            passwordStrength.classList.add("medium");
+          strengthText = "متوسطة";
               } else {
-    passwordStrength.classList.add("strong");
- }
-       }
+     passwordStrength.classList.add("strong");
+         strengthText = "قوية";
+          }
+     strengthTextEl.textContent = strengthText;
+                } else {
+       strengthTextEl.textContent = "";
+             }
 });
 
-      // Form validation
- registerForm.addEventListener("submit", function (e) {
-     const name = (document.getElementById("name").value || '').trim();
-       const email = (document.getElementById("email").value || '').trim();
-     const password = passwordInput.value || '';
-    const confirmPassword = (confirmPasswordInput.value || '');
+ // ========== FORM VALIDATION ==========
+    function validateEmail(email) {
+      const re = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+                return re.test(email);
+ }
 
- if (!name || !email || !password || !confirmPassword) {
-   e.preventDefault();
-         alert("يرجى ملء جميع الحقول المطلوبة");
-    return;
+   function showError(input, message) {
+     const inputGroup = input.closest('.input-group');
+     const errorDiv = inputGroup.querySelector('.error-message');
+  const errorSpan = errorDiv.querySelector('span');
+ 
+     input.classList.add('error');
+           errorSpan.textContent = message;
+       errorDiv.style.display = 'flex';
+      input.setAttribute('aria-invalid', 'true');
+       }
+
+            function clearError(input) {
+   const inputGroup = input.closest('.input-group');
+         const errorDiv = inputGroup.querySelector('.error-message');
+                
+     input.classList.remove('error');
+     errorDiv.style.display = 'none';
+             input.setAttribute('aria-invalid', 'false');
+         }
+
+        // Real-time validation
+            document.getElementById("name").addEventListener("blur", function () {
+ if (!this.value.trim()) {
+            showError(this, "الاسم الكامل مطلوب");
+   } else if (this.value.trim().length < 3) {
+   showError(this, "الاسم يجب أن يكون 3 أحرف على الأقل");
+      } else {
+   clearError(this);
+    }
+     });
+
+            document.getElementById("email").addEventListener("blur", function () {
+        if (!this.value) {
+             showError(this, "البريد الإلكتروني مطلوب");
+                } else if (!validateEmail(this.value)) {
+         showError(this, "البريد الإلكتروني غير صالح");
+       } else {
+        clearError(this);
+    }
+            });
+
+            passwordInput.addEventListener("blur", function () {
+          if (!this.value) {
+         showError(this, "كلمة المرور مطلوبة");
+         } else if (this.value.length < 6) {
+       showError(this, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      } else {
+    clearError(this);
+      }
+      });
+
+        confirmPasswordInput.addEventListener("blur", function () {
+        if (!this.value) {
+           showError(this, "تأكيد كلمة المرور مطلوب");
+           } else if (this.value !== passwordInput.value) {
+          showError(this, "كلمات المرور غير متطابقة");
+ } else {
+      clearError(this);
+        }
+     });
+
+// Clear errors on input
+  [document.getElementById("name"), document.getElementById("email"), passwordInput, confirmPasswordInput].forEach(input => {
+       input.addEventListener("input", function () {
+      if (this.value) {
+clearError(this);
+         }
+         });
+       });
+
+            // ========== FORM SUBMISSION ==========
+  registerForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+
+        let isValid = true;
+             const name = document.getElementById("name").value.trim();
+   const email = document.getElementById("email").value.trim();
+   const password = passwordInput.value;
+ const confirmPassword = confirmPasswordInput.value;
+
+    // Validate name
+           if (!name) {
+         showError(document.getElementById("name"), "الاسم الكامل مطلوب");
+ isValid = false;
+      } else if (name.length < 3) {
+         showError(document.getElementById("name"), "الاسم يجب أن يكون 3 أحرف على الأقل");
+        isValid = false;
+                }
+
+     // Validate email
+              if (!email) {
+ showError(document.getElementById("email"), "البريد الإلكتروني مطلوب");
+ isValid = false;
+     } else if (!validateEmail(email)) {
+showError(document.getElementById("email"), "البريد الإلكتروني غير صالح");
+    isValid = false;
     }
 
-            if (password.length < 6) {
-     e.preventDefault();
-  alert("يجب أن تكون كلمة المرور 6 أحرف على الأقل");
-   return;
+   // Validate password
+    if (!password) {
+      showError(passwordInput, "كلمة المرور مطلوبة");
+         isValid = false;
+  } else if (password.length < 6) {
+   showError(passwordInput, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+         isValid = false;
+        }
+
+     // Validate confirm password
+    if (!confirmPassword) {
+        showError(confirmPasswordInput, "تأكيد كلمة المرور مطلوب");
+         isValid = false;
+        } else if (password !== confirmPassword) {
+       showError(confirmPasswordInput, "كلمات المرور غير متطابقة");
+         isValid = false;
       }
 
-        if (password !== confirmPassword) {
-    e.preventDefault();
-        alert("كلمات المرور غير متطابقة");
-       }
-  });
+          if (isValid) {
+       // Show loading state
+         submitBtn.classList.add('loading');
+              submitBtn.disabled = true;
+          
+          // Submit form
+         this.submit();
+       } else {
+       // Focus first invalid input
+      const firstError = this.querySelector('.error');
+         if (firstError) {
+       firstError.focus();
+        }
+                }
+      });
+
+ // ========== ANALYTICS TRACKING ==========
+            if (typeof gtag !== 'undefined') {
+     registerForm.addEventListener('submit', function() {
+        gtag('event', 'register_attempt', {
+     'event_category': 'authentication',
+          'event_label': selectedUserType
+     });
+     });
+ }
         });
     </script>
 }
