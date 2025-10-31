@@ -11,6 +11,21 @@ namespace TafsilkPlatform.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Drop any existing FOREIGN KEY constraints that reference Orders with CASCADE delete
+            // This avoids SQL Server "multiple cascade paths" errors when recreating FKs with NoAction.
+            migrationBuilder.Sql(@"
+DECLARE @sql NVARCHAR(MAX) = N'';
+SELECT @sql = @sql + N'ALTER TABLE [' + OBJECT_SCHEMA_NAME(fk.parent_object_id) + N'].[' + OBJECT_NAME(fk.parent_object_id) + N'] DROP CONSTRAINT [' + fk.name + N'];' + CHAR(13)
+FROM sys.foreign_keys fk
+WHERE fk.referenced_object_id = OBJECT_ID(N'dbo.Orders')
+ AND fk.delete_referential_action =1; --1 = CASCADE
+
+IF (@sql <> N'')
+BEGIN
+ EXEC sp_executesql @sql;
+END
+");
+
             migrationBuilder.CreateTable(
                 name: "AppSettings",
                 columns: table => new
