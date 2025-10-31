@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TafsilkPlatform.Web.Data;
 
 #nullable disable
 
-namespace TafsilkPlatform.Migrations
+namespace TafsilkPlatform.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251031205115_FixTailorServiceFk")]
+    partial class FixTailorServiceFk
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -604,11 +607,12 @@ namespace TafsilkPlatform.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("TailorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TailorId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UploadedAt")
@@ -621,6 +625,8 @@ namespace TafsilkPlatform.Migrations
 
                     b.HasIndex("TailorId")
                         .HasDatabaseName("IX_PortfolioImages_TailorId");
+
+                    b.HasIndex("TailorId1");
 
                     b.ToTable("PortfolioImages", (string)null);
                 });
@@ -846,9 +852,7 @@ namespace TafsilkPlatform.Migrations
                         .HasDefaultValueSql("(getutcdate())");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<Guid?>("TailorId1")
                         .HasColumnType("uniqueidentifier");
@@ -887,9 +891,7 @@ namespace TafsilkPlatform.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
@@ -1536,11 +1538,15 @@ namespace TafsilkPlatform.Migrations
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.PortfolioImage", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("PortfolioImages")
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
+                        .WithMany()
                         .HasForeignKey("TailorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
+                        .WithMany()
+                        .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
                 });
@@ -1645,7 +1651,7 @@ namespace TafsilkPlatform.Migrations
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("RevenueReports")
+                        .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Tailor");
@@ -1680,7 +1686,7 @@ namespace TafsilkPlatform.Migrations
                         .IsRequired();
 
                     b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("TailorId1");
 
                     b.Navigation("Customer");
@@ -1805,12 +1811,6 @@ namespace TafsilkPlatform.Migrations
             modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
                 {
                     b.Navigation("Payments");
-
-                    b.Navigation("PortfolioImages");
-
-                    b.Navigation("RevenueReports");
-
-                    b.Navigation("Reviews");
 
                     b.Navigation("TailorServices");
                 });

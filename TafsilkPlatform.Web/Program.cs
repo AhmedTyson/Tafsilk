@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.Interfaces;
@@ -176,64 +179,74 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
+// After registering other services, register TokenService and configure JWT validation
+builder.Services.AddSingleton<ITokenService, TafsilkPlatform.Web.Security.TokenService>();
+
+// Configure JWT authentication as an additional scheme
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "ReplaceThisWithASecretKeyInProduction";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "tafsilk";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "tafsilk_clients";
+
+builder.Services.AddAuthentication()
+ .AddJwtBearer("Jwt", options =>
+ {
+ options.RequireHttpsMetadata = false;
+ options.SaveToken = true;
+ options.TokenValidationParameters = new TokenValidationParameters
+ {
+ ValidateIssuer = true,
+ ValidIssuer = jwtIssuer,
+ ValidateAudience = true,
+ ValidAudience = jwtAudience,
+ ValidateIssuerSigningKey = true,
+ IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+ ValidateLifetime = true,
+ };
+ });
+
+// Allow endpoints to accept either cookie or JWT bearer
+builder.Services.AddAuthorization(options =>
+{
+ options.AddPolicy("AdminApiPolicy", policy =>
+ {
+ policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+ policy.RequireRole("Admin");
+ });
+});
+
 var app = builder.Build();
 
-// Validate configuration and database on startup
+// Seed admin role and user during development if missing
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        
-        try
-        {
-      // Check database connectivity
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var canConnect = await dbContext.Database.CanConnectAsync();
-  
-            if (canConnect)
-         {
-       logger.LogInformation("Database connection successful");
-        
-    // Check for pending migrations
-                var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-    if (pendingMigrations.Any())
-         {
-      logger.LogWarning("Pending migrations found: {Migrations}", 
-          string.Join(", ", pendingMigrations));
-      logger.LogWarning("Run: dotnet ef database update");
-       }
-       else
-  {
-         logger.LogInformation("Database schema is up to date");
-                }
-       }
-          else
-            {
-        logger.LogError("Cannot connect to database");
-    }
-        }
-        catch (Exception ex)
-        {
-        logger.LogError(ex, "Database validation failed");
-    }
- 
-        // OAuth configuration summary
-        if (googleConfigured)
-  logger.LogInformation("Google OAuth configured");
-        else
-  logger.LogWarning("Google OAuth not configured - social login disabled");
-        
-        if (facebookConfigured)
-            logger.LogInformation("Facebook OAuth configured");
-        else
-logger.LogWarning("Facebook OAuth not configured - social login disabled");
-        
-        if (!googleConfigured || !facebookConfigured)
-    {
-            logger.LogWarning("To enable social login, configure OAuth secrets using user-secrets");
-        }
-    }
+ using (var scope = app.Services.CreateScope())
+ {
+ var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+ var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+ try
+ {
+ // attempt to migrate database - if model and migrations disagree this can throw
+ db.Database.Migrate();
+
+ // run seeder only if migrations succeeded
+ TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db);
+ }
+ catch (InvalidOperationException ex) when (
+ ex.Message?.Contains("pending", StringComparison.OrdinalIgnoreCase) == true ||
+ ex.Message?.Contains("PendingModelChangesWarning", StringComparison.OrdinalIgnoreCase) == true)
+ {
+ // Clear, actionable message for the developer
+ logger.LogWarning(ex, "Automatic database migration skipped because there are pending model changes. " +
+ "Create and apply a migration before running the application, for example:\n" +
+ " dotnet ef migrations add <Name> --project TafsilkPlatform.Web --startup-project TafsilkPlatform.Web\n" +
+ " dotnet ef database update --project TafsilkPlatform.Web --startup-project TafsilkPlatform.Web\n" +
+ "Seeding was skipped.");
+ }
+ catch (Exception ex)
+ {
+ logger.LogError(ex, "Failed to run admin seeder");
+ }
+ }
 }
 
 // Configure the HTTP request pipeline.

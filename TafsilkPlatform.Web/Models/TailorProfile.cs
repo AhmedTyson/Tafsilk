@@ -77,5 +77,13 @@ namespace TafsilkPlatform.Web.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        // Add collection navigation for TailorServices so EF maps FK correctly
+        public ICollection<TailorService> TailorServices { get; set; } = new List<TailorService>();
+
+        // Add collections for other related entities to avoid shadow FKs
+        public ICollection<PortfolioImage> PortfolioImages { get; set; } = new List<PortfolioImage>();
+        public ICollection<RevenueReport> RevenueReports { get; set; } = new List<RevenueReport>();
+        public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

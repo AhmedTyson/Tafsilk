@@ -247,23 +247,24 @@ public partial class AppDbContext : DbContext
                   .HasForeignKey(o => o.TailorId)
                   .OnDelete(DeleteBehavior.NoAction);
 
+            // Ensure child collections map back to their navigation properties to avoid shadow FKs
             entity.HasMany(o => o.Items)
-                  .WithOne()
+                  .WithOne(oi => oi.order)
                   .HasForeignKey(oi => oi.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(o => o.orderImages)
-                  .WithOne()
+                  .WithOne(oi => oi.order)
                   .HasForeignKey(oi => oi.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(o => o.Payments)
-                  .WithOne()
+                  .WithOne(p => p.Order)
                   .HasForeignKey(p => p.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(o => o.quote)
-                  .WithOne()
+                  .WithOne(q => q.order)
                   .HasForeignKey(q => q.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
         });
@@ -423,14 +424,15 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
    entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
      entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
        entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+     entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
      entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
 
-         entity.HasOne<TailorProfile>()
-      .WithMany()
-  .HasForeignKey(pi => pi.TailorId)
-     .HasPrincipalKey(t => t.Id)
-      .OnDelete(DeleteBehavior.Cascade);
+         entity.HasOne(pi => pi.Tailor)
+ .WithMany(t => t.PortfolioImages)
+ .HasForeignKey(pi => pi.TailorId)
+ .HasPrincipalKey(t => t.Id)
+ .OnDelete(DeleteBehavior.Cascade);
   });
 
     // TailorService Entity - Fix shadow property warning
@@ -445,10 +447,11 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
 
   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
 
-   entity.HasOne<TailorProfile>()
-      .WithMany()
-   .HasForeignKey(ts => ts.TailorId)
-   .HasPrincipalKey(t => t.Id)
+ // Explicit relationship using navigation property on TailorService and TailorProfile
+ entity.HasOne(ts => ts.Tailor)
+ .WithMany(t => t.TailorServices)
+ .HasForeignKey(ts => ts.TailorId)
+ .HasPrincipalKey(t => t.Id)
  .OnDelete(DeleteBehavior.Cascade);
  });
 
@@ -460,6 +463,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
 
     entity.Property(e => e.Comment).HasMaxLength(1000);
    entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+    entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
         entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
@@ -509,6 +513,7 @@ entity.HasOne<Order>()
             entity.Property(e => e.Month).IsRequired().HasColumnType("date");
        entity.Property(e => e.TotalRevenue).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
             entity.Property(e => e.GeneratedAt).HasDefaultValueSql("(getutcdate())");
+    entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
   entity.HasOne<TailorProfile>()
     .WithMany()

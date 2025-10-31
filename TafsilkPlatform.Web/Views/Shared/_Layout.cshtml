@@ -435,10 +435,16 @@ align-items: center;
           {
      var role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
          
-      @if (role == "Customer")
-             {
-     <li><a asp-controller="Dashboards" asp-action="Customer" class="nav-link">لوحة التحكم</a></li>
-    }
+      @* Admin link *@
+ if (role == "Admin")
+ {
+ <li><a asp-controller="AdminPanel" asp-action="Index" class="nav-link">لوحة المسؤول</a></li>
+ }
+
+ if (role == "Customer")
+ {
+ <li><a asp-controller="Dashboards" asp-action="Customer" class="nav-link">لوحة التحكم</a></li>
+ }
         else if (role == "Tailor")
          {
   <li><a asp-controller="Dashboards" asp-action="Tailor" class="nav-link">لوحة التحكم</a></li>
