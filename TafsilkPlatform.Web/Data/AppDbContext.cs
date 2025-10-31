@@ -272,19 +272,19 @@ public partial class AppDbContext : DbContext
         // OrderItem Entity - Fix decimal precision
         modelBuilder.Entity<OrderItem>(entity =>
   {
-    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
-       entity.Property(e => e.Total).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18,2);
+       entity.Property(e => e.Total).HasColumnType("decimal(18,2)").HasPrecision(18,2);
        
    entity.HasOne(e => e.order)
          .WithMany(o => o.Items)
       .HasForeignKey(e => e.OrderId)
-      .OnDelete(DeleteBehavior.Cascade);
+      .OnDelete(DeleteBehavior.NoAction);
         });
 
         // Payment Entity - Fix decimal precision
         modelBuilder.Entity<Payment>(entity =>
         {
-         entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)").HasPrecision(18, 2);
+         entity.Property(e => e.Amount).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
         
        entity.HasOne(p => p.Customer)
                   .WithMany(cp => cp.Payments)
@@ -372,7 +372,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
        .WithMany()
        .HasForeignKey(n => n.UserId)
       .HasPrincipalKey(u => u.Id)
-       .OnDelete(DeleteBehavior.Cascade);
+       .OnDelete(DeleteBehavior.NoAction);
         });
 
 // DeviceToken Entity - Fix shadow property warning
@@ -392,7 +392,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
      .WithMany()
    .HasForeignKey(dt => dt.UserId)
     .HasPrincipalKey(u => u.Id)
-     .OnDelete(DeleteBehavior.Cascade);
+     .OnDelete(DeleteBehavior.NoAction);
    });
 
  // UserActivityLog Entity - Fix shadow property warning
@@ -412,7 +412,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
       .WithMany()
   .HasForeignKey(ual => ual.UserId)
        .HasPrincipalKey(u => u.Id)
-   .OnDelete(DeleteBehavior.Cascade);
+   .OnDelete(DeleteBehavior.NoAction);
    });
 
         // PortfolioImage Entity - Fix shadow property warning
@@ -432,7 +432,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
  .WithMany(t => t.PortfolioImages)
  .HasForeignKey(pi => pi.TailorId)
  .HasPrincipalKey(t => t.Id)
- .OnDelete(DeleteBehavior.Cascade);
+ .OnDelete(DeleteBehavior.NoAction);
   });
 
     // TailorService Entity - Fix shadow property warning
@@ -452,7 +452,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
  .WithMany(t => t.TailorServices)
  .HasForeignKey(ts => ts.TailorId)
  .HasPrincipalKey(t => t.Id)
- .OnDelete(DeleteBehavior.Cascade);
+ .OnDelete(DeleteBehavior.NoAction);
  });
 
         // Review Entity - Fix shadow property warnings
@@ -502,7 +502,7 @@ entity.HasOne<Order>()
         .WithMany(o => o.orderImages)
     .HasForeignKey(oi => oi.OrderId)
    .HasPrincipalKey(o => o.OrderId)
-      .OnDelete(DeleteBehavior.Cascade);
+      .OnDelete(DeleteBehavior.NoAction);
         });
 
         // RevenueReport Entity - Fix shadow property warning
@@ -519,11 +519,17 @@ entity.HasOne<Order>()
     .WithMany()
        .HasForeignKey(rr => rr.TailorId)
             .HasPrincipalKey(t => t.Id)
-   .OnDelete(DeleteBehavior.Cascade);
+   .OnDelete(DeleteBehavior.NoAction);
         });
 
         OnModelCreatingPartial(modelBuilder);
-    }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+ // Ensure all foreign keys use NoAction to prevent multiple cascade path errors at the database level
+ foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+ {
+ foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+ }
+ }
+
+ partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
