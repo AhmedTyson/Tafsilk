@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
+	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>53d19473-2fd6-4a7c-906f-dda85cf58376</UserSecretsId>
@@ -24,10 +25,6 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="Properties\PublishProfiles\RunASP.pubxml.user" />
-  </ItemGroup>
 
   <!-- All dependencies consolidated here -->
   <ItemGroup>
