@@ -1,8 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TafsilkPlatform.Web.Models
 {
@@ -16,9 +13,11 @@ namespace TafsilkPlatform.Web.Models
         public string? Comment { get; set; } // Made nullable to fix CS8618
         public DateTime CreatedAt { get; set; }
         public bool IsDeleted { get; set; } // <-- Add this property to fix CS1061
-        public Order? Order { get; set; } // Made nullable to fix CS8618
-        public TailorProfile? Tailor { get; set; } // Made nullable to fix CS8618
-        public CustomerProfile? Customer { get; set; } // Made nullable to fix CS8618
+
+        // Navigation properties using PascalCase
+        public Order? Order { get; set; }
+        public TailorProfile? Tailor { get; set; }
+        public CustomerProfile? Customer { get; set; }
         public ICollection<RatingDimension> RatingDimensions { get; set; } = new List<RatingDimension>();
     }
 }

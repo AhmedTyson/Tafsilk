@@ -13,7 +13,7 @@ namespace TafsilkPlatform.Web.Models
         public string ImageUrl { get; set; } = string.Empty;
         public bool IsBeforeAfter { get; set; }
         public DateTime UploadedAt { get; set; }
-        public TailorProfile? Tailor { get; set; } // Made nullable to fix CS8618
-        public bool IsDeleted { get; set; } // Add this property to fix CS1061
+        public TailorProfile? Tailor { get; set; } // navigation
+        public bool IsDeleted { get; set; }
     }
 }
