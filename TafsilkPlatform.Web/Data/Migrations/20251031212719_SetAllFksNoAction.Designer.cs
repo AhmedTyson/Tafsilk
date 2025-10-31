@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TafsilkPlatform.Web.Data;
 
 #nullable disable
 
-namespace TafsilkPlatform.Migrations
+namespace TafsilkPlatform.Web.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251031212719_SetAllFksNoAction")]
+    partial class SetAllFksNoAction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -496,6 +499,9 @@ namespace TafsilkPlatform.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("OrderId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTimeOffset>("UploadedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -507,6 +513,8 @@ namespace TafsilkPlatform.Migrations
 
                     b.HasIndex("OrderId")
                         .HasDatabaseName("IX_OrderImages_OrderId");
+
+                    b.HasIndex("OrderId1");
 
                     b.ToTable("OrderImages");
                 });
@@ -529,11 +537,11 @@ namespace TafsilkPlatform.Migrations
 
                     b.Property<decimal>("Total")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("OrderItemId");
 
@@ -550,7 +558,7 @@ namespace TafsilkPlatform.Migrations
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
@@ -1477,24 +1485,30 @@ namespace TafsilkPlatform.Migrations
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderImages", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", null)
                         .WithMany("orderImages")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
+                        .WithMany()
+                        .HasForeignKey("OrderId1")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("order");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderItem", b =>
                 {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("order");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Payment", b =>

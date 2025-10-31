@@ -249,12 +249,12 @@ public partial class AppDbContext : DbContext
 
             // Ensure child collections map back to their navigation properties to avoid shadow FKs
             entity.HasMany(o => o.Items)
-                  .WithOne(oi => oi.order)
+                  .WithOne(oi => oi.Order)
                   .HasForeignKey(oi => oi.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(o => o.orderImages)
-                  .WithOne(oi => oi.order)
+                  .WithOne(oi => oi.Order)
                   .HasForeignKey(oi => oi.OrderId)
                   .OnDelete(DeleteBehavior.NoAction);
 
@@ -271,11 +271,11 @@ public partial class AppDbContext : DbContext
 
         // OrderItem Entity - Fix decimal precision
         modelBuilder.Entity<OrderItem>(entity =>
-  {
+ {
     entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18,2);
        entity.Property(e => e.Total).HasColumnType("decimal(18,2)").HasPrecision(18,2);
        
-   entity.HasOne(e => e.order)
+   entity.HasOne(e => e.Order)
          .WithMany(o => o.Items)
       .HasForeignKey(e => e.OrderId)
       .OnDelete(DeleteBehavior.NoAction);
@@ -498,11 +498,11 @@ entity.HasOne<Order>()
   {
         entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
 
-   entity.HasOne<Order>()
-        .WithMany(o => o.orderImages)
-    .HasForeignKey(oi => oi.OrderId)
-   .HasPrincipalKey(o => o.OrderId)
-      .OnDelete(DeleteBehavior.NoAction);
+ entity.HasOne(oi => oi.Order)
+ .WithMany(o => o.orderImages)
+ .HasForeignKey(oi => oi.OrderId)
+ .HasPrincipalKey(o => o.OrderId)
+ .OnDelete(DeleteBehavior.NoAction);
         });
 
         // RevenueReport Entity - Fix shadow property warning
