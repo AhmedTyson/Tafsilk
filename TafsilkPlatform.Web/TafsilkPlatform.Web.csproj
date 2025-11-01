@@ -26,8 +26,42 @@
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\Tafsilk-v3-\Booking &amp; Order Page.html" />
+    <None Include="wwwroot\Tafsilk-v3-\Checkout &amp; Payment.html" />
+    <None Include="wwwroot\Tafsilk-v3-\contact.html" />
+    <None Include="wwwroot\Tafsilk-v3-\homepage_test4.html" />
+    <None Include="wwwroot\Tafsilk-v3-\img\A3am-Hassan.png" />
+    <None Include="wwwroot\Tafsilk-v3-\img\Khaled.png" />
+    <None Include="wwwroot\Tafsilk-v3-\img\mohamed.png" />
+    <None Include="wwwroot\Tafsilk-v3-\img\tailoring-Egyptian-student.png" />
+    <None Include="wwwroot\Tafsilk-v3-\img\workma.png" />
+    <None Include="wwwroot\Tafsilk-v3-\index.html" />
+    <None Include="wwwroot\Tafsilk-v3-\js\include-partials.js" />
+    <None Include="wwwroot\Tafsilk-v3-\js\script.js" />
+    <None Include="wwwroot\Tafsilk-v3-\js\store.js" />
+    <None Include="wwwroot\Tafsilk-v3-\js\video-handler.js" />
+    <None Include="wwwroot\Tafsilk-v3-\LICENSE" />
+    <None Include="wwwroot\Tafsilk-v3-\Order Management %28Tailors%29.html" />
+    <None Include="wwwroot\Tafsilk-v3-\Order Tracking.html" />
+    <None Include="wwwroot\Tafsilk-v3-\partials\footer.html" />
+    <None Include="wwwroot\Tafsilk-v3-\partials\header.html" />
+    <None Include="wwwroot\Tafsilk-v3-\Portfolio Management.html" />
+    <None Include="wwwroot\Tafsilk-v3-\portfolios.html" />
+    <None Include="wwwroot\Tafsilk-v3-\README.md" />
+    <None Include="wwwroot\Tafsilk-v3-\register.html" />
+    <None Include="wwwroot\Tafsilk-v3-\Review &amp; Rating.html" />
+    <None Include="wwwroot\Tafsilk-v3-\search-tailors.html" />
+    <None Include="wwwroot\Tafsilk-v3-\store.html" />
+    <None Include="wwwroot\Tafsilk-v3-\styles.css" />
+    <None Include="wwwroot\Tafsilk-v3-\Tailor Profile Page.html" />
+    <None Include="wwwroot\Tafsilk-v3-\tailor_dashboard.html" />
+    <None Include="wwwroot\Tafsilk-v3-\Workshop Registration.html" />
+  </ItemGroup>
+
   <!-- All dependencies consolidated here -->
   <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
@@ -42,12 +76,16 @@
     <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
   </ItemGroup>
   
   <!-- Development-only files -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\UserSettings\" />
   </ItemGroup>
 
 </Project>

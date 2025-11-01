@@ -40,8 +40,25 @@ namespace TafsilkPlatform.Web.Models
         [DataType(DataType.DateTime)]
         public DateTime? UpdatedAt { get; set; }
 
+        [Display(Name = "Last Login")]
+        [DataType(DataType.DateTime)]
+        public DateTime? LastLoginAt { get; set; }
+
         [Display(Name = "Deleted Status")]
         public bool IsDeleted { get; set; } = false;
+
+        // Email verification
+        [Display(Name = "Email Verified")]
+        public bool EmailVerified { get; set; } = false;
+
+        [MaxLength(64)]
+        public string? EmailVerificationToken { get; set; }
+
+        [DataType(DataType.DateTime)]
+        public DateTime? EmailVerificationTokenExpires { get; set; }
+
+        [DataType(DataType.DateTime)]
+        public DateTime? EmailVerifiedAt { get; set; }
 
         // New notification preferences
         public bool EmailNotifications { get; set; } = true;

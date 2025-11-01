@@ -1,0 +1,206 @@
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.AddPortfolioImageViewModel
+
+@{
+    ViewData["Title"] = "إضافة صورة جديدة";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var breadcrumbs = new List<(string Text, string Url)>
+    {
+        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
+        ("معرض الأعمال", Url.Action("ManagePortfolio", "TailorManagement")),
+        ("إضافة صورة", "")
+    };
+}
+
+@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
+
+<div class="container tailor-management-container" dir="rtl">
+    <div class="row justify-content-center">
+   <div class="col-lg-8">
+            <!-- Page Header -->
+      <div class="page-header">
+         <div class="d-flex justify-content-between align-items-center">
+          <div>
+       <h1 class="page-title">
+    <i class="fas fa-image"></i>
+        إضافة صورة جديدة
+      </h1>
+         <p class="page-description">أضف صورة من أعمالك السابقة إلى معرض الأعمال</p>
+            </div>
+  <a asp-action="ManagePortfolio" class="btn btn-outline-secondary">
+           <i class="fas fa-arrow-right"></i>
+       رجوع
+           </a>
+    </div>
+   </div>
+
+     <!-- Form Card -->
+        <div class="card">
+                <div class="card-body">
+       <form asp-action="AddPortfolioImage" method="post" enctype="multipart/form-data">
+   @Html.AntiForgeryToken()
+     <input type="hidden" asp-for="TailorId" />
+            
+   <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <!-- Image Upload with Preview -->
+ <div class="mb-4">
+         <label asp-for="ImageFile" class="form-label">
+         <i class="fas fa-image text-primary"></i>
+   اختر الصورة
+     <span class="text-danger">*</span>
+    </label>
+          
+  <div class="image-preview-container">
+          <div id="imagePreview" style="display: none;">
+       <img id="preview" class="image-preview" src="#" alt="معاينة">
+          </div>
+              
+           <label for="ImageFile" class="image-upload-label">
+          <i class="fas fa-cloud-upload-alt"></i>
+        اختر صورة أو اسحبها هنا
+            </label>
+    
+          <input asp-for="ImageFile" 
+     id="ImageFile"
+           class="form-control" 
+             type="file" 
+   accept="image/*"
+  onchange="previewImage(this)"
+                  style="display: none;">
+   </div>
+      
+                     <span asp-validation-for="ImageFile" class="invalid-feedback d-block"></span>
+   <div class="form-text">
+      <i class="fas fa-info-circle text-primary"></i>
+              الحجم الأقصى: 5 ميجابايت • الصيغ المدعومة: JPG, PNG, GIF
+       </div>
+             </div>
+
+   <!-- Title -->
+            <div class="mb-3">
+       <label asp-for="Title" class="form-label">
+   عنوان الصورة
+             <span class="text-danger">*</span>
+       </label>
+       <input asp-for="Title" class="form-control" placeholder="مثال: ثوب رجالي أنيق">
+            <span asp-validation-for="Title" class="invalid-feedback"></span>
+    </div>
+
+             <!-- Category -->
+                <div class="mb-3">
+           <label asp-for="Category" class="form-label">الفئة</label>
+      <select asp-for="Category" class="form-control">
+     <option value="">-- اختر الفئة --</option>
+ @foreach (var category in ViewBag.Categories as List<string> ?? new List<string>())
+       {
+  <option value="@category">@category</option>
+           }
+                   </select>
+      <span asp-validation-for="Category" class="invalid-feedback"></span>
+         </div>
+
+            <!-- Description -->
+        <div class="mb-3">
+      <label asp-for="Description" class="form-label">الوصف</label>
+            <textarea asp-for="Description" class="form-control" rows="4" 
+       placeholder="وصف مختصر للعمل والتفاصيل المهمة..."></textarea>
+  <span asp-validation-for="Description" class="invalid-feedback"></span>
+     </div>
+
+  <!-- Estimated Price -->
+        <div class="mb-4">
+          <label asp-for="EstimatedPrice" class="form-label">السعر التقديري (ريال)</label>
+      <div class="input-group">
+        <input asp-for="EstimatedPrice" type="number" class="form-control" 
+             placeholder="0.00" step="0.01" min="0">
+    <span class="input-group-text">ريال</span>
+  </div>
+         <span asp-validation-for="EstimatedPrice" class="invalid-feedback"></span>
+      <div class="form-text">
+               <i class="fas fa-info-circle text-primary"></i>
+    السعر التقريبي لهذا النوع من الأعمال
+        </div>
+      </div>
+
+          <!-- Options -->
+          <div class="card mb-4" style="background-color: var(--background-gray); border: none;">
+        <div class="card-body">
+     <h6 class="mb-3">
+     <i class="fas fa-cog text-primary"></i>
+      خيارات إضافية
+       </h6>
+      
+    <div class="form-check mb-3">
+        <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeatured">
+                <label class="form-check-label" for="IsFeatured">
+  <i class="fas fa-star text-warning"></i>
+        <strong>صورة مميزة</strong>
+ </label>
+  <div class="form-text">الصور المميزة تظهر في أول معرض الأعمال</div>
+   </div>
+
+      <div class="form-check">
+  <input asp-for="IsBeforeAfter" class="form-check-input" type="checkbox" id="IsBeforeAfter">
+    <label class="form-check-label" for="IsBeforeAfter">
+      <i class="fas fa-exchange-alt text-info"></i>
+    <strong>صورة قبل وبعد</strong>
+       </label>
+  <div class="form-text">صورة توضح التحسين أو التغيير في العمل</div>
+       </div>
+           </div>
+           </div>
+
+          <!-- Action Buttons -->
+ <div class="d-flex justify-content-between gap-2">
+          <button type="submit" class="btn btn-primary btn-lg">
+         <i class="fas fa-save"></i>
+   حفظ الصورة
+  </button>
+           <a asp-action="ManagePortfolio" class="btn btn-outline-secondary btn-lg">
+        <i class="fas fa-times"></i>
+       إلغاء
+         </a>
+        </div>
+  </form>
+                </div>
+         </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input) {
+ if (input.files && input.files[0]) {
+           var reader = new FileReader();
+       
+     reader.onload = function (e) {
+      document.getElementById('preview').src = e.target.result;
+        document.getElementById('imagePreview').style.display = 'block';
+   
+    // Update upload label
+    var label = input.parentElement.querySelector('.image-upload-label');
+         if (label) {
+    label.innerHTML = '<i class="fas fa-check-circle"></i> تم اختيار الصورة - انقر لتغييرها';
+           }
+  }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+     // Make the entire preview container clickable
+      document.addEventListener('DOMContentLoaded', function() {
+            var container = document.querySelector('.image-preview-container');
+            var fileInput = document.getElementById('ImageFile');
+      
+            if (container && fileInput) {
+                container.addEventListener('click', function() {
+         fileInput.click();
+      });
+            }
+        });
+    </script>
+}

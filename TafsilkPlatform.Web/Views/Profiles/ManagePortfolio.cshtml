@@ -1,0 +1,666 @@
+@model TafsilkPlatform.Web.ViewModels.Portfolio.PortfolioManagementViewModel
+
+@{
+    ViewData["Title"] = "إدارة المعرض والأسعار";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+  :root {
+  --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+        --secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+        --success-color: #27ae60;
+      --warning-color: #f39c12;
+  --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --text-light: #bdc3c7;
+        --background-white: #ffffff;
+  --background-gray: #f8f9fa;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+        --radius-full: 9999px;
+
+     --transition-fast: 0.15s ease-in-out;
+--transition-normal: 0.3s ease-in-out;
+    }
+
+    .portfolio-page {
+        padding: 2rem 0;
+  background: var(--background-gray);
+    }
+
+    .page-header {
+     text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+    }
+
+    .portfolio-layout {
+        display: grid;
+      grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+  @@media (min-width: 1024px) {
+        .portfolio-layout {
+     grid-template-columns: 2fr 1fr;
+        }
+  }
+
+    .portfolio-content, .portfolio-sidebar {
+        background: var(--background-white);
+        border-radius: var(--radius-lg);
+    padding: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+  .section {
+   margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+ border-bottom: 1px solid var(--border-color);
+    }
+
+ .section:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+   gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+    width: 32px;
+height: 32px;
+        border-radius: 50%;
+background: var(--primary-color);
+   color: white;
+     display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+    }
+
+    .section-title {
+    font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .upload-area {
+border: 2px dashed var(--border-color);
+      border-radius: var(--radius-md);
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+     transition: all var(--transition-normal);
+        margin-bottom: 1.5rem;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary-color);
+        background: var(--primary-light);
+    }
+
+  .upload-icon {
+        font-size: 48px;
+      color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .portfolio-gallery {
+     display: grid;
+    grid-template-columns: repeat(1, 1fr);
+ gap: 1rem;
+    }
+
+    @@media (min-width: 640px) {
+        .portfolio-gallery {
+      grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+  @@media (min-width: 1024px) {
+   .portfolio-gallery {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .portfolio-item {
+ border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        transition: all var(--transition-normal);
+        position: relative;
+    }
+
+ .portfolio-item:hover {
+      transform: translateY(-5px);
+     box-shadow: var(--shadow-md);
+    }
+
+    .portfolio-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .portfolio-overlay {
+   position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+   left: 0;
+      background: rgba(0, 0, 0, 0.7);
+        display: flex;
+  align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity var(--transition-normal);
+    }
+
+    .portfolio-item:hover .portfolio-overlay {
+ opacity: 1;
+    }
+
+    .portfolio-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .portfolio-action {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+      background: var(--background-white);
+        display: flex;
+  align-items: center;
+    justify-content: center;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        border: none;
+    }
+
+    .portfolio-action:hover {
+        background: var(--primary-color);
+    color: white;
+    }
+
+  .portfolio-details {
+        padding: 1rem;
+    }
+
+    .portfolio-title {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .portfolio-price {
+      color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+ }
+
+    .portfolio-category {
+      font-size: 0.875rem;
+        color: var(--text-secondary);
+  }
+
+    .quick-stats {
+ display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+        background: var(--background-gray);
+    border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+}
+
+    .stat-value {
+        font-size: 1.5rem;
+font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+     font-weight: 600;
+        text-align: center;
+ cursor: pointer;
+    transition: all var(--transition-normal);
+    text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+     background: var(--primary-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+    background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--primary-color);
+   color: white;
+  }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-label {
+ display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+   border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: border-color var(--transition-normal);
+    }
+
+    .form-control:focus {
+    outline: none;
+        border-color: var(--primary-color);
+ box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+ bottom: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-content {
+   background: white;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+   width: 90%;
+    max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+     align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .modal-title {
+     font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .close-modal {
+        background: none;
+     border: none;
+        font-size: 1.5rem;
+      cursor: pointer;
+     color: var(--text-secondary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+   color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+</style>
+}
+
+<div class="portfolio-page">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+  <h1 class="page-title">إدارة المعرض والأسعار</h1>
+       <p class="page-subtitle">نظم معرض أعمالك، حدد الأسعار، وادير محتواك بسهولة</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["Success"] != null)
+        {
+       <div class="alert alert-success alert-dismissible fade show">
+             <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+     {
+   <div class="alert alert-danger alert-dismissible fade show">
+  <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+  }
+
+        <div class="portfolio-layout">
+       <!-- Left Column: Portfolio Content -->
+  <div class="portfolio-content">
+    <!-- Portfolio Gallery Section -->
+         <section class="section">
+                  <div class="section-header">
+    <div class="section-icon">
+      <i class="fas fa-images"></i>
+             </div>
+         <h2 class="section-title">معرض الأعمال</h2>
+ </div>
+
+          <!-- Upload Area -->
+            <div class="upload-area" onclick="document.getElementById('imageUploadInput').click()">
+            <div class="upload-icon">
+<i class="fas fa-cloud-upload-alt"></i>
+      </div>
+           <p>اسحب وأفلت الصور هنا أو انقر للاختيار</p>
+          <button type="button" class="btn btn-primary mt-2">
+          <i class="fas fa-plus me-2"></i>اختر الصور
+ </button>
+      </div>
+
+    @if (!Model.Images.Any())
+           {
+   <div class="empty-state">
+    <i class="fas fa-images"></i>
+     <h4>لا توجد صور في المعرض</h4>
+     <p>ابدأ بإضافة صور لأعمالك لعرضها للعملاء</p>
+  </div>
+         }
+         else
+        {
+         <!-- Portfolio Gallery -->
+   <div class="portfolio-gallery">
+  @foreach (var image in Model.Images)
+       {
+    <div class="portfolio-item" data-id="@image.Id">
+         @if (image.ImageData != null)
+        {
+           <img src="@Url.Action("GetPortfolioImage", "Profiles", new { id = image.Id })" 
+     alt="@image.Title" 
+   class="portfolio-image" />
+            }
+else
+      {
+   <div class="portfolio-image" style="background: var(--background-gray); display: flex; align-items: center; justify-content: center;">
+       <i class="fas fa-image fa-3x" style="color: var(--text-light);"></i>
+         </div>
+              }
+     <div class="portfolio-overlay">
+       <div class="portfolio-actions">
+       <button type="button" class="portfolio-action" onclick="editImage('@image.Id', '@image.Title', '@image.Category', @image.Price, '@image.Description', @image.IsFeatured.ToString().ToLower())">
+      <i class="fas fa-edit"></i>
+          </button>
+     <form asp-action="DeletePortfolioImage" asp-route-id="@image.Id" method="post" style="display: inline;" onsubmit="return confirm('هل أنت متأكد من حذف هذه الصورة؟')">
+          @Html.AntiForgeryToken()
+     <button type="submit" class="portfolio-action">
+     <i class="fas fa-trash"></i>
+        </button>
+                 </form>
+          </div>
+         </div>
+     <div class="portfolio-details">
+      <div class="portfolio-title">@image.Title</div>
+     <div class="portfolio-price">@image.Price.ToString("N0") ج.م</div>
+   <div class="portfolio-category">@image.Category</div>
+                  @if (image.IsFeatured)
+      {
+            <span class="badge bg-warning mt-2">
+     <i class="fas fa-star"></i> مميز
+     </span>
+        }
+              </div>
+             </div>
+          }
+ </div>
+   }
+       </section>
+      </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="portfolio-sidebar">
+      <!-- Quick Stats -->
+   <div class="quick-stats">
+        <div class="stat-card">
+         <div class="stat-value">@Model.Stats.TotalImages</div>
+     <div class="stat-label">صورة في المعرض</div>
+     </div>
+           <div class="stat-card">
+       <div class="stat-value">@Model.Stats.MonthlyViews</div>
+           <div class="stat-label">مشاهدة هذا الشهر</div>
+         </div>
+     <div class="stat-card">
+       <div class="stat-value">@Model.Stats.WeeklyAppointments</div>
+         <div class="stat-label">موعد هذا الأسبوع</div>
+       </div>
+        <div class="stat-card">
+             <div class="stat-value">@Model.Stats.CompletedProjects</div>
+      <div class="stat-label">مشروع مكتمل</div>
+         </div>
+     </div>
+
+    <!-- Quick Actions -->
+             <section class="section">
+  <div class="section-header">
+      <div class="section-icon">
+          <i class="fas fa-bolt"></i>
+            </div>
+       <h2 class="section-title">إجراءات سريعة</h2>
+       </div>
+    <div class="d-grid gap-2">
+  <a href="@Url.Action("ManageServices", "Profiles")" class="btn btn-outline">
+     <i class="fas fa-concierge-bell me-2"></i>إدارة الخدمات
+      </a>
+       <a href="@Url.Action("Tailor", "Dashboards")" class="btn btn-outline">
+              <i class="fas fa-home me-2"></i>لوحة التحكم
+      </a>
+      <a href="@Url.Action("TailorProfile", "Profiles")" class="btn btn-outline">
+ <i class="fas fa-user me-2"></i>الملف الشخصي
+    </a>
+       </div>
+ </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Modal -->
+<div class="modal" id="uploadModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">إضافة صورة جديدة</h2>
+          <button type="button" class="close-modal" onclick="closeUploadModal()">&times;</button>
+        </div>
+<form asp-action="UploadPortfolioImage" method="post" enctype="multipart/form-data">
+  @Html.AntiForgeryToken()
+    <input type="file" id="imageUploadInput" name="file" accept="image/*" style="display:none" onchange="showUploadModal()" required />
+        
+     <div class="form-group">
+    <label for="title" class="form-label">العنوان *</label>
+       <input type="text" id="title" name="title" class="form-control" required maxlength="100" />
+   </div>
+          
+            <div class="form-group">
+  <label for="category" class="form-label">الفئة *</label>
+ <select id="category" name="category" class="form-control" required>
+@foreach (var cat in ViewBag.Categories as List<string>)
+  {
+ <option value="@cat">@cat</option>
+      }
+                </select>
+            </div>
+            
+      <div class="form-group">
+      <label for="price" class="form-label">السعر التقديري (ج.م) *</label>
+   <input type="number" id="price" name="price" class="form-control" min="0" step="0.01" required />
+            </div>
+   
+         <div class="form-group">
+         <label for="description" class="form-label">الوصف</label>
+     <textarea id="description" name="description" class="form-control" rows="3" maxlength="500"></textarea>
+    </div>
+            
+          <div class="form-group">
+       <div class="form-check">
+                    <input type="checkbox" id="isFeatured" name="isFeatured" class="form-check-input" value="true" />
+   <label for="isFeatured" class="form-check-label">جعلها صورة مميزة</label>
+                </div>
+            </div>
+        
+        <button type="submit" class="btn btn-primary w-100">رفع الصورة</button>
+     </form>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">تعديل تفاصيل الصورة</h2>
+            <button type="button" class="close-modal" onclick="closeEditModal()">&times;</button>
+     </div>
+        <form id="editForm" method="post">
+     @Html.AntiForgeryToken()
+            <input type="hidden" id="editId" name="Id" />
+         
+    <div class="form-group">
+         <label for="editTitle" class="form-label">العنوان *</label>
+           <input type="text" id="editTitle" name="Title" class="form-control" required maxlength="100" />
+   </div>
+  
+     <div class="form-group">
+      <label for="editCategory" class="form-label">الفئة *</label>
+                <select id="editCategory" name="Category" class="form-control" required>
+   @foreach (var cat in ViewBag.Categories as List<string>)
+        {
+        <option value="@cat">@cat</option>
+             }
+       </select>
+  </div>
+ 
+    <div class="form-group">
+      <label for="editPrice" class="form-label">السعر التقديري (ج.م) *</label>
+   <input type="number" id="editPrice" name="Price" class="form-control" min="0" step="0.01" required />
+     </div>
+    
+       <div class="form-group">
+  <label for="editDescription" class="form-label">الوصف</label>
+         <textarea id="editDescription" name="Description" class="form-control" rows="3" maxlength="500"></textarea>
+ </div>
+            
+  <div class="form-group">
+   <div class="form-check">
+        <input type="checkbox" id="editIsFeatured" name="IsFeatured" class="form-check-input" value="true" />
+       <label for="editIsFeatured" class="form-check-label">جعلها صورة مميزة</label>
+    </div>
+          </div>
+            
+  <button type="submit" class="btn btn-primary w-100">حفظ التغييرات</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function showUploadModal() {
+        document.getElementById('uploadModal').classList.add('show');
+    }
+
+    function closeUploadModal() {
+        document.getElementById('uploadModal').classList.remove('show');
+ document.getElementById('imageUploadInput').value = '';
+    }
+
+    function editImage(id, title, category, price, description, isFeatured) {
+      document.getElementById('editId').value = id;
+     document.getElementById('editTitle').value = title;
+        document.getElementById('editCategory').value = category;
+        document.getElementById('editPrice').value = price;
+      document.getElementById('editDescription').value = description || '';
+        document.getElementById('editIsFeatured').checked = isFeatured;
+     
+        document.getElementById('editForm').action = '/profile/tailor/portfolio/update/' + id;
+  document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('show');
+    }
+
+    // Close modals when clicking outside
+    document.getElementById('uploadModal').addEventListener('click', function(e) {
+        if (e.target === this) closeUploadModal();
+    });
+
+  document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEditModal();
+    });
+</script>
+}

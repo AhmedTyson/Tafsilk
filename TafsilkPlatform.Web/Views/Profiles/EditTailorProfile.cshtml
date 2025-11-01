@@ -1,0 +1,754 @@
+@model TafsilkPlatform.Web.ViewModels.Tailor.EditTailorProfileViewModel
+
+@{
+    ViewData["Title"] = "تعديل الملف الشخصي";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+    :root {
+        --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+ --primary-light: #e3f2fd;
+        --secondary-color: #f39c12;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --border-color: #e1e8ed;
+        --background-white: #ffffff;
+        --background-gray: #f8f9fa;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+  }
+
+    .edit-profile-page {
+        padding: 2rem 0;
+    background: var(--background-gray);
+        min-height: 100vh;
+    }
+
+    .page-header {
+  text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .page-title {
+    font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+  color: var(--text-secondary);
+    }
+
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+      gap: 2rem;
+  }
+
+    @@media (min-width: 1024px) {
+  .profile-layout {
+      grid-template-columns: 1fr 350px;
+        }
+    }
+
+    .profile-form-section, .profile-sidebar {
+        background: var(--background-white);
+        border-radius: var(--radius-lg);
+ padding: 2rem;
+   box-shadow: var(--shadow-sm);
+    }
+
+    .form-section {
+   margin-bottom: 2.5rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+        margin-bottom: 0;
+    border-bottom: none;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        width: 36px;
+    height: 36px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+  display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.125rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+}
+
+    .form-row {
+        display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+    }
+
+    @@media (min-width: 768px) {
+        .form-row {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    .form-row.single {
+     grid-template-columns: 1fr;
+    }
+
+    .form-group {
+   margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .form-label.required::after {
+        content: " *";
+        color: var(--error-color);
+    }
+
+    .form-control {
+  width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    }
+
+    .form-control:disabled {
+  background: var(--background-gray);
+        cursor: not-allowed;
+    }
+
+    textarea.form-control {
+   resize: vertical;
+        min-height: 100px;
+    }
+
+    .input-group {
+    position: relative;
+    }
+
+ .input-group-icon {
+   position: absolute;
+      right: 0.75rem;
+        top: 50%;
+transform: translateY(-50%);
+        color: var(--text-secondary);
+    }
+
+    .input-group .form-control {
+        padding-right: 2.5rem;
+    }
+
+  .profile-picture-upload {
+        text-align: center;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+     margin: 0 auto 1rem;
+        overflow: hidden;
+        border: 3px solid var(--border-color);
+        background: var(--background-gray);
+        display: flex;
+        align-items: center;
+     justify-content: center;
+    }
+
+    .profile-picture-preview img {
+        width: 100%;
+        height: 100%;
+     object-fit: cover;
+    }
+
+    .profile-picture-preview i {
+        font-size: 3rem;
+        color: var(--text-secondary);
+    }
+
+  .file-input-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+     left: -9999px;
+    }
+
+ .file-input-label {
+      display: inline-block;
+        padding: 0.75rem 1.5rem;
+  background: var(--primary-color);
+     color: white;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+     transition: all 0.3s;
+    }
+
+    .file-input-label:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .stats-grid {
+     display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+    background: var(--background-gray);
+      border-radius: var(--radius-md);
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .stat-value {
+     font-size: 1.5rem;
+    font-weight: 700;
+ color: var(--primary-color);
+     margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+     font-size: 0.875rem;
+ color: var(--text-secondary);
+    }
+
+    .verification-badge {
+   display: inline-flex;
+        align-items: center;
+     gap: 0.5rem;
+        padding: 0.5rem 1rem;
+      border-radius: var(--radius-md);
+  font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .verification-badge.verified {
+        background: #d4edda;
+  color: #155724;
+    }
+
+    .verification-badge.pending {
+    background: #fff3cd;
+        color: #856404;
+    }
+
+ .quick-links {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .quick-link {
+        display: flex;
+        align-items: center;
+    gap: 0.75rem;
+      padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.3s;
+    }
+
+    .quick-link:hover {
+        background: var(--background-gray);
+      border-color: var(--primary-color);
+    }
+
+    .quick-link i {
+      color: var(--primary-color);
+    }
+
+    .btn {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+      text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--primary-hover);
+      transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+        background: transparent;
+        color: var(--primary-color);
+     border: 2px solid var(--primary-color);
+    }
+
+    .btn-outline:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-block {
+        width: 100%;
+        display: block;
+    }
+
+    .form-actions {
+  display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        margin-top: 2rem;
+    }
+
+    .text-danger {
+        color: var(--error-color);
+      font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+  .help-text {
+     font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    .map-preview {
+     height: 200px;
+        background: var(--background-gray);
+      border-radius: var(--radius-md);
+ display: flex;
+        align-items: center;
+   justify-content: center;
+        color: var(--text-secondary);
+   margin-top: 1rem;
+    }
+</style>
+}
+
+<div class="edit-profile-page">
+    <div class="container">
+     <!-- Page Header -->
+      <div class="page-header">
+<h1 class="page-title">تعديل الملف الشخصي</h1>
+            <p class="page-subtitle">قم بتحديث معلوماتك وتفاصيل ورشتك</p>
+  </div>
+
+        <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+        {
+       <div class="alert alert-success alert-dismissible fade show">
+       <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+    @if (TempData["Error"] != null)
+  {
+            <div class="alert alert-danger alert-dismissible fade show">
+      <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+   </div>
+        }
+
+<form asp-action="EditTailorProfile" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TailorId)
+  @Html.HiddenFor(m => m.UserId)
+
+  <div class="profile-layout">
+        <!-- Left Column: Form -->
+       <div class="profile-form-section">
+          <!-- Personal Information -->
+   <div class="form-section">
+        <div class="section-header">
+       <div class="section-icon">
+     <i class="fas fa-user"></i>
+                  </div>
+          <h2 class="section-title">المعلومات الشخصية</h2>
+          </div>
+
+     <div class="form-row">
+            <div class="form-group">
+          <label asp-for="FullName" class="form-label required"></label>
+           <input asp-for="FullName" class="form-control" placeholder="أدخل الاسم الكامل" />
+         <span asp-validation-for="FullName" class="text-danger"></span>
+     </div>
+
+          <div class="form-group">
+ <label asp-for="PhoneNumber" class="form-label required"></label>
+         <div class="input-group">
+         <span class="input-group-icon"><i class="fas fa-phone"></i></span>
+              <input asp-for="PhoneNumber" class="form-control" placeholder="مثال: 01012345678" />
+       </div>
+   <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+  </div>
+  </div>
+
+          <div class="form-group">
+     <label asp-for="Email" class="form-label"></label>
+      <div class="input-group">
+          <span class="input-group-icon"><i class="fas fa-envelope"></i></span>
+         <input asp-for="Email" class="form-control" placeholder="example@email.com" disabled />
+               </div>
+  <p class="help-text">لتغيير البريد الإلكتروني، يرجى التواصل مع الدعم</p>
+        </div>
+    </div>
+
+<!-- Shop Details -->
+     <div class="form-section">
+         <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-store"></i>
+                </div>
+          <h2 class="section-title">تفاصيل الورشة</h2>
+       </div>
+
+           <div class="form-group">
+ <label asp-for="ShopName" class="form-label required"></label>
+           <input asp-for="ShopName" class="form-control" placeholder="اسم الورشة أو المحل" />
+         <span asp-validation-for="ShopName" class="text-danger"></span>
+         </div>
+
+         <div class="form-group">
+        <label asp-for="ShopDescription" class="form-label"></label>
+        <textarea asp-for="ShopDescription" class="form-control" placeholder="وصف مختصر عن الورشة والخدمات المقدمة"></textarea>
+     <span asp-validation-for="ShopDescription" class="text-danger"></span>
+         </div>
+
+         <div class="form-row">
+           <div class="form-group">
+             <label asp-for="Specialization" class="form-label"></label>
+     <select asp-for="Specialization" class="form-control">
+            <option value="">اختر التخصص</option>
+      @foreach (var spec in ViewBag.Specializations as List<string>)
+           {
+              <option value="@spec">@spec</option>
+      }
+        </select>
+       <span asp-validation-for="Specialization" class="text-danger"></span>
+    </div>
+
+   <div class="form-group">
+        <label asp-for="YearsOfExperience" class="form-label"></label>
+              <input asp-for="YearsOfExperience" type="number" class="form-control" placeholder="عدد سنوات الخبرة" min="0" max="100" />
+       <span asp-validation-for="YearsOfExperience" class="text-danger"></span>
+                </div>
+       </div>
+    </div>
+
+         <!-- Location -->
+          <div class="form-section">
+   <div class="section-header">
+       <div class="section-icon">
+          <i class="fas fa-map-marker-alt"></i>
+         </div>
+             <h2 class="section-title">الموقع</h2>
+    </div>
+
+   <div class="form-row">
+      <div class="form-group">
+        <label asp-for="City" class="form-label"></label>
+     <select asp-for="City" class="form-control">
+            <option value="">اختر المدينة</option>
+          @foreach (var city in ViewBag.Cities as List<string>)
+          {
+     <option value="@city">@city</option>
+        }
+       </select>
+             <span asp-validation-for="City" class="text-danger"></span>
+           </div>
+
+            <div class="form-group">
+      <label asp-for="District" class="form-label"></label>
+         <input asp-for="District" class="form-control" placeholder="الحي أو المنطقة" />
+<span asp-validation-for="District" class="text-danger"></span>
+        </div>
+         </div>
+
+        <div class="form-group">
+      <label asp-for="Address" class="form-label"></label>
+     <textarea asp-for="Address" class="form-control" rows="2" placeholder="العنوان التفصيلي"></textarea>
+           <span asp-validation-for="Address" class="text-danger"></span>
+      </div>
+
+        <div class="form-row">
+         <div class="form-group">
+    <label asp-for="Latitude" class="form-label"></label>
+     <input asp-for="Latitude" type="number" step="0.000001" class="form-control" placeholder="خط العرض" />
+       <span asp-validation-for="Latitude" class="text-danger"></span>
+      </div>
+
+               <div class="form-group">
+   <label asp-for="Longitude" class="form-label"></label>
+  <input asp-for="Longitude" type="number" step="0.000001" class="form-control" placeholder="خط الطول" />
+  <span asp-validation-for="Longitude" class="text-danger"></span>
+</div>
+      </div>
+
+     @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+             {
+       <div class="map-preview">
+ <i class="fas fa-map"></i>
+      <span class="ms-2">الموقع: @Model.Latitude.Value.ToString("F6"), @Model.Longitude.Value.ToString("F6")</span>
+  </div>
+              }
+    </div>
+
+        <!-- Bio & Business Hours -->
+     <div class="form-section">
+ <div class="section-header">
+          <div class="section-icon">
+   <i class="fas fa-info-circle"></i>
+        </div>
+            <h2 class="section-title">نبذة تعريفية</h2>
+      </div>
+
+   <div class="form-group">
+      <label asp-for="Bio" class="form-label"></label>
+           <textarea asp-for="Bio" class="form-control" rows="4" placeholder="نبذة تعريفية عنك وعن خبراتك"></textarea>
+    <span asp-validation-for="Bio" class="text-danger"></span>
+      <p class="help-text">الحد الأقصى 1000 حرف</p>
+    </div>
+
+      <div class="form-group">
+   <label asp-for="BusinessHours" class="form-label"></label>
+    <input asp-for="BusinessHours" class="form-control" placeholder="مثال: السبت - الخميس: 9 صباحاً - 9 مساءً" />
+      <span asp-validation-for="BusinessHours" class="text-danger"></span>
+         </div>
+            </div>
+
+  <!-- Social Media -->
+<div class="form-section">
+         <div class="section-header">
+  <div class="section-icon">
+    <i class="fas fa-share-alt"></i>
+        </div>
+      <h2 class="section-title">وسائل التواصل الاجتماعي</h2>
+   </div>
+
+           <div class="form-row">
+    <div class="form-group">
+           <label asp-for="FacebookUrl" class="form-label"></label>
+   <div class="input-group">
+   <span class="input-group-icon"><i class="fab fa-facebook"></i></span>
+    <input asp-for="FacebookUrl" class="form-control" placeholder="رابط صفحة فيسبوك" />
+             </div>
+        <span asp-validation-for="FacebookUrl" class="text-danger"></span>
+              </div>
+
+         <div class="form-group">
+          <label asp-for="InstagramUrl" class="form-label"></label>
+     <div class="input-group">
+          <span class="input-group-icon"><i class="fab fa-instagram"></i></span>
+       <input asp-for="InstagramUrl" class="form-control" placeholder="رابط حساب إنستغرام" />
+       </div>
+          <span asp-validation-for="InstagramUrl" class="text-danger"></span>
+   </div>
+    </div>
+
+             <div class="form-row">
+          <div class="form-group">
+  <label asp-for="TwitterUrl" class="form-label"></label>
+           <div class="input-group">
+                <span class="input-group-icon"><i class="fab fa-twitter"></i></span>
+     <input asp-for="TwitterUrl" class="form-control" placeholder="رابط حساب تويتر" />
+ </div>
+                <span asp-validation-for="TwitterUrl" class="text-danger"></span>
+          </div>
+
+                <div class="form-group">
+     <label asp-for="WebsiteUrl" class="form-label"></label>
+       <div class="input-group">
+     <span class="input-group-icon"><i class="fas fa-globe"></i></span>
+    <input asp-for="WebsiteUrl" class="form-control" placeholder="رابط الموقع الإلكتروني" />
+      </div>
+       <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
+          </div>
+   </div>
+       </div>
+
+     <!-- Profile Picture -->
+            <div class="form-section">
+        <div class="section-header">
+        <div class="section-icon">
+          <i class="fas fa-camera"></i>
+              </div>
+   <h2 class="section-title">صورة الملف الشخصي</h2>
+        </div>
+
+  <div class="profile-picture-upload">
+  <div class="profile-picture-preview" id="picturePreview">
+            @if (Model.CurrentProfilePictureData != null)
+     {
+         <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.TailorId })" 
+              alt="Profile Picture" 
+       id="previewImage" />
+           }
+          else
+     {
+            <i class="fas fa-user"></i>
+ }
+            </div>
+
+      <div class="file-input-wrapper">
+      <input type="file" 
+                 id="profilePictureInput" 
+           name="ProfilePicture" 
+        accept="image/*"
+       onchange="previewProfilePicture(event)" />
+   <label for="profilePictureInput" class="file-input-label">
+   <i class="fas fa-upload me-2"></i>اختر صورة جديدة
+  </label>
+            </div>
+       <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+           <p class="help-text">الحد الأقصى: 5 ميجابايت | الأنواع المدعومة: JPG, PNG, GIF</p>
+           </div>
+  </div>
+
+       <!-- Form Actions -->
+     <div class="form-actions">
+     <a href="@Url.Action("TailorProfile", "Profiles")" class="btn btn-outline">
+            <i class="fas fa-times me-2"></i>إلغاء
+           </a>
+        <button type="submit" class="btn btn-primary">
+     <i class="fas fa-save me-2"></i>حفظ التغييرات
+          </button>
+    </div>
+         </div>
+
+    <!-- Right Column: Sidebar -->
+      <div class="profile-sidebar">
+   <!-- Verification Status -->
+          @if (Model.IsVerified)
+        {
+              <div class="verification-badge verified">
+      <i class="fas fa-check-circle"></i>
+            <span>حساب موثق</span>
+   </div>
+   @if (Model.VerifiedAt.HasValue)
+                {
+        <p class="text-muted small">تم التوثيق في: @Model.VerifiedAt.Value.ToString("dd/MM/yyyy")</p>
+        }
+      }
+        else
+            {
+      <div class="verification-badge pending">
+           <i class="fas fa-clock"></i>
+         <span>في انتظار التوثيق</span>
+         </div>
+          }
+
+          <!-- Statistics -->
+         <div class="stats-grid">
+       <div class="stat-card">
+          <div class="stat-value">@Model.PortfolioCount</div>
+      <div class="stat-label">صورة في المعرض</div>
+            </div>
+ <div class="stat-card">
+      <div class="stat-value">@Model.ServiceCount</div>
+          <div class="stat-label">خدمة</div>
+         </div>
+            <div class="stat-card">
+       <div class="stat-value">@Model.CompletedOrders</div>
+           <div class="stat-label">طلب مكتمل</div>
+      </div>
+ <div class="stat-card">
+    <div class="stat-value">@Model.AverageRating.ToString("F1")</div>
+        <div class="stat-label">التقييم</div>
+        </div>
+        </div>
+
+             <!-- Quick Links -->
+        <div class="quick-links">
+          <a href="@Url.Action("Tailor", "Dashboards")" class="quick-link">
+      <i class="fas fa-home"></i>
+       <span>لوحة التحكم</span>
+      </a>
+          <a href="@Url.Action("ManagePortfolio", "Profiles")" class="quick-link">
+  <i class="fas fa-images"></i>
+<span>إدارة المعرض</span>
+      </a>
+   <a href="@Url.Action("ManageServices", "Profiles")" class="quick-link">
+            <i class="fas fa-concierge-bell"></i>
+    <span>إدارة الخدمات</span>
+            </a>
+          <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { id = Model.TailorId })" class="quick-link" target="_blank">
+ <i class="fas fa-eye"></i>
+ <span>عرض الملف العام</span>
+  </a>
+         </div>
+                </div>
+            </div>
+     </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewProfilePicture(e) {
+    const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+    reader.onload = function(evt) {
+  const preview = document.getElementById('picturePreview');
+  const existingImg = document.getElementById('previewImage');
+     
+  if (existingImg) {
+       existingImg.src = evt.target.result;
+        } else {
+  preview.innerHTML = `<img src="${evt.target.result}" alt="Preview" id="previewImage" />`;
+          }
+                };
+          reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}

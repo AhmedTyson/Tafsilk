@@ -1,0 +1,274 @@
+@model TafsilkPlatform.Web.ViewModels.CompleteTailorProfileRequest
+@{
+    ViewData["Title"] = "تفصيلك — تقديم الأوراق الثبوتية";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Meta {
+    <meta name="description" content="تقديم الأوراق الثبوتية للتسجيل كخياط في منصة تفصيلك" />
+    <meta name="robots" content="noindex, nofollow" />
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+    <div class="col-lg-8">
+     <!-- Alert - Important Notice -->
+  <div class="alert alert-info mb-4" role="alert">
+              <h4 class="alert-heading">
+  <i class="fas fa-info-circle"></i>
+        خطوة مهمة لإكمال التسجيل
+          </h4>
+  <p class="mb-0">
+      لضمان جودة الخدمة وثقة العملاء، يجب تقديم الأوراق الثبوتية التالية قبل تفعيل حسابك:
+    </p>
+    <ul class="mt-2 mb-0">
+            <li>صورة الهوية الشخصية أو السجل التجاري</li>
+           <li>صور من أعمالك السابقة (3 صور على الأقل)</li>
+     </ul>
+<p class="mt-2 mb-0">
+  <small class="text-muted">
+     ⏱ سيتم مراجعة طلبك خلال 24-48 ساعة وإرسال تأكيد البريد الإلكتروني
+         </small>
+      </p>
+       </div>
+
+    @if (TempData["InfoMessage"] != null)
+            {
+          <div class="alert alert-success" role="alert">
+     <i class="fas fa-check-circle"></i>
+             @TempData["InfoMessage"]
+         </div>
+          }
+
+    <!-- Registration Card -->
+     <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white">
+      <h3 class="mb-0">
+           <i class="fas fa-file-upload"></i>
+  تقديم الأوراق الثبوتية
+             </h3>
+        </div>
+    <div class="card-body">
+            <form asp-action="ProvideTailorEvidence" asp-controller="Account" method="post" enctype="multipart/form-data">
+         @Html.AntiForgeryToken()
+               <input type="hidden" asp-for="UserId" />
+              <input type="hidden" asp-for="Email" />
+  <input type="hidden" asp-for="FullName" />
+
+@Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
+              <!-- Personal Information Section -->
+            <div class="mb-4">
+          <h5 class="border-bottom pb-2 mb-3">
+              <i class="fas fa-user"></i>
+         المعلومات الشخصية
+     </h5>
+
+       <div class="row g-3">
+       <div class="col-md-6">
+        <label class="form-label">الاسم الكامل</label>
+     <input type="text" class="form-control" value="@Model?.FullName" readonly />
+   </div>
+   <div class="col-md-6">
+           <label class="form-label">البريد الإلكتروني</label>
+    <input type="email" class="form-control" value="@Model?.Email" readonly />
+        </div>
+   </div>
+          </div>
+
+       <!-- Workshop Information Section -->
+<div class="mb-4">
+          <h5 class="border-bottom pb-2 mb-3">
+      <i class="fas fa-store"></i>
+ معلومات الورشة
+ </h5>
+
+   <div class="row g-3">
+      <div class="col-md-6">
+ <label asp-for="WorkshopName" class="form-label">
+اسم الورشة <span class="text-danger">*</span>
+ </label>
+             <input asp-for="WorkshopName" class="form-control" required />
+ <span asp-validation-for="WorkshopName" class="text-danger"></span>
+             </div>
+
+            <div class="col-md-6">
+      <label asp-for="PhoneNumber" class="form-label">
+                  رقم الهاتف <span class="text-danger">*</span>
+       </label>
+          <input asp-for="PhoneNumber" class="form-control" required />
+      <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+     </div>
+
+       <div class="col-md-6">
+   <label asp-for="City" class="form-label">
+       المدينة <span class="text-danger">*</span>
+       </label>
+  <select asp-for="City" class="form-select">
+           <option value="">اختر المدينة</option>
+<option value="Cairo">القاهرة</option>
+       <option value="Alexandria">الإسكندرية</option>
+        <option value="Giza">الجيزة</option>
+          <option value="Shubra El-Kheima">شبرا الخيمة</option>
+       <option value="Port Said">بورسعيد</option>
+                 <option value="Suez">السويس</option>
+           <option value="Other">أخرى</option>
+        </select>
+    <span asp-validation-for="City" class="text-danger"></span>
+         </div>
+
+        <div class="col-md-6">
+        <label asp-for="ExperienceYears" class="form-label">
+           سنوات الخبرة
+      </label>
+  <input asp-for="ExperienceYears" type="number" class="form-control" min="0" max="100" />
+      <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+              </div>
+
+       <div class="col-12">
+       <label asp-for="Address" class="form-label">
+  عنوان الورشة <span class="text-danger">*</span>
+      </label>
+                 <textarea asp-for="Address" class="form-control" rows="2" required></textarea>
+   <span asp-validation-for="Address" class="text-danger"></span>
+   </div>
+
+        <div class="col-12">
+           <label asp-for="Description" class="form-label">
+        وصف الورشة والخدمات <span class="text-danger">*</span>
+      </label>
+        <textarea asp-for="Description" class="form-control" rows="3" required></textarea>
+       <small class="form-text text-muted">
+      اكتب نبذة عن ورشتك والخدمات التي تقدمها
+              </small>
+          <span asp-validation-for="Description" class="text-danger"></span>
+              </div>
+       </div>
+          </div>
+
+            <!-- Evidence Documents Section -->
+            <div class="mb-4">
+              <h5 class="border-bottom pb-2 mb-3">
+   <i class="fas fa-shield-check"></i>
+          الأوراق الثبوتية (مطلوبة)
+       </h5>
+
+  <!-- ID Document -->
+ <div class="mb-3">
+          <label asp-for="IdDocument" class="form-label">
+   <i class="fas fa-id-card"></i>
+       صورة الهوية الشخصية أو السجل التجاري <span class="text-danger">*</span>
+ </label>
+            <input asp-for="IdDocument" class="form-control" type="file" accept="image/*" required />
+    <small class="form-text text-muted">
+    صورة واضحة للهوية أو السجل التجاري (JPG, PNG)
+         </small>
+       <span asp-validation-for="IdDocument" class="text-danger"></span>
+               </div>
+
+  <!-- Portfolio Images -->
+   <div class="mb-3">
+       <label asp-for="PortfolioImages" class="form-label">
+ <i class="fas fa-images"></i>
+  صور من أعمالك السابقة <span class="text-danger">*</span>
+      </label>
+          <input asp-for="PortfolioImages" class="form-control" type="file" accept="image/*" multiple required />
+<small class="form-text text-muted">
+              يجب رفع 3 صور على الأقل من أعمالك لتوضيح مستوى الجودة والخبرة
+  </small>
+        <span asp-validation-for="PortfolioImages" class="text-danger"></span>
+         </div>
+
+     <!-- Additional Documents (Optional) -->
+ <div class="mb-3">
+         <label asp-for="AdditionalDocuments" class="form-label">
+     <i class="fas fa-paperclip"></i>
+            وثائق إضافية (اختياري)
+  </label>
+     <input asp-for="AdditionalDocuments" class="form-control" type="file" accept="image/*,.pdf" multiple />
+    <small class="form-text text-muted">
+ شهادات خبرة، تدريب، أو أي وثائق تدعم طلبك
+         </small>
+      <span asp-validation-for="AdditionalDocuments" class="text-danger"></span>
+           </div>
+              </div>
+
+          <!-- Terms and Conditions -->
+     <div class="mb-4">
+             <div class="form-check">
+ <input asp-for="AgreeToTerms" class="form-check-input" required />
+             <label asp-for="AgreeToTerms" class="form-check-label">
+        أوافق على <a href="@Url.Action("Privacy", "Home")" target="_blank">شروط الخدمة وسياسة الخصوصية</a>
+  <span class="text-danger">*</span>
+    </label>
+         <span asp-validation-for="AgreeToTerms" class="text-danger d-block"></span>
+      </div>
+</div>
+
+      <!-- Submit Button -->
+          <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary btn-lg">
+          <i class="fas fa-paper-plane"></i>
+        إرسال الأوراق الثبوتية وإكمال التسجيل
+         </button>
+        <a href="@Url.Action("Login", "Account")" class="btn btn-outline-secondary">
+   <i class="fas fa-arrow-right"></i>
+      تسجيل الدخول لاحقاً
+          </a>
+         </div>
+
+         <!-- Note -->
+  <div class="alert alert-warning mt-3" role="alert">
+     <small>
+    <i class="fas fa-exclamation-triangle"></i>
+       <strong>ملاحظة مهمة:</strong>
+   لن تتمكن من الدخول إلى حسابك حتى تقوم بتقديم الأوراق الثبوتية المطلوبة.
+       سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.
+           </small>
+               </div>
+   </form>
+     </div>
+      </div>
+
+  <!-- Help Section -->
+<div class="card mt-4 border-info">
+      <div class="card-body">
+         <h6 class="card-title">
+        <i class="fas fa-question-circle text-info"></i>
+        هل تحتاج مساعدة؟
+</h6>
+           <p class="card-text mb-0">
+     في حال وجود أي استفسار، يمكنك التواصل معنا عبر:
+   </p>
+          <ul class="mb-0">
+     <li>البريد الإلكتروني: <a href="mailto:support@tafsilk.com">support@tafsilk.com</a></li>
+                <li>الهاتف: <bdi>+20 123 456 7890</bdi></li>
+     </ul>
+             </div>
+    </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+ <script>
+        // Optional: Preview uploaded images
+    document.getElementById('IdDocument').addEventListener('change', function(e) {
+          if (e.target.files.length > 0) {
+        console.log('ID document selected:', e.target.files[0].name);
+         }
+        });
+
+        document.getElementById('PortfolioImages').addEventListener('change', function(e) {
+  const fileCount = e.target.files.length;
+      if (fileCount > 0) {
+        console.log(`${fileCount} portfolio images selected`);
+   if (fileCount < 3) {
+         alert('يرجى اختيار 3 صور على الأقل من أعمالك');
+                }
+    }
+        });
+    </script>
+}

@@ -1,0 +1,600 @@
+@model TafsilkPlatform.Web.ViewModels.Corporate.EditCorporateProfileViewModel
+
+@{
+    ViewData["Title"] = "تعديل الملف الشخصي للشركة";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+    :root {
+        --primary-color: #2c5aa0;
+    --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+   --secondary-color: #f39c12;
+--success-color: #27ae60;
+        --warning-color: #f39c12;
+        --error-color: #e74c3c;
+     --text-primary: #2c3e50;
+   --text-secondary: #7f8c8d;
+        --border-color: #e1e8ed;
+        --background-white: #ffffff;
+  --background-gray: #f8f9fa;
+ --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+    }
+
+    .edit-profile-page {
+        padding: 2rem 0;
+        background: var(--background-gray);
+        min-height: 100vh;
+    }
+
+    .page-header {
+        text-align: center;
+    margin-bottom: 3rem;
+    }
+
+    .page-title {
+        font-size: 1.875rem;
+     font-weight: 700;
+ color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+ color: var(--text-secondary);
+    }
+
+    .profile-layout {
+  display: grid;
+      grid-template-columns: 1fr;
+    gap: 2rem;
+    }
+
+    @@media (min-width: 1024px) {
+      .profile-layout {
+  grid-template-columns: 1fr 350px;
+    }
+    }
+
+    .profile-form-section, .profile-sidebar {
+        background: var(--background-white);
+        border-radius: var(--radius-lg);
+ padding: 2rem;
+  box-shadow: var(--shadow-sm);
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+   padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-section:last-child {
+    margin-bottom: 0;
+   border-bottom: none;
+  }
+
+    .section-header {
+     display: flex;
+      align-items: center;
+        gap: 0.75rem;
+  margin-bottom: 1.5rem;
+    }
+
+    .section-icon {
+        width: 36px;
+     height: 36px;
+        border-radius: 50%;
+   background: var(--primary-color);
+   color: white;
+ display: flex;
+        align-items: center;
+    justify-content: center;
+   font-size: 1.125rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+      color: var(--text-primary);
+    }
+
+.form-row {
+    display: grid;
+grid-template-columns: 1fr;
+        gap: 1.5rem;
+ }
+
+    @@media (min-width: 768px) {
+     .form-row {
+   grid-template-columns: repeat(2, 1fr);
+    }
+    }
+
+    .form-row.single {
+   grid-template-columns: 1fr;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+ display: block;
+        margin-bottom: 0.5rem;
+   font-weight: 600;
+   color: var(--text-primary);
+    }
+
+    .form-label.required::after {
+    content: " *";
+        color: var(--error-color);
+    }
+
+    .form-control {
+   width: 100%;
+padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        transition: all 0.3s;
+ font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+   border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+    }
+
+    .form-control:disabled {
+        background: var(--background-gray);
+cursor: not-allowed;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .input-group {
+position: relative;
+    }
+
+    .input-group-icon {
+  position: absolute;
+     right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+     color: var(--text-secondary);
+    }
+
+    .input-group .form-control {
+        padding-right: 2.5rem;
+    }
+
+    .profile-picture-upload {
+    text-align: center;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+   margin: 0 auto 1rem;
+        overflow: hidden;
+border: 3px solid var(--border-color);
+        background: var(--background-gray);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .profile-picture-preview img {
+  width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-picture-preview i {
+   font-size: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+     display: inline-block;
+    }
+
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-input-label {
+   display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background: var(--primary-color);
+        color: white;
+ border-radius: var(--radius-md);
+     cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .file-input-label:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+    }
+
+    .stats-grid {
+    display: grid;
+grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+  background: var(--background-gray);
+        border-radius: var(--radius-md);
+        padding: 1rem;
+   text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+ font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+     font-size: 0.875rem;
+ color: var(--text-secondary);
+    }
+
+  .approval-badge {
+        display: inline-flex;
+  align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+ font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .approval-badge.approved {
+    background: #d4edda;
+        color: #155724;
+    }
+
+    .approval-badge.pending {
+     background: #fff3cd;
+ color: #856404;
+  }
+
+    .quick-links {
+  display: grid;
+        gap: 0.75rem;
+    }
+
+    .quick-link {
+ display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+    border: 1px solid var(--border-color);
+   border-radius: var(--radius-md);
+        text-decoration: none;
+   color: var(--text-primary);
+        transition: all 0.3s;
+    }
+
+    .quick-link:hover {
+   background: var(--background-gray);
+        border-color: var(--primary-color);
+    }
+
+  .quick-link i {
+        color: var(--primary-color);
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        border: none;
+ border-radius: var(--radius-md);
+        font-weight: 600;
+text-align: center;
+ cursor: pointer;
+        transition: all 0.3s;
+text-decoration: none;
+    }
+
+    .btn-primary {
+    background: var(--primary-color);
+        color: white;
+    }
+
+  .btn-primary:hover {
+background: var(--primary-hover);
+        transform: translateY(-2px);
+   box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+    background: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-outline:hover {
+   background: var(--primary-color);
+color: white;
+    }
+
+    .btn-block {
+        width: 100%;
+  display: block;
+    }
+
+    .form-actions {
+        display: flex;
+     gap: 1rem;
+        justify-content: flex-end;
+ margin-top: 2rem;
+    }
+
+    .text-danger {
+   color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .help-text {
+      font-size: 0.875rem;
+  color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+</style>
+}
+
+<div class="edit-profile-page">
+    <div class="container">
+      <!-- Page Header -->
+   <div class="page-header">
+  <h1 class="page-title">تعديل الملف الشخصي للشركة</h1>
+    <p class="page-subtitle">قم بتحديث معلومات شركتك</p>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["Success"] != null)
+        {
+ <div class="alert alert-success alert-dismissible fade show">
+    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+   </div>
+        }
+        @if (TempData["Error"] != null)
+     {
+            <div class="alert alert-danger alert-dismissible fade show">
+     <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+  <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+     }
+
+        <form asp-action="EditCorporateProfile" method="post" enctype="multipart/form-data">
+      @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.Id)
+       @Html.HiddenFor(m => m.UserId)
+
+            <div class="profile-layout">
+       <!-- Left Column: Form -->
+      <div class="profile-form-section">
+        <!-- Company Information -->
+          <div class="form-section">
+          <div class="section-header">
+<div class="section-icon">
+                <i class="fas fa-building"></i>
+      </div>
+     <h2 class="section-title">معلومات الشركة</h2>
+         </div>
+
+            <div class="form-group">
+      <label asp-for="CompanyName" class="form-label required"></label>
+     <input asp-for="CompanyName" class="form-control" placeholder="اسم الشركة" />
+     <span asp-validation-for="CompanyName" class="text-danger"></span>
+       </div>
+
+   <div class="form-row">
+      <div class="form-group">
+  <label asp-for="ContactPerson" class="form-label required"></label>
+    <input asp-for="ContactPerson" class="form-control" placeholder="اسم جهة الاتصال" />
+          <span asp-validation-for="ContactPerson" class="text-danger"></span>
+              </div>
+
+         <div class="form-group">
+            <label asp-for="PhoneNumber" class="form-label required"></label>
+   <div class="input-group">
+          <span class="input-group-icon"><i class="fas fa-phone"></i></span>
+           <input asp-for="PhoneNumber" class="form-control" placeholder="مثال: 01012345678" />
+   </div>
+    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+              </div>
+ </div>
+
+        <div class="form-group">
+ <label asp-for="Email" class="form-label"></label>
+   <div class="input-group">
+    <span class="input-group-icon"><i class="fas fa-envelope"></i></span>
+    <input asp-for="Email" class="form-control" placeholder="example@company.com" disabled />
+       </div>
+          <p class="help-text">لتغيير البريد الإلكتروني، يرجى التواصل مع الدعم</p>
+           </div>
+
+    <div class="form-row">
+   <div class="form-group">
+           <label asp-for="Industry" class="form-label"></label>
+          <input asp-for="Industry" class="form-control" placeholder="مثال: الصناعة، التجارة، الخدمات" />
+      <span asp-validation-for="Industry" class="text-danger"></span>
+       </div>
+
+        <div class="form-group">
+        <label asp-for="TaxNumber" class="form-label"></label>
+        <input asp-for="TaxNumber" class="form-control" placeholder="الرقم الضريبي" />
+ <span asp-validation-for="TaxNumber" class="text-danger"></span>
+        </div>
+   </div>
+        </div>
+
+   <!-- Bio -->
+         <div class="form-section">
+      <div class="section-header">
+             <div class="section-icon">
+      <i class="fas fa-info-circle"></i>
+     </div>
+         <h2 class="section-title">نبذة عن الشركة</h2>
+</div>
+
+  <div class="form-group">
+          <label asp-for="Bio" class="form-label"></label>
+        <textarea asp-for="Bio" class="form-control" rows="4" placeholder="نبذة تعريفية عن الشركة ونشاطها"></textarea>
+   <span asp-validation-for="Bio" class="text-danger"></span>
+         <p class="help-text">الحد الأقصى 1000 حرف</p>
+            </div>
+    </div>
+
+                    <!-- Profile Picture -->
+         <div class="form-section">
+        <div class="section-header">
+ <div class="section-icon">
+     <i class="fas fa-camera"></i>
+    </div>
+      <h2 class="section-title">شعار الشركة</h2>
+        </div>
+
+    <div class="profile-picture-upload">
+          <div class="profile-picture-preview" id="picturePreview">
+     @if (Model.CurrentProfilePictureData != null)
+  {
+        <img src="@Url.Action("GetCorporateProfilePicture", "Profiles", new { id = Model.Id })" 
+      alt="Company Logo" 
+      id="previewImage" />
+   }
+    else
+                {
+              <i class="fas fa-building"></i>
+   }
+         </div>
+
+<div class="file-input-wrapper">
+ <input type="file" 
+        id="profilePictureInput" 
+                 name="ProfilePicture" 
+       accept="image/*"
+                 onchange="previewProfilePicture(event)" />
+        <label for="profilePictureInput" class="file-input-label">
+            <i class="fas fa-upload me-2"></i>اختر شعار جديد
+             </label>
+          </div>
+          <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+           <p class="help-text">الحد الأقصى: 5 ميجابايت | الأنواع المدعومة: JPG, PNG, GIF</p>
+    </div>
+        </div>
+
+       <!-- Form Actions -->
+                <div class="form-actions">
+        <a href="@Url.Action("CorporateProfile", "Profiles")" class="btn btn-outline">
+      <i class="fas fa-times me-2"></i>إلغاء
+   </a>
+         <button type="submit" class="btn btn-primary">
+  <i class="fas fa-save me-2"></i>حفظ التغييرات
+        </button>
+            </div>
+                </div>
+
+       <!-- Right Column: Sidebar -->
+    <div class="profile-sidebar">
+           <!-- Approval Status -->
+   @if (Model.IsApproved)
+     {
+       <div class="approval-badge approved">
+    <i class="fas fa-check-circle"></i>
+    <span>حساب معتمد</span>
+               </div>
+    }
+            else
+     {
+  <div class="approval-badge pending">
+ <i class="fas fa-clock"></i>
+            <span>في انتظار الموافقة</span>
+    </div>
+          <p class="text-muted small">سيتم مراجعة حسابك من قبل الإدارة خلال 24-48 ساعة</p>
+           }
+
+         <!-- Statistics -->
+        <div class="stats-grid">
+             <div class="stat-card">
+ <div class="stat-value">@Model.TotalOrders</div>
+                  <div class="stat-label">إجمالي الطلبات</div>
+          </div>
+         <div class="stat-card">
+         <div class="stat-value">@Model.ActiveOrders</div>
+             <div class="stat-label">طلبات نشطة</div>
+       </div>
+   <div class="stat-card">
+  <div class="stat-value">@Model.CompletedOrders</div>
+ <div class="stat-label">طلبات مكتملة</div>
+       </div>
+           <div class="stat-card">
+ <div class="stat-value">@Model.TotalSpent.ToString("C")</div>
+  <div class="stat-label">إجمالي المصروفات</div>
+          </div>
+        </div>
+
+   <!-- Quick Links -->
+                    <div class="quick-links">
+                 <a href="@Url.Action("Corporate", "Dashboards")" class="quick-link">
+     <i class="fas fa-home"></i>
+ <span>لوحة التحكم</span>
+          </a>
+ <a href="@Url.Action("ManageCorporateAddresses", "Profiles")" class="quick-link">
+     <i class="fas fa-map-marker-alt"></i>
+        <span>إدارة العناوين</span>
+       </a>
+           <a href="@Url.Action("ChangePassword", "Account")" class="quick-link">
+            <i class="fas fa-key"></i>
+     <span>تغيير كلمة المرور</span>
+ </a>
+  </div>
+</div>
+     </div>
+ </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewProfilePicture(e) {
+        const file = e.target.files[0];
+            if (file) {
+            const reader = new FileReader();
+     reader.onload = function(evt) {
+        const preview = document.getElementById('picturePreview');
+        const existingImg = document.getElementById('previewImage');
+     
+         if (existingImg) {
+      existingImg.src = evt.target.result;
+           } else {
+preview.innerHTML = `<img src="${evt.target.result}" alt="Preview" id="previewImage" />`;
+      }
+       };
+        reader.readAsDataURL(file);
+        }
+        }
+  </script>
+}
