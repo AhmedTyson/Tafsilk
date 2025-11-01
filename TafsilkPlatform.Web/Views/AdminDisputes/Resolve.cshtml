@@ -1,0 +1,16 @@
+@model TafsilkPlatform.Web.Models.Dispute
+@{
+ ViewData["Title"] = "حل النزاع";
+}
+<h2>حل النزاع</h2>
+<form method="post" asp-action="ResolveConfirmed">
+ <input type="hidden" name="id" value="@Model.Id" />
+ <div class="form-group">
+ <label for="resolutionDetails">تفاصيل الحل</label>
+ <textarea id="resolutionDetails" name="resolutionDetails" rows="6" class="form-control"></textarea>
+ </div>
+ <div class="form-group">
+ <button type="submit" class="btn btn-primary">تأكيد الحل</button>
+ <a class="btn btn-secondary" href="@Url.Action("Index", "AdminDisputes")">إلغاء</a>
+ </div>
+</form>

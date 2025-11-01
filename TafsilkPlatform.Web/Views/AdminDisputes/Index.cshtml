@@ -1,0 +1,42 @@
+@model IEnumerable<TafsilkPlatform.Web.Models.Dispute>
+@{
+ ViewData["Title"] = "قائمة النزاعات";
+}
+<h2>النزاعات المفتوحة</h2>
+@if (!Model?.Any() ?? true)
+{
+ <p>لا توجد نزاعات مفتوحة.</p>
+}
+else
+{
+ <table class="data-table">
+ <thead>
+ <tr>
+ <th>الرقم</th>
+ <th>الطلب</th>
+ <th>المبلغ</th>
+ <th>مقدم النزاع</th>
+ <th>السبب</th>
+ <th>تاريخ الإنشاء</th>
+ <th>إجراءات</th>
+ </tr>
+ </thead>
+ <tbody>
+ @foreach (var d in Model)
+ {
+ <tr>
+ <td>@d.Id</td>
+ <td>@d.OrderId</td>
+ <td>@(d.Order?.TotalPrice.ToString("C") ?? "-")</td>
+ <td>@d.OpenedByUserId</td>
+ <td>@d.Reason</td>
+ <td>@d.CreatedAt.ToString("g")</td>
+ <td>
+ <a class="btn btn-text" href="@Url.Action("Details", "AdminDisputes", new { id = d.Id })">عرض</a>
+ <a class="btn btn-primary" href="@Url.Action("Resolve", "AdminDisputes", new { id = d.Id })">حل</a>
+ </td>
+ </tr>
+ }
+ </tbody>
+ </table>
+}

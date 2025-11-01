@@ -1769,7 +1769,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.CustomerProfile", null)
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_CustomerProfiles");
 
@@ -1780,7 +1780,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.Order", null)
                         .WithOne()
                         .HasForeignKey("TafsilkPlatform.Models.Review", "OrderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_Orders");
 
@@ -1791,7 +1791,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_Reviews_TailorProfiles");
 
@@ -1811,7 +1811,7 @@ namespace TafsilkPlatform.Migrations
                     b.HasOne("TafsilkPlatform.Models.TailorProfile", null)
                         .WithMany()
                         .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired()
                         .HasConstraintName("FK_TailorBadges_TailorProfiles");
                 });

@@ -527,7 +527,7 @@ END
                         column: x => x.TailorId,
                         principalTable: "TailorProfiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -812,7 +812,7 @@ END
                         column: x => x.CustomerId,
                         principalTable: "CustomerProfiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Reviews_CustomerProfiles_CustomerId1",
                         column: x => x.CustomerId1,
@@ -823,7 +823,7 @@ END
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Reviews_Orders_OrderId1",
                         column: x => x.OrderId1,
@@ -834,7 +834,7 @@ END
                         column: x => x.TailorId,
                         principalTable: "TailorProfiles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Reviews_TailorProfiles_TailorId1",
                         column: x => x.TailorId1,

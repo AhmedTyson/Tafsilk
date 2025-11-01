@@ -1,0 +1,17 @@
+@model TafsilkPlatform.Web.Models.Dispute
+@{
+ ViewData["Title"] = "تفاصيل النزاع";
+}
+<h2>تفاصيل النزاع</h2>
+<div>
+ <h3>السبب: @Model.Reason</h3>
+ <p>الوصف: @Model.Description</p>
+ <p>الطلب: @Model.OrderId</p>
+ <p>مقدم النزاع: @Model.OpenedByUserId</p>
+ <p>الحالة: @Model.Status</p>
+ <p>تاريخ الإنشاء: @Model.CreatedAt.ToString("g")</p>
+</div>
+<div>
+ <a class="btn btn-secondary" href="@Url.Action("Index", "AdminDisputes")">العودة</a>
+ <a class="btn btn-primary" href="@Url.Action("Resolve", "AdminDisputes", new { id = Model.Id })">حل النزاع</a>
+</div>

@@ -1,0 +1,116 @@
+@model TafsilkPlatform.Web.Models.TailorService
+
+@{
+    ViewData["Title"] = Model.TailorServiceId == Guid.Empty ? "إضافة خدمة جديدة" : "تعديل الخدمة";
+    var isEdit = Model.TailorServiceId != Guid.Empty;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+           <div class="card-header bg-gradient-primary text-white p-4">
+<h3 class="mb-0">
+         <i class="fas fa-@(isEdit ? "edit" : "plus") me-2"></i>
+    @ViewData["Title"]
+       </h3>
+   </div>
+  
+             <div class="card-body p-4">
+ <form asp-action="@(isEdit ? "EditService" : "AddService")" method="post">
+       @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+     
+     <input type="hidden" asp-for="TailorServiceId" />
+            <input type="hidden" asp-for="TailorId" />
+              <input type="hidden" asp-for="IsDeleted" />
+      
+    <!-- Service Name -->
+             <div class="mb-4">
+  <label asp-for="ServiceName" class="form-label fw-bold">
+             <i class="fas fa-scissors me-2"></i>اسم الخدمة
+       </label>
+                <input asp-for="ServiceName" class="form-control form-control-lg" 
+         placeholder="مثال: تفصيل ثوب، تقصير بنطلون" required />
+       <span asp-validation-for="ServiceName" class="text-danger small"></span>
+          </div>
+
+         <!-- Description -->
+      <div class="mb-4">
+    <label asp-for="Description" class="form-label fw-bold">
+    <i class="fas fa-align-right me-2"></i>وصف الخدمة
+      </label>
+    <textarea asp-for="Description" class="form-control" rows="4"
+             placeholder="اكتب وصفاً تفصيلياً للخدمة"></textarea>
+             <span asp-validation-for="Description" class="text-danger small"></span>
+           </div>
+
+  <!-- Base Price -->
+            <div class="mb-4">
+          <label asp-for="BasePrice" class="form-label fw-bold">
+       <i class="fas fa-money-bill-wave me-2"></i>السعر الأساسي (ريال)
+        </label>
+              <div class="input-group input-group-lg">
+      <input asp-for="BasePrice" type="number" step="0.01" min="0" 
+    class="form-control" placeholder="100.00" required />
+   <span class="input-group-text">ريال</span>
+     </div>
+           <span asp-validation-for="BasePrice" class="text-danger small"></span>
+     <small class="text-muted d-block mt-1">
+        <i class="fas fa-info-circle me-1"></i>
+          السعر الأساسي للخدمة، يمكن تعديله حسب التفاصيل
+</small>
+       </div>
+
+           <!-- Estimated Duration -->
+         <div class="mb-4">
+                 <label asp-for="EstimatedDuration" class="form-label fw-bold">
+               <i class="fas fa-clock me-2"></i>المدة التقديرية (بالأيام)
+           </label>
+        <input asp-for="EstimatedDuration" type="number" min="1" 
+               class="form-control form-control-lg" placeholder="3" required />
+    <span asp-validation-for="EstimatedDuration" class="text-danger small"></span>
+         <small class="text-muted d-block mt-1">
+          <i class="fas fa-info-circle me-1"></i>
+     المدة المتوقعة لإنجاز الخدمة
+                  </small>
+         </div>
+
+  <!-- Action Buttons -->
+     <div class="d-flex gap-3">
+      <button type="submit" class="btn btn-primary btn-lg flex-fill">
+      <i class="fas fa-save me-2"></i>
+     @(isEdit ? "حفظ التعديلات" : "إضافة الخدمة")
+   </button>
+                <a asp-action="ManageServices" class="btn btn-outline-secondary btn-lg">
+             <i class="fas fa-times me-2"></i>إلغاء
+    </a>
+         </div>
+     </form>
+        </div>
+      </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 100%);
+    }
+    
+    .form-control:focus {
+ border-color: #2c5aa0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+    }
+    
+    .input-group-text {
+   background-color: #f8f9fa;
+        border-color: #dee2e6;
+ }
+</style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

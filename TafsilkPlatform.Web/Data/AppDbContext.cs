@@ -473,24 +473,24 @@ entity.HasOne<Order>()
         .WithOne()
            .HasForeignKey<Review>(r => r.OrderId)
        .HasPrincipalKey<Order>(o => o.OrderId)
-           .OnDelete(DeleteBehavior.Restrict);
+           .OnDelete(DeleteBehavior.NoAction);
 
         entity.HasOne<TailorProfile>()
      .WithMany()
   .HasForeignKey(r => r.TailorId)
       .HasPrincipalKey(t => t.Id)
-  .OnDelete(DeleteBehavior.Restrict);
+  .OnDelete(DeleteBehavior.NoAction);
 
        entity.HasOne<CustomerProfile>()
  .WithMany()
   .HasForeignKey(r => r.CustomerId)
        .HasPrincipalKey(c => c.Id)
-        .OnDelete(DeleteBehavior.Restrict);
+        .OnDelete(DeleteBehavior.NoAction);
 
       entity.HasMany(r => r.RatingDimensions)
    .WithOne(rd => rd.Review)
    .HasForeignKey(rd => rd.ReviewId)
-       .OnDelete(DeleteBehavior.Cascade);
+       .OnDelete(DeleteBehavior.NoAction);
  });
 
  // OrderImages Entity - Fix shadow property warning

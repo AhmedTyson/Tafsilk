@@ -10,7 +10,7 @@ namespace TafsilkPlatform.Web.Controllers
  public IActionResult Index()
  {
  // Returns the existing admin dashboard view file
- return View("~/Views/Dashboards/admindashborad.cshtml");
+ return View("~/Views/Dashboards/admindashboard.cshtml");
  }
  }
 }

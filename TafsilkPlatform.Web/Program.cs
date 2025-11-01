@@ -28,12 +28,12 @@ builder.Services.AddDataProtection();
 // Configure session for OAuth state with distributed cache
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.Name = ".Tafsilk.Session";
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SameSite = SameSiteMode.Lax;
+ options.IdleTimeout = TimeSpan.FromMinutes(30);
+ options.Cookie.Name = ".Tafsilk.Session";
+ options.Cookie.HttpOnly = true;
+ options.Cookie.IsEssential = true;
+ options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+ options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // Check OAuth configuration - ensure we're reading the config correctly
@@ -45,108 +45,108 @@ var facebookAppSecret = builder.Configuration["Facebook:app_secret"];
 // Log configuration status for debugging
 Console.WriteLine($"Google ClientId configured: {!string.IsNullOrWhiteSpace(googleClientId)}");
 Console.WriteLine($"Google ClientSecret configured: {!string.IsNullOrWhiteSpace(googleClientSecret)}");
-Console.WriteLine($"Facebook AppId configured: {!string.IsNullOrWhiteSpace(facebookAppId)} (Value: {facebookAppId?.Substring(0, Math.Min(10, facebookAppId?.Length ?? 0))}...)");
-Console.WriteLine($"Facebook AppSecret configured: {!string.IsNullOrWhiteSpace(facebookAppSecret)} (Value: {facebookAppSecret?.Substring(0, Math.Min(10, facebookAppSecret?.Length ?? 0))}...)");
+Console.WriteLine($"Facebook AppId configured: {!string.IsNullOrWhiteSpace(facebookAppId)} (Value: {facebookAppId?.Substring(0, Math.Min(10, facebookAppId?.Length ??0))}...)");
+Console.WriteLine($"Facebook AppSecret configured: {!string.IsNullOrWhiteSpace(facebookAppSecret)} (Value: {facebookAppSecret?.Substring(0, Math.Min(10, facebookAppSecret?.Length ??0))}...)");
 
 var googleConfigured = !string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret);
 var facebookConfigured = !string.IsNullOrWhiteSpace(facebookAppId) && !string.IsNullOrWhiteSpace(facebookAppSecret);
 
 // Cookie authentication for MVC login views with enhanced configuration
 var authBuilder = builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/Login";
-        options.Cookie.Name = ".Tafsilk.Auth";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.Cookie.SameSite = SameSiteMode.Lax;
-        options.ExpireTimeSpan = TimeSpan.FromDays(14);
-        options.SlidingExpiration = true;
-    });
+ .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+ .AddCookie(options =>
+ {
+ options.LoginPath = "/Account/Login";
+ options.LogoutPath = "/Account/Logout";
+ options.AccessDeniedPath = "/Account/Login";
+ options.Cookie.Name = ".Tafsilk.Auth";
+ options.Cookie.HttpOnly = true;
+ options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+ options.Cookie.SameSite = SameSiteMode.Lax;
+ options.ExpireTimeSpan = TimeSpan.FromDays(14);
+ options.SlidingExpiration = true;
+ });
 
 // Conditionally add Google OAuth only if configured
 if (googleConfigured)
 {
-    authBuilder.AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = googleClientId!;
-        googleOptions.ClientSecret = googleClientSecret!;
-        googleOptions.CallbackPath = "/signin-google";
+ authBuilder.AddGoogle(googleOptions =>
+ {
+ googleOptions.ClientId = googleClientId!;
+ googleOptions.ClientSecret = googleClientSecret!;
+ googleOptions.CallbackPath = "/signin-google";
  
-        // Request additional scopes
-        googleOptions.Scope.Add("profile");
-        googleOptions.Scope.Add("email");
-  
-        // Save tokens for API calls if needed
-      googleOptions.SaveTokens = true;
-        
-        // Configure correlation cookie with explicit settings
-        googleOptions.CorrelationCookie.Name = ".Tafsilk.Correlation.Google";
-  googleOptions.CorrelationCookie.SameSite = SameSiteMode.Lax;
-        googleOptions.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-   googleOptions.CorrelationCookie.HttpOnly = true;
-        googleOptions.CorrelationCookie.IsEssential = true;
-        
-     // Increase timeout for OAuth flow
-    googleOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
-    });
-    Console.WriteLine("Google OAuth configured");
+ // Request additional scopes
+ googleOptions.Scope.Add("profile");
+ googleOptions.Scope.Add("email");
+ 
+ // Save tokens for API calls if needed
+ googleOptions.SaveTokens = true;
+ 
+ // Configure correlation cookie with explicit settings
+ googleOptions.CorrelationCookie.Name = ".Tafsilk.Correlation.Google";
+ googleOptions.CorrelationCookie.SameSite = SameSiteMode.Lax;
+ googleOptions.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+ googleOptions.CorrelationCookie.HttpOnly = true;
+ googleOptions.CorrelationCookie.IsEssential = true;
+ 
+ // Increase timeout for OAuth flow
+ googleOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
+ });
+ Console.WriteLine("Google OAuth configured");
 }
 else
 {
-    Console.WriteLine("WARNING: Google OAuth not configured - social login will not work");
-    Console.WriteLine(" Configure: dotnet user-secrets set \"Google:client_id\" \"YOUR_ID\"");
-    Console.WriteLine("   Configure: dotnet user-secrets set \"Google:client_secret\" \"YOUR_SECRET\"");
+ Console.WriteLine("WARNING: Google OAuth not configured - social login will not work");
+ Console.WriteLine(" Configure: dotnet user-secrets set \"Google:client_id\" \"YOUR_ID\"");
+ Console.WriteLine(" Configure: dotnet user-secrets set \"Google:client_secret\" \"YOUR_SECRET\"");
 }
 
 // Conditionally add Facebook OAuth only if configured
 if (facebookConfigured)
 {
-  authBuilder.AddFacebook(facebookOptions =>
-    {
-        facebookOptions.AppId = facebookAppId!;
-        facebookOptions.AppSecret = facebookAppSecret!;
-        facebookOptions.CallbackPath = "/signin-facebook";
-        
-        // Scope for permissions - email and public_profile are included by default
-        facebookOptions.Scope.Add("email");
-        facebookOptions.Scope.Add("public_profile");
-        
-        // Fields to retrieve from Facebook Graph API
-        facebookOptions.Fields.Add("name");
-        facebookOptions.Fields.Add("email");
-        facebookOptions.Fields.Add("picture");
-        
-     // Save tokens for API calls if needed
-    facebookOptions.SaveTokens = true;
+ authBuilder.AddFacebook(facebookOptions =>
+ {
+ facebookOptions.AppId = facebookAppId!;
+ facebookOptions.AppSecret = facebookAppSecret!;
+ facebookOptions.CallbackPath = "/signin-facebook";
+ 
+ // Scope for permissions - email and public_profile are included by default
+ facebookOptions.Scope.Add("email");
+ facebookOptions.Scope.Add("public_profile");
+ 
+ // Fields to retrieve from Facebook Graph API
+ facebookOptions.Fields.Add("name");
+ facebookOptions.Fields.Add("email");
+ facebookOptions.Fields.Add("picture");
+ 
+ // Save tokens for API calls if needed
+ facebookOptions.SaveTokens = true;
 
-        // Configure correlation cookie with explicit settings
-        facebookOptions.CorrelationCookie.Name = ".Tafsilk.Correlation.Facebook";
-        facebookOptions.CorrelationCookie.SameSite = SameSiteMode.Lax;
-        facebookOptions.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        facebookOptions.CorrelationCookie.HttpOnly = true;
-        facebookOptions.CorrelationCookie.IsEssential = true;
-        
-      // Increase timeout for OAuth flow
-      facebookOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
-    });
-    Console.WriteLine("Facebook OAuth configured");
+ // Configure correlation cookie with explicit settings
+ facebookOptions.CorrelationCookie.Name = ".Tafsilk.Correlation.Facebook";
+ facebookOptions.CorrelationCookie.SameSite = SameSiteMode.Lax;
+ facebookOptions.CorrelationCookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+ facebookOptions.CorrelationCookie.HttpOnly = true;
+ facebookOptions.CorrelationCookie.IsEssential = true;
+ 
+ // Increase timeout for OAuth flow
+ facebookOptions.RemoteAuthenticationTimeout = TimeSpan.FromMinutes(5);
+ });
+ Console.WriteLine("Facebook OAuth configured");
 }
 else
 {
-    Console.WriteLine("WARNING: Facebook OAuth not configured - social login will not work");
-    Console.WriteLine("   Configure: dotnet user-secrets set \"Facebook:app_id\" \"YOUR_ID\"");
-    Console.WriteLine("   Configure: dotnet user-secrets set \"Facebook:app_secret\" \"YOUR_SECRET\"");
+ Console.WriteLine("WARNING: Facebook OAuth not configured - social login will not work");
+ Console.WriteLine(" Configure: dotnet user-secrets set \"Facebook:app_id\" \"YOUR_ID\"");
+ Console.WriteLine(" Configure: dotnet user-secrets set \"Facebook:app_secret\" \"YOUR_SECRET\"");
 }
 
 // Database context
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-  b => b.MigrationsAssembly("TafsilkPlatform.Web")));
+ options.UseSqlServer(
+ builder.Configuration.GetConnectionString("DefaultConnection"),
+ b => b.MigrationsAssembly("TafsilkPlatform.Web")));
 
 // Register repositories
 builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
@@ -229,7 +229,7 @@ if (app.Environment.IsDevelopment())
  db.Database.Migrate();
 
  // run seeder only if migrations succeeded
- TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db);
+ TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db, builder.Configuration, logger);
  }
  catch (InvalidOperationException ex) when (
  ex.Message?.Contains("pending", StringComparison.OrdinalIgnoreCase) == true ||
@@ -252,12 +252,12 @@ if (app.Environment.IsDevelopment())
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+ app.UseExceptionHandler("/Home/Error");
+ app.UseHsts();
 }
 else
 {
-    app.UseDeveloperExceptionPage();
+ app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
@@ -272,8 +272,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+ name: "default",
+ pattern: "{controller=Home}/{action=Index}/{id?}");
 
 // Log startup success
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();

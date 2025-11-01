@@ -1,0 +1,383 @@
+@* 
+    Unified Footer - Two versions: Full and Minimal
+    Use minimal footer for auth pages (Login/Register)
+*@
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var isAuthPage = (currentController == "Account" && (currentAction == "Login" || currentAction == "Register" || currentAction == "CompleteGoogleRegistration"));
+    var isMinimal = ViewData["MinimalFooter"] as bool? ?? isAuthPage;
+}
+
+@if (isMinimal)
+{
+    <!-- Minimal Footer (for Auth pages) -->
+    <footer class="minimal-footer">
+        <div class="container">
+        <div class="minimal-footer-content">
+      <p>© @DateTime.Now.Year تفصيلك. جميع الحقوق محفوظة</p>
+      <div class="minimal-footer-links">
+       <a asp-controller="Home" asp-action="Privacy">سياسة الخصوصية</a>
+     <a href="#">شروط الاستخدام</a>
+     <a href="#">المساعدة</a>
+  </div>
+  </div>
+    </div>
+    </footer>
+}
+else
+{
+    <!-- Full Footer (for all other pages) -->
+    <footer class="full-footer" id="contact">
+<div class="container">
+     <div class="footer-content">
+                <!-- About Section -->
+           <div class="footer-section">
+       <h3 class="footer-title">
+ <i class="fas fa-cut"></i>
+       عن تفصيلك
+             </h3>
+        <p class="footer-description">
+      منصة رقمية تربطك بأمهر الخياطين في منطقتك. نوفر لك خدمات خياطة موثوقة وبأسعار شفافة مع ضمان الجودة.
+</p>
+   <div class="social-links">
+       <a href="#" aria-label="Facebook" title="تابعنا على فيسبوك">
+       <i class="fab fa-facebook"></i>
+ </a>
+  <a href="#" aria-label="Twitter" title="تابعنا على تويتر">
+  <i class="fab fa-twitter"></i>
+</a>
+    <a href="#" aria-label="Instagram" title="تابعنا على إنستجرام">
+      <i class="fab fa-instagram"></i>
+    </a>
+ <a href="#" aria-label="LinkedIn" title="تابعنا على لينكد إن">
+   <i class="fab fa-linkedin"></i>
+          </a>
+         </div>
+        </div>
+
+      <!-- Quick Links -->
+        <div class="footer-section">
+            <h3 class="footer-title">روابط سريعة</h3>
+           <ul class="footer-links">
+     <li><a href="@Url.Action("Index","Home")#home"><i class="fas fa-chevron-left"></i> الرئيسية</a></li>
+    <li><a href="@Url.Action("Index","Home")#how-it-works"><i class="fas fa-chevron-left"></i> كيف تعمل المنصة</a></li>
+   <li><a href="@Url.Action("Index","Home")#tailors"><i class="fas fa-chevron-left"></i> الخياطين</a></li>
+<li><a asp-controller="Account" asp-action="Register"><i class="fas fa-chevron-left"></i> انضم كخياط</a></li>
+       <li><a href="#"><i class="fas fa-chevron-left"></i> الأسعار</a></li>
+     </ul>
+   </div>
+
+ <!-- Legal & Support -->
+<div class="footer-section">
+            <h3 class="footer-title">الدعم والمساعدة</h3>
+         <ul class="footer-links">
+  <li><a asp-controller="Home" asp-action="Privacy"><i class="fas fa-chevron-left"></i> سياسة الخصوصية</a></li>
+       <li><a href="#"><i class="fas fa-chevron-left"></i> شروط الاستخدام</a></li>
+    <li><a href="#"><i class="fas fa-chevron-left"></i> سياسة الاسترجاع</a></li>
+ <li><a href="#"><i class="fas fa-chevron-left"></i> الأسئلة الشائعة</a></li>
+     <li><a href="#"><i class="fas fa-chevron-left"></i> مركز المساعدة</a></li>
+     </ul>
+  </div>
+
+<!-- Contact Info -->
+ <div class="footer-section">
+        <h3 class="footer-title">تواصل معنا</h3>
+      <ul class="footer-contact">
+           <li>
+      <i class="fas fa-envelope"></i>
+             <div>
+         <strong>البريد الإلكتروني</strong>
+    <a href="mailto:info@tafsilk.com">info@@tafsilk.com</a>
+   </div>
+           </li>
+  <li>
+       <i class="fas fa-phone"></i>
+          <div>
+             <strong>الهاتف</strong>
+    <a href="tel:+201234567890">+20 123 456 7890</a>
+   </div>
+    </li>
+  <li>
+     <i class="fas fa-map-marker-alt"></i>
+  <div>
+  <strong>العنوان</strong>
+          <span>القاهرة، مصر</span>
+     </div>
+       </li>
+        </ul>
+        </div>
+      </div>
+
+     <div class="footer-bottom">
+       <div class="footer-bottom-content">
+         <p>© @DateTime.Now.Year تفصيلك. جميع الحقوق محفوظة</p>
+    <div class="footer-badges">
+            <span class="badge-item">
+ <i class="fas fa-shield-alt"></i>
+           مدفوعات آمنة
+            </span>
+       <span class="badge-item">
+   <i class="fas fa-check-circle"></i>
+       جودة مضمونة
+        </span>
+           </div>
+  </div>
+   </div>
+        </div>
+    </footer>
+}
+
+<style>
+    /* Minimal Footer (for Auth pages) */
+.minimal-footer {
+    background: #1f2937;
+        color: white;
+   padding: 1.5rem 0;
+   margin-top: auto;
+    }
+
+ .minimal-footer-content {
+   display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+  gap: 1rem;
+    }
+
+    .minimal-footer-content p {
+        margin: 0;
+        color: #d1d5db;
+ font-size: 0.9375rem;
+    }
+
+.minimal-footer-links {
+        display: flex;
+        gap: 1.5rem;
+     flex-wrap: wrap;
+  }
+
+    .minimal-footer-links a {
+    color: #d1d5db;
+        text-decoration: none;
+        font-size: 0.9375rem;
+     transition: color 0.3s;
+    }
+
+    .minimal-footer-links a:hover {
+   color: white;
+    }
+
+    /* Full Footer */
+    .full-footer {
+        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+   color: white;
+padding: 3rem 0 0 0;
+margin-top: 4rem;
+    }
+
+    .footer-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2.5rem;
+ margin-bottom: 2.5rem;
+    }
+
+    .footer-section {
+  text-align: right;
+    }
+
+    .footer-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .footer-description {
+        color: #d1d5db;
+   font-size: 0.9375rem;
+        line-height: 1.7;
+margin-bottom: 1.5rem;
+    }
+
+    .social-links {
+        display: flex;
+      gap: 0.75rem;
+    }
+
+    .social-links a {
+        width: 40px;
+ height: 40px;
+        border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+   display: flex;
+        align-items: center;
+      justify-content: center;
+        color: white;
+   transition: all 0.3s;
+        font-size: 1.125rem;
+    }
+
+.social-links a:hover {
+        background: #2563eb;
+        transform: translateY(-3px);
+    }
+
+    .footer-links {
+        list-style: none;
+  padding: 0;
+        margin: 0;
+    }
+
+    .footer-links li {
+   margin-bottom: 0.75rem;
+ }
+
+  .footer-links a {
+        color: #d1d5db;
+   text-decoration: none;
+   transition: all 0.3s;
+  display: flex;
+  align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9375rem;
+    }
+
+    .footer-links a:hover {
+    color: white;
+        padding-right: 0.5rem;
+    }
+
+    .footer-links a i {
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+
+    .footer-contact {
+        list-style: none;
+     padding: 0;
+        margin: 0;
+    }
+
+    .footer-contact li {
+     display: flex;
+        align-items: flex-start;
+ gap: 1rem;
+        margin-bottom: 1.25rem;
+   color: #d1d5db;
+  }
+
+.footer-contact li i {
+    font-size: 1.25rem;
+        color: #2563eb;
+        margin-top: 0.25rem;
+    }
+
+.footer-contact li div {
+   display: flex;
+   flex-direction: column;
+   gap: 0.25rem;
+}
+
+.footer-contact li strong {
+      color: white;
+        font-size: 0.875rem;
+    }
+
+    .footer-contact li a {
+        color: #d1d5db;
+ text-decoration: none;
+   transition: color 0.3s;
+    }
+
+    .footer-contact li a:hover {
+        color: white;
+    }
+
+ .footer-contact li span {
+    font-size: 0.9375rem;
+    }
+
+    .footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 1.5rem 0;
+    }
+
+    .footer-bottom-content {
+        display: flex;
+  justify-content: space-between;
+        align-items: center;
+    flex-wrap: wrap;
+        gap: 1rem;
+  }
+
+    .footer-bottom p {
+        margin: 0;
+      color: #9ca3af;
+        font-size: 0.9375rem;
+    }
+
+    .footer-badges {
+        display: flex;
+        gap: 1.5rem;
+     flex-wrap: wrap;
+    }
+
+    .badge-item {
+        display: flex;
+ align-items: center;
+     gap: 0.5rem;
+  color: #9ca3af;
+        font-size: 0.875rem;
+    }
+
+    .badge-item i {
+   color: #10b981;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .minimal-footer-content,
+    .footer-bottom-content {
+       flex-direction: column;
+        text-align: center;
+        }
+
+     .minimal-footer-links,
+        .footer-badges {
+       justify-content: center;
+      }
+
+        .footer-content {
+          grid-template-columns: 1fr;
+    gap: 2rem;
+      }
+
+.footer-section {
+         text-align: center;
+      }
+
+        .footer-title {
+       justify-content: center;
+        }
+
+  .social-links {
+       justify-content: center;
+        }
+
+   .footer-links a,
+        .footer-contact li {
+justify-content: center;
+        }
+
+  .full-footer {
+            padding: 2rem 0 0 0;
+      margin-top: 2rem;
+        }
+  }
+</style>

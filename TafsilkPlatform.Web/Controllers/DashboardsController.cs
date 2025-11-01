@@ -8,6 +8,9 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize]
 public class DashboardsController : Controller
 {
+ // Removed AdminDashboard action - now handled by AdminDashboardController
+ // Navigate to: /Admin/Dashboard or /Admin instead
+
  [Authorize(Roles = "Customer")]
  public IActionResult Customer()
  {

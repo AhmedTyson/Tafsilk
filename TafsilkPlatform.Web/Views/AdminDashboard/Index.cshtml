@@ -1,0 +1,423 @@
+@model TafsilkPlatform.Web.ViewModels.Admin.DashboardHomeViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "لوحة التحكم - المسؤول";
+}
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - تفصيلك</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+<!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Admin Dashboard CSS -->
+    <link rel="stylesheet" href="~/css/admin-dashboard-new.css" asp-append-version="true" />
+</head>
+<body class="admin-dashboard">
+
+<!-- Sidebar Backdrop for Mobile -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+    <div class="logo">
+            <div class="logo-icon">
+      <i class="fas fa-cut"></i>
+            </div>
+       <span class="logo-text">تفصيلك</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose" aria-label="إغلاق القائمة">
+       <i class="fas fa-times"></i>
+   </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+   <ul class="nav-list">
+        <li class="nav-item active">
+ <a href="@Url.Action("Index", "AdminDashboard")" class="nav-link">
+     <i class="fas fa-home"></i>
+                 <span class="nav-text">لوحة التحكم</span>
+   </a>
+    </li>
+   <li class="nav-item">
+        <a href="@Url.Action("Users", "AdminDashboard")" class="nav-link">
+        <i class="fas fa-users"></i>
+         <span class="nav-text">إدارة المستخدمين</span>
+     </a>
+       </li>
+            <li class="nav-item">
+  <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="nav-link">
+ <i class="fas fa-user-check"></i>
+      <span class="nav-text">التحقق من الخياطين</span>
+      @if (Model.PendingTailorVerifications > 0)
+           {
+       <span class="badge">@Model.PendingTailorVerifications</span>
+        }
+    </a>
+            </li>
+         <li class="nav-item">
+   <a href="@Url.Action("PortfolioReview", "AdminDashboard")" class="nav-link">
+            <i class="fas fa-images"></i>
+  <span class="nav-text">مراجعة الصور</span>
+           @if (Model.PendingPortfolioReviews > 0)
+         {
+               <span class="badge">@Model.PendingPortfolioReviews</span>
+   }
+ </a>
+   </li>
+    <li class="nav-item">
+     <a href="@Url.Action("Orders", "AdminDashboard")" class="nav-link">
+      <i class="fas fa-shopping-cart"></i>
+     <span class="nav-text">الطلبات</span>
+       </a>
+    </li>
+     <li class="nav-item">
+            <a href="@Url.Action("Disputes", "AdminDashboard")" class="nav-link">
+            <i class="fas fa-exclamation-triangle"></i>
+                    <span class="nav-text">حل النزاعات</span>
+           @if (Model.OpenDisputes > 0)
+          {
+          <span class="badge">@Model.OpenDisputes</span>
+        }
+                </a>
+            </li>
+            <li class="nav-item">
+         <a href="@Url.Action("Refunds", "AdminDashboard")" class="nav-link">
+                    <i class="fas fa-money-bill-wave"></i>
+     <span class="nav-text">طلبات الاسترداد</span>
+    @if (Model.PendingRefunds > 0)
+           {
+     <span class="badge">@Model.PendingRefunds</span>
+ }
+        </a>
+            </li>
+            <li class="nav-item">
+       <a href="@Url.Action("Reviews", "AdminDashboard")" class="nav-link">
+   <i class="fas fa-star"></i>
+    <span class="nav-text">مراجعة التقييمات</span>
+    </a>
+       </li>
+        <li class="nav-item">
+      <a href="@Url.Action("Analytics", "AdminDashboard")" class="nav-link">
+         <i class="fas fa-chart-line"></i>
+       <span class="nav-text">التقارير والإحصائيات</span>
+     </a>
+      </li>
+    <li class="nav-item">
+       <a href="@Url.Action("Notifications", "AdminDashboard")" class="nav-link">
+         <i class="fas fa-bell"></i>
+          <span class="nav-text">مركز الإشعارات</span>
+             </a>
+  </li>
+  <li class="nav-item">
+             <a href="@Url.Action("AuditLogs", "AdminDashboard")" class="nav-link">
+            <i class="fas fa-clipboard-list"></i>
+         <span class="nav-text">سجلات التدقيق</span>
+        </a>
+      </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-light btn-block">
+      <i class="fas fa-home"></i>
+      <span class="nav-text">العودة للموقع</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+    <!-- Top Navigation Bar -->
+  <header class="topbar">
+        <div class="topbar-left">
+       <button class="sidebar-toggle" id="sidebarToggle" aria-label="فتح القائمة">
+     <i class="fas fa-bars"></i>
+</button>
+ <div class="breadcrumb">
+       <i class="fas fa-home"></i>
+             <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">لوحة التحكم</span>
+            </div>
+        </div>
+        
+   <div class="topbar-right">
+<!-- Quick Search -->
+<div class="topbar-search">
+      <input type="text" placeholder="بحث سريع..." aria-label="بحث" />
+    <i class="fas fa-search"></i>
+            </div>
+
+       <!-- Notifications -->
+     <div class="topbar-item">
+             <button class="topbar-btn" id="notificationBtn" aria-label="الإشعارات">
+   <i class="fas fa-bell"></i>
+      <span class="badge-dot"></span>
+    </button>
+</div>
+
+            <!-- User Menu -->
+       <div class="topbar-item user-menu">
+         <button class="user-menu-toggle" id="userMenuToggle">
+                <div class="user-avatar">
+       <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="المسؤول" />
+       </div>
+         <div class="user-info">
+          <span class="user-name">@(User.Identity?.Name ?? "المسؤول")</span>
+     <span class="user-role">مسؤول النظام</span>
+ </div>
+             <i class="fas fa-chevron-down"></i>
+    </button>
+
+      <div class="user-menu-dropdown" id="userMenuDropdown">
+        <div class="user-menu-header">
+            <div class="user-avatar-large">
+                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="المسؤول" />
+       </div>
+         <div class="user-details">
+       <strong>@(User.Identity?.Name ?? "المسؤول")</strong>
+     <span>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@tafsilk.com")</span>
+          </div>
+          </div>
+              <div class="user-menu-body">
+     <a href="#" class="user-menu-item">
+     <i class="fas fa-user"></i>
+    <span>الملف الشخصي</span>
+     </a>
+     <a href="#" class="user-menu-item">
+    <i class="fas fa-cog"></i>
+          <span>الإعدادات</span>
+   </a>
+      </div>
+           <div class="user-menu-footer">
+   <form asp-controller="Account" asp-action="Logout" method="post">
+     @Html.AntiForgeryToken()
+       <button type="submit" class="btn btn-logout btn-block">
+      <i class="fas fa-sign-out-alt"></i>
+        <span>تسجيل الخروج</span>
+        </button>
+             </form>
+             </div>
+         </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="page-header">
+       <div class="page-header-content">
+     <h1 class="page-title">لوحة التحكم</h1>
+     <p class="page-subtitle">نظرة عامة على أداء المنصة</p>
+            </div>
+            <div class="page-actions">
+   <button class="btn btn-primary" id="refreshData">
+  <i class="fas fa-sync-alt"></i>
+             <span>تحديث البيانات</span>
+           </button>
+   </div>
+  </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+ <div class="stat-card">
+          <div class="stat-card-header">
+     <div class="stat-icon primary">
+    <i class="fas fa-users"></i>
+            </div>
+   </div>
+  <div class="stat-card-body">
+       <h3 class="stat-value">@Model.TotalUsers.ToString("N0")</h3>
+  <p class="stat-label">إجمالي المستخدمين</p>
+      </div>
+                <div class="stat-card-footer">
+          <span class="stat-info">عملاء: @Model.TotalCustomers | خياطين: @Model.TotalTailors</span>
+        </div>
+   </div>
+
+      <div class="stat-card">
+     <div class="stat-card-header">
+             <div class="stat-icon warning">
+     <i class="fas fa-user-clock"></i>
+    </div>
+            </div>
+ <div class="stat-card-body">
+<h3 class="stat-value">@Model.PendingTailorVerifications.ToString("N0")</h3>
+    <p class="stat-label">طلبات تحقق معلقة</p>
+    </div>
+         <div class="stat-card-footer">
+           <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="stat-info">عرض الطلبات →</a>
+            </div>
+ </div>
+
+        <div class="stat-card">
+      <div class="stat-card-header">
+          <div class="stat-icon success">
+<i class="fas fa-shopping-cart"></i>
+       </div>
+          </div>
+     <div class="stat-card-body">
+ <h3 class="stat-value">@Model.ActiveOrders.ToString("N0")</h3>
+         <p class="stat-label">الطلبات النشطة</p>
+          </div>
+      <div class="stat-card-footer">
+        <a href="@Url.Action("Orders", "AdminDashboard")" class="stat-info">إدارة الطلبات →</a>
+  </div>
+         </div>
+
+    <div class="stat-card">
+                <div class="stat-card-header">
+        <div class="stat-icon info">
+        <i class="fas fa-dollar-sign"></i>
+                    </div>
+    </div>
+         <div class="stat-card-body">
+         <h3 class="stat-value">@Model.TotalRevenue.ToString("N0")</h3>
+        <p class="stat-label">إجمالي الإيرادات (ج.م)</p>
+      </div>
+        <div class="stat-card-footer">
+            <a href="@Url.Action("Analytics", "AdminDashboard")" class="stat-info">عرض التقارير →</a>
+           </div>
+            </div>
+        </div>
+
+        <!-- Urgent Actions -->
+        @if (Model.OpenDisputes > 0 || Model.PendingRefunds > 0 || Model.PendingPortfolioReviews > 0)
+        {
+            <div class="alert-section">
+           <h2 class="section-title">
+     <i class="fas fa-exclamation-circle"></i>
+         إجراءات عاجلة تحتاج لانتباهك
+              </h2>
+
+        <div class="alert-grid">
+       @if (Model.OpenDisputes > 0)
+     {
+          <div class="alert-card danger">
+             <div class="alert-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+          </div>
+  <div class="alert-content">
+     <h3>@Model.OpenDisputes نزاع مفتوح</h3>
+    <p>هناك نزاعات تحتاج للمراجعة والحل</p>
+</div>
+            <div class="alert-action">
+      <a href="@Url.Action("Disputes", "AdminDashboard")" class="btn btn-danger btn-sm">
+      معالجة النزاعات
+    </a>
+         </div>
+      </div>
+            }
+
+       @if (Model.PendingRefunds > 0)
+          {
+        <div class="alert-card warning">
+     <div class="alert-icon">
+   <i class="fas fa-money-bill-wave"></i>
+  </div>
+  <div class="alert-content">
+     <h3>@Model.PendingRefunds طلب استرداد</h3>
+    <p>هناك طلبات استرداد بانتظار الموافقة</p>
+        </div>
+     <div class="alert-action">
+           <a href="@Url.Action("Refunds", "AdminDashboard")" class="btn btn-warning btn-sm">
+          مراجعة الطلبات
+        </a>
+          </div>
+        </div>
+          }
+
+   @if (Model.PendingPortfolioReviews > 0)
+       {
+              <div class="alert-card info">
+         <div class="alert-icon">
+    <i class="fas fa-images"></i>
+   </div>
+    <div class="alert-content">
+               <h3>@Model.PendingPortfolioReviews صورة للمراجعة</h3>
+    <p>صور من معارض أعمال الخياطين تحتاج للموافقة</p>
+          </div>
+          <div class="alert-action">
+      <a href="@Url.Action("PortfolioReview", "AdminDashboard")" class="btn btn-info btn-sm">
+       مراجعة الصور
+      </a>
+    </div>
+   </div>
+           }
+    </div>
+   </div>
+        }
+
+        <!-- Recent Activity -->
+        <div class="dashboard-card">
+       <div class="card-header">
+   <h3 class="card-title">
+             <i class="fas fa-history"></i>
+        النشاط الحديث
+         </h3>
+      <a href="@Url.Action("AuditLogs", "AdminDashboard")" class="btn btn-text btn-sm">عرض الكل</a>
+            </div>
+    <div class="card-body">
+ @if (Model.RecentActivity.Any())
+    {
+          <div class="activity-list">
+    @foreach (var activity in Model.RecentActivity)
+       {
+       <div class="activity-item">
+  <div class="activity-icon">
+          <i class="fas fa-user-circle"></i>
+          </div>
+       <div class="activity-content">
+          <div class="activity-text">
+            <strong>@activity.UserName</strong> - @activity.Action
+         </div>
+              <div class="activity-time">
+  @activity.Timestamp.ToString("dd/MM/yyyy HH:mm")
+  @if (!string.IsNullOrEmpty(activity.IpAddress))
+          {
+   <span class="activity-ip">من @activity.IpAddress</span>
+    }
+ </div>
+          </div>
+                </div>
+}
+     </div>
+           }
+  else
+           {
+   <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+           <p>لا توجد أنشطة حديثة</p>
+        </div>
+           }
+ </div>
+  </div>
+    </main>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            showToast('@TempData["Success"]', 'success');
+        });
+    </script>
+}
+
+<!-- Scripts -->
+<script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
+</body>
+</html>
