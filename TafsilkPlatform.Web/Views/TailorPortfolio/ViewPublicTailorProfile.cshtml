@@ -1,0 +1,1258 @@
+@model TafsilkPlatform.Web.Models.TailorProfile
+
+@{
+    ViewData["Title"] = $"تفصيلك — {Model.ShopName ?? Model.FullName}";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+<style>
+    :root {
+  --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+     --primary-light: #e3f2fd;
+--secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+  --success-color: #27ae60;
+    --warning-color: #f39c12;
+        --error-color: #e74c3c;
+        --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+        --text-light: #bdc3c7;
+ --text-white: #ffffff;
+        --background-white: #ffffff;
+        --background-gray: #f8f9fa;
+ --background-light: #ecf0f1;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+    --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      --font-size-xs: 0.75rem;
+        --font-size-sm: 0.875rem;
+--font-size-base: 1rem;
+        --font-size-lg: 1.125rem;
+        --font-size-xl: 1.25rem;
+--font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+        --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+ --spacing-md: 1rem;
+        --spacing-lg: 1.5rem;
+ --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --spacing-3xl: 4rem;
+
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1),
+       0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+        --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+        --radius-full: 9999px;
+
+   --transition-fast: 0.15s ease-in-out;
+      --transition-normal: 0.3s ease-in-out;
+   --transition-slow: 0.5s ease-in-out;
+      }
+
+      /* Main Container */
+      .container {
+   max-width: 1200px;
+ margin: 0 auto;
+     padding: 0 var(--spacing-md);
+  width: 100%;
+        box-sizing: border-box;
+      }
+
+      @@media (min-width: 768px) {
+        .container {
+          padding: 0 var(--spacing-lg);
+        }
+      }
+
+      @@media (min-width: 1024px) {
+        .container {
+          padding: 0 var(--spacing-xl);
+        }
+      }
+
+      /* Tailor Profile Header */
+      .tailor-profile {
+        margin: var(--spacing-2xl) 0;
+      width: 100%;
+   box-sizing: border-box;
+      }
+
+ .profile-header {
+        background-color: var(--background-white);
+border-radius: var(--radius-lg);
+     box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      .profile-banner {
+      height: 200px;
+        background: linear-gradient(
+  135deg,
+   var(--primary-color) 0%,
+  var(--primary-hover) 100%
+        );
+        position: relative;
+      }
+
+      .profile-content {
+        padding: var(--spacing-2xl);
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+      }
+
+      @@media (min-width: 768px) {
+        .profile-content {
+          grid-template-columns: 1fr 2fr;
+        }
+      }
+
+      .profile-image {
+    text-align: center;
+      }
+
+      .profile-img {
+        width: 200px;
+        height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+        border: 5px solid var(--background-white);
+        box-shadow: var(--shadow-lg);
+        margin-top: -100px;
+        background-color: var(--background-light);
+        position: relative;
+        z-index: 2;
+      }
+
+      .profile-info {
+      padding: var(--spacing-md);
+    }
+
+      .profile-name {
+      font-size: var(--font-size-3xl);
+   font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+ .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        background-color: var(--success-color);
+        color: var(--text-white);
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--radius-full);
+        font-size: var(--font-size-sm);
+  font-weight: 600;
+     margin-bottom: var(--spacing-md);
+    }
+
+   .profile-stats {
+        display: flex;
+        gap: var(--spacing-xl);
+        margin-bottom: var(--spacing-lg);
+        flex-wrap: wrap;
+      }
+
+    .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-value {
+        font-size: var(--font-size-2xl);
+    font-weight: 700;
+        color: var(--primary-color);
+    }
+
+      .stat-label {
+        font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+ }
+
+      .profile-details {
+        display: grid;
+        grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+   margin-bottom: var(--spacing-lg);
+   }
+
+    @@media (min-width: 480px) {
+        .profile-details {
+        grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .detail-item {
+        display: flex;
+  align-items: center;
+        gap: var(--spacing-sm);
+      }
+
+      .detail-item i {
+        color: var(--primary-color);
+    width: 20px;
+      }
+
+      .profile-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        flex-wrap: wrap;
+        margin-top: var(--spacing-lg);
+      }
+
+  .action-buttons {
+      display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+      }
+
+      /* Tabs Section */
+      .tabs-section {
+        margin-bottom: var(--spacing-3xl);
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .tabs-container {
+        background-color: var(--background-white);
+border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      }
+
+      .tabs-header {
+        display: flex;
+ border-bottom: 1px solid var(--border-color);
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+
+      .tabs-header::-webkit-scrollbar {
+        display: none;
+      }
+
+      .tab {
+   padding: var(--spacing-md) var(--spacing-lg);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        white-space: nowrap;
+        font-weight: 600;
+        color: var(--text-secondary);
+   border-bottom: 3px solid transparent;
+      }
+
+      .tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+      }
+
+    .tab:hover {
+        background-color: var(--background-gray);
+      }
+
+      .tab-content {
+      display: none;
+  padding: var(--spacing-xl);
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .section-title {
+   font-size: var(--font-size-2xl);
+        font-weight: 700;
+   margin-bottom: var(--spacing-lg);
+  color: var(--text-primary);
+        padding-bottom: var(--spacing-sm);
+ border-bottom: 2px solid var(--border-color);
+      }
+
+      /* Information Tab */
+      .info-grid {
+        display: grid;
+    grid-template-columns: 1fr;
+     gap: var(--spacing-xl);
+      }
+
+      @@media (min-width: 768px) {
+    .info-grid {
+          grid-template-columns: 1fr 1fr;
+      }
+      }
+
+      .info-card {
+        background-color: var(--background-gray);
+     border-radius: var(--radius-lg);
+ padding: var(--spacing-lg);
+      }
+
+.info-card-title {
+     font-size: var(--font-size-lg);
+  font-weight: 600;
+        margin-bottom: var(--spacing-md);
+   color: var(--primary-color);
+     display: flex;
+    align-items: center;
+      gap: var(--spacing-sm);
+      }
+
+      .info-list {
+      list-style: none;
+      }
+
+ .info-list li {
+        padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .info-list li:last-child {
+        border-bottom: none;
+ }
+
+      .info-label {
+     font-weight: 600;
+  color: var(--text-primary);
+      }
+
+      .info-value {
+        color: var(--text-secondary);
+  }
+
+      /* Reviews Tab */
+      .reviews-summary {
+        background-color: var(--background-white);
+     border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+ box-shadow: var(--shadow-sm);
+    margin-bottom: var(--spacing-xl);
+        display: flex;
+        flex-direction: column;
+  align-items: center;
+        text-align: center;
+      }
+
+      @@media (min-width: 768px) {
+     .reviews-summary {
+      flex-direction: row;
+        text-align: right;
+          align-items: flex-start;
+        }
+      }
+
+      .rating-overview {
+        flex: 1;
+        padding: var(--spacing-md);
+      }
+
+      .rating-score {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: var(--spacing-sm);
+      }
+
+   .rating-stars {
+        color: var(--secondary-color);
+  font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-sm);
+      }
+
+  .rating-count {
+        color: var(--text-secondary);
+        font-size: var(--font-size-sm);
+      }
+
+      .rating-bars {
+        flex: 2;
+        padding: var(--spacing-md);
+      }
+
+      .rating-bar {
+        display: flex;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+      }
+
+    .rating-label {
+        width: 80px;
+  font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .rating-bar-inner {
+        flex: 1;
+   height: 8px;
+        background-color: var(--background-light);
+        border-radius: var(--radius-full);
+ overflow: hidden;
+        margin: 0 var(--spacing-sm);
+      }
+
+      .rating-bar-fill {
+        height: 100%;
+     background-color: var(--secondary-color);
+        border-radius: var(--radius-full);
+      }
+
+      .rating-value {
+    width: 30px;
+     font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        text-align: left;
+      }
+
+   .reviews-list {
+ display: grid;
+        grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+      }
+
+      @@media (min-width: 768px) {
+        .reviews-list {
+       grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .review-card {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .review-header {
+    display: flex;
+ justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .reviewer {
+        display: flex;
+        align-items: center;
+gap: var(--spacing-sm);
+      }
+
+      .reviewer-avatar {
+        width: 40px;
+ height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: var(--background-light);
+      }
+
+      .reviewer-info h4 {
+        font-size: var(--font-size-base);
+      font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .reviewer-info p {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .review-stars {
+        color: var(--secondary-color);
+      }
+
+      .review-content {
+color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+ .review-date {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+        margin-top: var(--spacing-sm);
+  }
+
+   /* Services Tab */
+      .services-grid {
+      display: grid;
+        grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @@media (min-width: 640px) {
+ .services-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @@media (min-width: 1024px) {
+        .services-grid {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+      .service-card {
+        background-color: var(--background-white);
+ border-radius: var(--radius-lg);
+        padding: var(--spacing-lg);
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+        text-align: center;
+        position: relative;
+      }
+
+      .service-card:hover {
+   transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .service-icon {
+        width: 60px;
+        height: 60px;
+        background-color: var(--primary-light);
+        border-radius: 50%;
+   display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--spacing-md);
+    color: var(--primary-color);
+   font-size: var(--font-size-xl);
+      }
+
+      .service-title {
+    font-size: var(--font-size-lg);
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-primary);
+      }
+
+      .service-desc {
+  color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+   font-size: var(--font-size-sm);
+      }
+
+ .service-price {
+      font-size: var(--font-size-lg);
+        font-weight: 700;
+        color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
+    }
+
+      .service-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background-color: var(--secondary-color);
+        color: white;
+        padding: 4px 8px;
+        border-radius: var(--radius-sm);
+        font-size: var(--font-size-xs);
+        font-weight: 600;
+      }
+
+ /* Portfolio Tab */
+  .portfolio-grid {
+      display: grid;
+    grid-template-columns: repeat(1, 1fr);
+        gap: var(--spacing-md);
+      }
+
+      @@media (min-width: 640px) {
+        .portfolio-grid {
+  grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+      @@media (min-width: 1024px) {
+        .portfolio-grid {
+  grid-template-columns: repeat(3, 1fr);
+        }
+      }
+
+  .portfolio-item {
+    border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all var(--transition-normal);
+        position: relative;
+        aspect-ratio: 1 / 1;
+      }
+
+      .portfolio-item:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .portfolio-img {
+  width: 100%;
+   height: 100%;
+        object-fit: cover;
+        transition: transform var(--transition-normal);
+      }
+
+    .portfolio-item:hover .portfolio-img {
+      transform: scale(1.05);
+      }
+
+      .portfolio-overlay {
+   position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+        color: white;
+        padding: var(--spacing-md);
+        transform: translateY(100%);
+        transition: transform var(--transition-normal);
+      }
+
+      .portfolio-item:hover .portfolio-overlay {
+        transform: translateY(0);
+      }
+
+      .portfolio-title {
+   font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+      }
+
+      .portfolio-desc {
+        font-size: var(--font-size-sm);
+        opacity: 0.9;
+}
+
+      /* Calendar and Map Section */
+      .calendar-map-section {
+        margin-bottom: var(--spacing-3xl);
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .calendar-map-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xl);
+}
+
+      @@media (min-width: 1024px) {
+        .calendar-map-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+  }
+
+      .calendar-card, .map-card {
+   background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+   padding: var(--spacing-xl);
+    box-shadow: var(--shadow-sm);
+      }
+
+      .map-placeholder {
+        height: 400px;
+        background-color: var(--background-light);
+        border-radius: var(--radius-md);
+        display: flex;
+    align-items: center;
+        justify-content: center;
+        color: var(--text-secondary);
+        flex-direction: column;
+     gap: var(--spacing-md);
+      }
+
+      .map-placeholder i {
+        font-size: 3rem;
+        color: var(--primary-color);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-block;
+     padding: var(--spacing-sm) var(--spacing-lg);
+        border: none;
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+   font-size: var(--font-size-base);
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+   cursor: pointer;
+     transition: all var(--transition-normal);
+        line-height: 1.5;
+ }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+      .btn-primary:hover,
+   .btn-primary:focus {
+        background-color: var(--primary-hover);
+        color: var(--text-white);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+      }
+
+      .btn-outline:hover,
+      .btn-outline:focus {
+        background-color: var(--primary-color);
+        color: var(--text-white);
+      }
+
+ .btn-secondary {
+        background-color: var(--secondary-color);
+        color: var(--text-white);
+    }
+
+      .btn-secondary:hover,
+      .btn-secondary:focus {
+        background-color: var(--secondary-hover);
+        color: var(--text-white);
+        transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+ }
+
+ /* Responsive Adjustments */
+      @@media (max-width: 640px) {
+        .profile-header {
+          margin: 0 calc(-1 * var(--spacing-md));
+        }
+
+   .profile-banner {
+    height: 150px;
+        }
+
+   .profile-img {
+          width: 150px;
+  height: 150px;
+     margin-top: -75px;
+ }
+
+        .profile-actions {
+          flex-direction: column;
+        }
+
+        .action-buttons {
+      width: 100%;
+        }
+
+     .action-buttons .btn {
+       flex: 1;
+          text-align: center;
+        }
+  }
+    </style>
+}
+
+<!-- Main Content -->
+<main class="container">
+    <section class="tailor-profile">
+        <div class="profile-header">
+         <div class="profile-banner"></div>
+            <div class="profile-content">
+            <div class="profile-image">
+         @if (Model.ProfilePictureData != null)
+      {
+       <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })"
+          alt="@Model.FullName"
+    class="profile-img" />
+       }
+       else
+         {
+    <img src="https://placehold.co/400x400/e3f2fd/2c5aa0?text=خياط+محترف"
+     alt="@Model.FullName"
+           class="profile-img" />
+       }
+  </div>
+ <div class="profile-info">
+      <h1 class="profile-name">@(Model.ShopName ?? Model.FullName)</h1>
+           @if (Model.IsVerified)
+      {
+       <div class="profile-badge">
+         <i class="fas fa-check-circle"></i>
+              <span>خياط موثوق</span>
+   </div>
+ }
+
+   <div class="profile-stats">
+    <div class="stat">
+      <span class="stat-value">@Model.AverageRating.ToString("F1")</span>
+     <span class="stat-label">التقييم</span>
+    </div>
+     <div class="stat">
+     <span class="stat-value">@ViewBag.ReviewCount</span>
+      <span class="stat-label">تقييم</span>
+            </div>
+@if (Model.YearsOfExperience.HasValue)
+  {
+     <div class="stat">
+           <span class="stat-value">@Model.YearsOfExperience</span>
+      <span class="stat-label">سنوات خبرة</span>
+     </div>
+                 }
+    </div>
+
+                <div class="profile-details">
+    @if (!string.IsNullOrEmpty(Model.City))
+             {
+           <div class="detail-item">
+        <i class="fas fa-map-marker-alt"></i>
+  <span>@Model.City@(!string.IsNullOrEmpty(Model.District) ? ", " + Model.District : "")</span>
+      </div>
+    }
+     @if (!string.IsNullOrEmpty(Model.Specialization))
+            {
+      <div class="detail-item">
+               <i class="fas fa-tshirt"></i>
+       <span>@Model.Specialization</span>
+            </div>
+   }
+         @if (!string.IsNullOrEmpty(Model.BusinessHours))
+   {
+            <div class="detail-item">
+     <i class="fas fa-clock"></i>
+               <span>@Model.BusinessHours</span>
+     </div>
+       }
+             <div class="detail-item">
+              <i class="fas fa-bolt"></i>
+    <span>خدمة عاجلة متاحة</span>
+             </div>
+          </div>
+
+       @if (!string.IsNullOrEmpty(Model.Bio))
+ {
+    <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
+            @Model.Bio
+     </p>
+    }
+          else if (!string.IsNullOrEmpty(Model.ShopDescription))
+    {
+      <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
+           @Model.ShopDescription
+      </p>
+     }
+
+   <div class="profile-actions">
+  <div class="action-buttons">
+           <a href="@Url.Action("Index", "Booking", new { tailorId = Model.Id })" class="btn btn-primary">
+                <i class="fas fa-calendar-check"></i>
+   احجز موعد
+              </a>
+      <button class="btn btn-outline" id="favoriteBtn">
+        <i class="far fa-heart"></i>
+          إضافة إلى المفضلة
+    </button>
+        <a href="@Url.Action("Index", "Messages", new { recipientId = Model.UserId })" class="btn btn-outline">
+                     <i class="fas fa-envelope"></i>
+       مراسلة
+             </a>
+        <button class="btn btn-secondary" id="viewWorkBtn">
+               <i class="fas fa-eye"></i>
+        عرض الأعمال
+        </button>
+   </div>
+         </div>
+        </div>
+            </div>
+  </div>
+    </section>
+
+    <!-- Tabs Section -->
+    <section class="tabs-section">
+   <div class="tabs-container">
+            <div class="tabs-header">
+       <div class="tab active" data-tab="information">المعلومات</div>
+  <div class="tab" data-tab="reviews">التقييمات</div>
+      <div class="tab" data-tab="services">الخدمات</div>
+  <div class="tab" data-tab="portfolio">معرض الأعمال</div>
+      </div>
+
+            <!-- Information Tab -->
+   <div class="tab-content active" id="information-tab">
+ <h2 class="section-title">معلومات عن الخياط</h2>
+         <div class="info-grid">
+     <div class="info-card">
+             <h3 class="info-card-title">
+      <i class="fas fa-info-circle"></i>
+           معلومات عامة
+       </h3>
+              <ul class="info-list">
+ <li>
+         <span class="info-label">الاسم:</span>
+      <span class="info-value">@(Model.ShopName ?? Model.FullName)</span>
+         </li>
+       @if (!string.IsNullOrEmpty(Model.Specialization))
+    {
+       <li>
+        <span class="info-label">التخصص:</span>
+        <span class="info-value">@Model.Specialization</span>
+      </li>
+   }
+         @if (Model.YearsOfExperience.HasValue)
+       {
+    <li>
+     <span class="info-label">سنوات الخبرة:</span>
+   <span class="info-value">@Model.YearsOfExperience سنوات</span>
+              </li>
+         }
+    <li>
+   <span class="info-label">تاريخ الانضمام:</span>
+         <span class="info-value">@Model.CreatedAt.ToString("MMMM yyyy")</span>
+    </li>
+      </ul>
+    </div>
+
+      @if (!string.IsNullOrEmpty(Model.BusinessHours))
+          {
+   <div class="info-card">
+     <h3 class="info-card-title">
+   <i class="fas fa-clock"></i>
+ أوقات العمل
+           </h3>
+          <ul class="info-list">
+              <li>
+  <span class="info-label">ساعات العمل:</span>
+         <span class="info-value">@Model.BusinessHours</span>
+        </li>
+         </ul>
+  </div>
+}
+
+     <div class="info-card">
+           <h3 class="info-card-title">
+           <i class="fas fa-map-marker-alt"></i>
+           معلومات الاتصال
+    </h3>
+               <ul class="info-list">
+  @if (!string.IsNullOrEmpty(Model.Address))
+               {
+            <li>
+        <span class="info-label">العنوان:</span>
+  <span class="info-value">@Model.Address</span>
+       </li>
+         }
+      else if (!string.IsNullOrEmpty(Model.City))
+         {
+     <li>
+<span class="info-label">المدينة:</span>
+ <span class="info-value">@Model.City</span>
+      </li>
+        }
+     @if (Model.User?.PhoneNumber != null)
+            {
+      <li>
+  <span class="info-label">الهاتف:</span>
+        <span class="info-value">@Model.User.PhoneNumber</span>
+       </li>
+       }
+          @if (!string.IsNullOrEmpty(Model.FacebookUrl) || !string.IsNullOrEmpty(Model.InstagramUrl))
+     {
+         <li>
+   <span class="info-label">وسائل التواصل:</span>
+    <span class="info-value">
+     @if (!string.IsNullOrEmpty(Model.FacebookUrl))
+          {
+               <a href="@Model.FacebookUrl" target="_blank" style="color: #1877F2; margin-left: 8px;">
+           <i class="fab fa-facebook"></i>
+           </a>
+        }
+          @if (!string.IsNullOrEmpty(Model.InstagramUrl))
+     {
+  <a href="@Model.InstagramUrl" target="_blank" style="color: #E4405F; margin-left: 8px;">
+       <i class="fab fa-instagram"></i>
+     </a>
+           }
+        </span>
+          </li>
+          }
+  </ul>
+        </div>
+
+       <div class="info-card">
+    <h3 class="info-card-title">
+          <i class="fas fa-star"></i>
+         المميزات
+       </h3>
+     <ul class="info-list">
+      <li>
+     <span class="info-label">التوصيل للمنزل:</span>
+      <span class="info-value">متاح (رسوم إضافية)</span>
+          </li>
+             <li>
+   <span class="info-label">الدفع الإلكتروني:</span>
+ <span class="info-value">متاح</span>
+     </li>
+    <li>
+   <span class="info-label">ضمان الجودة:</span>
+                 <span class="info-value">7 أيام</span>
+  </li>
+        </ul>
+  </div>
+        </div>
+            </div>
+
+ <!-- Reviews Tab -->
+            <div class="tab-content" id="reviews-tab">
+              <h2 class="section-title">تقييمات العملاء</h2>
+
+    @if (Model.Reviews != null && Model.Reviews.Any())
+     {
+   <div class="reviews-summary">
+ <div class="rating-overview">
+    <div class="rating-score">@Model.AverageRating.ToString("F1")</div>
+         <div class="rating-stars">
+     @for (int i = 1; i <= 5; i++)
+  {
+     if (i <= Math.Floor((double)Model.AverageRating))
+   {
+       <i class="fas fa-star"></i>
+  }
+               else if (i - 0.5 <= (double)Model.AverageRating)
+      {
+      <i class="fas fa-star-half-alt"></i>
+      }
+     else
+ {
+       <i class="far fa-star"></i>
+    }
+     }
+       </div>
+    <div class="rating-count">بناءً على @ViewBag.ReviewCount تقييم</div>
+       </div>
+</div>
+
+       <div class="reviews-list">
+                   @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt).Take(6))
+    {
+   <div class="review-card">
+      <div class="review-header">
+       <div class="reviewer">
+     <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=@review.Customer.FullName.Substring(0, 1)"
+       alt="@review.Customer.FullName"
+        class="reviewer-avatar" />
+         <div class="reviewer-info">
+         <h4>@review.Customer.FullName</h4>
+<p>عميل منذ @((DateTime.UtcNow - review.Customer.CreatedAt).TotalDays / 30) شهر</p>
+            </div>
+    </div>
+           <div class="review-stars">
+    @for (int i = 1; i <= review.Rating; i++)
+          {
+    <i class="fas fa-star"></i>
+        }
+              </div>
+          </div>
+     <div class="review-content">
+            <p>@review.Comment</p>
+  </div>
+                     <div class="review-date">منذ @((DateTime.UtcNow - review.CreatedAt).TotalDays) يوم</div>
+   </div>
+       }
+         </div>
+          }
+        else
+          {
+      <p class="text-muted text-center">لا توجد تقييمات بعد</p>
+    }
+   </div>
+
+          <!-- Services Tab -->
+      <div class="tab-content" id="services-tab">
+       <h2 class="section-title">الخدمات والأسعار</h2>
+     @if (Model.TailorServices != null && Model.TailorServices.Any())
+      {
+     <div class="services-grid">
+       @foreach (var service in Model.TailorServices.OrderBy(s => s.BasePrice))
+    {
+ <div class="service-card">
+     <div class="service-icon">
+         <i class="fas fa-tshirt"></i>
+       </div>
+       <h3 class="service-title">@service.ServiceName</h3>
+          @if (!string.IsNullOrEmpty(service.Description))
+         {
+      <p class="service-desc">@service.Description</p>
+ }
+   <div class="service-price">@service.BasePrice.ToString("N0") جنيه</div>
+         <a href="@Url.Action("Index", "Booking", new { tailorId = Model.Id, serviceId = service.TailorServiceId })" 
+    class="btn btn-primary">اطلب الآن</a>
+      </div>
+           }
+      </div>
+       }
+       else
+ {
+                <p class="text-muted text-center">لا توجد خدمات معلنة بعد</p>
+  }
+            </div>
+
+            <!-- Portfolio Tab -->
+  <div class="tab-content" id="portfolio-tab">
+                <h2 class="section-title">معرض الأعمال</h2>
+     @if (Model.PortfolioImages != null && Model.PortfolioImages.Any())
+  {
+ <div class="portfolio-grid">
+      @foreach (var image in Model.PortfolioImages.OrderByDescending(p => p.CreatedAt))
+        {
+  <div class="portfolio-item">
+ <img src="@Url.Action("GetPortfolioImage", "TailorManagement", new { id = image.PortfolioImageId })"
+    alt="@image.Title"
+        class="portfolio-img" />
+         <div class="portfolio-overlay">
+   <h3 class="portfolio-title">@image.Title</h3>
+         @if (!string.IsNullOrEmpty(image.Description))
+  {
+   <p class="portfolio-desc">@image.Description</p>
+      }
+         </div>
+     </div>
+         }
+     </div>
+        }
+        else
+   {
+          <p class="text-muted text-center">لا توجد صور في المعرض بعد</p>
+    }
+   </div>
+        </div>
+    </section>
+
+    <!-- Calendar and Map Section -->
+    <section class="calendar-map-section">
+      <h2 class="section-title">الموقع والحجز</h2>
+      <div class="calendar-map-grid">
+      <div class="map-card">
+      <h3>موقع الورشة</h3>
+       <div class="map-placeholder">
+       <i class="fas fa-map-marked-alt"></i>
+        <p>خريطة تفاعلية لموقع الورشة</p>
+              @if (!string.IsNullOrEmpty(Model.City))
+                 {
+        <p class="text-muted">@Model.City@(!string.IsNullOrEmpty(Model.District) ? ", " + Model.District : "")</p>
+           }
+          @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+            {
+  <a href="https://www.google.com/maps?q=@Model.Latitude,@Model.Longitude" 
+            target="_blank" 
+          class="btn btn-outline">
+   <i class="fas fa-directions"></i>
+          الحصول على الاتجاهات
+                </a>
+              }
+     </div>
+  <div class="workshop-info" style="margin-top: var(--spacing-lg);">
+              <h4>معلومات الورشة</h4>
+     @if (!string.IsNullOrEmpty(Model.BusinessHours))
+          {
+        <p><i class="fas fa-clock"></i> @Model.BusinessHours</p>
+     }
+  @if (Model.User?.PhoneNumber != null)
+    {
+            <p><i class="fas fa-phone"></i> @Model.User.PhoneNumber</p>
+ }
+       </div>
+</div>
+
+         <div class="calendar-card">
+    <h3>احجز موعد</h3>
+    <p style="margin-bottom: var(--spacing-lg); color: var(--text-secondary);">
+   لحجز موعد مع الخياط، يرجى الضغط على الزر أدناه
+              </p>
+      <a href="@Url.Action("Index", "Booking", new { tailorId = Model.Id })" 
+          class="btn btn-primary" 
+  style="width: 100%;">
+     <i class="fas fa-calendar-check"></i>
+            احجز موعد الآن
+     </a>
+            </div>
+  </div>
+    </section>
+</main>
+
+@section Scripts {
+    <script>
+// Initialize Tabs
+   document.addEventListener('DOMContentLoaded', function() {
+         initTabs();
+        initFavorite();
+        });
+
+        // Initialize Tabs
+        function initTabs() {
+          const tabs = document.querySelectorAll('.tab');
+   const tabContents = document.querySelectorAll('.tab-content');
+       
+   tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+              const tabId = this.getAttribute('data-tab');
+   
+                    // Update active tab
+    tabs.forEach(t => t.classList.remove('active'));
+ this.classList.add('active');
+ 
+               // Show corresponding content
+         tabContents.forEach(content => {
+   content.classList.remove('active');
+  if (content.id === `${tabId}-tab`) {
+       content.classList.add('active');
+      }
+    });
+      });
+            });
+        }
+
+        // Initialize Favorite Button
+        function initFavorite() {
+    const favoriteBtn = document.getElementById('favoriteBtn');
+            const viewWorkBtn = document.getElementById('viewWorkBtn');
+            
+    if (favoriteBtn) {
+             favoriteBtn.addEventListener('click', function() {
+  // In a real app, you would make an AJAX call to save/remove favorite
+    const isFavorite = this.classList.contains('favorited');
+       
+  if (isFavorite) {
+  this.classList.remove('favorited');
+     this.innerHTML = '<i class="far fa-heart"></i> إضافة إلى المفضلة';
+     } else {
+          this.classList.add('favorited');
+        this.innerHTML = '<i class="fas fa-heart"></i> إزالة من المفضلة';
+      }
+    });
+          }
+
+            if (viewWorkBtn) {
+          viewWorkBtn.addEventListener('click', function() {
+    // Navigate to portfolio tab
+        document.querySelector('.tab[data-tab="portfolio"]').click();
+         
+     // Scroll to portfolio section
+         document.getElementById('portfolio-tab').scrollIntoView({ behavior: 'smooth' });
+       });
+            }
+        }
+    </script>
+}

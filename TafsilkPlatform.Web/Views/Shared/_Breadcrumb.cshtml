@@ -1,0 +1,62 @@
+@* Breadcrumb Navigation Component *@
+@model List<(string Text, string Url)>
+
+@if (Model != null && Model.Any())
+{
+    <nav aria-label="breadcrumb" dir="rtl">
+   <ol class="breadcrumb bg-transparent p-0 mb-4">
+    <li class="breadcrumb-item">
+       <a href="@Url.Action("Index", "Home")">
+        <i class="fas fa-home"></i>
+     الرئيسية
+           </a>
+ </li>
+            
+    @for (int i = 0; i < Model.Count; i++)
+ {
+                var item = Model[i];
+                if (i == Model.Count - 1)
+      {
+         <li class="breadcrumb-item active" aria-current="page">
+     @item.Text
+        </li>
+   }
+    else
+      {
+         <li class="breadcrumb-item">
+   <a href="@item.Url">@item.Text</a>
+   </li>
+       }
+        }
+</ol>
+    </nav>
+}
+
+<style>
+    .breadcrumb {
+    font-size: 0.875rem;
+    }
+    
+.breadcrumb-item + .breadcrumb-item::before {
+        content: "‹";
+        float: left;
+        padding-left: 0.5rem;
+     padding-right: 0.5rem;
+  color: #6c757d;
+  }
+    
+    .breadcrumb-item a {
+   color: #6c757d;
+ text-decoration: none;
+  transition: color 0.2s ease;
+    }
+    
+    .breadcrumb-item a:hover {
+ color: #2c5aa0;
+    }
+    
+    .breadcrumb-item.active {
+        color: #2c5aa0;
+      font-weight: 600;
+    }
+</style>

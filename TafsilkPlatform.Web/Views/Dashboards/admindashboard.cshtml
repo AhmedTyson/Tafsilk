@@ -358,6 +358,49 @@
     </div>
         }
 
+      <!-- Quick Actions -->
+ <div class="row g-3">
+   <div class="col-md-3">
+            <a href="@Url.Action("Users", "AdminDashboard")" class="action-card">
+      <div class="action-icon">
+     <i class="fas fa-users"></i>
+     </div>
+          <h5>إدارة المستخدمين</h5>
+          <p>إدارة حسابات المستخدمين والصلاحيات</p>
+    </a>
+            </div>
+
+  <div class="col-md-3">
+            <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="action-card">
+      <div class="action-icon">
+     <i class="fas fa-user-check"></i>
+     </div>
+          <h5>التحقق من الخياطين</h5>
+          <p>مراجعة طلبات انضمام الخياطين الجدد</p>
+    </a>
+            </div>
+
+    <div class="col-md-3">
+            <a href="@Url.Action("Orders", "AdminDashboard")" class="action-card">
+      <div class="action-icon">
+     <i class="fas fa-shopping-cart"></i>
+     </div>
+          <h5>إدارة الطلبات</h5>
+          <p>مراجعة وإدارة طلبات العملاء</p>
+    </a>
+            </div>
+
+    <div class="col-md-3">
+            <a href="@Url.Action("Analytics", "AdminDashboard")" class="action-card">
+      <div class="action-icon">
+     <i class="fas fa-chart-line"></i>
+     </div>
+          <h5>التقارير والإحصائيات</h5>
+          <p>عرض الإحصائيات العامة وأداء المنصة</p>
+    </a>
+            </div>
+         </div>
+
       <!-- Recent Activity -->
         <div class="dashboard-card">
    <div class="card-header">

@@ -1,0 +1,112 @@
+@{
+    ViewData["Title"] = "إعادة إرسال رسالة التحقق";
+}
+
+<div class="container" style="max-width: 500px; margin-top: 50px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+    <div class="text-center mb-4">
+                <i class="fas fa-envelope-open-text fa-3x text-primary mb-3"></i>
+          <h2 class="fw-bold">إعادة إرسال رسالة التحقق</h2>
+    <p class="text-muted">أدخل بريدك الإلكتروني لإرسال رسالة تحقق جديدة</p>
+            </div>
+
+       @if (TempData["RegisterSuccess"] != null)
+            {
+     <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+                 @TempData["RegisterSuccess"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+       </div>
+            }
+
+         @if (TempData["ErrorMessage"] != null)
+{
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+           <i class="fas fa-exclamation-circle me-2"></i>
+                 @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+ </div>
+  }
+
+            <form method="post" asp-action="ResendVerificationEmail">
+       @Html.AntiForgeryToken()
+       
+      <div class="mb-3">
+   <label for="email" class="form-label">البريد الإلكتروني</label>
+        <div class="input-group">
+       <span class="input-group-text">
+            <i class="fas fa-envelope"></i>
+            </span>
+            <input type="email" 
+             class="form-control" 
+         id="email" 
+      name="email"
+   placeholder="your@example.com"
+        required
+          autofocus />
+    </div>
+  </div>
+
+    <div class="d-grid gap-2 mb-3">
+   <button type="submit" class="btn btn-primary btn-lg">
+           <i class="fas fa-paper-plane me-2"></i>
+          إرسال رسالة التحقق
+          </button>
+     </div>
+
+                <div class="text-center">
+           <a asp-action="Login" class="text-decoration-none">
+        <i class="fas fa-arrow-right me-2"></i>
+        العودة لتسجيل الدخول
+           </a>
+   </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card mt-3 border-0 bg-light">
+        <div class="card-body text-center">
+         <p class="mb-0 text-muted">
+       <i class="fas fa-info-circle me-2"></i>
+   ستصلك رسالة التحقق خلال بضع دقائق. تحقق من مجلد البريد العشوائي (Spam) إذا لم تجدها.
+         </p>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+    .card {
+       border-radius: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            border: none;
+            font-weight: 600;
+  }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+        }
+
+        .input-group-text {
+       background-color: #f8f9fa;
+            border-right: none;
+  }
+
+    .form-control {
+          border-left: none;
+        }
+
+   .form-control:focus {
+   box-shadow: none;
+            border-color: #2563eb;
+        }
+
+        .form-control:focus + .input-group-text {
+       border-color: #2563eb;
+        }
+    </style>
+}

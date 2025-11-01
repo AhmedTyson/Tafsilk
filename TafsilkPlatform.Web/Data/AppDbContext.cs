@@ -403,6 +403,7 @@ entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
 
     entity.Property(e => e.Action).IsRequired().HasMaxLength(100);
      entity.Property(e => e.EntityType).HasMaxLength(50);
+    entity.Property(e => e.Details).HasMaxLength(1000);  // Add configuration for Details column
     entity.Property(e => e.IpAddress).HasMaxLength(45);
          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 

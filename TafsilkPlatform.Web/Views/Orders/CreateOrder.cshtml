@@ -1,0 +1,868 @@
+@model TafsilkPlatform.Web.ViewModels.Orders.CreateOrderViewModel
+@{
+    ViewData["Title"] = "حجز طلب جديد";
+    Layout = "_Layout";
+}
+
+@section Styles {
+<style>
+    :root {
+        --primary-color: #2c5aa0;
+        --primary-hover: #1e3f73;
+        --primary-light: #e3f2fd;
+  --secondary-color: #f39c12;
+        --secondary-hover: #e67e22;
+        --success-color: #27ae60;
+    --warning-color: #f39c12;
+     --error-color: #e74c3c;
+    --text-primary: #2c3e50;
+        --text-secondary: #7f8c8d;
+      --text-light: #bdc3c7;
+        --background-white: #ffffff;
+     --background-gray: #f8f9fa;
+     --background-light: #ecf0f1;
+        --border-color: #e1e8ed;
+        --dark: #0f172a;
+
+ --spacing-xs: 0.25rem;
+        --spacing-sm: 0.5rem;
+        --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+        --spacing-xl: 2rem;
+        --spacing-2xl: 3rem;
+        --spacing-3xl: 4rem;
+
+     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    --radius-sm: 0.25rem;
+        --radius-md: 0.5rem;
+        --radius-lg: 0.75rem;
+        --radius-xl: 1rem;
+
+     --transition-fast: 0.15s ease-in-out;
+        --transition-normal: 0.3s ease-in-out;
+    }
+
+    .booking-page {
+padding: var(--spacing-2xl) 0;
+        background-color: var(--background-gray);
+        min-height: 100vh;
+    }
+
+    .page-header {
+   text-align: center;
+        margin-bottom: var(--spacing-2xl);
+    }
+
+    .page-title {
+        font-size: 2rem;
+ font-weight: 700;
+        margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+    }
+
+    .page-subtitle {
+        font-size: 1.125rem;
+      color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .booking-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+ gap: var(--spacing-xl);
+  }
+
+    @@media (min-width: 1024px) {
+        .booking-layout {
+    grid-template-columns: 2fr 1fr;
+        }
+    }
+
+    .booking-steps {
+        background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .order-summary {
+    background-color: var(--background-white);
+        border-radius: var(--radius-lg);
+        padding: var(--spacing-xl);
+ box-shadow: var(--shadow-sm);
+        height: fit-content;
+     position: sticky;
+        top: 100px;
+    }
+
+    .step {
+        margin-bottom: var(--spacing-2xl);
+        padding-bottom: var(--spacing-xl);
+  border-bottom: 1px solid var(--border-color);
+    }
+
+    .step:last-child {
+        margin-bottom: 0;
+        border-bottom: none;
+    }
+
+    .step-header {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    }
+
+    .step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: var(--primary-color);
+        color: white;
+        display: flex;
+    align-items: center;
+        justify-content: center;
+  font-weight: 700;
+    }
+
+    .step-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+  }
+
+    /* Tailor Card */
+    .tailor-card {
+    display: flex;
+        gap: var(--spacing-lg);
+        align-items: center;
+padding: var(--spacing-lg);
+        background-color: var(--background-light);
+        border-radius: var(--radius-md);
+    }
+
+    .tailor-avatar {
+        width: 80px;
+        height: 80px;
+ border-radius: 50%;
+        object-fit: cover;
+ background-color: var(--background-white);
+        border: 3px solid var(--background-white);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .tailor-info h3 {
+        font-size: 1.125rem;
+        font-weight: 700;
+margin-bottom: var(--spacing-xs);
+    }
+
+ .tailor-rating {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
+    }
+
+    .stars {
+        color: var(--secondary-color);
+    }
+
+    .tailor-location {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+
+    /* Service Selection */
+    .service-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+    }
+
+.service-option {
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+ text-align: center;
+ cursor: pointer;
+        transition: all var(--transition-normal);
+      background: white;
+    }
+
+    .service-option:hover {
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+  .service-option.selected {
+        border-color: var(--primary-color);
+  background-color: var(--primary-light);
+    }
+
+    .service-icon {
+        width: 60px;
+        height: 60px;
+        background-color: var(--background-light);
+        border-radius: 50%;
+    display: flex;
+ align-items: center;
+ justify-content: center;
+        margin: 0 auto var(--spacing-md);
+        color: var(--primary-color);
+        font-size: 1.5rem;
+    }
+
+    .service-name {
+        font-weight: 600;
+        margin-bottom: var(--spacing-xs);
+    }
+
+    .service-price {
+    color: var(--primary-color);
+  font-weight: 700;
+    }
+
+  /* Form Styles */
+    .form-group {
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .form-label {
+     display: block;
+        margin-bottom: var(--spacing-xs);
+        font-weight: 600;
+   color: var(--text-primary);
+    }
+
+    .form-control {
+  width: 100%;
+        padding: var(--spacing-md);
+      border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        transition: border-color var(--transition-normal);
+    }
+
+    .form-control:focus {
+     outline: none;
+   border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Image Upload */
+    .upload-area {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-md);
+        padding: var(--spacing-2xl);
+     text-align: center;
+  cursor: pointer;
+    transition: all var(--transition-normal);
+    background-color: var(--background-gray);
+    }
+
+    .upload-area:hover, .upload-area.dragover {
+    border-color: var(--primary-color);
+      background-color: var(--primary-light);
+    }
+
+    .upload-icon {
+        font-size: 48px;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .upload-btn {
+        display: inline-block;
+        padding: var(--spacing-sm) var(--spacing-lg);
+        background-color: var(--primary-color);
+     color: white;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: background-color var(--transition-normal);
+    }
+
+    .upload-btn:hover {
+        background-color: var(--primary-hover);
+    }
+
+    .uploaded-images {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+    }
+
+    .uploaded-image {
+        position: relative;
+        border-radius: var(--radius-md);
+    overflow: hidden;
+        aspect-ratio: 1 / 1;
+        border: 2px solid var(--border-color);
+    }
+
+    .uploaded-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .remove-image {
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        width: 24px;
+height: 24px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+     justify-content: center;
+        cursor: pointer;
+        color: var(--error-color);
+        border: none;
+ transition: transform var(--transition-fast);
+    }
+
+    .remove-image:hover {
+  transform: scale(1.1);
+    }
+
+  /* Summary Styles */
+    .summary-title {
+    font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+   padding-bottom: var(--spacing-sm);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .summary-section {
+        margin-bottom: var(--spacing-xl);
+    }
+
+    .summary-item {
+ display: flex;
+  justify-content: space-between;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .summary-label {
+ color: var(--text-secondary);
+    }
+
+    .summary-value {
+        font-weight: 600;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-xl);
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+    font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-normal);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        background-color: var(--primary-hover);
+        transform: translateY(-1px);
+box-shadow: var(--shadow-md);
+    }
+
+    .btn-submit:disabled {
+        background-color: var(--text-light);
+ cursor: not-allowed;
+    }
+
+    .form-check {
+    display: flex;
+    align-items: center;
+        gap: var(--spacing-sm);
+    }
+
+    .form-check-input {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+    }
+
+    .cost-breakdown {
+  background-color: var(--background-light);
+     padding: var(--spacing-lg);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-lg);
+    }
+
+    .cost-item {
+        display: flex;
+    justify-content: space-between;
+        padding: var(--spacing-sm) 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .cost-total {
+     display: flex;
+     justify-content: space-between;
+    padding: var(--spacing-md) 0;
+        font-weight: 700;
+        font-size: 1.125rem;
+      border-top: 2px solid var(--border-color);
+        margin-top: var(--spacing-sm);
+    }
+</style>
+}
+
+<main class="booking-page">
+    <div class="container">
+     <div class="page-header">
+        <h1 class="page-title">حجز طلب جديد</h1>
+     <p class="page-subtitle">املأ التفاصيل أدناه لإنشاء طلبك الجديد مع الخياط</p>
+        </div>
+
+        <form asp-action="CreateOrder" asp-controller="Orders" method="post" enctype="multipart/form-data" id="orderForm">
+ @Html.AntiForgeryToken()
+         @Html.HiddenFor(m => m.TailorId)
+     @Html.HiddenFor(m => m.CustomerId)
+       @Html.HiddenFor(m => m.SelectedServiceId, new { id = "selectedServiceId" })
+            @Html.HiddenFor(m => m.ServiceType, new { id = "serviceType" })
+      @Html.HiddenFor(m => m.EstimatedPrice, new { id = "estimatedPrice" })
+
+            <div class="booking-layout">
+  <!-- Left Column: Booking Steps -->
+      <div class="booking-steps">
+        <!-- Step 1: Tailor Information -->
+   <section class="step">
+   <div class="step-header">
+           <div class="step-number">1</div>
+         <h2 class="step-title">معلومات الخياط</h2>
+  </div>
+    <div class="tailor-card">
+      @if (Model.TailorProfilePictureData != null)
+               {
+          <img src="data:@Model.TailorProfilePictureContentType;base64,@Convert.ToBase64String(Model.TailorProfilePictureData)"
+        alt="@Model.TailorName" class="tailor-avatar" />
+     }
+       else
+          {
+            <div class="tailor-avatar" style="background: var(--primary-light); display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-user" style="font-size: 2rem; color: var(--primary-color);"></i>
+                </div>
+  }
+         <div class="tailor-info">
+     <h3>@Model.TailorName</h3>
+   @if (!string.IsNullOrEmpty(Model.TailorShopName))
+        {
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">@Model.TailorShopName</p>
+           }
+            <div class="tailor-rating">
+       <span class="stars">
+        @for (int i = 1; i <= 5; i++)
+    {
+      if (i <= Math.Floor((double)Model.TailorAverageRating))
+                {
+        <i class="fas fa-star"></i>
+      }
+       else if (i - 0.5 <= (double)Model.TailorAverageRating)
+      {
+  <i class="fas fa-star-half-alt"></i>
+   }
+          else
+     {
+        <i class="far fa-star"></i>
+  }
+ }
+   </span>
+       <span class="rating">@Model.TailorAverageRating.ToString("0.0")</span>
+     <span class="reviews">(@Model.TailorReviewCount تقييم)</span>
+    </div>
+            <div class="tailor-location">
+        <i class="fas fa-map-marker-alt"></i>
+          <span>@Model.TailorDistrict، @Model.TailorCity</span>
+      </div>
+      </div>
+    </div>
+      </section>
+
+     <!-- Step 2: Service Selection -->
+           <section class="step">
+      <div class="step-header">
+            <div class="step-number">2</div>
+           <h2 class="step-title">اختر نوع الخدمة</h2>
+</div>
+   <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+       <span asp-validation-for="SelectedServiceId" class="text-danger"></span>
+           
+     <div class="service-options" id="serviceOptions">
+     @foreach (var service in Model.AvailableServices)
+        {
+ <div class="service-option" data-service-id="@service.ServiceId"
+   data-service-name="@service.ServiceName" data-service-price="@service.ServicePrice">
+            <div class="service-icon">
+      <i class="fas @service.ServiceIcon"></i>
+                </div>
+  <div class="service-name">@service.ServiceName</div>
+          <div class="service-price">من @service.ServicePrice.ToString("N0") ج.م</div>
+        @if (!string.IsNullOrEmpty(service.ServiceDescription))
+          {
+           <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 0.5rem;">
+       @service.ServiceDescription
+         </p>
+   }
+       </div>
+        }
+         </div>
+         </section>
+
+            <!-- Step 3: Upload Reference Images -->
+     <section class="step">
+               <div class="step-header">
+                <div class="step-number">3</div>
+   <h2 class="step-title">رفع صور مرجعية</h2>
+           </div>
+ <div class="upload-area" id="uploadArea">
+          <div class="upload-icon">
+       <i class="fas fa-cloud-upload-alt"></i>
+       </div>
+          <div class="upload-text">
+    <p>اسحب وأفلت الصور هنا أو</p>
+                 </div>
+         <label class="upload-btn">
+    <i class="fas fa-plus"></i>
+     <span>اختر الصور</span>
+<input type="file" name="ReferenceImages" id="imageUpload" 
+    accept="image/*" multiple style="display: none;">
+        </label>
+     </div>
+              <div class="uploaded-images" id="uploadedImages"></div>
+               </section>
+
+    <!-- Step 4: Order Description and Measurements -->
+          <section class="step">
+       <div class="step-header">
+           <div class="step-number">4</div>
+     <h2 class="step-title">وصف الطلب والمقاسات</h2>
+  </div>
+   
+   <div class="form-group">
+        <label asp-for="Description" class="form-label">وصف الطلب *</label>
+           <textarea asp-for="Description" class="form-control" rows="4" 
+         placeholder="يرجى وصف التصميم والتفاصيل المطلوبة..."></textarea>
+    <span asp-validation-for="Description" class="text-danger"></span>
+   </div>
+
+             <div class="form-group">
+ <label asp-for="Measurements" class="form-label">المقاسات</label>
+             <textarea asp-for="Measurements" class="form-control" rows="3" 
+          placeholder="الصدر: __ سم، الخصر: __ سم، الطول: __ سم، إلخ..."></textarea>
+  <span asp-validation-for="Measurements" class="text-danger"></span>
+   </div>
+
+              <div class="form-group">
+   <label asp-for="AdditionalNotes" class="form-label">ملاحظات إضافية</label>
+         <textarea asp-for="AdditionalNotes" class="form-control" rows="3" 
+  placeholder="أي ملاحظات إضافية حول التصميم، القماش، أو متطلبات خاصة..."></textarea>
+         <span asp-validation-for="AdditionalNotes" class="text-danger"></span>
+               </div>
+       </section>
+
+       <!-- Step 5: Delivery Date -->
+      <section class="step">
+          <div class="step-header">
+    <div class="step-number">5</div>
+      <h2 class="step-title">موعد التسليم</h2>
+             </div>
+
+     <div class="form-group">
+ <label asp-for="DueDate" class="form-label">تاريخ التسليم المطلوب</label>
+          <input asp-for="DueDate" type="date" class="form-control" 
+        min="@DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="DueDate" class="text-danger"></span>
+  <small class="text-muted">الحد الأدنى للتسليم: 3 أيام</small>
+           </div>
+
+            <div class="form-group">
+              <label asp-for="PreferredTime" class="form-label">الوقت المفضل</label>
+       <select asp-for="PreferredTime" class="form-control">
+          <option value="">اختر الوقت المفضل</option>
+        <option value="9:00 ص">9:00 صباحاً</option>
+                     <option value="10:00 ص">10:00 صباحاً</option>
+           <option value="11:00 ص">11:00 صباحاً</option>
+      <option value="12:00 م">12:00 ظهراً</option>
+    <option value="1:00 م">1:00 مساءً</option>
+  <option value="2:00 م">2:00 مساءً</option>
+   <option value="3:00 م">3:00 مساءً</option>
+    <option value="4:00 م">4:00 مساءً</option>
+    <option value="5:00 م">5:00 مساءً</option>
+         </select>
+            </div>
+     </section>
+
+           <!-- Step 6: Confirm Order -->
+ <section class="step">
+     <div class="step-header">
+   <div class="step-number">6</div>
+       <h2 class="step-title">تأكيد الطلب</h2>
+   </div>
+
+      <div class="form-group">
+           <div class="form-check">
+      <input asp-for="AgreeToTerms" type="checkbox" class="form-check-input" id="agreeTerms" />
+    <label asp-for="AgreeToTerms" class="form-check-label" for="agreeTerms">
+أوافق على <a href="#" target="_blank">شروط الخدمة</a> و <a href="#" target="_blank">سياسة الخصوصية</a> *
+         </label>
+         </div>
+  <span asp-validation-for="AgreeToTerms" class="text-danger"></span>
+   </div>
+
+   <button type="submit" class="btn-submit" id="submitBtn" disabled>
+    <i class="fas fa-check-circle"></i>
+              تأكيد الطلب
+             </button>
+ </section>
+     </div>
+
+           <!-- Right Column: Order Summary -->
+         <div class="order-summary">
+            <h2 class="summary-title">ملخص الطلب</h2>
+
+   <div class="summary-section">
+         <h3 class="summary-title">الخياط</h3>
+   <div class="summary-item">
+    <span class="summary-label">الاسم:</span>
+         <span class="summary-value">@Model.TailorName</span>
+    </div>
+       <div class="summary-item">
+    <span class="summary-label">الموقع:</span>
+         <span class="summary-value">@Model.TailorDistrict، @Model.TailorCity</span>
+</div>
+     </div>
+
+         <div class="summary-section">
+    <h3 class="summary-title">الخدمة</h3>
+      <div class="summary-item">
+          <span class="summary-label">النوع:</span>
+             <span class="summary-value" id="summary-service">لم يتم الاختيار</span>
+ </div>
+     <div class="summary-item">
+             <span class="summary-label">السعر التقديري:</span>
+          <span class="summary-value" id="summary-price">0 ج.م</span>
+</div>
+       </div>
+
+         <div class="summary-section">
+            <div class="cost-breakdown">
+       <div class="cost-item">
+     <span>السعر الأساسي</span>
+     <span id="basePrice">0 ج.م</span>
+       </div>
+      <div class="cost-item">
+<span>ضريبة القيمة المضافة (14%)</span>
+      <span id="taxCost">0 ج.م</span>
+        </div>
+             <div class="cost-total">
+    <span>الإجمالي المتوقع</span>
+           <span id="totalCost">0 ج.م</span>
+         </div>
+       </div>
+                </div>
+
+          <div class="summary-section">
+         <h3 class="summary-title">الصور المرجعية</h3>
+      <div id="summary-images">
+     <p style="color: var(--text-secondary);">لم يتم رفع أي صور بعد</p>
+         </div>
+           </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const serviceOptions = document.querySelectorAll('.service-option');
+        const imageUpload = document.getElementById('imageUpload');
+        const uploadArea = document.getElementById('uploadArea');
+   const uploadedImages = document.getElementById('uploadedImages');
+   const summaryImages = document.getElementById('summary-images');
+        const agreeTerms = document.getElementById('agreeTerms');
+        const submitBtn = document.getElementById('submitBtn');
+
+        let selectedServiceId = null;
+        let selectedServiceName = null;
+   let selectedServicePrice = 0;
+        let uploadedFiles = [];
+
+        // Service Selection
+    serviceOptions.forEach(option => {
+   option.addEventListener('click', function () {
+          serviceOptions.forEach(opt => opt.classList.remove('selected'));
+      this.classList.add('selected');
+     
+         selectedServiceId = this.getAttribute('data-service-id');
+     selectedServiceName = this.getAttribute('data-service-name');
+            selectedServicePrice = parseFloat(this.getAttribute('data-service-price'));
+
+  document.getElementById('selectedServiceId').value = selectedServiceId;
+       document.getElementById('serviceType').value = selectedServiceName;
+          document.getElementById('estimatedPrice').value = selectedServicePrice;
+
+ updateSummary();
+      checkFormValidity();
+         });
+        });
+
+        // Update Summary
+        function updateSummary() {
+            document.getElementById('summary-service').textContent = selectedServiceName || 'لم يتم الاختيار';
+         
+         const basePrice = selectedServicePrice;
+    const taxRate = 0.14;
+            const taxCost = basePrice * taxRate;
+            const totalCost = basePrice + taxCost;
+
+    document.getElementById('summary-price').textContent = `${basePrice.toLocaleString()} ج.م`;
+      document.getElementById('basePrice').textContent = `${basePrice.toLocaleString()} ج.م`;
+document.getElementById('taxCost').textContent = `${taxCost.toLocaleString()} ج.م`;
+            document.getElementById('totalCost').textContent = `${totalCost.toLocaleString()} ج.م`;
+        }
+
+   // Image Upload
+      uploadArea.addEventListener('click', function (e) {
+     if (e.target !== imageUpload) {
+           imageUpload.click();
+       }
+        });
+
+        imageUpload.addEventListener('change', handleImageUpload);
+
+        // Drag and Drop
+        uploadArea.addEventListener('dragover', function (e) {
+            e.preventDefault();
+         uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function () {
+            uploadArea.classList.remove('dragover');
+      });
+
+        uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+   if (e.dataTransfer.files.length) {
+                handleImageUpload({ target: { files: e.dataTransfer.files } });
+            }
+        });
+
+        function handleImageUpload(e) {
+     const files = e.target.files || e.dataTransfer.files;
+
+     if (files.length > 0) {
+         uploadedImages.innerHTML = '';
+     summaryImages.innerHTML = '';
+
+Array.from(files).forEach(file => {
+       if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const imgContainer = document.createElement('div');
+      imgContainer.className = 'uploaded-image';
+
+          const img = document.createElement('img');
+  img.src = e.target.result;
+          img.alt = 'صورة مرجعية';
+
+        const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.className = 'remove-image';
+ removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+ removeBtn.addEventListener('click', function () {
+    imgContainer.remove();
+          updateSummaryImages();
+          });
+
+         imgContainer.appendChild(img);
+        imgContainer.appendChild(removeBtn);
+         uploadedImages.appendChild(imgContainer);
+
+   // Add to summary
+        const summaryImg = document.createElement('img');
+    summaryImg.src = e.target.result;
+      summaryImg.alt = 'صورة مرجعية';
+              summaryImg.style.width = '100%';
+       summaryImg.style.borderRadius = 'var(--radius-md)';
+       summaryImg.style.marginBottom = 'var(--spacing-sm)';
+        summaryImages.appendChild(summaryImg);
+ };
+
+     reader.readAsDataURL(file);
+         }
+                });
+            }
+        }
+
+        function updateSummaryImages() {
+    const images = uploadedImages.querySelectorAll('img');
+   summaryImages.innerHTML = '';
+
+       if (images.length === 0) {
+        summaryImages.innerHTML = '<p style="color: var(--text-secondary);">لم يتم رفع أي صور بعد</p>';
+  } else {
+        images.forEach(img => {
+        const summaryImg = document.createElement('img');
+        summaryImg.src = img.src;
+          summaryImg.alt = 'صورة مرجعية';
+        summaryImg.style.width = '100%';
+summaryImg.style.borderRadius = 'var(--radius-md)';
+  summaryImg.style.marginBottom = 'var(--spacing-sm)';
+       summaryImages.appendChild(summaryImg);
+    });
+       }
+    }
+
+   // Form Validation
+        agreeTerms.addEventListener('change', checkFormValidity);
+
+        function checkFormValidity() {
+         const isValid = selectedServiceId && agreeTerms.checked;
+ submitBtn.disabled = !isValid;
+        }
+
+        // Form Submission
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+      if (!selectedServiceId) {
+      e.preventDefault();
+     alert('يرجى اختيار نوع الخدمة');
+     return false;
+            }
+
+     if (!agreeTerms.checked) {
+        e.preventDefault();
+                alert('يرجى الموافقة على الشروط والأحكام');
+  return false;
+  }
+        });
+    });
+</script>
+}

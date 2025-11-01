@@ -9,13 +9,19 @@ namespace TafsilkPlatform.Web.Models
         [Key]
         public Guid OrderImageId { get; set; }
 
+        [ForeignKey("Order")]
         public Guid OrderId { get; set; }
-
-        // use PascalCase navigation name so EF conventions map correctly
         public required Order Order { get; set; }
 
+        // Binary image storage (for new uploads)
+        public byte[]? ImageData { get; set; }
+        public string? ContentType { get; set; }
+
+        // URL storage (for legacy/external storage)
         public required string ImgUrl { get; set; }
         public required string UploadedId { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTimeOffset UploadedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }
