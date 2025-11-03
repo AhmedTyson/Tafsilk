@@ -28,147 +28,129 @@ public class AccountController : Controller
         IUserRepository userRepository, 
         IUnitOfWork unitOfWork,
         IFileUploadService fileUploadService,
-        ILogger<AccountController> logger,
-        IDateTimeService dateTime)
+      ILogger<AccountController> logger,
+   IDateTimeService dateTime)
     {
-      _auth = auth;
+  _auth = auth;
         _userRepository = userRepository;
-        _unitOfWork = unitOfWork;
-        _fileUploadService = fileUploadService;
+    _unitOfWork = unitOfWork;
+ _fileUploadService = fileUploadService;
         _logger = logger;
         _dateTime = dateTime;
     }
+
+    #region Registration & Login
 
     [HttpGet]
     [AllowAnonymous]
     public IActionResult Register()
     {
-     // If user is already authenticated, redirect to their dashboard
-        // They should logout first if they want to register a new account
+// If user is already authenticated, redirect to their dashboard
         if (User.Identity?.IsAuthenticated == true)
- {
-        var roleName = User.FindFirstValue(ClaimTypes.Role);
-            _logger.LogInformation("[AccountController] Authenticated user {Email} attempted to access Register. Redirecting to dashboard.", 
-        User.FindFirstValue(ClaimTypes.Email));
-        TempData["InfoMessage"] = "أنت مسجل دخول بالفعل. يرجى تسجيل الخروج أولاً إذا كنت تريد إنشاء حساب جديد.";
+    {
+       var roleName = User.FindFirstValue(ClaimTypes.Role);
+     _logger.LogInformation("[AccountController] Authenticated user {Email} attempted to access Register. Redirecting to dashboard.", 
+                User.FindFirstValue(ClaimTypes.Email));
+   TempData["InfoMessage"] = "أنت مسجل دخول بالفعل. يرجى تسجيل الخروج أولاً إذا كنت تريد إنشاء حساب جديد.";
             return RedirectToRoleDashboard(roleName);
-        }
+      }
 
         return View();
-}
+    }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(string name, string email, string password, string userType, string? phoneNumber)
-  {
-     // If user is already authenticated, redirect to their dashboard
-      if (User.Identity?.IsAuthenticated == true)
-        {
-       var roleName = User.FindFirstValue(ClaimTypes.Role);
-      _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
-            User.FindFirstValue(ClaimTypes.Email));
-  TempData["ErrorMessage"] = "أنت مسجل دخول بالفعل. لا يمكنك إنشاء حساب جديد أثناء تسجيل الدخول.";
-  return RedirectToRoleDashboard(roleName);
+    {
+        // If user is already authenticated, redirect to their dashboard
+        if (User.Identity?.IsAuthenticated == true)
+ {
+            var roleName = User.FindFirstValue(ClaimTypes.Role);
+            _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
+      User.FindFirstValue(ClaimTypes.Email));
+    TempData["ErrorMessage"] = "أنت مسجل دخول بالفعل. لا يمكنك إنشاء حساب جديد أثناء تسجيل الدخول.";
+   return RedirectToRoleDashboard(roleName);
  }
 
-// ✅ IMPROVED: Sanitize inputs with null safety
-        name = SanitizeInput(name ?? string.Empty, 100);
-  email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+        // Sanitize inputs
+  name = SanitizeInput(name ?? string.Empty, 100);
+        email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
 
-  // ✅ IMPROVED: Comprehensive name validation
-     if (string.IsNullOrWhiteSpace(name))
-      {
+ // Validate name
+        if (string.IsNullOrWhiteSpace(name))
      ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
-        }
-    else if (name.Length < 2)
-        {
-      ModelState.AddModelError(nameof(name), "الاسم يجب أن يكون حرفين على الأقل");
- }
-      else if (name.Length > 100)
-  {
-    ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
-  }
+        else if (name.Length < 2)
+ ModelState.AddModelError(nameof(name), "الاسم يجب أن يكون حرفين على الأقل");
+    else if (name.Length > 100)
+  ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
 
- // ✅ IMPROVED: Email validation
-if (string.IsNullOrWhiteSpace(email))
-        {
-    ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-        }
-      else if (!IsValidEmail(email))
-    {
-      ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح. يرجى إدخال بريد إلكتروني صحيح");
-  }
+        // Validate email
+        if (string.IsNullOrWhiteSpace(email))
+         ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+   else if (!IsValidEmail(email))
+            ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح. يرجى إدخال بريد إلكتروني صحيح");
 
-        // ✅ IMPROVED: Password strength validation
-  if (string.IsNullOrWhiteSpace(password))
+    // Validate password
+        if (string.IsNullOrWhiteSpace(password))
+      ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+  else
         {
-ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
-  }
-   else
-{
-    var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
-          if (!isValidPassword)
-    {
-     ModelState.AddModelError(nameof(password), passwordError!);
-        }
-  }
+      var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
+     if (!isValidPassword)
+    ModelState.AddModelError(nameof(password), passwordError!);
+      }
 
-     // ✅ IMPROVED: Phone number validation
-   if (!string.IsNullOrWhiteSpace(phoneNumber))
-    {
-      var (isValidPhone, phoneError) = ValidatePhoneNumber(phoneNumber);
-        if (!isValidPhone)
-            {
-         ModelState.AddModelError(nameof(phoneNumber), phoneError!);
-   }
+        // Validate phone number
+        if (!string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            var (isValidPhone, phoneError) = ValidatePhoneNumber(phoneNumber);
+    if (!isValidPhone)
+           ModelState.AddModelError(nameof(phoneNumber), phoneError!);
         }
 
-     if (!ModelState.IsValid)
-     {
-    return View();
-  }
+   if (!ModelState.IsValid)
+            return View();
 
-      var role = userType?.ToLowerInvariant() switch
+        var role = userType?.ToLowerInvariant() switch
         {
-     "tailor" => RegistrationRole.Tailor,
-            "corporate" => RegistrationRole.Corporate,
-_ => RegistrationRole.Customer
-        };
-
-var req = new RegisterRequest
-        {
- Email = email,
-   Password = password,
-  FullName = name,
-          PhoneNumber = phoneNumber,
-  Role = role
+            "tailor" => RegistrationRole.Tailor,
+      "corporate" => RegistrationRole.Corporate,
+         _ => RegistrationRole.Customer
   };
 
-      var (ok, err, user) = await _auth.RegisterAsync(req);
-if (!ok || user is null)
+  var req = new RegisterRequest
         {
-      ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
-   return View();
+ Email = email,
+          Password = password,
+       FullName = name,
+  PhoneNumber = phoneNumber,
+            Role = role
+        };
+
+        var (ok, err, user) = await _auth.RegisterAsync(req);
+        if (!ok || user is null)
+        {
+   ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
+            return View();
         }
 
-        // ✅ IMPROVED: Log successful registration
         _logger.LogInformation("[AccountController] User registered successfully: {Email}, Role: {Role}", email, role);
 
-     // Special handling for Tailors: Must provide evidence BEFORE login
- if (role == RegistrationRole.Tailor)
-    {
-   TempData["UserId"] = user.Id.ToString();
-  TempData["UserEmail"] = email;
- TempData["UserName"] = name;
-    TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقديم الأوراق الثبوتية لإكمال التسجيل";
-   return RedirectToAction(nameof(ProvideTailorEvidence));
- }
+        // For Tailors: Redirect to CompleteTailorProfile (better UX wizard)
+        if (role == RegistrationRole.Tailor)
+        {
+  TempData["UserId"] = user.Id.ToString();
+            TempData["UserEmail"] = email;
+   TempData["UserName"] = name;
+          TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
+            return RedirectToAction(nameof(CompleteTailorProfile));
+        }
 
         // For Customers and Corporates: Show success and redirect to login
-     TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
+      TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
         return RedirectToAction("Login");
-    }
+  }
 
     [HttpGet]
     [AllowAnonymous]
@@ -181,336 +163,642 @@ if (!ok || user is null)
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
- public async Task<IActionResult> Login(string email, string password, bool rememberMe = false, string? returnUrl = null)
+    public async Task<IActionResult> Login(string email, string password, bool rememberMe = false, string? returnUrl = null)
     {
-   // ✅ IMPROVED: Sanitize inputs with null safety
-     email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+     // Sanitize inputs
+      email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
 
-    // ✅ IMPROVED: Enhanced validation
+        // Validate
         if (string.IsNullOrWhiteSpace(email))
-  {
-       ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-  }
-  else if (!IsValidEmail(email))
-    {
-   ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
-      }
+     ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        else if (!IsValidEmail(email))
+            ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
 
         if (string.IsNullOrWhiteSpace(password))
-{
-       ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
-}
+  ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
 
-  if (!ModelState.IsValid)
- {
-  return View();
- }
+      if (!ModelState.IsValid)
+   return View();
 
-     var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
+        var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
 
-   // ✅ FIX: Handle Condition 2 - Existing tailor without evidence
-    if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user != null)
-  {
-   // Tailor exists but hasn't submitted evidence yet - MANDATORY redirect
-    _logger.LogWarning("[AccountController] Tailor {Email} attempted login without evidence. Redirecting to evidence page.", email);
-
-       // Pass user data to evidence page
-         TempData["UserId"] = user.Id.ToString();
-TempData["UserEmail"] = user.Email ?? email;
-      TempData["UserName"] = user.Email ?? email; // Use email as fallback
-    TempData["InfoMessage"] = "يجب تقديم الأوراق الثبوتية لإكمال التسجيل قبل تسجيل الدخول";
-
-      return RedirectToAction(nameof(ProvideTailorEvidence));
-}
-
- if (!ok || user is null)
+        // Handle tailor with incomplete profile
+        if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user != null)
         {
-   ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
-  return View();
-      }
+            _logger.LogWarning("[AccountController] Tailor {Email} attempted login without complete profile. Redirecting to complete profile page.", email);
 
-        // Get full name from profile based on role
+      TempData["UserId"] = user.Id.ToString();
+            TempData["UserEmail"] = user.Email ?? email;
+  TempData["UserName"] = user.Email ?? email;
+    TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية قبل تسجيل الدخول";
+
+return RedirectToAction(nameof(CompleteTailorProfile));
+    }
+
+        if (!ok || user is null)
+{
+         ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+            return View();
+   }
+
+    // Get full name from profile based on role
         string fullName = user.Email ?? "مستخدم";
         var roleName = user.Role?.Name ?? string.Empty;
-   
+
         if (!string.IsNullOrEmpty(roleName))
-    {
-   switch (roleName.ToLower())
+        {
+            switch (roleName.ToLower())
    {
-         case "customer":
-    var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+                case "customer":
+         var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+           if (customer != null && !string.IsNullOrEmpty(customer.FullName))
       fullName = customer.FullName;
-     break;
-        case "tailor":
-  var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-        if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-      fullName = tailor.FullName;
-         break;
-   case "corporate":
-        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
-          if (corporate != null)
-   fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
-   break;
-     }
-        }
+  break;
+    case "tailor":
+         var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+       if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+  fullName = tailor.FullName;
+               break;
+  case "corporate":
+             var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
+        if (corporate != null)
+         fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
+       break;
+            }
+  }
 
-        // Build claims with role and full name
-  var claims = new List<Claim>
- {
-  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-      new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-       new Claim(ClaimTypes.Name, fullName),
-     new Claim("FullName", fullName)
-  };
-        
-        if (!string.IsNullOrEmpty(roleName))
-{
-       claims.Add(new Claim(ClaimTypes.Role, roleName));
-     }
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+      // Build claims
+        var claims = new List<Claim>
         {
-            IsPersistent = rememberMe
-     });
-
-        // REMOVED: Check if tailor needs to complete profile
-     // Verification is ONE-TIME only (before first login via ProvideTailorEvidence)
-        // After successful login, ALL users (including tailors) go to their dashboard
-   // NO verification prompts after login
-
-        // Redirect to role-specific dashboard or return URL
-   if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-    {
-  return Redirect(returnUrl);
-        }
-
-    return RedirectToRoleDashboard(roleName);
-    }
-
-    private IActionResult RedirectToRoleDashboard(string? roleName)
-    {
-        return (roleName?.ToLowerInvariant()) switch
-        {
-            "tailor" => RedirectToAction("Tailor", "Dashboards"),
-            "corporate" => RedirectToAction("Corporate", "Dashboards"),
-            _ => RedirectToAction("Customer", "Dashboards")
+   new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+       new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.Name, fullName),
+            new Claim("FullName", fullName)
         };
-    }
+
+        if (!string.IsNullOrEmpty(roleName))
+  claims.Add(new Claim(ClaimTypes.Role, roleName));
+
+   var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, 
+    new AuthenticationProperties { IsPersistent = rememberMe });
+
+        // Redirect to dashboard or return URL
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+    return Redirect(returnUrl);
+
+      return RedirectToRoleDashboard(roleName);
+  }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        return RedirectToAction("Index", "Home");
+ return RedirectToAction("Index", "Home");
+ }
+
+    #endregion
+
+    #region Tailor Profile Completion
+
+    /// <summary>
+    /// GET: Complete Tailor Profile - Handles both authenticated and unauthenticated tailors
+    /// </summary>
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> CompleteTailorProfile()
+    {
+        // Check if coming from registration (unauthenticated)
+        var userIdStr = TempData["UserId"]?.ToString();
+
+        // Keep the data for the POST
+TempData.Keep("UserId");
+        TempData.Keep("UserEmail");
+        TempData.Keep("UserName");
+
+        Guid userGuid;
+        User? user = null;
+
+        // Scenario 1: Unauthenticated tailor (just registered or login redirect)
+        if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
+        {
+      user = await _unitOfWork.Users.GetByIdAsync(userGuid);
+     if (user == null || user.Role?.Name?.ToLower() != "tailor")
+ {
+       TempData["ErrorMessage"] = "حساب غير صالح";
+      return RedirectToAction(nameof(Register));
+     }
+        }
+        // Scenario 2: Authenticated tailor (editing profile after login)
+ else if (User.Identity?.IsAuthenticated == true)
+        {
+         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out userGuid))
+        return Unauthorized();
+
+       user = await _unitOfWork.Users.GetByIdAsync(userGuid);
+            if (user == null)
+                return NotFound();
+
+            // Check if user is a tailor
+            var roleName = User.FindFirstValue(ClaimTypes.Role);
+     if (roleName?.ToLower() != "tailor")
+            {
+     TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
+       return RedirectToAction("Index", "Home");
+            }
+      }
+      else
+        {
+      // No user ID and not authenticated - redirect to registration
+TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
+    return RedirectToAction(nameof(Register));
+        }
+
+        // CRITICAL: Check if profile already exists (evidence already provided)
+      // This ensures ONE-TIME submission only
+      var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+        if (existingProfile != null)
+        {
+            _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to login.", user.Id);
+ TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. يمكنك تسجيل الدخول الآن";
+ return RedirectToAction(nameof(Login));
+        }
+
+   var model = new CompleteTailorProfileRequest
+        {
+            UserId = user.Id,
+            Email = TempData["UserEmail"]?.ToString() ?? user.Email,
+            FullName = TempData["UserName"]?.ToString() ?? user.Email
+ };
+
+  return View(model);
     }
 
-/// <summary>
-  /// Serves profile pictures from the database
+    /// <summary>
+    /// POST: Complete Tailor Profile - Creates profile with evidence submission
     /// </summary>
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+  public async Task<IActionResult> CompleteTailorProfile(CompleteTailorProfileRequest model)
+  {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        try
+        {
+  // Get the user - model.UserId comes from hidden field
+   var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
+     if (user == null || user.Role?.Name?.ToLower() != "tailor")
+        {
+    ModelState.AddModelError(string.Empty, "حساب غير صالح");
+      return View(model);
+        }
+
+       // CRITICAL: Check if profile already exists - BLOCK double submission
+  var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
+            if (existingProfile != null)
+            {
+ _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
+     TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
+   return RedirectToAction(nameof(Login));
+       }
+
+            // Validate that required evidence documents are provided
+         if (model.IdDocument == null || model.IdDocument.Length == 0)
+      {
+      ModelState.AddModelError(nameof(model.IdDocument), "يجب تحميل صورة الهوية الشخصية");
+        return View(model);
+            }
+            else
+            {
+     var (isValidId, idError) = ValidateFileUpload(model.IdDocument, "document");
+        if (!isValidId)
+    {
+         ModelState.AddModelError(nameof(model.IdDocument), idError!);
+       return View(model);
+       }
+   }
+
+            // Validate portfolio images (at least 3)
+          if ((model.PortfolioImages == null || !model.PortfolioImages.Any()) &&
+         (model.WorkSamples == null || !model.WorkSamples.Any()))
+     {
+              ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من أعمالك السابقة");
+    return View(model);
+        }
+     else
+          {
+      var portfolioFiles = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
+   if (portfolioFiles.Count < 3)
+     {
+      ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من معرض الأعمال");
+         return View(model);
+      }
+
+                if (portfolioFiles.Count > 10)
+       {
+           ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
+          return View(model);
+         }
+
+     foreach (var image in portfolioFiles)
+{
+              var (isValidImage, imageError) = ValidateFileUpload(image, "image");
+         if (!isValidImage)
+           {
+   ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
+         return View(model);
+   }
+              }
+ }
+
+      // Sanitize text inputs
+      var sanitizedFullName = SanitizeInput(model.FullName, 100);
+            var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
+         var sanitizedAddress = SanitizeInput(model.Address, 200);
+        var sanitizedCity = SanitizeInput(model.City, 50);
+     var sanitizedDescription = SanitizeInput(model.Description, 1000);
+
+      // Create tailor profile NOW (this is the ONE AND ONLY TIME)
+            var tailorProfile = new TailorProfile
+     {
+         Id = Guid.NewGuid(),
+                UserId = model.UserId,
+          FullName = sanitizedFullName,
+              ShopName = sanitizedWorkshopName,
+       Address = sanitizedAddress,
+       City = sanitizedCity,
+        Bio = sanitizedDescription,
+     ExperienceYears = model.ExperienceYears,
+  IsVerified = false, // Awaiting admin approval
+                CreatedAt = _dateTime.Now
+            };
+
+            // Store ID document as evidence
+            if (model.IdDocument != null && model.IdDocument.Length > 0)
+      {
+         using var memoryStream = new MemoryStream();
+      await model.IdDocument.CopyToAsync(memoryStream);
+     tailorProfile.ProfilePictureData = memoryStream.ToArray();
+    tailorProfile.ProfilePictureContentType = model.IdDocument.ContentType;
+            }
+
+            await _unitOfWork.Tailors.AddAsync(tailorProfile);
+
+            // Save portfolio images
+     var portfolioFilesToSave = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
+   if (portfolioFilesToSave.Any())
+            {
+   var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
+              Directory.CreateDirectory(portfolioFolderPath);
+
+    int imageIndex = 0;
+                foreach (var image in portfolioFilesToSave.Take(10))
+ {
+        if (image.Length > 0)
+         {
+var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
+         var filePath = Path.Combine(portfolioFolderPath, fileName);
+
+    using (var stream = new FileStream(filePath, FileMode.Create))
+     {
+           await image.CopyToAsync(stream);
+   }
+
+               var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
+    var portfolioImage = new PortfolioImage
+   {
+   PortfolioImageId = Guid.NewGuid(),
+        TailorId = tailorProfile.Id,
+   ImageUrl = relativeUrl,
+              IsBeforeAfter = false,
+    UploadedAt = _dateTime.Now,
+    IsDeleted = false
+       };
+
+             await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
+    }
+   }
+      }
+
+      // Keep user INACTIVE until admin approves
+       user.IsActive = false;
+         user.UpdatedAt = _dateTime.Now;
+
+      // Generate email verification token
+     var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+      .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0, 32);
+
+            user.EmailVerificationToken = verificationToken;
+            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+
+  await _unitOfWork.Users.UpdateAsync(user);
+     await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("[AccountController] Tailor {UserId} completed ONE-TIME profile submission. Awaiting admin review (IsActive=false).", model.UserId);
+
+            // Send email verification (background task)
+            _ = Task.Run(async () =>
+       {
+    try
+  {
+          // TODO: Implement email sending
+         _logger.LogInformation("Email verification sent to tailor: {Email}", user.Email);
+       }
+           catch (Exception ex)
+            {
+        _logger.LogError(ex, "Failed to send verification email to {Email}", user.Email);
+     }
+    });
+
+            TempData["RegisterSuccess"] = "تم إكمال ملفك الشخصي بنجاح! سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة. سنرسل لك إشعاراً عند الموافقة على حسابك.";
+            return RedirectToAction(nameof(Login));
+        }
+      catch (Exception ex)
+      {
+   _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
+            ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+        return View(model);
+        }
+    }
+
+    #endregion
+
+    #region Profile & Settings
+
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> ProfilePicture(Guid id)
     {
         try
- {
+        {
             byte[]? imageData = null;
- string? contentType = null;
+            string? contentType = null;
 
-      // Try to get profile picture from Customer profile
-  var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(id);
-       if (customerProfile?.ProfilePictureData != null)
-   {
-      imageData = customerProfile.ProfilePictureData;
-          contentType = customerProfile.ProfilePictureContentType ?? "image/jpeg";
-  }
+    // Try to get profile picture from Customer profile
+        var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(id);
+            if (customerProfile?.ProfilePictureData != null)
+            {
+    imageData = customerProfile.ProfilePictureData;
+                contentType = customerProfile.ProfilePictureContentType ?? "image/jpeg";
+          }
 
    // Try Tailor profile if not found
-      if (imageData == null)
-   {
-   var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(id);
-           if (tailorProfile?.ProfilePictureData != null)
-   {
-  imageData = tailorProfile.ProfilePictureData;
-contentType = tailorProfile.ProfilePictureContentType ?? "image/jpeg";
-      }
-      }
-       
-     // Try Corporate profile if not found
-       if (imageData == null)
- {
- var corporateProfile = await _unitOfWork.Corporates.GetByUserIdAsync(id);
-if (corporateProfile?.ProfilePictureData != null)
-  {
- imageData = corporateProfile.ProfilePictureData;
-    contentType = corporateProfile.ProfilePictureContentType ?? "image/jpeg";
-     }
-         }
-
-// Return image or placeholder
-  if (imageData != null)
+  if (imageData == null)
 {
-  return File(imageData, contentType ?? "image/jpeg");
-       }
-    
-        // Return 404 or default placeholder image
-     return NotFound();
+      var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(id);
+     if (tailorProfile?.ProfilePictureData != null)
+      {
+                 imageData = tailorProfile.ProfilePictureData;
+          contentType = tailorProfile.ProfilePictureContentType ?? "image/jpeg";
+              }
+ }
+
+            // Try Corporate profile if not found
+            if (imageData == null)
+         {
+   var corporateProfile = await _unitOfWork.Corporates.GetByUserIdAsync(id);
+                if (corporateProfile?.ProfilePictureData != null)
+    {
+         imageData = corporateProfile.ProfilePictureData;
+         contentType = corporateProfile.ProfilePictureContentType ?? "image/jpeg";
+    }
+     }
+
+    // Return image or placeholder
+      if (imageData != null)
+     return File(imageData, contentType ?? "image/jpeg");
+
+    return NotFound();
         }
      catch
-   {
-     // Log the error if needed
-       return NotFound();
+    {
+return NotFound();
         }
     }
 
     [HttpGet]
     public IActionResult ChangePassword()
     {
-  return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
- public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
-    {
-        if (!ModelState.IsValid)
-     {
-            return View(model);
-        }
-
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
- if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-  {
-   return Unauthorized();
-        }
-
-        var user = await _unitOfWork.Users.GetByIdAsync(userGuid);
-        if (user == null)
-        {
- return NotFound();
-        }
-
-        // Verify current password
-     if (!PasswordHasher.Verify(user.PasswordHash, model.CurrentPassword))
-        {
-      ModelState.AddModelError(nameof(model.CurrentPassword), "كلمة المرور الحالية غير صحيحة");
-            return View(model);
-}
-
-   // Update to new password
-user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
-        user.UpdatedAt = _dateTime.Now;
-
-      await _unitOfWork.Users.UpdateAsync(user);
-await _unitOfWork.SaveChangesAsync();
-
-   TempData["SuccessMessage"] = "تم تغيير كلمة المرور بنجاح!";
-      
-  // Get user role to redirect to appropriate dashboard
-   var roleName = User.FindFirstValue(ClaimTypes.Role);
-    return RedirectToRoleDashboard(roleName);
-    }
-
-    [HttpGet]
-    public IActionResult RequestRoleChange()
-    {
         return View();
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RequestRoleChange(RoleChangeRequestViewModel model)
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
     {
-      if (!ModelState.IsValid)
-        {
-         return View(model);
-     }
+        if (!ModelState.IsValid)
+        return View(model);
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-        {
-      return Unauthorized();
-  }
+    if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+   return Unauthorized();
 
         var user = await _unitOfWork.Users.GetByIdAsync(userGuid);
         if (user == null)
-        {
             return NotFound();
-   }
 
-        var currentRole = User.FindFirstValue(ClaimTypes.Role);
-
-        // Validate role change (e.g., Customer can become Tailor, but not vice versa without admin approval)
-        if (currentRole == "Tailor" && model.TargetRole == "Customer")
+        // Verify current password
+        if (!PasswordHasher.Verify(user.PasswordHash, model.CurrentPassword))
         {
- ModelState.AddModelError(string.Empty, "لا يمكن التحويل من خياط إلى عميل بشكل مباشر. يرجى الاتصال بالدعم.");
-      return View(model);
+ ModelState.AddModelError(nameof(model.CurrentPassword), "كلمة المرور الحالية غير صحيحة");
+     return View(model);
         }
 
-        // For now, we'll allow Customer -> Tailor conversion
-        // In production, this should create a request that admin approves
-        if (model.TargetRole == "Tailor" && currentRole == "Customer")
+   // Update to new password
+        user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
+        user.UpdatedAt = _dateTime.Now;
+
+        await _unitOfWork.Users.UpdateAsync(user);
+        await _unitOfWork.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "تم تغيير كلمة المرور بنجاح!";
+
+        var roleName = User.FindFirstValue(ClaimTypes.Role);
+        return RedirectToRoleDashboard(roleName);
+    }
+
+    [HttpGet]
+ public IActionResult Settings()
     {
-   // Validate required fields for tailors
-      if (string.IsNullOrWhiteSpace(model.ShopName) || string.IsNullOrWhiteSpace(model.Address))
+     _logger.LogInformation("User {UserId} accessed Settings page",
+         User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var roleName = User.FindFirstValue(ClaimTypes.Role);
+        return RedirectToRoleDashboard(roleName);
+    }
+
+    #endregion
+
+    #region Email Verification
+
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyEmail(string token)
+    {
+        if (string.IsNullOrEmpty(token))
      {
-          ModelState.AddModelError(string.Empty, "اسم المتجر والعنوان مطلوبان للخياطين");
-              return View(model);
-            }
-
-         // Get Tailor role - Query the database directly via DbContext
-    var tailorRole = await _unitOfWork.Context.Set<Role>().FirstOrDefaultAsync(r => r.Name == "Tailor");
-     if (tailorRole == null)
-    {
-            ModelState.AddModelError(string.Empty, "دور الخياط غير موجود في النظام");
-                return View(model);
-            }
-
-            // Update user role
-         user.RoleId = tailorRole.Id;
-     user.UpdatedAt = _dateTime.Now;
-    await _unitOfWork.Users.UpdateAsync(user);
-
- // Create tailor profile
-     var tailorProfile = new TailorProfile
-      {
-    Id = Guid.NewGuid(),
- UserId = userGuid,
-  FullName = user.CustomerProfile?.FullName ?? string.Empty,
-      ShopName = model.ShopName,
-       Address = model.Address,
-          ExperienceYears = model.ExperienceYears,
-       CreatedAt = _dateTime.Now
-  };
-
-            await _unitOfWork.Tailors.AddAsync(tailorProfile);
-
-            // Mark customer profile as inactive (don't delete)
-  // This allows reverting if needed
-
-      await _unitOfWork.SaveChangesAsync();
-
-        // Sign out and redirect to login to refresh claims
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
- TempData["RegisterSuccess"] = "تم تحويل حسابك إلى خياط بنجاح! يرجى تسجيل الدخول مرة أخرى.";
+   TempData["ErrorMessage"] = "رابط التحقق غير صالح";
             return RedirectToAction("Login");
         }
 
-        TempData["ErrorMessage"] = "طلب تغيير الدور غير مدعوم حالياً";
-      
-      // Get user role to redirect to appropriate dashboard
-     var roleName = User.FindFirstValue(ClaimTypes.Role);
- return RedirectToRoleDashboard(roleName);
+        var (success, error) = await _auth.VerifyEmailAsync(token);
+
+    if (success)
+            TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
+        else
+            TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
+
+  return RedirectToAction("Login");
     }
 
     [HttpGet]
     [AllowAnonymous]
+    public IActionResult ResendVerificationEmail()
+    {
+     return View();
+    }
+
+    [HttpPost]
+  [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResendVerificationEmail(string email)
+    {
+    if (string.IsNullOrWhiteSpace(email))
+        {
+    ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+     return View();
+        }
+
+      var (success, error) = await _auth.ResendVerificationEmailAsync(email);
+
+    if (success)
+   TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
+      else
+     TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
+
+ return View();
+    }
+
+    #endregion
+
+    #region Password Reset
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ForgotPassword()
+{
+        return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgottenPassword(string email)
+    {
+        email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(email))
+   {
+     ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        return View();
+        }
+
+    if (!IsValidEmail(email))
+   {
+   ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
+    return View();
+  }
+
+   var user = await _unitOfWork.Users.GetByEmailAsync(email);
+
+        // Security: Always show success message (don't reveal if email exists)
+        if (user == null)
+ {
+       _logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
+         TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
+          return View();
+        }
+
+ var resetToken = GeneratePasswordResetToken();
+ user.PasswordResetToken = resetToken;
+        user.PasswordResetTokenExpires = _dateTime.Now.AddHours(1);
+        user.UpdatedAt = _dateTime.Now;
+
+        await _unitOfWork.Users.UpdateAsync(user);
+        await _unitOfWork.SaveChangesAsync();
+
+        var resetLink = Url.Action(nameof(ResetPassword), "Account",
+     new { token = resetToken }, Request.Scheme);
+        _logger.LogInformation("Password reset link generated for {Email}: {Link}", email, resetLink);
+
+        TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
+        return View();
+    }
+
+    [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResetPassword(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+        {
+    TempData["ErrorMessage"] = "رابط إعادة تعيين كلمة المرور غير صالح";
+        return RedirectToAction(nameof(Login));
+      }
+
+        var model = new ResetPasswordViewModel { Token = token };
+        return View(model);
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+    {
+        if (!ModelState.IsValid)
+     return View(model);
+
+        var user = await _unitOfWork.Context.Set<User>()
+        .FirstOrDefaultAsync(u => u.PasswordResetToken == model.Token);
+
+        if (user == null)
+      {
+    ModelState.AddModelError(string.Empty, "رابط إعادة تعيين كلمة المرور غير صالح");
+  return View(model);
+        }
+
+        if (user.PasswordResetTokenExpires == null || user.PasswordResetTokenExpires < _dateTime.Now)
+        {
+            ModelState.AddModelError(string.Empty, "انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.");
+            return View(model);
+        }
+
+        user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpires = null;
+ user.UpdatedAt = _dateTime.Now;
+
+        await _unitOfWork.Users.UpdateAsync(user);
+        await _unitOfWork.SaveChangesAsync();
+
+ _logger.LogInformation("Password reset successful for user: {Email}", user.Email);
+
+        TempData["RegisterSuccess"] = "تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
+    return RedirectToAction(nameof(Login));
+    }
+
+    #endregion
+
+    #region OAuth (Google/Facebook)
+
+  [HttpGet]
+    [AllowAnonymous]
     public IActionResult GoogleLogin(string? returnUrl = null)
     {
-        var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", new { returnUrl });
+    var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", new { returnUrl });
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
         return Challenge(properties, "Google");
     }
@@ -519,1085 +807,529 @@ await _unitOfWork.SaveChangesAsync();
     [AllowAnonymous]
     public IActionResult FacebookLogin(string? returnUrl = null)
     {
-      var redirectUrl = Url.Action(nameof(FacebookResponse), "Account", new { returnUrl });
- var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
-      return Challenge(properties, "Facebook");
+        var redirectUrl = Url.Action(nameof(FacebookResponse), "Account", new { returnUrl });
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+ return Challenge(properties, "Facebook");
     }
 
-  [HttpGet]
+    [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
     {
-   return await HandleOAuthResponse("Google", returnUrl);
+        return await HandleOAuthResponse("Google", returnUrl);
     }
 
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> FacebookResponse(string? returnUrl = null)
     {
-   return await HandleOAuthResponse("Facebook", returnUrl);
+ return await HandleOAuthResponse("Facebook", returnUrl);
     }
 
     private async Task<IActionResult> HandleOAuthResponse(string provider, string? returnUrl = null)
     {
-     try
+        try
         {
-     var authenticateResult = await HttpContext.AuthenticateAsync(provider);
+      var authenticateResult = await HttpContext.AuthenticateAsync(provider);
 
-if (!authenticateResult.Succeeded)
-            {
-         TempData["ErrorMessage"] = $"فشل تسجيل الدخول عبر {provider}";
-          return RedirectToAction(nameof(Login));
-      }
+          if (!authenticateResult.Succeeded)
+{
+    TempData["ErrorMessage"] = $"فشل تسجيل الدخول عبر {provider}";
+           return RedirectToAction(nameof(Login));
+   }
 
-       var claims = authenticateResult.Principal?.Claims;
+            var claims = authenticateResult.Principal?.Claims;
             var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-     var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-var providerId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+       var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+         var providerId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-         // Try to get profile picture from different claim types
-string? picture = null;
+   // Try to get profile picture from different claim types
+ string? picture = null;
 
-      if (provider == "Facebook")
-  {
-     // Facebook picture claims
-picture = claims?.FirstOrDefault(c => c.Type == "urn:facebook:picture:url")?.Value
-   ?? claims?.FirstOrDefault(c => c.Type == "urn:facebook:picture")?.Value
+  if (provider == "Facebook")
+        {
+        picture = claims?.FirstOrDefault(c => c.Type == "urn:facebook:picture:url")?.Value
+        ?? claims?.FirstOrDefault(c => c.Type == "urn:facebook:picture")?.Value
             ?? claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
 
-      // If no picture claim found, construct Facebook Graph API URL
-        if (string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(providerId))
-     {
+                if (string.IsNullOrEmpty(picture) && !string.IsNullOrEmpty(providerId))
     picture = $"https://graph.facebook.com/{providerId}/picture?type=large";
-       }
-        }
-       else if (provider == "Google")
-    {
-        // Google picture claims
-    picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value
-          ?? claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
-      }
+            }
+            else if (provider == "Google")
+          {
+           picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value
+              ?? claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
+            }
 
-    if (string.IsNullOrEmpty(email))
-    {
-       TempData["ErrorMessage"] = $"لم نتمكن من الحصول على بريدك الإلكتروني من {provider}";
-          return RedirectToAction(nameof(Login));
-      }
-
-       // Check if user exists
-  var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
-
-  if (existingUser != null)
-{
-  // User exists, sign them in
-          // Get full name from profile
-      string fullName = existingUser.Email ?? "مستخدم";
-var roleName = existingUser.Role?.Name ?? string.Empty;
-        
-       if (!string.IsNullOrEmpty(roleName))
+          if (string.IsNullOrEmpty(email))
         {
-           switch (roleName.ToLower())
-   {
-   case "customer":
-       var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
-     if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-     fullName = customer.FullName;
-       break;
-       case "tailor":
-          var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
-    if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-       fullName = tailor.FullName;
-      break;
-       case "corporate":
-      var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(existingUser.Id);
-        if (corporate != null)
-    fullName = corporate.ContactPerson ?? corporate.CompanyName ?? existingUser.Email ?? "مستخدم";
-  break;
-          }
-   }
-  
-   var userClaims = new List<Claim>
-   {
- new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString()),
-        new Claim(ClaimTypes.Email, existingUser.Email ?? string.Empty),
-  new Claim(ClaimTypes.Name, fullName),
-    new Claim("FullName", fullName)
-     };
-
-     if (!string.IsNullOrEmpty(roleName))
-           {
-     userClaims.Add(new Claim(ClaimTypes.Role, roleName));
+TempData["ErrorMessage"] = $"لم نتمكن من الحصول على بريدك الإلكتروني من {provider}";
+   return RedirectToAction(nameof(Login));
      }
 
-      var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-       var principal = new ClaimsPrincipal(identity);
+            // Check if user exists
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
 
-       await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-new AuthenticationProperties { IsPersistent = true });
-
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-       {
-                 return Redirect(returnUrl);
-       }
-
-  return RedirectToRoleDashboard(roleName);
- }
-            else
+  if (existingUser != null)
             {
-    // New user - store data in session and redirect to complete registration
-   TempData["OAuthProvider"] = provider;
-         TempData["OAuthEmail"] = email;
-    TempData["OAuthName"] = name ?? string.Empty;
-    TempData["OAuthPicture"] = picture ?? string.Empty;
-     TempData["OAuthId"] = providerId ?? string.Empty;
+   // User exists, sign them in
+           string fullName = existingUser.Email ?? "مستخدم";
+          var roleName = existingUser.Role?.Name ?? string.Empty;
 
-             return RedirectToAction(nameof(CompleteSocialRegistration));
+    if (!string.IsNullOrEmpty(roleName))
+    {
+              switch (roleName.ToLower())
+    {
+    case "customer":
+    var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
+    if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+        fullName = customer.FullName;
+       break;
+     case "tailor":
+   var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
+       if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+    fullName = tailor.FullName;
+              break;
+  case "corporate":
+        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(existingUser.Id);
+  if (corporate != null)
+ fullName = corporate.ContactPerson ?? corporate.CompanyName ?? existingUser.Email ?? "مستخدم";
+         break;
+                }
+  }
+
+  var userClaims = new List<Claim>
+            {
+           new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString()),
+     new Claim(ClaimTypes.Email, existingUser.Email ?? string.Empty),
+  new Claim(ClaimTypes.Name, fullName),
+      new Claim("FullName", fullName)
+        };
+
+  if (!string.IsNullOrEmpty(roleName))
+     userClaims.Add(new Claim(ClaimTypes.Role, roleName));
+
+             var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+  var principal = new ClaimsPrincipal(identity);
+
+              await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+    new AuthenticationProperties { IsPersistent = true });
+
+  if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+          return Redirect(returnUrl);
+
+     return RedirectToRoleDashboard(roleName);
+    }
+   else
+      {
+       // New user - store data in session and redirect to complete registration
+        TempData["OAuthProvider"] = provider;
+                TempData["OAuthEmail"] = email;
+        TempData["OAuthName"] = name ?? string.Empty;
+     TempData["OAuthPicture"] = picture ?? string.Empty;
+    TempData["OAuthId"] = providerId ?? string.Empty;
+
+    return RedirectToAction(nameof(CompleteSocialRegistration));
             }
         }
-        catch (Exception ex)
+    catch (Exception ex)
     {
-          // Log the exception
             TempData["ErrorMessage"] = $"حدث خطأ أثناء تسجيل الدخول: {ex.Message}";
-            return RedirectToAction(nameof(Login));
+ return RedirectToAction(nameof(Login));
         }
     }
 
     [HttpGet]
     [AllowAnonymous]
-  public IActionResult CompleteGoogleRegistration()
+    public IActionResult CompleteGoogleRegistration()
     {
-        return CompleteSocialRegistration();
+ return CompleteSocialRegistration();
     }
 
     [HttpGet]
-  [AllowAnonymous]
+    [AllowAnonymous]
     public IActionResult CompleteSocialRegistration()
     {
         var provider = TempData["OAuthProvider"]?.ToString() ?? "Google";
-        var email = TempData["OAuthEmail"]?.ToString();
+   var email = TempData["OAuthEmail"]?.ToString();
         var name = TempData["OAuthName"]?.ToString();
         var picture = TempData["OAuthPicture"]?.ToString();
 
-  if (string.IsNullOrEmpty(email))
-    {
-       return RedirectToAction(nameof(Register));
-    }
+        if (string.IsNullOrEmpty(email))
+   return RedirectToAction(nameof(Register));
 
-        // Keep data for the form
-        TempData.Keep("OAuthProvider");
+    // Keep data for the form
+    TempData.Keep("OAuthProvider");
         TempData.Keep("OAuthEmail");
         TempData.Keep("OAuthName");
         TempData.Keep("OAuthPicture");
         TempData.Keep("OAuthId");
 
-var model = new CompleteGoogleRegistrationViewModel
+  var model = new CompleteGoogleRegistrationViewModel
         {
-        Email = email,
+            Email = email,
             FullName = name ?? string.Empty,
-    ProfilePictureUrl = picture
-     };
+       ProfilePictureUrl = picture
+        };
 
-ViewData["Provider"] = provider;
+        ViewData["Provider"] = provider;
         return View("CompleteGoogleRegistration", model);
     }
 
-  [HttpPost]
+    [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CompleteGoogleRegistration(CompleteGoogleRegistrationViewModel model)
-  {
-        return await CompleteSocialRegistrationPost(model);
+    {
+ return await CompleteSocialRegistrationPost(model);
     }
 
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CompleteSocialRegistration(CompleteGoogleRegistrationViewModel model)
- {
+    {
         return await CompleteSocialRegistrationPost(model);
     }
 
     private async Task<IActionResult> CompleteSocialRegistrationPost(CompleteGoogleRegistrationViewModel model)
-  {
-     if (!ModelState.IsValid)
-        {
-    return View("CompleteGoogleRegistration", model);
-}
+    {
+        if (!ModelState.IsValid)
+            return View("CompleteGoogleRegistration", model);
 
         var provider = TempData["OAuthProvider"]?.ToString() ?? "Google";
         var email = TempData["OAuthEmail"]?.ToString();
         var oauthId = TempData["OAuthId"]?.ToString();
         var picture = TempData["OAuthPicture"]?.ToString();
 
-     if (string.IsNullOrEmpty(email))
-        {
-      return RedirectToAction(nameof(Register));
-        }
+        if (string.IsNullOrEmpty(email))
+            return RedirectToAction(nameof(Register));
 
         try
-   {
+    {
             // Determine role
-    var role = model.UserType?.ToLowerInvariant() switch
+var role = model.UserType?.ToLowerInvariant() switch
             {
-     "tailor" => RegistrationRole.Tailor,
-         "corporate" => RegistrationRole.Corporate,
-   _ => RegistrationRole.Customer
-          };
+       "tailor" => RegistrationRole.Tailor,
+       "corporate" => RegistrationRole.Corporate,
+_ => RegistrationRole.Customer
+       };
 
-  // Create registration request
-          var registerRequest = new RegisterRequest
+      // Create registration request
+            var registerRequest = new RegisterRequest
             {
-                Email = email,
-     Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
-     FullName = model.FullName,
-       PhoneNumber = model.PhoneNumber,
-    Role = role
- };
+             Email = email,
+           Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
+                FullName = model.FullName,
+         PhoneNumber = model.PhoneNumber,
+          Role = role
+       };
 
- var (ok, err, user) = await _auth.RegisterAsync(registerRequest);
+            var (ok, err, user) = await _auth.RegisterAsync(registerRequest);
 
-     if (!ok || user == null)
+   if (!ok || user == null)
             {
-      ModelState.AddModelError(string.Empty, err ?? "فشل إنشاء الحساب");
- ViewData["Provider"] = provider;
-         return View("CompleteGoogleRegistration", model);
-     }
-
-        // Update profile picture if available from OAuth provider
-      if (!string.IsNullOrEmpty(picture))
-   {
-    if (role == RegistrationRole.Customer)
-       {
-  var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-               if (customerProfile != null)
-     {
-         // Download and store the OAuth profile picture
-         // For now, we'll skip downloading external images to keep it simple
-         // You can implement HTTP download logic if needed
-           await _unitOfWork.Customers.UpdateAsync(customerProfile);
-              }
-   }
-          else if (role == RegistrationRole.Tailor)
- {
-              var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-                if (tailorProfile != null)
-        {
-            // Download and store the OAuth profile picture
-            // For now, we'll skip downloading external images to keep it simple
-         await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
+       ModelState.AddModelError(string.Empty, err ?? "فشل إنشاء الحساب");
+      ViewData["Provider"] = provider;
+    return View("CompleteGoogleRegistration", model);
       }
+
+    // Update profile picture if available from OAuth provider
+            if (!string.IsNullOrEmpty(picture))
+{
+       if (role == RegistrationRole.Customer)
+        {
+         var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+        if (customerProfile != null)
+            {
+   // TODO: Download and store the OAuth profile picture
+    await _unitOfWork.Customers.UpdateAsync(customerProfile);
+              }
+    }
+        else if (role == RegistrationRole.Tailor)
+              {
+          var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+     if (tailorProfile != null)
+       {
+          // TODO: Download and store the OAuth profile picture
+       await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
+            }
                 }
 
-    await _unitOfWork.SaveChangesAsync();
-            }
+          await _unitOfWork.SaveChangesAsync();
+        }
 
-   // Sign in the user
-          // Get full name from profile
-        string fullName = model.FullName;
- var roleName = user.Role?.Name ?? string.Empty;
-        
-  if (!string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(fullName))
-      {
-      switch (roleName.ToLower())
-   {
+    // Sign in the user
+  string fullName = model.FullName;
+var roleName = user.Role?.Name ?? string.Empty;
+
+ if (!string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(fullName))
+            {
+         switch (roleName.ToLower())
+                {
          case "customer":
-        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-      fullName = customer.FullName;
-     break;
+     var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+   if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+               fullName = customer.FullName;
+            break;
         case "tailor":
-            var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-        if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+        var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+ if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
       fullName = tailor.FullName;
          break;
-   case "corporate":
-        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
-          if (corporate != null)
-      fullName = corporate.ContactPerson ?? corporate.CompanyName ?? fullName;
-   break;
-            }
+      case "corporate":
+    var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
+            if (corporate != null)
+             fullName = corporate.ContactPerson ?? corporate.CompanyName ?? fullName;
+                  break;
+}
         }
-  
-  var userClaims = new List<Claim>
-            {
- new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-  new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-  new Claim(ClaimTypes.Name, fullName),
-   new Claim("FullName", fullName)
+
+            var userClaims = new List<Claim>
+        {
+           new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+        new Claim(ClaimTypes.Name, fullName),
+      new Claim("FullName", fullName)
             };
 
-     if (!string.IsNullOrEmpty(roleName))
-         {
+            if (!string.IsNullOrEmpty(roleName))
   userClaims.Add(new Claim(ClaimTypes.Role, roleName));
-     }
 
-  var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-  var principal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+     var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-         new AuthenticationProperties { IsPersistent = true });
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+ new AuthenticationProperties { IsPersistent = true });
 
-   return RedirectToRoleDashboard(roleName);
-  }
+      return RedirectToRoleDashboard(roleName);
+        }
         catch (Exception ex)
-   {
- ModelState.AddModelError(string.Empty, $"حدث خطأ: {ex.Message}");
-          ViewData["Provider"] = provider;
-       return View("CompleteGoogleRegistration", model);
+        {
+  ModelState.AddModelError(string.Empty, $"حدث خطأ: {ex.Message}");
+    ViewData["Provider"] = provider;
+        return View("CompleteGoogleRegistration", model);
         }
     }
 
+    #endregion
+
+    #region Role Management
+
     [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> CompleteTailorProfile()
+    public IActionResult RequestRoleChange()
+ {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RequestRoleChange(RoleChangeRequestViewModel model)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!ModelState.IsValid)
+   return View(model);
+
+   var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-        {
-     return Unauthorized();
-        }
+ return Unauthorized();
 
         var user = await _unitOfWork.Users.GetByIdAsync(userGuid);
         if (user == null)
-        {
      return NotFound();
-       }
 
-        // Check if user is a tailor
-        var roleName = User.FindFirstValue(ClaimTypes.Role);
-  if (roleName?.ToLower() != "tailor")
-      {
-   TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
-  return RedirectToAction("Index", "Home");
-   }
+        var currentRole = User.FindFirstValue(ClaimTypes.Role);
 
-  // Check if profile is already completed
-        var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userGuid);
-    if (tailorProfile != null && !string.IsNullOrEmpty(tailorProfile.Bio) && tailorProfile.IsVerified)
+        // Validate role change
+if (currentRole == "Tailor" && model.TargetRole == "Customer")
         {
-   TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل";
-      return RedirectToAction("Tailor", "Dashboards");
-   }
-
-        var model = new CompleteTailorProfileRequest
-     {
-     UserId = userGuid,
-   Email = user.Email,
-       FullName = User.FindFirstValue("FullName") ?? user.Email
-   };
-
- return View(model);
-    }
-
-    [HttpPost]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CompleteTailorProfile(CompleteTailorProfileRequest model)
-  {
-  if (!ModelState.IsValid)
-   {
-       return View(model);
-  }
-
-        try
- {
-    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-   if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
-  {
-     return Unauthorized();
-  }
-
-         // Check if user is a tailor
-   var roleName = User.FindFirstValue(ClaimTypes.Role);
-    if (roleName?.ToLower() != "tailor")
-  {
-        TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
-    return RedirectToAction("Index", "Home");
-   }
-
-   // Get tailor profile
-       var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userGuid);
-    if (tailorProfile == null)
-       {
-        TempData["ErrorMessage"] = "لم يتم العثور على ملف الخياط";
-    return RedirectToAction("Index", "Home");
-     }
-
-   // Update tailor profile with complete information
-            tailorProfile.ShopName = model.WorkshopName;
-     tailorProfile.Address = model.Address;
-  tailorProfile.City = model.City;
-  tailorProfile.Bio = model.Description;
-      tailorProfile.ExperienceYears = model.ExperienceYears;
-   tailorProfile.UpdatedAt = _dateTime.Now;
-
-   // Save ID document as profile picture (temporary)
-       if (model.IdDocument != null && model.IdDocument.Length > 0)
-  {
-          using var memoryStream = new MemoryStream();
-        await model.IdDocument.CopyToAsync(memoryStream);
-    tailorProfile.ProfilePictureData = memoryStream.ToArray();
- tailorProfile.ProfilePictureContentType = model.IdDocument.ContentType;
-            }
-
-      await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
-
-  // Save portfolio images - Note: Currently PortfolioImage only supports ImageUrl
-   // In future, may need to extend the model to support binary data
-    if (model.PortfolioImages != null && model.PortfolioImages.Any())
-     {
-       // For now, we'll save them using file upload service
-          var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
-      Directory.CreateDirectory(portfolioFolderPath);
-
-       int imageIndex = 0;
-    foreach (var image in model.PortfolioImages.Take(10)) // Limit to 10 images
-      {
- if (image.Length > 0)
- {
-         // Save file to disk
-     var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
-     var filePath = Path.Combine(portfolioFolderPath, fileName);
-
-  using (var stream = new FileStream(filePath, FileMode.Create))
-       {
-      await image.CopyToAsync(stream);
-  }
-
-       // Store relative path in database
-     var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
-
-        var portfolioImage = new PortfolioImage
-      {
-    PortfolioImageId = Guid.NewGuid(),
-      TailorId = tailorProfile.Id,
-    ImageUrl = relativeUrl,
- IsBeforeAfter = false,
-    UploadedAt = _dateTime.Now,
-    IsDeleted = false
-  };
-
-      await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
-         }
-     }
-  }
-
-   await _unitOfWork.SaveChangesAsync();
-
-     TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
-   return RedirectToAction("Tailor", "Dashboards");
- }
-        catch (Exception ex)
-   {
-       _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
-       ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
-    return View(model);
-  }
-    }
-
-    /// <summary>
-    /// Verify email using token from email link
-    /// </summary>
-  [HttpGet]
- [AllowAnonymous]
-   public async Task<IActionResult> VerifyEmail(string token)
-    {
-    if (string.IsNullOrEmpty(token))
-{
-       TempData["ErrorMessage"] = "رابط التحقق غير صالح";
-      return RedirectToAction("Login");
-     }
-
-        var (success, error) = await _auth.VerifyEmailAsync(token);
-
-  if (success)
-  {
-        TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
-       }
-  else
-  {
-       TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
-     }
-
-        return RedirectToAction("Login");
-    }
-
-    /// <summary>
-    /// Resend email verification link
-    /// </summary>
-  [HttpGet]
-    [AllowAnonymous]
-    public IActionResult ResendVerificationEmail()
-    {
-    return View();
-    }
-
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-  public async Task<IActionResult> ResendVerificationEmail(string email)
-    {
-     if (string.IsNullOrWhiteSpace(email))
-      {
-   ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-        return View();
-   }
-
-      var (success, error) = await _auth.ResendVerificationEmailAsync(email);
-
-        if (success)
-        {
-          TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
-    }
-     else
-   {
-      TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
-        }
-
-    return View();
-    }
-
-    [HttpGet]
-    [AllowAnonymous] // Allow access before authentication since they just registered
-    public async Task<IActionResult> ProvideTailorEvidence()
- {
-        // Check if coming from registration
-        var userIdStr = TempData["UserId"]?.ToString();
-
-        // Keep the data for the POST
-        TempData.Keep("UserId");
- TempData.Keep("UserEmail");
-        TempData.Keep("UserName");
-
-        if (string.IsNullOrEmpty(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
-        {
-        TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
-            return RedirectToAction(nameof(Register));
-      }
-
-        // Verify user exists and is a tailor
-        var user = await _unitOfWork.Users.GetByIdAsync(userId);
-        if (user == null || user.Role?.Name?.ToLower() != "tailor")
-        {
-  TempData["ErrorMessage"] = "حساب غير صالح";
-     return RedirectToAction(nameof(Register));
-    }
-
-        // CRITICAL: Check if profile already exists (evidence already provided)
- // This ensures ONE-TIME verification only
-        var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userId);
-        if (existingProfile != null)
-        {
-        _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access evidence page but already has profile. Redirecting to login.", userId);
-      TempData["InfoMessage"] = "تم تقديم الأوراق الثبوتية بالفعل. يمكنك تسجيل الدخول الآن";
-    return RedirectToAction(nameof(Login));
-        }
-
-        var model = new CompleteTailorProfileRequest
-        {
-        UserId = userId,
-  Email = TempData["UserEmail"]?.ToString() ?? user.Email,
-            FullName = TempData["UserName"]?.ToString() ?? user.Email
-        };
-
-  return View(model);
-    }
-
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ProvideTailorEvidence(CompleteTailorProfileRequest model)
-    {
-        if (!ModelState.IsValid)
-        {
-return View(model);
-   }
-
-        try
-{
- // Get the user
-  var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
-            if (user == null || user.Role?.Name?.ToLower() != "tailor")
-    {
-   ModelState.AddModelError(string.Empty, "حساب غير صالح");
-         return View(model);
-   }
-
-  // CRITICAL: Check if profile already exists - BLOCK double submission
-   // This ensures ONE-TIME verification only
-  var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
-  if (existingProfile != null)
-      {
-     _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit evidence but already has profile. Blocking submission.", model.UserId);
-       TempData["InfoMessage"] = "تم تقديم الأوراق الثبوتية بالفعل. لا يمكن التقديم مرة أخرى.";
-       return RedirectToAction(nameof(Login));
-  }
-
-        // Validate that required evidence documents are provided
-            if (model.IdDocument == null || model.IdDocument.Length == 0)
-{
-    ModelState.AddModelError(nameof(model.IdDocument), "يجب تحميل صورة الهوية الشخصية");
-        return View(model);
-            }
- else
- {
-   // ✅ IMPROVED: Validate ID document
-      var (isValidId, idError) = ValidateFileUpload(model.IdDocument, "document");
-    if (!isValidId)
-  {
-        ModelState.AddModelError(nameof(model.IdDocument), idError!);
-     return View(model);
-   }
-        }
-
-  if ((model.PortfolioImages == null || !model.PortfolioImages.Any()) &&
-   (model.WorkSamples == null || !model.WorkSamples.Any()))
-    {
-   ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل صورة واحدة من أعمالك السابقة");
-  return View(model);
-        }
-  else
-  {
-     // ✅ IMPROVED: Validate portfolio images
-  var portfolioFiles = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
-     if (portfolioFiles.Count > 10)
-       {
-    ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
+  ModelState.AddModelError(string.Empty, "لا يمكن التحويل من خياط إلى عميل بشكل مباشر. يرجى الاتصال بالدعم.");
       return View(model);
-   }
-
-      foreach (var image in portfolioFiles)
-{
-    var (isValidImage, imageError) = ValidateFileUpload(image, "image");
-  if (!isValidImage)
-    {
-ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
-    return View(model);
-        }
-  }
         }
 
-  // ✅ IMPROVED: Sanitize text inputs
-        var sanitizedFullName = SanitizeInput(model.FullName, 100);
-  var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
- var sanitizedAddress = SanitizeInput(model.Address, 200);
-  var sanitizedCity = SanitizeInput(model.City, 50);
-var sanitizedDescription = SanitizeInput(model.Description, 1000);
-
-  // Create tailor profile NOW (after evidence is provided)
-        // THIS IS THE ONE AND ONLY TIME the profile is created
-     var tailorProfile = new TailorProfile
-   {
-  Id = Guid.NewGuid(),
-UserId = model.UserId,
-    FullName = sanitizedFullName,
- ShopName = sanitizedWorkshopName,
-   Address = sanitizedAddress,
-      City = sanitizedCity,
-     Bio = sanitizedDescription,
-      ExperienceYears = model.ExperienceYears,
-   IsVerified = false, // Awaiting admin approval
-      CreatedAt = _dateTime.Now
-  };
-
-          // Store ID document as evidence
-  if (model.IdDocument != null && model.IdDocument.Length > 0)
-  {
-      using var memoryStream = new MemoryStream();
-     await model.IdDocument.CopyToAsync(memoryStream);
-     tailorProfile.ProfilePictureData = memoryStream.ToArray();
-         tailorProfile.ProfilePictureContentType = model.IdDocument.ContentType;
-    }
-
-     await _unitOfWork.Tailors.AddAsync(tailorProfile);
-
-  // Save portfolio images
- if (model.PortfolioImages != null && model.PortfolioImages.Any())
-   {
- var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
-  Directory.CreateDirectory(portfolioFolderPath);
-
-       int imageIndex = 0;
-          foreach (var image in model.PortfolioImages.Take(10))
-       {
-       if (image.Length > 0)
-       {
-       var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
-               var filePath = Path.Combine(portfolioFolderPath, fileName);
-
-      using (var stream = new FileStream(filePath, FileMode.Create))
+        // Allow Customer -> Tailor conversion
+      if (model.TargetRole == "Tailor" && currentRole == "Customer")
+        {
+  if (string.IsNullOrWhiteSpace(model.ShopName) || string.IsNullOrWhiteSpace(model.Address))
             {
-             await image.CopyToAsync(stream);
-       }
-
-    var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
-  var portfolioImage = new PortfolioImage
-       {
-        PortfolioImageId = Guid.NewGuid(),
-         TailorId = tailorProfile.Id,
-       ImageUrl = relativeUrl,
-   IsBeforeAfter = false,
-    UploadedAt = _dateTime.Now,
-    IsDeleted = false
-      };
-
-   await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
-    }
-   }
+     ModelState.AddModelError(string.Empty, "اسم المتجر والعنوان مطلوبان للخياطين");
+        return View(model);
             }
 
-  // NOW prepare for admin review - keep user INACTIVE until admin approves
-  // ✅ FIX: Don't activate user until admin reviews and approves
-            user.IsActive = false; // Keep inactive until admin approval
-      user.UpdatedAt = _dateTime.Now;
-
-         // Generate email verification token (will be used after admin approval)
-            var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
-  .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0, 32);
-
-  user.EmailVerificationToken = verificationToken;
-  user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
-
-     await _unitOfWork.Users.UpdateAsync(user);
-         await _unitOfWork.SaveChangesAsync();
-
-       _logger.LogInformation("[AccountController] Tailor {UserId} completed ONE-TIME evidence submission. Awaiting admin review (IsActive=false).", model.UserId);
-
-     // Send email verification (background task)
-            _ = Task.Run(async () =>
-            {
-    try
-   {
-          // You can create a new email method or use existing one
-       // await _emailService.SendEmailVerificationAsync(user.Email, model.FullName, verificationToken);
-           _logger.LogInformation("Email verification sent to tailor: {Email}", user.Email);
-                }
-  catch (Exception ex)
-      {
-   _logger.LogError(ex, "Failed to send verification email to {Email}", user.Email);
-         }
-          });
-
-          TempData["RegisterSuccess"] = "تم تقديم الأوراق الثبوتية بنجاح! سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة. سنرسل لك إشعاراً عند الموافقة على حسابك.";
-            return RedirectToAction(nameof(Login));
- }
-        catch (Exception ex)
-   {
-     _logger.LogError(ex, "[AccountController] Error providing tailor evidence for user: {UserId}", model.UserId);
-  ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
-     return View(model);
-  }
-    }
-
-    #region Settings
-
-    /// <summary>
-  /// User settings page (redirects to dashboard for now)
-    /// </summary>
-    [HttpGet]
-    public IActionResult Settings()
-    {
-        _logger.LogInformation("User {UserId} accessed Settings page", 
-     User.FindFirstValue(ClaimTypes.NameIdentifier));
-        var roleName = User.FindFirstValue(ClaimTypes.Role);
-    return RedirectToRoleDashboard(roleName);
-    }
-
-    #endregion
-
-  #region Password Reset
-
-  /// <summary>
-    /// Forgot password page
-    /// </summary>
-    [HttpGet]
-    [AllowAnonymous]
- public IActionResult ForgotPassword()
-    {
-        return View();
-    }
-
-    /// <summary>
-    /// Send password reset email
-    /// </summary>
-    [HttpPost]
-    [AllowAnonymous]
- [ValidateAntiForgeryToken]
-  public async Task<IActionResult> ForgottenPassword(string email)
- {
-   // ✅ IMPROVED: Sanitize and validate email with null safety
-   email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
-
- if (string.IsNullOrWhiteSpace(email))
-        {
-  ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-  return View();
- }
-
-      if (!IsValidEmail(email))
-   {
-     ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
-   return View();
-   }
-
-        var user = await _unitOfWork.Users.GetByEmailAsync(email);
-
-        // Security: Always show success message (don't reveal if email exists)
-     if (user == null)
-  {
-_logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
-TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
- return View();
-        }
-
-   var resetToken = GeneratePasswordResetToken();
- user.PasswordResetToken = resetToken;
-user.PasswordResetTokenExpires = _dateTime.Now.AddHours(1);
-     user.UpdatedAt = _dateTime.Now;
-
-await _unitOfWork.Users.UpdateAsync(user);
- await _unitOfWork.SaveChangesAsync();
-
-  var resetLink = Url.Action(nameof(ResetPassword), "Account",
-     new { token = resetToken }, Request.Scheme);
- _logger.LogInformation("Password reset link generated for {Email}: {Link}", email, resetLink);
-
-TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
-  return View();
-}
-
-    /// <summary>
-    /// Reset password form
-    /// </summary>
-    [HttpGet]
-  [AllowAnonymous]
-    public IActionResult ResetPassword(string token)
-    {
-        if (string.IsNullOrEmpty(token))
-        {
-            TempData["ErrorMessage"] = "رابط إعادة تعيين كلمة المرور غير صالح";
-      return RedirectToAction(nameof(Login));
-        }
-
-        var model = new ResetPasswordViewModel { Token = token };
-        return View(model);
-}
-
-    /// <summary>
-    /// Process password reset
-    /// </summary>
-    [HttpPost]
- [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-    {
-    if (!ModelState.IsValid)
-        {
-    return View(model);
-        }
-
-        var user = await _unitOfWork.Context.Set<User>()
-  .FirstOrDefaultAsync(u => u.PasswordResetToken == model.Token);
-
-        if (user == null)
-        {
-            ModelState.AddModelError(string.Empty, "رابط إعادة تعيين كلمة المرور غير صالح");
-       return View(model);
-        }
-
-   if (user.PasswordResetTokenExpires == null || user.PasswordResetTokenExpires < _dateTime.Now)
-    {
-        ModelState.AddModelError(string.Empty, "انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.");
+      var tailorRole = await _unitOfWork.Context.Set<Role>().FirstOrDefaultAsync(r => r.Name == "Tailor");
+            if (tailorRole == null)
+          {
+                ModelState.AddModelError(string.Empty, "دور الخياط غير موجود في النظام");
           return View(model);
         }
 
-        user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
- user.PasswordResetToken = null;
-        user.PasswordResetTokenExpires = null;
- user.UpdatedAt = _dateTime.Now;
+  user.RoleId = tailorRole.Id;
+       user.UpdatedAt = _dateTime.Now;
+     await _unitOfWork.Users.UpdateAsync(user);
 
-        await _unitOfWork.Users.UpdateAsync(user);
-  await _unitOfWork.SaveChangesAsync();
+            var tailorProfile = new TailorProfile
+ {
+                Id = Guid.NewGuid(),
+       UserId = userGuid,
+        FullName = user.CustomerProfile?.FullName ?? string.Empty,
+          ShopName = model.ShopName,
+    Address = model.Address,
+          ExperienceYears = model.ExperienceYears,
+   CreatedAt = _dateTime.Now
+     };
 
-        _logger.LogInformation("Password reset successful for user: {Email}", user.Email);
+            await _unitOfWork.Tailors.AddAsync(tailorProfile);
+     await _unitOfWork.SaveChangesAsync();
 
-  TempData["RegisterSuccess"] = "تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
-        return RedirectToAction(nameof(Login));
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["RegisterSuccess"] = "تم تحويل حسابك إلى خياط بنجاح! يرجى تسجيل الدخول مرة أخرى.";
+    return RedirectToAction("Login");
+        }
+
+     TempData["ErrorMessage"] = "طلب تغيير الدور غير مدعوم حالياً";
+        var roleName = User.FindFirstValue(ClaimTypes.Role);
+        return RedirectToRoleDashboard(roleName);
     }
 
     #endregion
 
-    #region Validation Helpers
+    #region Helper Methods
 
-    /// <summary>
-    /// Validates email format
-  /// </summary>
+    private IActionResult RedirectToRoleDashboard(string? roleName)
+    {
+        return (roleName?.ToLowerInvariant()) switch
+  {
+            "tailor" => RedirectToAction("Tailor", "Dashboards"),
+          "corporate" => RedirectToAction("Corporate", "Dashboards"),
+            "admin" => RedirectToAction("Index", "Admin"),
+      _ => RedirectToAction("Customer", "Dashboards")
+        };
+    }
+
     private bool IsValidEmail(string? email)
     {
-        if (string.IsNullOrWhiteSpace(email))
+   if (string.IsNullOrWhiteSpace(email))
     return false;
 
         try
         {
-    var addr = new System.Net.Mail.MailAddress(email);
-      return addr.Address == email && email.Contains("@") && email.Length <= 254;
-   }
+      var addr = new System.Net.Mail.MailAddress(email);
+    return addr.Address == email && email.Contains("@") && email.Length <= 254;
+    }
         catch
-   {
-            return false;
-        }
+        {
+  return false;
+    }
     }
 
-    /// <summary>
-    /// Validates password strength
-    /// </summary>
     private (bool IsValid, string? Error) ValidatePasswordStrength(string password)
     {
-if (string.IsNullOrWhiteSpace(password))
-            return (false, "كلمة المرور مطلوبة");
+        if (string.IsNullOrWhiteSpace(password))
+    return (false, "كلمة المرور مطلوبة");
 
-        if (password.Length < 8)
-    return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+      if (password.Length < 8)
+      return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
 
-        if (password.Length > 128)
-         return (false, "كلمة المرور طويلة جداً");
+if (password.Length > 128)
+     return (false, "كلمة المرور طويلة جداً");
 
-        // Check for uppercase
-     if (!password.Any(char.IsUpper))
- return (false, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل");
+        if (!password.Any(char.IsUpper))
+            return (false, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل");
 
-      // Check for lowercase
-        if (!password.Any(char.IsLower))
-     return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
+ if (!password.Any(char.IsLower))
+    return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
 
-        // Check for digit
-  if (!password.Any(char.IsDigit))
-      return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
+        if (!password.Any(char.IsDigit))
+   return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
 
- // Check for special character
-        if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
-    return (false, "كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل");
+    if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
+            return (false, "كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل");
 
-        // Check for common weak passwords
         var weakPasswords = new[] { "password1!", "qwerty123!", "admin123!", "welcome1!", "Password1!", "Qwerty123!" };
-if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
-return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أفصل");
+    if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
+         return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
 
         return (true, null);
     }
 
-    /// <summary>
-    /// Validates phone number format and strength
-    /// </summary>
     private (bool IsValid, string? Error) ValidatePhoneNumber(string phoneNumber)
     {
-        // Check if the phone number is not empty
         if (string.IsNullOrWhiteSpace(phoneNumber))
-      {
-            return (false, "رقم الهاتف مطلوب");
+       return (false, "رقم الهاتف مطلوب");
+
+        var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
+
+        if (digitsOnly.Length < 9)
+            return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
+
+  if (digitsOnly.StartsWith("000") || digitsOnly.StartsWith("111") || digitsOnly.StartsWith("222") ||
+        digitsOnly.StartsWith("333") || digitsOnly.StartsWith("444") || digitsOnly.StartsWith("555") ||
+         digitsOnly.StartsWith("666") || digitsOnly.StartsWith("777") || digitsOnly.StartsWith("888") ||
+            digitsOnly.StartsWith("999") || digitsOnly == new string('0', digitsOnly.Length) ||
+            digitsOnly == new string('1', digitsOnly.Length) || digitsOnly == new string('2', digitsOnly.Length))
+        {
+   return (false, "رقم الهاتف ضعيف جداً. يرجى اختيار رقم آخر");
         }
 
-      // Remove any non-digit characters for validation
-     var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
-
-        // Check if the number contains at least 9 digits
-        if (digitsOnly.Length < 9)
-        {
-            return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
-  }
-
-        // Check for common patterns or sequential numbers
-        if (digitsOnly.StartsWith("000") || digitsOnly.StartsWith("111") || digitsOnly.StartsWith("222") ||
-  digitsOnly.StartsWith("333") || digitsOnly.StartsWith("444") || digitsOnly.StartsWith("555") ||
-    digitsOnly.StartsWith("666") || digitsOnly.StartsWith("777") || digitsOnly.StartsWith("888") ||
-    digitsOnly.StartsWith("999") || digitsOnly == new string('0', digitsOnly.Length) ||
-         digitsOnly == new string('1', digitsOnly.Length) || digitsOnly == new string('2', digitsOnly.Length))
-        {
-            return (false, "رقم الهاتف ضعيف جداً. يرجى اختيار رقم آخر");
-   }
-
-        return (true, null);
+      return (true, null);
     }
 
-    /// <summary>
-    /// Validates file upload (size, type, content)
-    /// </summary>
     private (bool IsValid, string? Error) ValidateFileUpload(IFormFile? file, string fileType = "image")
     {
         if (file == null || file.Length == 0)
-   return (false, "الملف مطلوب");
+            return (false, "الملف مطلوب");
 
-   // Check file size (max 5MB for images, 10MB for documents)
         var maxSize = fileType == "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
-        if (file.Length > maxSize)
-            return (false, $"حجم الملف كبير جداً. الحد الأقصى {maxSize / (1024 * 1024)} ميجابايت");
+      if (file.Length > maxSize)
+         return (false, $"حجم الملف كبير جداً. الحد الأقصى {maxSize / (1024 * 1024)} ميجابايت");
 
-   // Check file extension
         var allowedExtensions = fileType == "image"
-          ? new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
-       : new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
+      ? new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
+      : new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
 
-        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-     if (!allowedExtensions.Contains(extension))
-    return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
+var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+  return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
 
-        // Check content type
-   var allowedContentTypes = fileType == "image"
+        var allowedContentTypes = fileType == "image"
             ? new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" }
-            : new[] { "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "image/jpeg", "image/png" };
+     : new[] { "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "image/jpeg", "image/png" };
 
         if (!allowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
-    return (false, "نوع محتوى الملف غير صحيح");
+         return (false, "نوع محتوى الملف غير صحيح");
 
-        // Sanitize file name (prevent directory traversal)
         var fileName = Path.GetFileName(file.FileName);
-    if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
-        return (false, "اسم الملف غير صالح");
+        if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
+  return (false, "اسم الملف غير صالح");
 
-   return (true, null);
+    return (true, null);
     }
 
-    /// <summary>
-    /// Sanitizes input strings by trimming and removing potentially dangerous characters
-    /// </summary>
     private string SanitizeInput(string? input, int maxLength)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return string.Empty;
+    return string.Empty;
 
-        // Trim whitespace
-   input = input.Trim();
+        input = input.Trim();
+        input = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
 
-    // Remove HTML tags
-input = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
-
-      // Remove SQL injection patterns
         var sqlPatterns = new[] { "--", ";--", "';", "')", "' OR '", "' AND '", "DROP ", "INSERT ", "DELETE ", "UPDATE ", "EXEC " };
         foreach (var pattern in sqlPatterns)
-      {
             input = input.Replace(pattern, "", StringComparison.OrdinalIgnoreCase);
-        }
 
-        // Enforce maximum length
         if (input.Length > maxLength)
-        {
             input = input.Substring(0, maxLength);
-        }
 
-        return input;
-    }
+    return input;
+ }
 
-    /// <summary>
-    /// Generates a secure password reset token
-    /// </summary>
     private string GeneratePasswordResetToken()
-  {
+    {
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
-       .Replace("+", "")
-  .Replace("/", "")
-        .Replace("=", "")
-         .Substring(0, 32);
+            .Replace("+", "")
+            .Replace("/", "")
+       .Replace("=", "")
+            .Substring(0, 32);
     }
 
     #endregion
