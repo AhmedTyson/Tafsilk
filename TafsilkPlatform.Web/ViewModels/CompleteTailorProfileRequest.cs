@@ -15,21 +15,21 @@ public class CompleteTailorProfileRequest
 
     [Required(ErrorMessage = "رقم الهاتف مطلوب")]
     [Phone(ErrorMessage = "رقم الهاتف غير صحيح")]
-    [Display(Name = "رقم الهاتف")]
+ [Display(Name = "رقم الهاتف")]
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "العنوان مطلوب")]
-  [Display(Name = "عنوان الورشة")]
-    public string Address { get; set; } = string.Empty;
+    [Display(Name = "عنوان الورشة")]
+ public string Address { get; set; } = string.Empty;
 
-    [Display(Name = "المدينة")]
+ [Display(Name = "المدينة")]
     public string? City { get; set; }
 
-[Required(ErrorMessage = "وصف الورشة مطلوب")]
+    [Required(ErrorMessage = "وصف الورشة مطلوب")]
     [Display(Name = "وصف الورشة والخدمات")]
     public string Description { get; set; } = string.Empty;
 
-    [Display(Name = "سنوات الخبرة")]
+  [Display(Name = "سنوات الخبرة")]
     [Range(0, 100, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 100")]
     public int? ExperienceYears { get; set; }
 
@@ -40,7 +40,7 @@ public class CompleteTailorProfileRequest
 
     [Required(ErrorMessage = "صور معرض الأعمال مطلوبة (3 على الأقل)")]
     [Display(Name = "صور من أعمالك السابقة")]
-public List<IFormFile>? PortfolioImages { get; set; }
+    public List<IFormFile>? PortfolioImages { get; set; }
 
     /// <summary>
     /// Alias for PortfolioImages - work samples
@@ -53,16 +53,16 @@ public List<IFormFile>? PortfolioImages { get; set; }
     }
 
     [Display(Name = "وثائق إضافية (اختياري)")]
- public List<IFormFile>? AdditionalDocuments { get; set; }
+    public List<IFormFile>? AdditionalDocuments { get; set; }
 
     [Required(ErrorMessage = "يجب الموافقة على الشروط والأحكام")]
     [Display(Name = "أوافق على الشروط والأحكام وسياسة الخصوصية")]
     public bool AgreeToTerms { get; set; }
 
     // User ID (set from authenticated user or registration)
-    public Guid UserId { get; set; }
+  public Guid UserId { get; set; }
 
-    // Email and FullName (for display)
+ // Email and FullName (for display)
     public string? Email { get; set; }
     public string? FullName { get; set; }
 }

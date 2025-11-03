@@ -768,6 +768,216 @@ ViewData["Provider"] = provider;
         }
     }
 
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> CompleteTailorProfile()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+        {
+     return Unauthorized();
+        }
+
+        var user = await _unitOfWork.Users.GetByIdAsync(userGuid);
+        if (user == null)
+        {
+     return NotFound();
+       }
+
+        // Check if user is a tailor
+        var roleName = User.FindFirstValue(ClaimTypes.Role);
+  if (roleName?.ToLower() != "tailor")
+      {
+   TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
+  return RedirectToAction("Index", "Home");
+   }
+
+  // Check if profile is already completed
+        var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userGuid);
+    if (tailorProfile != null && !string.IsNullOrEmpty(tailorProfile.Bio) && tailorProfile.IsVerified)
+        {
+   TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل";
+      return RedirectToAction("Tailor", "Dashboards");
+   }
+
+        var model = new CompleteTailorProfileRequest
+     {
+     UserId = userGuid,
+   Email = user.Email,
+       FullName = User.FindFirstValue("FullName") ?? user.Email
+   };
+
+ return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CompleteTailorProfile(CompleteTailorProfileRequest model)
+  {
+  if (!ModelState.IsValid)
+   {
+       return View(model);
+  }
+
+        try
+ {
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+   if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+  {
+     return Unauthorized();
+  }
+
+         // Check if user is a tailor
+   var roleName = User.FindFirstValue(ClaimTypes.Role);
+    if (roleName?.ToLower() != "tailor")
+  {
+        TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
+    return RedirectToAction("Index", "Home");
+   }
+
+   // Get tailor profile
+       var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userGuid);
+    if (tailorProfile == null)
+       {
+        TempData["ErrorMessage"] = "لم يتم العثور على ملف الخياط";
+    return RedirectToAction("Index", "Home");
+     }
+
+   // Update tailor profile with complete information
+            tailorProfile.ShopName = model.WorkshopName;
+     tailorProfile.Address = model.Address;
+  tailorProfile.City = model.City;
+  tailorProfile.Bio = model.Description;
+      tailorProfile.ExperienceYears = model.ExperienceYears;
+   tailorProfile.UpdatedAt = _dateTime.Now;
+
+   // Save ID document as profile picture (temporary)
+       if (model.IdDocument != null && model.IdDocument.Length > 0)
+  {
+          using var memoryStream = new MemoryStream();
+        await model.IdDocument.CopyToAsync(memoryStream);
+    tailorProfile.ProfilePictureData = memoryStream.ToArray();
+ tailorProfile.ProfilePictureContentType = model.IdDocument.ContentType;
+            }
+
+      await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
+
+  // Save portfolio images - Note: Currently PortfolioImage only supports ImageUrl
+   // In future, may need to extend the model to support binary data
+    if (model.PortfolioImages != null && model.PortfolioImages.Any())
+     {
+       // For now, we'll save them using file upload service
+          var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
+      Directory.CreateDirectory(portfolioFolderPath);
+
+       int imageIndex = 0;
+    foreach (var image in model.PortfolioImages.Take(10)) // Limit to 10 images
+      {
+ if (image.Length > 0)
+ {
+         // Save file to disk
+     var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
+     var filePath = Path.Combine(portfolioFolderPath, fileName);
+
+  using (var stream = new FileStream(filePath, FileMode.Create))
+       {
+      await image.CopyToAsync(stream);
+  }
+
+       // Store relative path in database
+     var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
+
+        var portfolioImage = new PortfolioImage
+      {
+    PortfolioImageId = Guid.NewGuid(),
+      TailorId = tailorProfile.Id,
+    ImageUrl = relativeUrl,
+ IsBeforeAfter = false,
+    UploadedAt = _dateTime.Now,
+    IsDeleted = false
+  };
+
+      await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
+         }
+     }
+  }
+
+   await _unitOfWork.SaveChangesAsync();
+
+     TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
+   return RedirectToAction("Tailor", "Dashboards");
+ }
+        catch (Exception ex)
+   {
+       _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
+       ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+    return View(model);
+  }
+    }
+
+    /// <summary>
+    /// Verify email using token from email link
+    /// </summary>
+  [HttpGet]
+ [AllowAnonymous]
+   public async Task<IActionResult> VerifyEmail(string token)
+    {
+    if (string.IsNullOrEmpty(token))
+        {
+       TempData["ErrorMessage"] = "رابط التحقق غير صالح";
+      return RedirectToAction("Login");
+     }
+
+        var (success, error) = await _auth.VerifyEmailAsync(token);
+
+      if (success)
+  {
+            TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
+       }
+  else
+  {
+       TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
+        }
+
+        return RedirectToAction("Login");
+    }
+
+    /// <summary>
+    /// Resend email verification link
+    /// </summary>
+  [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResendVerificationEmail()
+    {
+    return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+  public async Task<IActionResult> ResendVerificationEmail(string email)
+    {
+       if (string.IsNullOrWhiteSpace(email))
+      {
+   ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        return View();
+       }
+
+      var (success, error) = await _auth.ResendVerificationEmailAsync(email);
+
+        if (success)
+        {
+          TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
+        }
+     else
+   {
+      TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
+        }
+
+    return View();
+    }
+
 
     /// <summary>
     /// Verify email using token from email link
