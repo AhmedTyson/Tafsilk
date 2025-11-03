@@ -549,7 +549,7 @@ public async Task<User?> GetUserByEmailAsync(string email)
                 corporate.IsApproved = isApproved;
 corporate.UpdatedAt = _dateTime.Now;
 
-                await _db.SaveChangesAsync();
+    await _db.SaveChangesAsync();
 
            _logger.LogInformation("[AuthService] Corporate approval status changed: {CorporateId}, IsApproved: {IsApproved}",
         corporateId, isApproved);

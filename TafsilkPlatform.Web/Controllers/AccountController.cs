@@ -994,6 +994,68 @@ ViewData["Provider"] = provider;
     return View();
     }
 
+    /// <summary>
+    /// Verify email using token from email link
+    /// </summary>
+  [HttpGet]
+ [AllowAnonymous]
+   public async Task<IActionResult> VerifyEmail(string token)
+    {
+    if (string.IsNullOrEmpty(token))
+        {
+       TempData["ErrorMessage"] = "رابط التحقق غير صالح";
+      return RedirectToAction("Login");
+     }
+
+        var (success, error) = await _auth.VerifyEmailAsync(token);
+
+      if (success)
+  {
+            TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
+       }
+  else
+  {
+       TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
+        }
+
+        return RedirectToAction("Login");
+    }
+
+    /// <summary>
+    /// Resend email verification link
+    /// </summary>
+  [HttpGet]
+    [AllowAnonymous]
+    public IActionResult ResendVerificationEmail()
+    {
+    return View();
+    }
+
+    [HttpPost]
+    [AllowAnonymous]
+    [ValidateAntiForgeryToken]
+  public async Task<IActionResult> ResendVerificationEmail(string email)
+    {
+       if (string.IsNullOrWhiteSpace(email))
+      {
+   ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        return View();
+       }
+
+      var (success, error) = await _auth.ResendVerificationEmailAsync(email);
+
+        if (success)
+        {
+          TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
+        }
+     else
+   {
+      TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
+        }
+
+    return View();
+    }
+
     [HttpGet]
     [AllowAnonymous] // Allow access before authentication since they just registered
     public async Task<IActionResult> ProvideTailorEvidence()
