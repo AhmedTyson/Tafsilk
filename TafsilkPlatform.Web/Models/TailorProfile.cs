@@ -135,5 +135,69 @@ namespace TafsilkPlatform.Web.Models
         public ICollection<TailorService> TailorServices { get; set; } = new List<TailorService>();
         public ICollection<PortfolioImage> PortfolioImages { get; set; } = new List<PortfolioImage>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+
+        // Computed properties
+        [NotMapped]
+        public int TotalReviews => Reviews?.Count ?? 0;
+
+        [NotMapped]
+        public bool HasLocation => Latitude.HasValue && Longitude.HasValue;
+
+        [NotMapped]
+        public string ExperienceLevel
+        {
+            get
+            {
+                if (!ExperienceYears.HasValue) return "غير محدد";
+                return ExperienceYears.Value switch
+                {
+                    < 2 => "مبتدئ",
+                    < 5 => "متوسط",
+                    < 10 => "محترف",
+                    _ => "خبير"
+                };
+            }
+        }
+
+        // Domain methods
+        public void Verify(DateTime verifiedAt)
+        {
+            IsVerified = true;
+            VerifiedAt = verifiedAt;
+            UpdatedAt = verifiedAt;
+        }
+
+        public void UpdateRating(decimal newAverageRating)
+        {
+            if (newAverageRating < 0 || newAverageRating > 5)
+                throw new ArgumentException("Rating must be between 0 and 5");
+
+            AverageRating = newAverageRating;
+            UpdatedAt = DateTime.UtcNow;
+        }
+
+        public bool IsWithinRadius(decimal targetLat, decimal targetLon, double radiusKm)
+        {
+            if (!HasLocation) return false;
+
+            const double earthRadiusKm = 6371;
+            var dLat = DegreesToRadians((double)(targetLat - Latitude!.Value));
+            var dLon = DegreesToRadians((double)(targetLon - Longitude!.Value));
+
+            var a = Math.Sin(dLat / 2) * Math.Sin(dLat / 2) +
+                    Math.Cos(DegreesToRadians((double)Latitude.Value)) *
+                    Math.Cos(DegreesToRadians((double)targetLat)) *
+                    Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
+
+            var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
+            var distance = earthRadiusKm * c;
+
+            return distance <= radiusKm;
+        }
+
+        private static double DegreesToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
+        }
     }
 }
