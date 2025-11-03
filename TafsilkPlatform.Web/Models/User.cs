@@ -60,10 +60,36 @@ namespace TafsilkPlatform.Web.Models
         [DataType(DataType.DateTime)]
         public DateTime? EmailVerifiedAt { get; set; }
 
+        // Password reset tokens
+        [MaxLength(64)]
+        public string? PasswordResetToken { get; set; }
+
+        [DataType(DataType.DateTime)]
+        public DateTime? PasswordResetTokenExpires { get; set; }
+
         // New notification preferences
         public bool EmailNotifications { get; set; } = true;
         public bool SmsNotifications { get; set; } = true;
         public bool PromotionalNotifications { get; set; } = true;
+
+        // Ban management (replaces BannedUser table)
+        [Display(Name = "Ban Date")]
+        [DataType(DataType.DateTime)]
+        public DateTime? BannedAt { get; set; }
+
+        [MaxLength(500)]
+        [Display(Name = "Ban Reason")]
+        public string? BanReason { get; set; }
+
+        [Display(Name = "Ban Expires")]
+        [DataType(DataType.DateTime)]
+        public DateTime? BanExpiresAt { get; set; }
+
+        /// <summary>
+        /// Checks if user is currently banned
+        /// </summary>
+        [NotMapped]
+        public bool IsBanned => BannedAt.HasValue && (!BanExpiresAt.HasValue || BanExpiresAt > DateTime.UtcNow);
 
         // Navigation properties
         [ForeignKey("RoleId")]

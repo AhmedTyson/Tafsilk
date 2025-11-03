@@ -57,26 +57,22 @@ namespace TafsilkPlatform.Web.Data.Seed
  PasswordHash = PasswordHasher.Hash(adminPassword),
  RoleId = adminRole.Id,
  IsActive = true,
- CreatedAt = DateTime.UtcNow
+ CreatedAt = DateTime.UtcNow,
+ EmailVerified = true // Auto-verify admin email
  };
  db.Users.Add(adminUser);
- db.SaveChanges();
+ }
+ 
+ // Set admin role permissions (replaces Admin table)
+ if (string.IsNullOrEmpty(adminRole.Permissions))
+ {
+ adminRole.Permissions = "{\"CanVerifyTailors\":true,\"CanManageUsers\":true,\"CanViewReports\":true,\"CanManageOrders\":true,\"CanResolveDisputes\":true,\"CanManageRefunds\":true,\"CanSendNotifications\":true,\"CanViewAuditLogs\":true,\"CanManageRoles\":true}";
+ adminRole.Priority = 100;
+ logger.LogInformation("Admin role permissions configured");
  }
 
- // ensure Admin record exists (link user to admin table)
- var adminRecord = db.Admins.FirstOrDefault(a => a.UserId == adminUser.Id);
- if (adminRecord == null)
- {
- adminRecord = new Admin
- {
- Id = Guid.NewGuid(),
- UserId = adminUser.Id,
- Permissions = "*",
- CreatedAt = DateTime.UtcNow
- };
- db.Admins.Add(adminRecord);
  db.SaveChanges();
- }
+ logger.LogInformation("Admin seeding completed. Email: {Email}", adminEmail);
  }
  }
 }

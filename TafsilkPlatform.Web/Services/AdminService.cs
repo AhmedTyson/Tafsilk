@@ -8,15 +8,18 @@ namespace TafsilkPlatform.Web.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<AdminService> _logger;
+        private readonly IHttpContextAccessor? _httpContextAccessor;
 
         public AdminService(
         IUnitOfWork unitOfWork,
-            ILogger<AdminService> logger)
+            ILogger<AdminService> logger,
+   IHttpContextAccessor? httpContextAccessor = null)
         {
             _unitOfWork = unitOfWork;
    _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
-
+        
      // ==================== PRIVATE HELPER METHODS ====================
 
         /// <summary>
@@ -39,6 +42,25 @@ namespace TafsilkPlatform.Web.Services
   
         await _unitOfWork.Notifications.AddAsync(notification);
             await _unitOfWork.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Logs an admin action to the activity log
+ /// </summary>
+        private async Task LogAdminActionAsync(Guid adminUserId, string action, string details, string entityType = "System")
+      {
+            var log = new ActivityLog
+       {
+     UserId = adminUserId,
+    Action = action,
+       EntityType = entityType,
+       Details = details,
+    IpAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+     CreatedAt = DateTime.UtcNow,
+       IsAdminAction = true // Mark as admin action
+   };
+     
+   await _unitOfWork.Context.ActivityLogs.AddAsync(log);
         }
 
         // ==================== TAILOR VERIFICATION ====================
@@ -72,6 +94,8 @@ tailor.UpdatedAt = DateTime.UtcNow;
    "تهانينا! تم التحقق من حسابك بنجاح. يمكنك الآن استقبال الطلبات.",
  "Success"
       );
+
+      await LogAdminActionAsync(adminId, "VerifyTailor", $"تم التحقق من الخياط {tailorId}", "Tailor");
 
   _logger.LogInformation("[AdminService] Tailor verified successfully");
          return (true, null);
@@ -111,6 +135,8 @@ catch (Exception ex)
   $"عذراً، تم رفض طلب التحقق من حسابك. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
  "Warning"
   );
+
+      await LogAdminActionAsync(adminId, "RejectTailor", $"تم رفض تحقق الخياط {tailorId}. السبب: {reason}", "Tailor");
 
       _logger.LogInformation("[AdminService] Tailor rejected");
        return (true, null);
@@ -154,6 +180,8 @@ catch (Exception ex)
         "Warning"
      );
 
+                await LogAdminActionAsync(userId, "SuspendUser", $"تم إيقاف حساب المستخدم {userId}. السبب: {reason}", "User");
+
                 _logger.LogInformation("[AdminService] User suspended successfully");
      return (true, null);
             }
@@ -192,6 +220,8 @@ catch (Exception ex)
          "Success"
      );
 
+       await LogAdminActionAsync(userId, "ActivateUser", $"تم تفعيل حساب المستخدم {userId}", "User");
+
        _logger.LogInformation("[AdminService] User activated successfully");
   return (true, null);
       }
@@ -207,10 +237,10 @@ catch (Exception ex)
       /// </summary>
      public async Task<(bool Success, string? ErrorMessage)> BanUserAsync(
  Guid userId,
-        string? reason = null)
+    string? reason = null)
  {
 try
-      {
+  {
           _logger.LogInformation("[AdminService] Banning user: {UserId}", userId);
 
          var user = await _unitOfWork.Users.GetByIdAsync(userId);
@@ -222,25 +252,23 @@ try
   user.IsActive = false;
        user.IsDeleted = true; // Mark as deleted/banned
       user.UpdatedAt = DateTime.UtcNow;
+        
+            // Set ban fields (replaces BannedUser table)
+            user.BannedAt = DateTime.UtcNow;
+            user.BanReason = reason ?? "تم حظر الحساب من قبل الإدارة";
+   user.BanExpiresAt = null; // Permanent ban
 
       await _unitOfWork.SaveChangesAsync();
 
-             // Create banned user record
-    var bannedUser = new BannedUser
-        {
-     UserId = userId,
-    Reason = reason ?? "تم حظر الحساب من قبل الإدارة",
-              BannedAt = DateTime.UtcNow
-     };
-await _unitOfWork.Context.BannedUsers.AddAsync(bannedUser);
-
           // Create notification using helper method
-          await SendNotificationAsync(
+     await SendNotificationAsync(
     userId,
-                "تم حظر حسابك",
+        "تم حظر حسابك",
    $"تم حظر حسابك نهائياً. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
  "Error"
-        );
+ );
+
+      await LogAdminActionAsync(userId, "BanUser", $"تم حظر الحساب {userId} نهائياً. السبب: {reason}", "User");
 
   _logger.LogInformation("[AdminService] User banned successfully");
   return (true, null);
@@ -248,7 +276,7 @@ await _unitOfWork.Context.BannedUsers.AddAsync(bannedUser);
        catch (Exception ex)
     {
        _logger.LogError(ex, "[AdminService] Error banning user");
-                return (false, $"حدث خطأ: {ex.Message}");
+         return (false, $"حدث خطأ: {ex.Message}");
      }
    }
 

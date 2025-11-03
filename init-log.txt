@@ -1,0 +1,759 @@
+Using launch settings from TafsilkPlatform.Web\Properties\launchSettings.json...
+info: Startup[0]
+      === OAuth Configuration Status ===
+info: Startup[0]
+      Google OAuth: Configured
+info: Startup[0]
+      Facebook OAuth: Configured
+info: Startup[0]
+      ✓ Google OAuth provider registered
+info: Startup[0]
+      ✓ Facebook OAuth provider registered
+warn: Microsoft.EntityFrameworkCore.Model.Validation[10400]
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+info: Program[0]
+      Starting database initialization...
+info: Program[0]
+      Database does not exist. Creating...
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (189ms) [Parameters=[], CommandType='Text', CommandTimeout='60']
+      CREATE DATABASE [TafsilkPlatformDb_Dev];
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (70ms) [Parameters=[], CommandType='Text', CommandTimeout='60']
+      IF SERVERPROPERTY('EngineEdition') <> 5
+      BEGIN
+          ALTER DATABASE [TafsilkPlatformDb_Dev] SET READ_COMMITTED_SNAPSHOT ON;
+      END;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [AppSettings] (
+          [Id] uniqueidentifier NOT NULL,
+          [Key] nvarchar(max) NOT NULL,
+          [Value] nvarchar(max) NOT NULL,
+          [LastUpdated] datetime2 NOT NULL,
+          CONSTRAINT [PK_AppSettings] PRIMARY KEY ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [ErrorLogs] (
+          [ErrorLogId] uniqueidentifier NOT NULL,
+          [Message] nvarchar(2000) NOT NULL,
+          [StackTrace] nvarchar(max) NOT NULL,
+          [Severity] nvarchar(50) NOT NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          [IsDeleted] bit NOT NULL,
+          CONSTRAINT [PK_ErrorLogs] PRIMARY KEY ([ErrorLogId])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Roles] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [Name] nvarchar(50) NOT NULL,
+          [Description] nvarchar(255) NULL,
+          [Permissions] nvarchar(2000) NULL,
+          [Priority] int NOT NULL DEFAULT 0,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          CONSTRAINT [PK__Roles__3214EC07CB85E41E] PRIMARY KEY ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [TailorBadges] (
+          [TailorBadgeId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [BadgeName] nvarchar(max) NOT NULL,
+          [EarnedAt] datetime2 NOT NULL,
+          [Description] nvarchar(max) NOT NULL,
+          [IsDeleted] bit NOT NULL,
+          CONSTRAINT [PK_TailorBadges] PRIMARY KEY ([TailorBadgeId])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Users] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [Email] nvarchar(255) NOT NULL,
+          [PhoneNumber] nvarchar(20) NULL,
+          [PasswordHash] nvarchar(max) NOT NULL,
+          [RoleId] uniqueidentifier NOT NULL,
+          [IsActive] bit NOT NULL DEFAULT CAST(1 AS bit),
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [UpdatedAt] datetime2 NULL,
+          [LastLoginAt] datetime2 NULL,
+          [IsDeleted] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [EmailVerified] bit NOT NULL,
+          [EmailVerificationToken] nvarchar(64) NULL,
+          [EmailVerificationTokenExpires] datetime2 NULL,
+          [EmailVerifiedAt] datetime2 NULL,
+          [EmailNotifications] bit NOT NULL DEFAULT CAST(1 AS bit),
+          [SmsNotifications] bit NOT NULL DEFAULT CAST(1 AS bit),
+          [PromotionalNotifications] bit NOT NULL DEFAULT CAST(1 AS bit),
+          [BannedAt] datetime2 NULL,
+          [BanReason] nvarchar(500) NULL,
+          [BanExpiresAt] datetime2 NULL,
+          CONSTRAINT [PK__Users__3214EC07AA820590] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Users_Roles] FOREIGN KEY ([RoleId]) REFERENCES [Roles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [ActivityLogs] (
+          [Id] uniqueidentifier NOT NULL,
+          [UserId] uniqueidentifier NOT NULL,
+          [Action] nvarchar(100) NOT NULL,
+          [EntityType] nvarchar(50) NOT NULL,
+          [EntityId] uniqueidentifier NULL,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [IpAddress] nvarchar(45) NULL,
+          [Details] nvarchar(1000) NULL,
+          [IsAdminAction] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [IsDeleted] bit NOT NULL,
+          [Discriminator] nvarchar(21) NOT NULL,
+          [UserActivityLogId] uniqueidentifier NULL,
+          CONSTRAINT [PK_ActivityLogs] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_ActivityLogs_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [CorporateAccounts] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [UserId] uniqueidentifier NOT NULL,
+          [CompanyName] nvarchar(255) NOT NULL,
+          [ContactPerson] nvarchar(255) NOT NULL,
+          [Industry] nvarchar(100) NULL,
+          [TaxNumber] nvarchar(100) NULL,
+          [Bio] nvarchar(1000) NULL,
+          [ProfilePictureUrl] nvarchar(500) NULL,
+          [ProfilePictureData] varbinary(max) NULL,
+          [ProfilePictureContentType] nvarchar(100) NULL,
+          [IsApproved] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [UpdatedAt] datetime2 NULL,
+          CONSTRAINT [PK__Corporat__3214EC07AC002547] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_CorporateAccounts_Users] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [CustomerProfiles] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [UserId] uniqueidentifier NOT NULL,
+          [FullName] nvarchar(255) NOT NULL,
+          [Gender] nvarchar(20) NULL,
+          [City] nvarchar(100) NULL,
+          [Bio] nvarchar(1000) NULL,
+          [ProfilePictureUrl] nvarchar(500) NULL,
+          [ProfilePictureData] varbinary(max) NULL,
+          [ProfilePictureContentType] nvarchar(100) NULL,
+          [DateOfBirth] date NULL,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [UpdatedAt] datetime2 NULL,
+          CONSTRAINT [PK__Customer__3214EC07880E7F94] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_CustomerProfiles_Users] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [DeviceTokens] (
+          [DeviceTokenId] uniqueidentifier NOT NULL,
+          [UserId] uniqueidentifier NOT NULL,
+          [Devicetoken] nvarchar(500) NOT NULL,
+          [Platform] nvarchar(20) NOT NULL,
+          [RegisteredAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [IsDeleted] bit NOT NULL,
+          CONSTRAINT [PK_DeviceTokens] PRIMARY KEY ([DeviceTokenId]),
+          CONSTRAINT [FK_DeviceTokens_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Notifications] (
+          [NotificationId] uniqueidentifier NOT NULL,
+          [UserId] uniqueidentifier NULL,
+          [AudienceType] nvarchar(50) NULL,
+          [Title] nvarchar(200) NOT NULL,
+          [Message] nvarchar(2000) NOT NULL,
+          [Type] nvarchar(50) NOT NULL,
+          [IsRead] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [SentAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [ExpiresAt] datetime2 NULL,
+          [IsDeleted] bit NOT NULL DEFAULT CAST(0 AS bit),
+          CONSTRAINT [PK_Notifications] PRIMARY KEY ([NotificationId]),
+          CONSTRAINT [FK_Notifications_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [RefreshTokens] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [UserId] uniqueidentifier NOT NULL,
+          [Token] nvarchar(max) NOT NULL,
+          [ExpiresAt] datetime2 NOT NULL,
+          [RevokedAt] datetime2 NULL,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          CONSTRAINT [PK__RefreshT__3214EC07E9DA722D] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_RefreshTokens_Users] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [TailorProfiles] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [UserId] uniqueidentifier NOT NULL,
+          [FullName] nvarchar(255) NULL,
+          [ShopName] nvarchar(255) NOT NULL,
+          [ShopDescription] nvarchar(500) NULL,
+          [Specialization] nvarchar(200) NULL,
+          [Address] nvarchar(500) NOT NULL,
+          [City] nvarchar(100) NULL,
+          [District] nvarchar(100) NULL,
+          [Latitude] decimal(10,8) NULL,
+          [Longitude] decimal(11,8) NULL,
+          [ExperienceYears] int NULL,
+          [PricingRange] nvarchar(100) NULL,
+          [Bio] nvarchar(1000) NULL,
+          [BusinessHours] nvarchar(200) NULL,
+          [FacebookUrl] nvarchar(500) NULL,
+          [InstagramUrl] nvarchar(500) NULL,
+          [TwitterUrl] nvarchar(500) NULL,
+          [WebsiteUrl] nvarchar(500) NULL,
+          [ProfilePictureUrl] nvarchar(500) NULL,
+          [ProfilePictureData] varbinary(max) NULL,
+          [ProfilePictureContentType] nvarchar(100) NULL,
+          [IsVerified] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [VerifiedAt] datetime2 NULL,
+          [AverageRating] decimal(3,2) NOT NULL,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [UpdatedAt] datetime2 NULL,
+          CONSTRAINT [PK__TailorPr__3214EC07A3FCF42C] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_TailorProfiles_Users] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [UserAddresses] (
+          [Id] uniqueidentifier NOT NULL DEFAULT ((newid())),
+          [UserId] uniqueidentifier NOT NULL,
+          [Label] nvarchar(100) NOT NULL,
+          [Street] nvarchar(255) NOT NULL,
+          [City] nvarchar(100) NOT NULL,
+          [Latitude] decimal(10,8) NULL,
+          [Longitude] decimal(11,8) NULL,
+          [IsDefault] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          CONSTRAINT [PK__UserAddr__3214EC07DDE0E48B] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_UserAddresses_Users] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Wallet] (
+          [WalletId] int NOT NULL IDENTITY,
+          [UserId] uniqueidentifier NOT NULL,
+          [Balance] decimal(18,2) NOT NULL,
+          CONSTRAINT [PK_Wallet] PRIMARY KEY ([WalletId]),
+          CONSTRAINT [FK_Wallet_Users_UserId] FOREIGN KEY ([UserId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [RFQs] (
+          [Id] uniqueidentifier NOT NULL,
+          [CorporateAccountId] uniqueidentifier NOT NULL,
+          [Title] nvarchar(max) NOT NULL,
+          [Description] nvarchar(max) NOT NULL,
+          [Quantity] int NOT NULL,
+          [Budget] decimal(18,2) NOT NULL,
+          [Deadline] datetime2 NOT NULL,
+          [Status] nvarchar(max) NOT NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          CONSTRAINT [PK_RFQs] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_RFQs_CorporateAccounts_CorporateAccountId] FOREIGN KEY ([CorporateAccountId]) REFERENCES [CorporateAccounts] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Orders] (
+          [OrderId] uniqueidentifier NOT NULL,
+          [Discription] nvarchar(max) NOT NULL,
+          [CreatedAt] datetimeoffset NOT NULL,
+          [DueDate] datetimeoffset NULL,
+          [TotalPrice] float NOT NULL,
+          [OrderType] nvarchar(max) NOT NULL,
+          [Status] int NOT NULL,
+          [CustomerId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          CONSTRAINT [PK_Orders] PRIMARY KEY ([OrderId]),
+          CONSTRAINT [FK_Orders_CustomerProfiles_CustomerId] FOREIGN KEY ([CustomerId]) REFERENCES [CustomerProfiles] ([Id]),
+          CONSTRAINT [FK_Orders_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [PortfolioImages] (
+          [PortfolioImageId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [Title] nvarchar(100) NULL,
+          [Category] nvarchar(50) NULL,
+          [Description] nvarchar(500) NULL,
+          [ImageUrl] nvarchar(500) NULL,
+          [ImageData] varbinary(max) NULL,
+          [ContentType] nvarchar(50) NULL,
+          [EstimatedPrice] decimal(18,2) NULL,
+          [IsBeforeAfter] bit NOT NULL,
+          [IsFeatured] bit NOT NULL,
+          [DisplayOrder] int NOT NULL,
+          [UploadedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [CreatedAt] datetime2 NOT NULL,
+          [IsDeleted] bit NOT NULL DEFAULT CAST(0 AS bit),
+          CONSTRAINT [PK_PortfolioImages] PRIMARY KEY ([PortfolioImageId]),
+          CONSTRAINT [FK_PortfolioImages_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [TailorServices] (
+          [TailorServiceId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [ServiceName] nvarchar(100) NOT NULL,
+          [Description] nvarchar(500) NOT NULL,
+          [BasePrice] decimal(18,2) NOT NULL,
+          [EstimatedDuration] int NOT NULL,
+          [IsDeleted] bit NOT NULL,
+          CONSTRAINT [PK_TailorServices] PRIMARY KEY ([TailorServiceId]),
+          CONSTRAINT [FK_TailorServices_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Contracts] (
+          [Id] uniqueidentifier NOT NULL,
+          [RFQId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [StartDate] datetime2 NOT NULL,
+          [EndDate] datetime2 NOT NULL,
+          [TotalAmount] decimal(18,2) NOT NULL,
+          [ContractStatus] nvarchar(max) NOT NULL,
+          CONSTRAINT [PK_Contracts] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Contracts_RFQs_RFQId] FOREIGN KEY ([RFQId]) REFERENCES [RFQs] ([Id]),
+          CONSTRAINT [FK_Contracts_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [RFQBids] (
+          [Id] uniqueidentifier NOT NULL,
+          [RFQId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [BidAmount] decimal(18,2) NOT NULL,
+          [EstimatedDelivery] datetime2 NOT NULL,
+          [Status] nvarchar(max) NOT NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          CONSTRAINT [PK_RFQBids] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_RFQBids_RFQs_RFQId] FOREIGN KEY ([RFQId]) REFERENCES [RFQs] ([Id]),
+          CONSTRAINT [FK_RFQBids_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Disputes] (
+          [Id] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [OpenedByUserId] uniqueidentifier NOT NULL,
+          [Reason] nvarchar(max) NOT NULL,
+          [Description] nvarchar(max) NOT NULL,
+          [Status] nvarchar(max) NOT NULL,
+          [ResolvedByAdminId] uniqueidentifier NULL,
+          [ResolutionDetails] nvarchar(max) NULL,
+          [ResolvedAt] datetime2 NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          CONSTRAINT [PK_Disputes] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Disputes_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId]),
+          CONSTRAINT [FK_Disputes_Users_OpenedByUserId] FOREIGN KEY ([OpenedByUserId]) REFERENCES [Users] ([Id]),
+          CONSTRAINT [FK_Disputes_Users_ResolvedByAdminId] FOREIGN KEY ([ResolvedByAdminId]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [OrderImages] (
+          [OrderImageId] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [ImageData] varbinary(max) NULL,
+          [ContentType] nvarchar(max) NULL,
+          [ImgUrl] nvarchar(max) NOT NULL,
+          [UploadedId] nvarchar(max) NOT NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          [UploadedAt] datetimeoffset NOT NULL,
+          CONSTRAINT [PK_OrderImages] PRIMARY KEY ([OrderImageId]),
+          CONSTRAINT [FK_OrderImages_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [OrderItems] (
+          [OrderItemId] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [ItemName] nvarchar(max) NOT NULL,
+          [Quantity] int NOT NULL,
+          [UnitPrice] decimal(18,2) NOT NULL,
+          [Total] decimal(18,2) NOT NULL,
+          CONSTRAINT [PK_OrderItems] PRIMARY KEY ([OrderItemId]),
+          CONSTRAINT [FK_OrderItems_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Payment] (
+          [PaymentId] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [CustomerId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [Amount] decimal(18,2) NOT NULL,
+          [PaymentType] int NOT NULL,
+          [PaymentStatus] int NOT NULL,
+          [TransactionType] int NOT NULL,
+          [PaidAt] datetimeoffset NOT NULL,
+          CONSTRAINT [PK_Payment] PRIMARY KEY ([PaymentId]),
+          CONSTRAINT [FK_Payment_CustomerProfiles_CustomerId] FOREIGN KEY ([CustomerId]) REFERENCES [CustomerProfiles] ([Id]),
+          CONSTRAINT [FK_Payment_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId]),
+          CONSTRAINT [FK_Payment_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Quotes] (
+          [QuoteId] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [ProposedPrice] decimal(18,2) NOT NULL,
+          [EstimatedDays] int NOT NULL,
+          [Message] nvarchar(max) NOT NULL,
+          CONSTRAINT [PK_Quotes] PRIMARY KEY ([QuoteId]),
+          CONSTRAINT [FK_Quotes_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId]),
+          CONSTRAINT [FK_Quotes_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [RefundRequests] (
+          [Id] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [RequestedBy] uniqueidentifier NOT NULL,
+          [Amount] decimal(18,2) NOT NULL,
+          [Status] nvarchar(max) NOT NULL,
+          [ProcessedAt] datetime2 NULL,
+          [CreatedAt] datetime2 NOT NULL,
+          CONSTRAINT [PK_RefundRequests] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_RefundRequests_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId]),
+          CONSTRAINT [FK_RefundRequests_Users_RequestedBy] FOREIGN KEY ([RequestedBy]) REFERENCES [Users] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Reviews] (
+          [ReviewId] uniqueidentifier NOT NULL,
+          [OrderId] uniqueidentifier NOT NULL,
+          [TailorId] uniqueidentifier NOT NULL,
+          [CustomerId] uniqueidentifier NOT NULL,
+          [Rating] int NOT NULL,
+          [Comment] nvarchar(1000) NULL,
+          [CreatedAt] datetime2 NOT NULL DEFAULT ((getutcdate())),
+          [IsDeleted] bit NOT NULL DEFAULT CAST(0 AS bit),
+          [CustomerProfileId] uniqueidentifier NULL,
+          [TailorProfileId] uniqueidentifier NULL,
+          CONSTRAINT [PK_Reviews] PRIMARY KEY ([ReviewId]),
+          CONSTRAINT [FK_Reviews_CustomerProfiles_CustomerId] FOREIGN KEY ([CustomerId]) REFERENCES [CustomerProfiles] ([Id]),
+          CONSTRAINT [FK_Reviews_CustomerProfiles_CustomerProfileId] FOREIGN KEY ([CustomerProfileId]) REFERENCES [CustomerProfiles] ([Id]),
+          CONSTRAINT [FK_Reviews_Orders_OrderId] FOREIGN KEY ([OrderId]) REFERENCES [Orders] ([OrderId]),
+          CONSTRAINT [FK_Reviews_TailorProfiles_TailorId] FOREIGN KEY ([TailorId]) REFERENCES [TailorProfiles] ([Id]),
+          CONSTRAINT [FK_Reviews_TailorProfiles_TailorProfileId] FOREIGN KEY ([TailorProfileId]) REFERENCES [TailorProfiles] ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [RatingDimensions] (
+          [RatingDimensionId] uniqueidentifier NOT NULL,
+          [ReviewId] uniqueidentifier NOT NULL,
+          [DimensionName] nvarchar(max) NOT NULL,
+          [Score] int NOT NULL,
+          [IsDeleted] bit NOT NULL,
+          CONSTRAINT [PK_RatingDimensions] PRIMARY KEY ([RatingDimensionId]),
+          CONSTRAINT [FK_RatingDimensions_Reviews_ReviewId] FOREIGN KEY ([ReviewId]) REFERENCES [Reviews] ([ReviewId])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_ActivityLogs_IsAdminAction] ON [ActivityLogs] ([IsAdminAction]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_ActivityLogs_UserId] ON [ActivityLogs] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Contracts_RFQId] ON [Contracts] ([RFQId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Contracts_TailorId] ON [Contracts] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_CorporateAccounts_UserId] ON [CorporateAccounts] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE UNIQUE INDEX [UQ__Corporat__1788CC4D39440DF8] ON [CorporateAccounts] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_CustomerProfiles_UserId] ON [CustomerProfiles] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE UNIQUE INDEX [UQ__Customer__1788CC4D90808B91] ON [CustomerProfiles] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_DeviceTokens_UserId] ON [DeviceTokens] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Disputes_OpenedByUserId] ON [Disputes] ([OpenedByUserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Disputes_OrderId] ON [Disputes] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Disputes_ResolvedByAdminId] ON [Disputes] ([ResolvedByAdminId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Notifications_AudienceType] ON [Notifications] ([AudienceType]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Notifications_UserId] ON [Notifications] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_OrderImages_OrderId] ON [OrderImages] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_OrderItems_OrderId] ON [OrderItems] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Orders_CustomerId] ON [Orders] ([CustomerId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Orders_TailorId] ON [Orders] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Payment_CustomerId] ON [Payment] ([CustomerId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Payment_OrderId] ON [Payment] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Payment_TailorId] ON [Payment] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_PortfolioImages_TailorId] ON [PortfolioImages] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Quotes_OrderId] ON [Quotes] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Quotes_TailorId] ON [Quotes] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RatingDimensions_ReviewId] ON [RatingDimensions] ([ReviewId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RefreshTokens_ExpiresAt] ON [RefreshTokens] ([ExpiresAt]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RefreshTokens_UserId] ON [RefreshTokens] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RefundRequests_OrderId] ON [RefundRequests] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RefundRequests_RequestedBy] ON [RefundRequests] ([RequestedBy]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Reviews_CustomerId] ON [Reviews] ([CustomerId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Reviews_CustomerProfileId] ON [Reviews] ([CustomerProfileId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Reviews_OrderId] ON [Reviews] ([OrderId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Reviews_TailorId] ON [Reviews] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Reviews_TailorProfileId] ON [Reviews] ([TailorProfileId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RFQBids_RFQId] ON [RFQBids] ([RFQId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RFQBids_TailorId] ON [RFQBids] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_RFQs_CorporateAccountId] ON [RFQs] ([CorporateAccountId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_TailorProfiles_UserId] ON [TailorProfiles] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE UNIQUE INDEX [UQ__TailorPr__1788CC4D37A4BF4A] ON [TailorProfiles] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_TailorServices_TailorId] ON [TailorServices] ([TailorId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_UserAddresses_UserId] ON [UserAddresses] ([UserId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Users_Email] ON [Users] ([Email]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE INDEX [IX_Users_RoleId] ON [Users] ([RoleId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE UNIQUE INDEX [UQ__Users__A9D10534975288F0] ON [Users] ([Email]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE UNIQUE INDEX [IX_Wallet_UserId] ON [Wallet] ([UserId]);
+info: Program[0]
+      ✓ Database created successfully
+info: Program[0]
+      Seeding initial data...
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [r].[Id], [r].[CreatedAt], [r].[Description], [r].[Name], [r].[Permissions], [r].[Priority]
+      FROM [Roles] AS [r]
+      WHERE [r].[Name] = N'Admin'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [r].[Id], [r].[CreatedAt], [r].[Description], [r].[Name], [r].[Permissions], [r].[Priority]
+      FROM [Roles] AS [r]
+      WHERE [r].[Name] = N'Customer'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (23ms) [Parameters=[@p0='4fbbb77e-4030-4830-b93b-89142fffb2ec', @p1='2025-11-03T10:31:57.9702372Z', @p2='Administrator' (Size = 255), @p3='Admin' (Nullable = false) (Size = 50), @p4=NULL (Size = 2000), @p5='ed221552-051f-4fb3-947f-a486a98ca671', @p6='2025-11-03T10:31:58.0528603Z', @p7='Customer role' (Size = 255), @p8='Customer' (Nullable = false) (Size = 50), @p9=NULL (Size = 2000)], CommandType='Text', CommandTimeout='30']
+      SET IMPLICIT_TRANSACTIONS OFF;
+      SET NOCOUNT ON;
+      MERGE [Roles] USING (
+      VALUES (@p0, @p1, @p2, @p3, @p4, 0),
+      (@p5, @p6, @p7, @p8, @p9, 1)) AS i ([Id], [CreatedAt], [Description], [Name], [Permissions], _Position) ON 1=0
+      WHEN NOT MATCHED THEN
+      INSERT ([Id], [CreatedAt], [Description], [Name], [Permissions])
+      VALUES (i.[Id], i.[CreatedAt], i.[Description], i.[Name], i.[Permissions])
+      OUTPUT INSERTED.[Priority], i._Position;
+warn: Program[0]
+      Admin email was not configured. Falling back to default 'admin@tafsilk.local'. Set 'Admin:Email' using user-secrets or environment variables to protect it.
+warn: Program[0]
+      Admin password was not configured. A default password will be used. Set 'Admin:Password' using user-secrets or environment variables and change the password after first login.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@__adminEmail_0='admin@tafsilk.local' (Size = 255)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [u].[Id], [u].[BanExpiresAt], [u].[BanReason], [u].[BannedAt], [u].[CreatedAt], [u].[Email], [u].[EmailNotifications], [u].[EmailVerificationToken], [u].[EmailVerificationTokenExpires], [u].[EmailVerified], [u].[EmailVerifiedAt], [u].[IsActive], [u].[IsDeleted], [u].[LastLoginAt], [u].[PasswordHash], [u].[PhoneNumber], [u].[PromotionalNotifications], [u].[RoleId], [u].[SmsNotifications], [u].[UpdatedAt]
+      FROM [Users] AS [u]
+      WHERE [u].[Email] = @__adminEmail_0
+info: Program[0]
+      Admin role permissions configured
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@p2='4fbbb77e-4030-4830-b93b-89142fffb2ec', @p0='{"CanVerifyTailors":true,"CanManageUsers":true,"CanViewReports":true,"CanManageOrders":true,"CanResolveDisputes":true,"CanManageRefunds":true,"CanSendNotifications":true,"CanViewAuditLogs":true,"CanManageRoles":true}' (Size = 2000), @p1='100', @p3='a7ee1946-94f0-460f-bc88-12ae96c51d27', @p4=NULL (DbType = DateTime2), @p5=NULL (Size = 500), @p6=NULL (DbType = DateTime2), @p7='2025-11-03T10:31:58.2699378Z', @p8='admin@tafsilk.local' (Nullable = false) (Size = 255), @p9=NULL (Size = 64), @p10=NULL (DbType = DateTime2), @p11='True', @p12=NULL (DbType = DateTime2), @p13=NULL (DbType = DateTime2), @p14='AWS1LYb0DcNe34NqIez0zxapnSA+PrGdhMH1Rx3tqxuv/A+vMT5KZO/ZqOgg7unJog==' (Nullable = false) (Size = 4000), @p15=NULL (Size = 20), @p16='4fbbb77e-4030-4830-b93b-89142fffb2ec', @p17=NULL (DbType = DateTime2)], CommandType='Text', CommandTimeout='30']
+      SET NOCOUNT ON;
+      UPDATE [Roles] SET [Permissions] = @p0, [Priority] = @p1
+      OUTPUT 1
+      WHERE [Id] = @p2;
+      INSERT INTO [Users] ([Id], [BanExpiresAt], [BanReason], [BannedAt], [CreatedAt], [Email], [EmailVerificationToken], [EmailVerificationTokenExpires], [EmailVerified], [EmailVerifiedAt], [LastLoginAt], [PasswordHash], [PhoneNumber], [RoleId], [UpdatedAt])
+      OUTPUT INSERTED.[EmailNotifications], INSERTED.[IsActive], INSERTED.[IsDeleted], INSERTED.[PromotionalNotifications], INSERTED.[SmsNotifications]
+      VALUES (@p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13, @p14, @p15, @p16, @p17);
+info: Program[0]
+      Admin seeding completed. Email: admin@tafsilk.local
+info: Program[0]
+      ✓ Initial data seeded successfully
+info: Program[0]
+      Applying performance indexes...
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_EmailVerificationToken' AND object_id = OBJECT_ID('Users'))
+            CREATE NONCLUSTERED INDEX [IX_Users_EmailVerificationToken] ON [Users]([EmailVerificationToken]) WHERE [EmailVerificationToken] IS NOT NULL;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_IsActive_IsDeleted' AND object_id = OBJECT_ID('Users'))
+        CREATE NONCLUSTERED INDEX [IX_Users_IsActive_IsDeleted] ON [Users]([IsActive], [IsDeleted]) INCLUDE ([Email], [RoleId]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TailorProfiles_UserId_IsVerified' AND object_id = OBJECT_ID('TailorProfiles'))
+             CREATE NONCLUSTERED INDEX [IX_TailorProfiles_UserId_IsVerified] ON [TailorProfiles]([UserId], [IsVerified]);
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_CorporateAccounts_UserId_IsApproved' AND object_id = OBJECT_ID('CorporateAccounts'))
+          CREATE NONCLUSTERED INDEX [IX_CorporateAccounts_UserId_IsApproved] ON [CorporateAccounts]([UserId], [IsApproved]);
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Orders_CustomerId_Status' AND object_id = OBJECT_ID('Orders'))
+                 CREATE NONCLUSTERED INDEX [IX_Orders_CustomerId_Status] ON [Orders]([CustomerId], [Status]) INCLUDE ([CreatedAt], [TotalAmount]);
+warn: Program[0]
+      Failed to create index. It may already exist or table may not exist yet.
+      Microsoft.Data.SqlClient.SqlException (0x80131904): Column name 'TotalAmount' does not exist in the target table or view.
+         at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+         at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+         at Microsoft.Data.SqlClient.SqlCommand.InternalEndExecuteNonQuery(IAsyncResult asyncResult, Boolean isInternal, String endMethod)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryInternal(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryAsync(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.<>c.<InternalExecuteNonQueryAsync>b__210_1(IAsyncResult result)
+         at System.Threading.Tasks.TaskFactory`1.FromAsyncCoreLogic(IAsyncResult iar, Func`2 endFunction, Action`1 endAction, Task`1 promise, Boolean requiresSynchronization)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at TafsilkPlatform.Web.Extensions.DatabaseInitializationExtensions.ApplyPerformanceIndexesAsync(AppDbContext db, ILogger logger) in C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform.Web\Extensions\DatabaseInitializationExtensions.cs:line 138
+      ClientConnectionId:7b04de61-08e2-4364-b2b0-f122726f3878
+      Error Number:1911,State:1,Class:16
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Orders_TailorId_Status' AND object_id = OBJECT_ID('Orders'))
+                CREATE NONCLUSTERED INDEX [IX_Orders_TailorId_Status] ON [Orders]([TailorId], [Status]) INCLUDE ([CreatedAt], [TotalAmount]);
+warn: Program[0]
+      Failed to create index. It may already exist or table may not exist yet.
+      Microsoft.Data.SqlClient.SqlException (0x80131904): Column name 'TotalAmount' does not exist in the target table or view.
+         at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+         at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+         at Microsoft.Data.SqlClient.SqlCommand.InternalEndExecuteNonQuery(IAsyncResult asyncResult, Boolean isInternal, String endMethod)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryInternal(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryAsync(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.<>c.<InternalExecuteNonQueryAsync>b__210_1(IAsyncResult result)
+         at System.Threading.Tasks.TaskFactory`1.FromAsyncCoreLogic(IAsyncResult iar, Func`2 endFunction, Action`1 endAction, Task`1 promise, Boolean requiresSynchronization)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at TafsilkPlatform.Web.Extensions.DatabaseInitializationExtensions.ApplyPerformanceIndexesAsync(AppDbContext db, ILogger logger) in C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform.Web\Extensions\DatabaseInitializationExtensions.cs:line 138
+      ClientConnectionId:7b04de61-08e2-4364-b2b0-f122726f3878
+      Error Number:1911,State:1,Class:16
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_RefreshTokens_UserId_ExpiresAt' AND object_id = OBJECT_ID('RefreshTokens'))
+       CREATE NONCLUSTERED INDEX [IX_RefreshTokens_UserId_ExpiresAt] ON [RefreshTokens]([UserId], [ExpiresAt] DESC) WHERE [IsRevoked] = 0;
+warn: Program[0]
+      Failed to create index. It may already exist or table may not exist yet.
+      Microsoft.Data.SqlClient.SqlException (0x80131904): Invalid column name 'IsRevoked'.
+         at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+         at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+         at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+         at Microsoft.Data.SqlClient.SqlCommand.InternalEndExecuteNonQuery(IAsyncResult asyncResult, Boolean isInternal, String endMethod)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryInternal(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.EndExecuteNonQueryAsync(IAsyncResult asyncResult)
+         at Microsoft.Data.SqlClient.SqlCommand.<>c.<InternalExecuteNonQueryAsync>b__210_1(IAsyncResult result)
+         at System.Threading.Tasks.TaskFactory`1.FromAsyncCoreLogic(IAsyncResult iar, Func`2 endFunction, Action`1 endAction, Task`1 promise, Boolean requiresSynchronization)
+      --- End of stack trace from previous location ---
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQueryAsync(RelationalCommandParameterObject parameterObject, CancellationToken cancellationToken)
+         at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(DatabaseFacade databaseFacade, String sql, IEnumerable`1 parameters, CancellationToken cancellationToken)
+         at TafsilkPlatform.Web.Extensions.DatabaseInitializationExtensions.ApplyPerformanceIndexesAsync(AppDbContext db, ILogger logger) in C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform.Web\Extensions\DatabaseInitializationExtensions.cs:line 138
+      ClientConnectionId:7b04de61-08e2-4364-b2b0-f122726f3878
+      Error Number:207,State:1,Class:16
+info: Program[0]
+      ✓ Applied 7 performance indexes
+info: Program[0]
+      ✓ Database initialization completed successfully
+info: Program[0]
+      === Tafsilk Platform Started Successfully ===
+info: Program[0]
+      Environment: Development
+info: Program[0]
+      URLs: 
+info: Program[0]
+      Health Check: /health
+info: Program[0]
+      Swagger UI: /swagger
+info: Microsoft.AspNetCore.DataProtection.KeyManagement.XmlKeyManager[63]
+      User profile is available. Using 'C:\Users\ahmed\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5140
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform.Web

@@ -26,7 +26,6 @@ namespace TafsilkPlatform.Web.Interfaces
         IRFQBidRepository RFQBids { get; }
         IContractRepository Contracts { get; }
         IDisputeRepository Disputes { get; }
-        IAdminRepository Admins { get; }
 
         Task<int> SaveChangesAsync();
         Task BeginTransactionAsync();

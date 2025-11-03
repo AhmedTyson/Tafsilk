@@ -118,8 +118,18 @@ public class AnalyticsViewModel
     public int CompletedOrders { get; set; }
     public decimal TotalRevenue { get; set; }
     public decimal RevenueThisMonth { get; set; }
-    public List<TailorPerformanceView> TopTailors { get; set; } = new();
+    public List<TailorPerformanceDto> TopTailors { get; set; } = new();
     public List<MonthlyRevenueDto> MonthlyRevenue { get; set; } = new();
+}
+
+public class TailorPerformanceDto
+{
+    public Guid TailorId { get; set; }
+    public string TailorName { get; set; } = string.Empty;
+    public string ShopName { get; set; } = string.Empty;
+    public decimal AverageRating { get; set; }
+    public int TotalOrders { get; set; }
+    public decimal Revenue { get; set; }
 }
 
 public class MonthlyRevenueDto

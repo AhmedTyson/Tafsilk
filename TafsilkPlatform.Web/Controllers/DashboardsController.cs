@@ -48,7 +48,7 @@ public class DashboardsController : Controller
         {
             var userId = User.GetUserId();
 
-            // Get tailor profile
+            // CRITICAL: Check if tailor has completed verification
             var tailor = await _context.TailorProfiles
                 .Include(t => t.User)
                 .Include(t => t.TailorServices)
@@ -57,8 +57,18 @@ public class DashboardsController : Controller
 
             if (tailor == null)
             {
-                _logger.LogWarning("Tailor profile not found for user {UserId}", userId);
-                return RedirectToAction("CompleteTailorProfile", "Account");
+                // Tailor has not provided evidence - MANDATORY redirect
+                _logger.LogWarning("Tailor profile not found for user {UserId}. Redirecting to evidence submission.", userId);
+                TempData["ErrorMessage"] = "يجب تقديم الأوراق الثبوتية وإكمال ملفك الشخصي أولاً. هذه الخطوة إلزامية للخياطين.";
+                return RedirectToAction("ProvideTailorEvidence", "Account", new { incomplete = true });
+            }
+
+            // Check if pending admin approval
+            var isPendingApproval = HttpContext.Items["PendingApproval"] as bool? ?? false;
+            if (!tailor.IsVerified || isPendingApproval)
+            {
+                ViewData["PendingApproval"] = true;
+                ViewData["PendingMessage"] = "حسابك قيد المراجعة من قبل الإدارة. سيتم تفعيل جميع الميزات بعد الموافقة (عادة خلال 2-3 أيام عمل).";
             }
 
             // Build dashboard data

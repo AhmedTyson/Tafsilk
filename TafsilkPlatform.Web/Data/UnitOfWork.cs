@@ -28,8 +28,7 @@ public sealed class UnitOfWork : IUnitOfWork
         IRFQRepository rfqs,
         IRFQBidRepository rfqBids,
         IContractRepository contracts,
-        IDisputeRepository disputes,
-        IAdminRepository admins)
+        IDisputeRepository disputes)
     {
         _db = db;
         Users = users;
@@ -51,7 +50,6 @@ public sealed class UnitOfWork : IUnitOfWork
         RFQBids = rfqBids;
         Contracts = contracts;
         Disputes = disputes;
-        Admins = admins;
     }
 
     public IUserRepository Users { get; }
@@ -73,7 +71,6 @@ public sealed class UnitOfWork : IUnitOfWork
     public IRFQBidRepository RFQBids { get; }
     public IContractRepository Contracts { get; }
     public IDisputeRepository Disputes { get; }
-    public IAdminRepository Admins { get; }
 
     public Task<int> SaveChangesAsync() => _db.SaveChangesAsync();
 

@@ -64,17 +64,17 @@ public class AdminDashboardController : Controller
         .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
      .SumAsync(p => (decimal?)p.Amount) ?? 0,
      
-        RecentActivity = await _context.UserActivityLogs
+    RecentActivity = await _context.ActivityLogs
   .OrderByDescending(l => l.CreatedAt)
     .Take(10)
-        .Include(l => l.User)
-            .Select(l => new ActivityLogDto
+ .Include(l => l.User)
+  .Select(l => new ActivityLogDto
          {
-                Action = l.Action,
-             UserName = l.User != null ? l.User.Email : "Unknown",
+       Action = l.Action,
+   UserName = l.User != null ? l.User.Email : "Unknown",
       Timestamp = l.CreatedAt,
    IpAddress = l.IpAddress
-     })
+   })
 .ToListAsync()
         };
 
@@ -223,13 +223,13 @@ await LogAdminAction("User Unbanned", $"User {user.Email} has been unbanned", "U
             return NotFound();
 
         // Get user activity logs
-        var activityLogs = await _context.UserActivityLogs
-            .Where(a => a.UserId == userId)
-            .OrderByDescending(a => a.CreatedAt)
+ var activityLogs = await _context.ActivityLogs
+     .Where(a => a.UserId == userId)
+   .OrderByDescending(a => a.CreatedAt)
  .Take(50)
    .ToListAsync();
 
-      ViewBag.ActivityLogs = activityLogs;
+ ViewBag.ActivityLogs = activityLogs;
 
         // Get orders if customer or tailor
 if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
@@ -371,61 +371,87 @@ if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
     [HttpPost("Tailors/{id}/Approve")]
     public async Task<IActionResult> ApproveTailor(Guid id, [FromForm] string? notes)
  {
-    var tailor = await _context.TailorProfiles
-  .Include(t => t.User)
-          .FirstOrDefaultAsync(t => t.Id == id);
+        var tailor = await _context.TailorProfiles
+            .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tailor == null)
-        return NotFound();
+return NotFound();
 
-tailor.IsVerified = true;
+   // ✅ FIX: Set both IsVerified AND activate user account
+  tailor.IsVerified = true;
+     tailor.VerifiedAt = DateTime.UtcNow;  // Track when verified
    tailor.UpdatedAt = DateTime.UtcNow;
 
-      // Create notification for tailor
- var notification = new Notification
+        // ✅ CRITICAL FIX: Activate the user account so they can login
+        if (tailor.User != null)
         {
- UserId = tailor.UserId,
-          Title = "تم التحقق من حسابك",
-     Message = "تهانينا! تم التحقق من حسابك بنجاح. يمكنك الآن استقبال الطلبات.",
-        Type = "Success",
-   SentAt = DateTime.UtcNow
-     };
-   _context.Notifications.Add(notification);
+            tailor.User.IsActive = true;
+     tailor.User.UpdatedAt = DateTime.UtcNow;
+        }
 
-        await LogAdminAction("Tailor Approved", $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) approved. Notes: {notes}", "TailorProfile");
+        // Create notification for tailor
+        var notification = new Notification
+        {
+   UserId = tailor.UserId,
+            Title = "تم التحقق من حسابك",
+            Message = "تهانينا! تم التحقق من حسابك بنجاح. يمكنك الآن تسجيل الدخول واستقبال الطلبات.",
+  Type = "Success",
+            SentAt = DateTime.UtcNow
+   };
+        _context.Notifications.Add(notification);
+
+        await LogAdminAction("Tailor Approved", 
+            $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) approved and activated. Notes: {notes}", 
+   "TailorProfile");
+        
         await _context.SaveChangesAsync();
 
-     TempData["Success"] = "Tailor verified successfully";
-        return RedirectToAction(nameof(TailorVerification));
+        TempData["Success"] = "Tailor verified and activated successfully";
+   return RedirectToAction(nameof(TailorVerification));
     }
 
     [HttpPost("Tailors/{id}/Reject")]
     public async Task<IActionResult> RejectTailor(Guid id, [FromForm] string reason)
     {
         var tailor = await _context.TailorProfiles
-            .Include(t => t.User)
-.FirstOrDefaultAsync(t => t.Id == id);
+       .Include(t => t.User)
+            .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tailor == null)
-       return NotFound();
+            return NotFound();
 
-        // Create notification for tailor
+   // ✅ FIX: Set verification status to false and deactivate user
+ tailor.IsVerified = false;
+        tailor.UpdatedAt = DateTime.UtcNow;
+
+        // ✅ CRITICAL FIX: Deactivate the user account so they cannot login
+        if (tailor.User != null)
+        {
+         tailor.User.IsActive = false;
+     tailor.User.UpdatedAt = DateTime.UtcNow;
+        }
+
+     // Create notification for tailor
         var notification = new Notification
         {
-         UserId = tailor.UserId,
-      Title = "تم رفض طلب التحقق",
-      Message = $"عذراً، تم رفض طلب التحقق. السبب: {reason}",
-         Type = "Warning",
+  UserId = tailor.UserId,
+            Title = "تم رفض طلب التحقق",
+            Message = $"عذراً، تم رفض طلب التحقق من حسابك. السبب: {reason}\n\nيمكنك تقديم طلب جديد بعد تصحيح المشكلة.",
+     Type = "Warning",
             SentAt = DateTime.UtcNow
         };
-      _context.Notifications.Add(notification);
+        _context.Notifications.Add(notification);
 
-        await LogAdminAction("Tailor Rejected", $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) rejected. Reason: {reason}", "TailorProfile");
+     await LogAdminAction("Tailor Rejected", 
+   $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) rejected and deactivated. Reason: {reason}", 
+            "TailorProfile");
+        
         await _context.SaveChangesAsync();
 
-        TempData["Info"] = "Tailor verification rejected";
-      return RedirectToAction(nameof(TailorVerification));
-   }
+        TempData["Info"] = "Tailor verification rejected and account deactivated";
+     return RedirectToAction(nameof(TailorVerification));
+    }
 
 // ============================================
     // 4. PORTFOLIO REVIEW
@@ -835,34 +861,50 @@ Type = "Warning",
           
      // Revenue Analytics
  TotalRevenue = await _context.Payment
-          .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
-         .SumAsync(p => (decimal?)p.Amount) ?? 0,
+    .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
+.SumAsync(p => (decimal?)p.Amount) ?? 0,
      RevenueThisMonth = await _context.Payment
       .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-1))
     .SumAsync(p => (decimal?)p.Amount) ?? 0,
  
-   // Tailor Performance
-     TopTailors = await _context.TailorPerformanceViews
+   // Tailor Performance - Calculate dynamically
+     TopTailors = await _context.TailorProfiles
+.Include(t => t.User)
+  .Include(t => t.Reviews)
+ .Include(t => t.Payments)
+   .Where(t => t.IsVerified)
+         .Select(t => new TailorPerformanceDto
+    {
+         TailorId = t.Id,
+        TailorName = t.FullName ?? t.User.Email,
+  ShopName = t.ShopName,
+     AverageRating = t.Reviews.Any() ? (decimal)t.Reviews.Average(r => r.Rating) : 0m,
+     TotalOrders = _context.Orders.Count(o => o.TailorId == t.Id && o.Status == OrderStatus.Delivered),
+Revenue = t.Payments
+    .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
+       .Sum(p => (decimal?)p.Amount) ?? 0
+     })
    .OrderByDescending(t => t.AverageRating)
+  .ThenByDescending(t => t.Revenue)
   .Take(10)
-       .ToListAsync(),
+.ToListAsync(),
  
   // Monthly Revenue Chart
         MonthlyRevenue = await _context.Payment
            .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-12))
-         .GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
+.GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
   .Select(g => new MonthlyRevenueDto
         {
    Year = g.Key.Year,
  Month = g.Key.Month,
-         Revenue = g.Sum(p => p.Amount)
-       })
+    Revenue = g.Sum(p => p.Amount)
+   })
    .OrderBy(m => m.Year).ThenBy(m => m.Month)
            .ToListAsync()
     };
 
 return View(viewModel);
-    }
+ }
 
     // ============================================
  // 10. NOTIFICATIONS
@@ -925,13 +967,13 @@ var userId = Guid.Parse(dto.TargetValue);
     [HttpGet("AuditLogs")]
     public async Task<IActionResult> AuditLogs([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] int page = 1)
   {
-        var query = _context.UserActivityLogs.AsQueryable();
+     var query = _context.ActivityLogs.AsQueryable();
 
-        if (startDate.HasValue)
-    query = query.Where(a => a.CreatedAt >= startDate.Value);
+ if (startDate.HasValue)
+  query = query.Where(a => a.CreatedAt >= startDate.Value);
 
-        if (endDate.HasValue)
-       query = query.Where(a => a.CreatedAt <= endDate.Value);
+     if (endDate.HasValue)
+   query = query.Where(a => a.CreatedAt <= endDate.Value);
 
    var pageSize = 50;
      var logs = await query
@@ -940,9 +982,9 @@ var userId = Guid.Parse(dto.TargetValue);
     .Take(pageSize)
       .Include(a => a.User)
     .Select(a => new AuditLogDto
-      {
-    Action = a.Action,
- Details = a.Details ?? "",  // Use Details field instead of EntityType
+   {
+ Action = a.Action,
+ Details = a.Details ?? "",
           PerformedBy = a.User != null ? a.User.Email : "Unknown",
         Timestamp = a.CreatedAt,
       IpAddress = a.IpAddress
@@ -969,25 +1011,26 @@ CurrentPage = page,
 
     private async Task LogAdminAction(string action, string details, string entityType = "System")
     {
-        var adminEmail = User.Identity?.Name ?? "Unknown";
+     var adminEmail = User.Identity?.Name ?? "Unknown";
       
-        var log = new UserActivityLog
-        {
+  var log = new ActivityLog
+  {
        UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null 
     ? Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
-        : Guid.Empty,
+      : Guid.Empty,
   Action = action,
-   EntityType = entityType,  // Actual entity type (e.g., "TailorProfile", "Order")
-Details = details,         // Detailed description of the action
+   EntityType = entityType,
+Details = details,
  IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-   CreatedAt = DateTime.UtcNow
+   CreatedAt = DateTime.UtcNow,
+            IsAdminAction = true // Mark as admin action
     };
 
- _context.UserActivityLogs.Add(log);
+ _context.ActivityLogs.Add(log);
     }
 }
 
-// Helper DTO for AuditLog display (to avoid conflict with Models.AuditLog)
+// Helper DTO for AuditLog display
 public class AuditLogDto
 {
     public string Action { get; set; } = string.Empty;

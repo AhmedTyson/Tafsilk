@@ -16,6 +16,7 @@ using TafsilkPlatform.Web.Security;
 using TafsilkPlatform.Web.Middleware;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using TafsilkPlatform.Web.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,23 +26,26 @@ builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Logging.AddEventSourceLogger();
 
-// Add response compression for better performance
-builder.Services.AddResponseCompression(options =>
+// Add response compression for better performance (disabled in Development for debugging)
+if (!builder.Environment.IsDevelopment())
 {
-    options.EnableForHttps = true;
-    options.Providers.Add<BrotliCompressionProvider>();
-    options.Providers.Add<GzipCompressionProvider>();
-});
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.Providers.Add<GzipCompressionProvider>();
+    });
 
-builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
-{
-    options.Level = CompressionLevel.Fastest;
-});
+    builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Fastest;
+    });
 
-builder.Services.Configure<GzipCompressionProviderOptions>(options =>
-{
-    options.Level = CompressionLevel.Fastest;
-});
+    builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Fastest;
+    });
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews()
@@ -226,16 +230,25 @@ else
 
 // Database context with retry on failure
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions =>
-  {
-        sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
-            sqlOptions.EnableRetryOnFailure(
-       maxRetryCount: 3,
-             maxRetryDelay: TimeSpan.FromSeconds(5),
-      errorNumbersToAdd: null);
-        }));
+        {
+    sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
+          sqlOptions.EnableRetryOnFailure(
+maxRetryCount: 3,
+       maxRetryDelay: TimeSpan.FromSeconds(5),
+ errorNumbersToAdd: null);
+        });
+
+    // SECURITY: Only enable sensitive data logging in Development environment
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+      options.EnableDetailedErrors();
+    }
+});
 
 // Add health checks
 builder.Services.AddHealthChecks()
@@ -263,7 +276,6 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<ITailorServiceRepository, TailorServiceRepository>();
 builder.Services.AddScoped<IDisputeRepository, DisputeRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
-builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 builder.Services.AddScoped<IRatingDimensionRepository, RatingDimensionRepository>();
 
 // Register Unit of Work
@@ -272,6 +284,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // Register services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserProfileHelper, UserProfileHelper>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IProfileCompletionService, ProfileCompletionService>();
@@ -381,29 +394,10 @@ policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationSchem
 
 var app = builder.Build();
 
-// Seed admin role and user during development if missing
+// Initialize database in development
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-var seedLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-     try
-        {
-      db.Database.Migrate();
-   TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db, builder.Configuration, seedLogger);
-        }
-        catch (InvalidOperationException ex) when (
-  ex.Message?.Contains("pending", StringComparison.OrdinalIgnoreCase) == true ||
-            ex.Message?.Contains("PendingModelChangesWarning", StringComparison.OrdinalIgnoreCase) == true)
-        {
-      seedLogger.LogWarning(ex, "Automatic database migration skipped - pending model changes detected. Create migration with: dotnet ef migrations add <Name>");
-        }
-        catch (Exception ex)
-        {
-    seedLogger.LogError(ex, "Failed to run admin seeder");
-        }
-    }
+    await app.Services.InitializeDatabaseAsync(builder.Configuration);
 }
 
 // Configure the HTTP request pipeline.
@@ -425,8 +419,11 @@ else
 
 app.UseHttpsRedirection();
 
-// Enable response compression
-app.UseResponseCompression();
+// Enable response compression (disabled in Development for debugging tools)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 app.UseStaticFiles();
 

@@ -1,0 +1,22 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.;Database=TafsilkPlatform;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true;Min Pool Size=5;Max Pool Size=100;"
+  },
+  "Database": {
+  "AutoMigrate": true,
+    "CommandTimeout": 30
+  },
+  "Caching": {
+    "RoleCacheDurationMinutes": 60,
+    "UserCacheDurationMinutes": 15
+  },
+  "Logging": {
+    "LogLevel": {
+"Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+  }
+  },
+  "AllowedHosts": "*"
+}
