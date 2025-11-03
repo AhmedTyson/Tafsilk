@@ -60,66 +60,112 @@ public class AccountController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-   public async Task<IActionResult> Register(string name, string email, string password, string userType, string? phoneNumber)
-    {
-        // If user is already authenticated, redirect to their dashboard
-        // They should logout first if they want to register a new account
-        if (User.Identity?.IsAuthenticated == true)
+    public async Task<IActionResult> Register(string name, string email, string password, string userType, string? phoneNumber)
+  {
+     // If user is already authenticated, redirect to their dashboard
+      if (User.Identity?.IsAuthenticated == true)
         {
-  var roleName = User.FindFirstValue(ClaimTypes.Role);
-  _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.", 
-        User.FindFirstValue(ClaimTypes.Email));
+       var roleName = User.FindFirstValue(ClaimTypes.Role);
+      _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
+            User.FindFirstValue(ClaimTypes.Email));
   TempData["ErrorMessage"] = "أنت مسجل دخول بالفعل. لا يمكنك إنشاء حساب جديد أثناء تسجيل الدخول.";
-      return RedirectToRoleDashboard(roleName);
-        }
+  return RedirectToRoleDashboard(roleName);
+ }
 
-        if (string.IsNullOrWhiteSpace(name))
-        {
-      ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
-        }
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+// ✅ IMPROVED: Sanitize inputs with null safety
+        name = SanitizeInput(name ?? string.Empty, 100);
+  email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+
+  // ✅ IMPROVED: Comprehensive name validation
+     if (string.IsNullOrWhiteSpace(name))
       {
-            ModelState.AddModelError(string.Empty, "بيانات غير صالحة");
+     ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
         }
-   if (!ModelState.IsValid)
-    {
-  return View();
-        }
-
-        var role = userType?.ToLowerInvariant() switch
-   {
-            "tailor" => RegistrationRole.Tailor,
-"corporate" => RegistrationRole.Corporate,
-   _ => RegistrationRole.Customer
-  };
-
-        var req = new RegisterRequest
+    else if (name.Length < 2)
         {
-      Email = email,
-       Password = password,
-FullName = name,
-      PhoneNumber = phoneNumber,
-      Role = role
+      ModelState.AddModelError(nameof(name), "الاسم يجب أن يكون حرفين على الأقل");
+ }
+      else if (name.Length > 100)
+  {
+    ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
+  }
+
+ // ✅ IMPROVED: Email validation
+if (string.IsNullOrWhiteSpace(email))
+        {
+    ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        }
+      else if (!IsValidEmail(email))
+    {
+      ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح. يرجى إدخال بريد إلكتروني صحيح");
+  }
+
+        // ✅ IMPROVED: Password strength validation
+  if (string.IsNullOrWhiteSpace(password))
+        {
+ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+  }
+   else
+{
+    var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
+          if (!isValidPassword)
+    {
+     ModelState.AddModelError(nameof(password), passwordError!);
+        }
+  }
+
+     // ✅ IMPROVED: Phone number validation
+   if (!string.IsNullOrWhiteSpace(phoneNumber))
+    {
+      var (isValidPhone, phoneError) = ValidatePhoneNumber(phoneNumber);
+        if (!isValidPhone)
+            {
+         ModelState.AddModelError(nameof(phoneNumber), phoneError!);
+   }
+        }
+
+     if (!ModelState.IsValid)
+     {
+    return View();
+  }
+
+      var role = userType?.ToLowerInvariant() switch
+        {
+     "tailor" => RegistrationRole.Tailor,
+            "corporate" => RegistrationRole.Corporate,
+_ => RegistrationRole.Customer
         };
 
-        var (ok, err, user) = await _auth.RegisterAsync(req);
-        if (!ok || user is null)
+var req = new RegisterRequest
         {
-         ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل");
-            return View();
+ Email = email,
+   Password = password,
+  FullName = name,
+          PhoneNumber = phoneNumber,
+  Role = role
+  };
+
+      var (ok, err, user) = await _auth.RegisterAsync(req);
+if (!ok || user is null)
+        {
+      ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
+   return View();
         }
 
-        // Special handling for Tailors: Must provide evidence BEFORE login
-     if (role == RegistrationRole.Tailor)
-        {
-            TempData["UserId"] = user.Id.ToString();
-      TempData["UserEmail"] = email;
-            TempData["UserName"] = name;
-TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقديم الأوراق الثبوتية لإكمال التسجيل";
-            return RedirectToAction(nameof(ProvideTailorEvidence));
-        }
+        // ✅ IMPROVED: Log successful registration
+        _logger.LogInformation("[AccountController] User registered successfully: {Email}, Role: {Role}", email, role);
 
-     // For Customers and Corporates: Show success and redirect to login
+     // Special handling for Tailors: Must provide evidence BEFORE login
+ if (role == RegistrationRole.Tailor)
+    {
+   TempData["UserId"] = user.Id.ToString();
+  TempData["UserEmail"] = email;
+ TempData["UserName"] = name;
+    TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقديم الأوراق الثبوتية لإكمال التسجيل";
+   return RedirectToAction(nameof(ProvideTailorEvidence));
+ }
+
+        // For Customers and Corporates: Show success and redirect to login
      TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
         return RedirectToAction("Login");
     }
@@ -135,47 +181,64 @@ TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقد�
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(string email, string password, bool rememberMe = false, string? returnUrl = null)
+ public async Task<IActionResult> Login(string email, string password, bool rememberMe = false, string? returnUrl = null)
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+   // ✅ IMPROVED: Sanitize inputs with null safety
+     email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+
+    // ✅ IMPROVED: Enhanced validation
+        if (string.IsNullOrWhiteSpace(email))
+  {
+       ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+  }
+  else if (!IsValidEmail(email))
+    {
+   ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
+      }
+
+        if (string.IsNullOrWhiteSpace(password))
+{
+       ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+}
+
+  if (!ModelState.IsValid)
+ {
+  return View();
+ }
+
+     var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
+
+   // ✅ FIX: Handle Condition 2 - Existing tailor without evidence
+    if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user != null)
+  {
+   // Tailor exists but hasn't submitted evidence yet - MANDATORY redirect
+    _logger.LogWarning("[AccountController] Tailor {Email} attempted login without evidence. Redirecting to evidence page.", email);
+
+       // Pass user data to evidence page
+         TempData["UserId"] = user.Id.ToString();
+TempData["UserEmail"] = user.Email ?? email;
+      TempData["UserName"] = user.Email ?? email; // Use email as fallback
+    TempData["InfoMessage"] = "يجب تقديم الأوراق الثبوتية لإكمال التسجيل قبل تسجيل الدخول";
+
+      return RedirectToAction(nameof(ProvideTailorEvidence));
+}
+
+ if (!ok || user is null)
         {
-            ModelState.AddModelError(string.Empty, "يرجى إدخال البريد وكلمة المرور");
-            return View();
-        }
-
-        var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
-
-        // ✅ FIX: Handle Condition 2 - Existing tailor without evidence
-        if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user != null)
-        {
-            // Tailor exists but hasn't submitted evidence yet - MANDATORY redirect
-            _logger.LogWarning("[AccountController] Tailor {Email} attempted login without evidence. Redirecting to evidence page.", email);
-
-            // Pass user data to evidence page
-            TempData["UserId"] = user.Id.ToString();
-            TempData["UserEmail"] = user.Email;
-            TempData["UserName"] = user.Email; // Use email as fallback
-            TempData["InfoMessage"] = "يجب تقديم الأوراق الثبوتية لإكمال التسجيل قبل تسجيل الدخول";
-
-            return RedirectToAction(nameof(ProvideTailorEvidence));
-        }
-
-        if (!ok || user is null)
-        {
-            ModelState.AddModelError(string.Empty, err ?? "بيانات اعتماد غير صحيحة");
-            return View();
-        }
+   ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+  return View();
+      }
 
         // Get full name from profile based on role
         string fullName = user.Email ?? "مستخدم";
         var roleName = user.Role?.Name ?? string.Empty;
-        
+   
         if (!string.IsNullOrEmpty(roleName))
-          {
-      switch (roleName.ToLower())
+    {
+   switch (roleName.ToLower())
    {
          case "customer":
-        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+    var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
             if (customer != null && !string.IsNullOrEmpty(customer.FullName))
       fullName = customer.FullName;
      break;
@@ -187,16 +250,16 @@ TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقد�
    case "corporate":
         var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
           if (corporate != null)
-      fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
+   fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
    break;
-            }
+     }
         }
 
         // Build claims with role and full name
   var claims = new List<Claim>
-        {
+ {
   new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+      new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
        new Claim(ClaimTypes.Name, fullName),
      new Claim("FullName", fullName)
   };
@@ -211,15 +274,15 @@ TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب تقد�
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
         {
             IsPersistent = rememberMe
-        });
+     });
 
         // REMOVED: Check if tailor needs to complete profile
-        // Verification is ONE-TIME only (before first login via ProvideTailorEvidence)
+     // Verification is ONE-TIME only (before first login via ProvideTailorEvidence)
         // After successful login, ALL users (including tailors) go to their dashboard
    // NO verification prompts after login
 
         // Redirect to role-specific dashboard or return URL
-        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+   if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
     {
   return Redirect(returnUrl);
         }
@@ -940,21 +1003,21 @@ ViewData["Provider"] = provider;
    public async Task<IActionResult> VerifyEmail(string token)
     {
     if (string.IsNullOrEmpty(token))
-        {
+{
        TempData["ErrorMessage"] = "رابط التحقق غير صالح";
       return RedirectToAction("Login");
      }
 
         var (success, error) = await _auth.VerifyEmailAsync(token);
 
-      if (success)
+  if (success)
   {
-            TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
+        TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
        }
   else
   {
        TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
-        }
+     }
 
         return RedirectToAction("Login");
     }
@@ -974,18 +1037,18 @@ ViewData["Provider"] = provider;
     [ValidateAntiForgeryToken]
   public async Task<IActionResult> ResendVerificationEmail(string email)
     {
-       if (string.IsNullOrWhiteSpace(email))
+     if (string.IsNullOrWhiteSpace(email))
       {
    ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
         return View();
-       }
+   }
 
       var (success, error) = await _auth.ResendVerificationEmailAsync(email);
 
         if (success)
         {
           TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
-        }
+    }
      else
    {
       TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
@@ -1000,10 +1063,8 @@ ViewData["Provider"] = provider;
  {
         // Check if coming from registration
         var userIdStr = TempData["UserId"]?.ToString();
-        var email = TempData["UserEmail"]?.ToString();
-        var name = TempData["UserName"]?.ToString();
-        
-  // Keep the data for the POST
+
+        // Keep the data for the POST
         TempData.Keep("UserId");
  TempData.Keep("UserEmail");
         TempData.Keep("UserName");
@@ -1035,8 +1096,8 @@ ViewData["Provider"] = provider;
         var model = new CompleteTailorProfileRequest
         {
         UserId = userId,
-  Email = email ?? user.Email,
-            FullName = name ?? user.Email
+  Email = TempData["UserEmail"]?.ToString() ?? user.Email,
+            FullName = TempData["UserName"]?.ToString() ?? user.Email
         };
 
   return View(model);
@@ -1076,30 +1137,67 @@ return View(model);
             if (model.IdDocument == null || model.IdDocument.Length == 0)
 {
     ModelState.AddModelError(nameof(model.IdDocument), "يجب تحميل صورة الهوية الشخصية");
-     return View(model);
+        return View(model);
             }
+ else
+ {
+   // ✅ IMPROVED: Validate ID document
+      var (isValidId, idError) = ValidateFileUpload(model.IdDocument, "document");
+    if (!isValidId)
+  {
+        ModelState.AddModelError(nameof(model.IdDocument), idError!);
+     return View(model);
+   }
+        }
 
- if ((model.PortfolioImages == null || !model.PortfolioImages.Any()) && 
+  if ((model.PortfolioImages == null || !model.PortfolioImages.Any()) &&
    (model.WorkSamples == null || !model.WorkSamples.Any()))
     {
-     ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل صورة واحدة من أعمالك السابقة");
+   ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل صورة واحدة من أعمالك السابقة");
+  return View(model);
+        }
+  else
+  {
+     // ✅ IMPROVED: Validate portfolio images
+  var portfolioFiles = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
+     if (portfolioFiles.Count > 10)
+       {
+    ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
       return View(model);
    }
 
-         // Create tailor profile NOW (after evidence is provided)
-     // THIS IS THE ONE AND ONLY TIME the profile is created
-       var tailorProfile = new TailorProfile
-  {
-     Id = Guid.NewGuid(),
-    UserId = model.UserId,
-     FullName = model.FullName,
-   ShopName = model.WorkshopName,
-    Address = model.Address,
-        City = model.City,
-      Bio = model.Description,
-    ExperienceYears = model.ExperienceYears,
- IsVerified = false, // Awaiting admin approval
-    CreatedAt = _dateTime.Now
+      foreach (var image in portfolioFiles)
+{
+    var (isValidImage, imageError) = ValidateFileUpload(image, "image");
+  if (!isValidImage)
+    {
+ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
+    return View(model);
+        }
+  }
+        }
+
+  // ✅ IMPROVED: Sanitize text inputs
+        var sanitizedFullName = SanitizeInput(model.FullName, 100);
+  var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
+ var sanitizedAddress = SanitizeInput(model.Address, 200);
+  var sanitizedCity = SanitizeInput(model.City, 50);
+var sanitizedDescription = SanitizeInput(model.Description, 1000);
+
+  // Create tailor profile NOW (after evidence is provided)
+        // THIS IS THE ONE AND ONLY TIME the profile is created
+     var tailorProfile = new TailorProfile
+   {
+  Id = Guid.NewGuid(),
+UserId = model.UserId,
+    FullName = sanitizedFullName,
+ ShopName = sanitizedWorkshopName,
+   Address = sanitizedAddress,
+      City = sanitizedCity,
+     Bio = sanitizedDescription,
+      ExperienceYears = model.ExperienceYears,
+   IsVerified = false, // Awaiting admin approval
+      CreatedAt = _dateTime.Now
   };
 
           // Store ID document as evidence
@@ -1224,107 +1322,282 @@ return View(model);
     /// </summary>
     [HttpPost]
     [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ForgotPassword(string email)
-    {
-        if (string.IsNullOrWhiteSpace(email))
-    {
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-            return View();
-        }
+ [ValidateAntiForgeryToken]
+  public async Task<IActionResult> ForgottenPassword(string email)
+ {
+   // ✅ IMPROVED: Sanitize and validate email with null safety
+   email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
+
+ if (string.IsNullOrWhiteSpace(email))
+        {
+  ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+  return View();
+ }
+
+      if (!IsValidEmail(email))
+   {
+     ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
+   return View();
+   }
 
         var user = await _unitOfWork.Users.GetByEmailAsync(email);
-        
-        // Security: Always show success message
-        if (user == null)
+
+        // Security: Always show success message (don't reveal if email exists)
+     if (user == null)
   {
-       _logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
-     TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
-            return View();
+_logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
+TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
+ return View();
         }
 
- var resetToken = GeneratePasswordResetToken();
-        user.PasswordResetToken = resetToken;
-     user.PasswordResetTokenExpires = _dateTime.Now.AddHours(1);
-        user.UpdatedAt = _dateTime.Now;
+   var resetToken = GeneratePasswordResetToken();
+ user.PasswordResetToken = resetToken;
+user.PasswordResetTokenExpires = _dateTime.Now.AddHours(1);
+     user.UpdatedAt = _dateTime.Now;
 
-        await _unitOfWork.Users.UpdateAsync(user);
-        await _unitOfWork.SaveChangesAsync();
+await _unitOfWork.Users.UpdateAsync(user);
+ await _unitOfWork.SaveChangesAsync();
 
-        var resetLink = Url.Action(nameof(ResetPassword), "Account", 
+  var resetLink = Url.Action(nameof(ResetPassword), "Account",
      new { token = resetToken }, Request.Scheme);
-        _logger.LogInformation("Password reset link generated for {Email}: {Link}", email, resetLink);
+ _logger.LogInformation("Password reset link generated for {Email}: {Link}", email, resetLink);
 
-        TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
-   return View();
-    }
+TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
+  return View();
+}
 
- /// <summary>
+    /// <summary>
     /// Reset password form
     /// </summary>
     [HttpGet]
-    [AllowAnonymous]
+  [AllowAnonymous]
     public IActionResult ResetPassword(string token)
     {
         if (string.IsNullOrEmpty(token))
-      {
+        {
             TempData["ErrorMessage"] = "رابط إعادة تعيين كلمة المرور غير صالح";
-            return RedirectToAction(nameof(Login));
+      return RedirectToAction(nameof(Login));
         }
 
         var model = new ResetPasswordViewModel { Token = token };
         return View(model);
-    }
+}
 
     /// <summary>
     /// Process password reset
     /// </summary>
- [HttpPost]
-    [AllowAnonymous]
+    [HttpPost]
+ [AllowAnonymous]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
     {
-        if (!ModelState.IsValid)
+    if (!ModelState.IsValid)
         {
-          return View(model);
-      }
+    return View(model);
+        }
 
         var user = await _unitOfWork.Context.Set<User>()
-   .FirstOrDefaultAsync(u => u.PasswordResetToken == model.Token);
+  .FirstOrDefaultAsync(u => u.PasswordResetToken == model.Token);
 
         if (user == null)
         {
-       ModelState.AddModelError(string.Empty, "رابط إعادة تعيين كلمة المرور غير صالح");
-            return View(model);
+            ModelState.AddModelError(string.Empty, "رابط إعادة تعيين كلمة المرور غير صالح");
+       return View(model);
         }
 
-    if (user.PasswordResetTokenExpires == null || user.PasswordResetTokenExpires < _dateTime.Now)
-      {
-            ModelState.AddModelError(string.Empty, "انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.");
-     return View(model);
+   if (user.PasswordResetTokenExpires == null || user.PasswordResetTokenExpires < _dateTime.Now)
+    {
+        ModelState.AddModelError(string.Empty, "انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.");
+          return View(model);
         }
 
         user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
-     user.PasswordResetToken = null;
+ user.PasswordResetToken = null;
         user.PasswordResetTokenExpires = null;
-        user.UpdatedAt = _dateTime.Now;
+ user.UpdatedAt = _dateTime.Now;
 
-      await _unitOfWork.Users.UpdateAsync(user);
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.Users.UpdateAsync(user);
+  await _unitOfWork.SaveChangesAsync();
 
-_logger.LogInformation("Password reset successful for user: {Email}", user.Email);
+        _logger.LogInformation("Password reset successful for user: {Email}", user.Email);
 
-        TempData["RegisterSuccess"] = "تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
-      return RedirectToAction(nameof(Login));
+  TempData["RegisterSuccess"] = "تم إعادة تعيين كلمة المرور بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
+        return RedirectToAction(nameof(Login));
     }
 
-    private string GeneratePasswordResetToken()
+    #endregion
+
+    #region Validation Helpers
+
+    /// <summary>
+    /// Validates email format
+  /// </summary>
+    private bool IsValidEmail(string? email)
     {
+        if (string.IsNullOrWhiteSpace(email))
+    return false;
+
+        try
+        {
+    var addr = new System.Net.Mail.MailAddress(email);
+      return addr.Address == email && email.Contains("@") && email.Length <= 254;
+   }
+        catch
+   {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Validates password strength
+    /// </summary>
+    private (bool IsValid, string? Error) ValidatePasswordStrength(string password)
+    {
+if (string.IsNullOrWhiteSpace(password))
+            return (false, "كلمة المرور مطلوبة");
+
+        if (password.Length < 8)
+    return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+
+        if (password.Length > 128)
+         return (false, "كلمة المرور طويلة جداً");
+
+        // Check for uppercase
+     if (!password.Any(char.IsUpper))
+ return (false, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل");
+
+      // Check for lowercase
+        if (!password.Any(char.IsLower))
+     return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
+
+        // Check for digit
+  if (!password.Any(char.IsDigit))
+      return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
+
+ // Check for special character
+        if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
+    return (false, "كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل");
+
+        // Check for common weak passwords
+        var weakPasswords = new[] { "password1!", "qwerty123!", "admin123!", "welcome1!", "Password1!", "Qwerty123!" };
+if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
+return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أفصل");
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Validates phone number format and strength
+    /// </summary>
+    private (bool IsValid, string? Error) ValidatePhoneNumber(string phoneNumber)
+    {
+        // Check if the phone number is not empty
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+      {
+            return (false, "رقم الهاتف مطلوب");
+        }
+
+      // Remove any non-digit characters for validation
+     var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
+
+        // Check if the number contains at least 9 digits
+        if (digitsOnly.Length < 9)
+        {
+            return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
+  }
+
+        // Check for common patterns or sequential numbers
+        if (digitsOnly.StartsWith("000") || digitsOnly.StartsWith("111") || digitsOnly.StartsWith("222") ||
+  digitsOnly.StartsWith("333") || digitsOnly.StartsWith("444") || digitsOnly.StartsWith("555") ||
+    digitsOnly.StartsWith("666") || digitsOnly.StartsWith("777") || digitsOnly.StartsWith("888") ||
+    digitsOnly.StartsWith("999") || digitsOnly == new string('0', digitsOnly.Length) ||
+         digitsOnly == new string('1', digitsOnly.Length) || digitsOnly == new string('2', digitsOnly.Length))
+        {
+            return (false, "رقم الهاتف ضعيف جداً. يرجى اختيار رقم آخر");
+   }
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Validates file upload (size, type, content)
+    /// </summary>
+    private (bool IsValid, string? Error) ValidateFileUpload(IFormFile? file, string fileType = "image")
+    {
+        if (file == null || file.Length == 0)
+   return (false, "الملف مطلوب");
+
+   // Check file size (max 5MB for images, 10MB for documents)
+        var maxSize = fileType == "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+        if (file.Length > maxSize)
+            return (false, $"حجم الملف كبير جداً. الحد الأقصى {maxSize / (1024 * 1024)} ميجابايت");
+
+   // Check file extension
+        var allowedExtensions = fileType == "image"
+          ? new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" }
+       : new[] { ".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png" };
+
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+     if (!allowedExtensions.Contains(extension))
+    return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
+
+        // Check content type
+   var allowedContentTypes = fileType == "image"
+            ? new[] { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" }
+            : new[] { "application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg", "image/png" };
+
+        if (!allowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
+    return (false, "نوع محتوى الملف غير صحيح");
+
+        // Sanitize file name (prevent directory traversal)
+        var fileName = Path.GetFileName(file.FileName);
+    if (fileName.Contains("..") || fileName.Contains("/") || fileName.Contains("\\"))
+        return (false, "اسم الملف غير صالح");
+
+   return (true, null);
+    }
+
+    /// <summary>
+    /// Sanitizes input strings by trimming and removing potentially dangerous characters
+    /// </summary>
+    private string SanitizeInput(string? input, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
+
+        // Trim whitespace
+   input = input.Trim();
+
+    // Remove HTML tags
+input = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
+
+      // Remove SQL injection patterns
+        var sqlPatterns = new[] { "--", ";--", "';", "')", "' OR '", "' AND '", "DROP ", "INSERT ", "DELETE ", "UPDATE ", "EXEC " };
+        foreach (var pattern in sqlPatterns)
+      {
+            input = input.Replace(pattern, "", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Enforce maximum length
+        if (input.Length > maxLength)
+        {
+            input = input.Substring(0, maxLength);
+        }
+
+        return input;
+    }
+
+    /// <summary>
+    /// Generates a secure password reset token
+    /// </summary>
+    private string GeneratePasswordResetToken()
+  {
         return Convert.ToBase64String(Guid.NewGuid().ToByteArray())
-          .Replace("+", "")
-    .Replace("/", "")
-            .Replace("=", "")
-            .Substring(0, 32);
+       .Replace("+", "")
+  .Replace("/", "")
+        .Replace("=", "")
+         .Substring(0, 32);
     }
 
     #endregion
