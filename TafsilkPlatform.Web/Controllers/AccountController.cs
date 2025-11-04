@@ -147,9 +147,33 @@ public class AccountController : Controller
             return RedirectToAction(nameof(CompleteTailorProfile));
         }
 
-        // For Customers and Corporates: Show success and redirect to login
-      TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
-        return RedirectToAction("Login");
+        // ✅ UPDATED: For Customers - Auto-login and redirect to their dashboard
+        if (role == RegistrationRole.Customer)
+        {
+         // Build claims for authentication
+            var claims = new List<Claim>
+            {
+    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+ new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+new Claim(ClaimTypes.Name, name),
+          new Claim("FullName", name),
+           new Claim(ClaimTypes.Role, "Customer")
+  };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+   var principal = new ClaimsPrincipal(identity);
+       await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, 
+     new AuthenticationProperties { IsPersistent = true });
+
+   _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
+
+    TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
+       return RedirectToAction("Customer", "Dashboards");
+        }
+
+     // For Corporates: Show success and redirect to login (requires email verification)
+   TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
+  return RedirectToAction("Login");
   }
 
     [HttpGet]
@@ -190,7 +214,7 @@ public class AccountController : Controller
       TempData["UserId"] = user.Id.ToString();
             TempData["UserEmail"] = user.Email ?? email;
   TempData["UserName"] = user.Email ?? email;
-    TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية قبل تسجيل الدخول";
+    TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية antes de تسجيل الدخول";
 
 return RedirectToAction(nameof(CompleteTailorProfile));
     }
@@ -452,21 +476,26 @@ TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل 
             // Save portfolio images
      var portfolioFilesToSave = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
    if (portfolioFilesToSave.Any())
-            {
+          {
    var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
-              Directory.CreateDirectory(portfolioFolderPath);
+              
+           // Create directory if it doesn't exist (async-compatible approach)
+    if (!Directory.Exists(portfolioFolderPath))
+              {
+           Directory.CreateDirectory(portfolioFolderPath);
+              }
 
-    int imageIndex = 0;
-                foreach (var image in portfolioFilesToSave.Take(10))
+ int imageIndex = 0;
+         foreach (var image in portfolioFilesToSave.Take(10))
  {
         if (image.Length > 0)
          {
 var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
-         var filePath = Path.Combine(portfolioFolderPath, fileName);
+       var filePath = Path.Combine(portfolioFolderPath, fileName);
 
-    using (var stream = new FileStream(filePath, FileMode.Create))
+    using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true))
      {
-           await image.CopyToAsync(stream);
+     await image.CopyToAsync(stream);
    }
 
                var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";

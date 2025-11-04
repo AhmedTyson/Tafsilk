@@ -101,7 +101,35 @@ private readonly IDateTimeService _dateTime;
         if (request.Role != RegistrationRole.Tailor)
         {
        await CreateProfileAsync(user.Id, request);
-    await SendEmailVerificationAsync(user, request.FullName);
+            
+            // ✅ UPDATED: Only send email verification for Corporate accounts
+         // Customers are automatically verified and can login immediately
+       if (request.Role == RegistrationRole.Corporate)
+    {
+await SendEmailVerificationAsync(user, request.FullName);
+          }
+       else if (request.Role == RegistrationRole.Customer)
+  {
+   // Auto-verify customers - they can login immediately
+   user.EmailVerified = true;
+              user.EmailVerifiedAt = _dateTime.Now;
+                await _db.SaveChangesAsync();
+      
+      _logger.LogInformation("[AuthService] Customer email auto-verified: {UserId}", user.Id);
+    
+          // Send welcome email in background (optional)
+     _ = Task.Run(async () =>
+     {
+ try
+   {
+            await _emailService.SendWelcomeEmailAsync(user.Email, request.FullName ?? "عميل", "Customer");
+              }
+         catch (Exception ex)
+        {
+  _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
+ }
+      });
+            }
       }
         else
         {
