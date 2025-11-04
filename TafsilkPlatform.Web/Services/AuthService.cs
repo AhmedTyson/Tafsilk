@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.ViewModels;
+using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
+using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Security;
-using System.Security.Claims;
-using Microsoft.Extensions.Caching.Memory;
+using TafsilkPlatform.Web.ViewModels;
 
 namespace TafsilkPlatform.Web.Services
 {
@@ -14,15 +14,15 @@ namespace TafsilkPlatform.Web.Services
     /// - Registration
     /// - Login validation
     /// - Email verification
-  /// - Password management
+    /// - Password management
     /// </summary>
     public class AuthService : IAuthService
     {
-    private readonly AppDbContext _db;
+        private readonly AppDbContext _db;
         private readonly ILogger<AuthService> _logger;
-private readonly IDateTimeService _dateTime;
+        private readonly IDateTimeService _dateTime;
         private readonly IEmailService _emailService;
-      private readonly IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
 
         // Weak passwords to reject during registration
         private static readonly string[] WeakPasswords = { "123456", "password", "qwerty", "111111", "123123" };
@@ -48,10 +48,10 @@ private readonly IDateTimeService _dateTime;
     IMemoryCache cache)
         {
             _db = db;
-     _logger = logger;
-    _dateTime = dateTime;
-    _emailService = emailService;
-   _cache = cache;
+            _logger = logger;
+            _dateTime = dateTime;
+            _emailService = emailService;
+            _cache = cache;
         }
 
         #region Registration
@@ -63,261 +63,250 @@ private readonly IDateTimeService _dateTime;
         /// </summary>
         public async Task<(bool Succeeded, string? Error, User? User)> RegisterAsync(RegisterRequest request)
         {
-    // No manual transaction needed - EF Core's SaveChangesAsync handles it
-    try
-    {
-  _logger.LogInformation("[AuthService] Registration attempt: {Email}, Role: {Role}", 
-            request.Email, request.Role);
+            // No manual transaction needed - EF Core's SaveChangesAsync handles it
+            try
+            {
+                _logger.LogInformation("[AuthService] Registration attempt: {Email}, Role: {Role}",
+                          request.Email, request.Role);
 
-        // Validate user input
-        var validationError = ValidateRegistrationRequest(request);
-        if (validationError != null)
-        {
-  return (false, validationError, null);
-        }
+                // Validate user input
+                var validationError = ValidateRegistrationRequest(request);
+                if (validationError != null)
+                {
+                    return (false, validationError, null);
+                }
 
-    // Check if email or phone already exists
-        if (await IsEmailTakenAsync(request.Email))
-        {
-       _logger.LogWarning("[AuthService] Registration failed - Email already exists: {Email}", request.Email);
-     return (false, "البريد الإلكتروني مستخدم بالفعل", null);
-      }
+                // Check if email or phone already exists
+                if (await IsEmailTakenAsync(request.Email))
+                {
+                    _logger.LogWarning("[AuthService] Registration failed - Email already exists: {Email}", request.Email);
+                    return (false, "البريد الإلكتروني مستخدم بالفعل", null);
+                }
 
-        if (!string.IsNullOrEmpty(request.PhoneNumber) && await IsPhoneTakenAsync(request.PhoneNumber))
-    {
-   _logger.LogWarning("[AuthService] Registration failed - Phone already exists: {Phone}", request.PhoneNumber);
-            return (false, "رقم الهاتف مستخدم بالفعل", null);
-        }
+                if (!string.IsNullOrEmpty(request.PhoneNumber) && await IsPhoneTakenAsync(request.PhoneNumber))
+                {
+                    _logger.LogWarning("[AuthService] Registration failed - Phone already exists: {Phone}", request.PhoneNumber);
+                    return (false, "رقم الهاتف مستخدم بالفعل", null);
+                }
 
-        // Create user account
-     var user = CreateUserEntity(request);
-      await _db.Users.AddAsync(user);
-        await _db.SaveChangesAsync();
-
-    _logger.LogInformation("[AuthService] User created: {UserId}, Email: {Email}, Role: {Role}, IsActive: {IsActive}",
-            user.Id, user.Email, request.Role, user.IsActive);
-
-        // Create role-specific profile (except Tailors)
-        if (request.Role != RegistrationRole.Tailor)
-        {
-       await CreateProfileAsync(user.Id, request);
-            
-            // ✅ UPDATED: Only send email verification for Corporate accounts
-         // Customers are automatically verified and can login immediately
-       if (request.Role == RegistrationRole.Corporate)
-    {
-await SendEmailVerificationAsync(user, request.FullName);
-          }
-       else if (request.Role == RegistrationRole.Customer)
-  {
-   // Auto-verify customers - they can login immediately
-   user.EmailVerified = true;
-              user.EmailVerifiedAt = _dateTime.Now;
+                // Create user account
+                var user = CreateUserEntity(request);
+                await _db.Users.AddAsync(user);
                 await _db.SaveChangesAsync();
-      
-      _logger.LogInformation("[AuthService] Customer email auto-verified: {UserId}", user.Id);
-    
-          // Send welcome email in background (optional)
-     _ = Task.Run(async () =>
-     {
- try
-   {
-            await _emailService.SendWelcomeEmailAsync(user.Email, request.FullName ?? "عميل", "Customer");
-              }
-         catch (Exception ex)
-        {
-  _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
- }
-      });
+
+                _logger.LogInformation("[AuthService] User created: {UserId}, Email: {Email}, Role: {Role}, IsActive: {IsActive}",
+                        user.Id, user.Email, request.Role, user.IsActive);
+
+                // Create role-specific profile (except Tailors)
+                if (request.Role != RegistrationRole.Tailor)
+                {
+                    await CreateProfileAsync(user.Id, request);
+
+                    // ✅ UPDATED: Only send email verification for Corporate accounts
+                    // Customers are automatically verified and can login immediately
+                    if (request.Role == RegistrationRole.Corporate)
+                    {
+                        await SendEmailVerificationAsync(user, request.FullName);
+                    }
+                    else if (request.Role == RegistrationRole.Customer)
+                    {
+                        // Auto-verify customers - they can login immediately
+                        user.EmailVerified = true;
+                        user.EmailVerifiedAt = _dateTime.Now;
+                        await _db.SaveChangesAsync();
+
+                        _logger.LogInformation("[AuthService] Customer email auto-verified: {UserId}", user.Id);
+
+                        // Send welcome email in background (optional)
+                        _ = Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await _emailService.SendWelcomeEmailAsync(user.Email, request.FullName ?? "عميل", "Customer");
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("[AuthService] Tailor profile creation deferred - awaiting evidence: {UserId}", user.Id);
+                }
+
+                // SaveChangesAsync already committed everything atomically
+                _logger.LogInformation("[AuthService] Registration completed successfully: {UserId}", user.Id);
+
+                return (true, null, user);
             }
-      }
-        else
-        {
-       _logger.LogInformation("[AuthService] Tailor profile creation deferred - awaiting evidence: {UserId}", user.Id);
-}
-
-        // SaveChangesAsync already committed everything atomically
-        _logger.LogInformation("[AuthService] Registration completed successfully: {UserId}", user.Id);
-
- return (true, null, user);
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "[AuthService] Registration failed for email: {Email}", request.Email);
-     return (false, "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.", null);
-    }
-}
-   #endregion
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[AuthService] Registration failed for email: {Email}", request.Email);
+                return (false, "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.", null);
+            }
+        }
+        #endregion
 
         #region Login Validation
 
-  /// <summary>
-  /// Validates user credentials
+        /// <summary>
+        /// Validates user credentials
         /// Checks: email/password, account status, tailor profile existence
         /// OPTIMIZED: Uses compiled query and minimal includes
-      /// </summary>
-     public async Task<(bool Succeeded, string? Error, User? User)> ValidateUserAsync(string email, string password)
-     {
-         try
-      {
-    _logger.LogInformation("[AuthService] Login attempt for: {Email}", email);
-
-      // Get user with role information using compiled query
-  var user = await _getUserForLoginQuery(_db, email);
-
-  if (user == null)
+        /// </summary>
+        public async Task<(bool Succeeded, string? Error, User? User)> ValidateUserAsync(string email, string password)
         {
-   _logger.LogWarning("[AuthService] Login failed - User not found: {Email}", email);
-    return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
-        }
-
-    // Verify password
- if (!PasswordHasher.Verify(user.PasswordHash, password))
-  {
-      _logger.LogWarning("[AuthService] Login failed - Invalid password: {Email}", email);
-         return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
-  }
-
-// CRITICAL: Check if tailor has submitted evidence - use compiled query
-   if (user.Role?.Name?.ToLower() == "tailor")
-    {
-  var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
-    if (!hasTailorProfile)
-     {
-          _logger.LogWarning("[AuthService] Login attempt - Tailor has not provided evidence yet: {Email}", email);
-          // IMPORTANT: Check if account is still inactive (evidence never submitted)
-   if (!user.IsActive)
-      {
-    // First-time login without evidence - redirect to evidence page
-        _logger.LogInformation("[AuthService] Redirecting new tailor to evidence submission: {Email}", email);
-   return (false, "TAILOR_INCOMPLETE_PROFILE", user);
-     }
-            else
+            try
             {
-        // Edge case: Profile was deleted but user is still active (should not happen)
-     _logger.LogError("[AuthService] Data inconsistency - Active tailor without profile: {UserId}", user.Id);
-       return (false, "حدث خطأ في حسابك. يرجى التواصل مع الدعم.", null);
-   }
-  }
-  }
+                _logger.LogInformation("[AuthService] Login attempt for: {Email}", email);
 
- // Check account status
-      if (!user.IsActive)
-  {
-_logger.LogWarning("[AuthService] Login failed - User is inactive: {Email}", email);
-  
-  // ✅ IMPROVED: More specific messages based on role and state
-       string message;
-            
-        if (user.Role?.Name?.ToLower() == "tailor")
- {
- var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
-     
-       if (!hasTailorProfile)
-           {
- // Evidence not submitted yet
-     message = "يجب تقديم الأوراق الثبوتية أولاً لإكمال التسجيل. يرجى إكمال التسجيل عبر رابط التسجيل.";
-      _logger.LogInformation("[AuthService] Tailor has not submitted evidence yet: {Email}", email);
-       }
-     else
-{
-       // Evidence submitted, waiting for admin approval
-      message = "حسابك قيد المراجعة من قبل الإدارة. سيتم تفعيله خلال 24-48 ساعة عمل. " +
-     "سنرسل لك إشعاراً عند الموافقة على حسابك. شكراً لصبرك!";
-_logger.LogInformation("[AuthService] Tailor awaiting admin approval: {Email}", email);
- }
+                // Get user with role information using compiled query
+                var user = await _getUserForLoginQuery(_db, email);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("[AuthService] Login failed - User not found: {Email}", email);
+                    return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+                }
+
+                // Verify password
+                if (!PasswordHasher.Verify(user.PasswordHash, password))
+                {
+                    _logger.LogWarning("[AuthService] Login failed - Invalid password: {Email}", email);
+                    return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+                }
+
+                // CRITICAL: Check if tailor has submitted evidence - use compiled query
+                if (user.Role?.Name?.ToLower() == "tailor")
+                {
+                    var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
+                    if (!hasTailorProfile)
+                    {
+                        _logger.LogWarning("[AuthService] Login attempt - Tailor has not provided evidence yet: {Email}", email);
+                        // Always allow login to complete profile if tailor profile is missing
+                        _logger.LogInformation("[AuthService] Redirecting new tailor to evidence submission: {Email}", email);
+                        return (false, "TAILOR_INCOMPLETE_PROFILE", user);
+                    }
+                }
+
+                // Check account status
+                if (!user.IsActive)
+                {
+                    _logger.LogWarning("[AuthService] Login failed - User is inactive: {Email}", email);
+
+                    // ✅ IMPROVED: More specific messages based on role and state
+                    string message;
+
+                    if (user.Role?.Name?.ToLower() == "tailor")
+                    {
+                        var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
+
+                        if (!hasTailorProfile)
+                        {
+                            // Evidence not submitted yet (should not reach here anymore)
+                            message = "يجب تقديم الأوراق الثبوتية أولاً لإكمال التسجيل. يرجى إكمال التسجيل عبر رابط التسجيل.";
+                            _logger.LogInformation("[AuthService] Tailor has not submitted evidence yet: {Email}", email);
+                        }
+                        else
+                        {
+                            // Evidence submitted, waiting for admin approval or banned
+                            message = "حسابك قيد المراجعة من قبل الإدارة أو تم حظرك. سيتم تفعيله خلال24-48 ساعة عمل أو يرجى التواصل مع الدعم.";
+                            _logger.LogInformation("[AuthService] Tailor awaiting admin approval or banned: {Email}", email);
+                        }
+                    }
+                    else
+                    {
+                        message = "حسابك غير نشط. يرجى التواصل مع الدعم.";
+                    }
+
+                    return (false, message, null);
+                }
+
+                if (user.IsDeleted)
+                {
+                    _logger.LogWarning("[AuthService] Login failed - User is deleted: {Email}", email);
+                    return (false, "حسابك غير موجود. يرجى التواصل مع الدعم.", null);
+                }
+
+                // Update last login timestamp (don't fail login if this fails)
+                _ = Task.Run(async () => await UpdateLastLoginAsync(user.Id));
+
+                _logger.LogInformation("[AuthService] Login successful: {UserId}, Email: {Email}", user.Id, user.Email);
+                return (true, null, user);
             }
-   else
+            catch (Exception ex)
             {
-     message = "حسابك غير نشط. يرجى التواصل مع الدعم.";
- }
-         
-   return (false, message, null);
-}
-
-        if (user.IsDeleted)
-     {
-      _logger.LogWarning("[AuthService] Login failed - User is deleted: {Email}", email);
-       return (false, "حسابك غير موجود. يرجى التواصل مع الدعم.", null);
-     }
-
-        // Update last login timestamp (don't fail login if this fails)
-     _ = Task.Run(async () => await UpdateLastLoginAsync(user.Id));
-
-   _logger.LogInformation("[AuthService] Login successful: {UserId}, Email: {Email}", user.Id, user.Email);
-return (true, null, user);
-}
-  catch (Exception ex)
-  {
-     _logger.LogError(ex, "[AuthService] Login error for: {Email}", email);
- return (false, "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.", null);
-     }
+                _logger.LogError(ex, "[AuthService] Login error for: {Email}", email);
+                return (false, "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.", null);
+            }
         }
 
         #endregion
 
-  #region Email Verification
+        #region Email Verification
 
         /// <summary>
         /// Verifies user email using verification token from email link
-     /// </summary>
-     public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
+        /// </summary>
+        public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
         {
-   try
-    {
-           var user = await _db.Users
- .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
+            try
+            {
+                var user = await _db.Users
+      .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
 
-             if (user == null)
-       {
-              _logger.LogWarning("[AuthService] Email verification failed - Invalid token");
-        return (false, "رابط التحقق غير صالح");
-     }
+                if (user == null)
+                {
+                    _logger.LogWarning("[AuthService] Email verification failed - Invalid token");
+                    return (false, "رابط التحقق غير صالح");
+                }
 
-if (user.EmailVerified)
-              {
-  _logger.LogInformation("[AuthService] Email already verified: {UserId}", user.Id);
-           return (true, null); // Already verified
-       }
+                if (user.EmailVerified)
+                {
+                    _logger.LogInformation("[AuthService] Email already verified: {UserId}", user.Id);
+                    return (true, null); // Already verified
+                }
 
-       if (user.EmailVerificationTokenExpires < _dateTime.Now)
-           {
-        _logger.LogWarning("[AuthService] Email verification failed - Token expired: {UserId}", user.Id);
-   return (false, "انتهت صلاحية رابط التحقق. يرجى طلب رابط جديد");
+                if (user.EmailVerificationTokenExpires < _dateTime.Now)
+                {
+                    _logger.LogWarning("[AuthService] Email verification failed - Token expired: {UserId}", user.Id);
+                    return (false, "انتهت صلاحية رابط التحقق. يرجى طلب رابط جديد");
                 }
 
                 // Mark email as verified
-    user.EmailVerified = true;
-          user.EmailVerifiedAt = _dateTime.Now;
-        user.EmailVerificationToken = null;
+                user.EmailVerified = true;
+                user.EmailVerifiedAt = _dateTime.Now;
+                user.EmailVerificationToken = null;
                 user.EmailVerificationTokenExpires = null;
-       user.UpdatedAt = _dateTime.Now;
+                user.UpdatedAt = _dateTime.Now;
 
-             await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-    _logger.LogInformation("[AuthService] Email verified successfully: {UserId}", user.Id);
+                _logger.LogInformation("[AuthService] Email verified successfully: {UserId}", user.Id);
 
                 // Send welcome email in background
-             _ = Task.Run(async () =>
-    {
-             try
-                    {
-            var role = await _db.Roles.FindAsync(user.RoleId);
-        var fullName = await GetUserFullNameAsync(user.Id);
-            await _emailService.SendWelcomeEmailAsync(user.Email, fullName, role?.Name ?? "Customer");
-  }
-             catch (Exception ex)
- {
-         _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
-}
+                _ = Task.Run(async () =>
+       {
+           try
+           {
+               var role = await _db.Roles.FindAsync(user.RoleId);
+               var fullName = await GetUserFullNameAsync(user.Id);
+               await _emailService.SendWelcomeEmailAsync(user.Email, fullName, role?.Name ?? "Customer");
+           }
+           catch (Exception ex)
+           {
+               _logger.LogError(ex, "Failed to send welcome email to {Email}", user.Email);
+           }
        });
 
-    return (true, null);
+                return (true, null);
             }
- catch (Exception ex)
-      {
-    _logger.LogError(ex, "[AuthService] Error verifying email for token: {Token}", token);
-      return (false, "حدث خطأ أثناء تأكيد البريد الإلكتروني");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[AuthService] Error verifying email for token: {Token}", token);
+                return (false, "حدث خطأ أثناء تأكيد البريد الإلكتروني");
             }
         }
 
@@ -325,271 +314,271 @@ if (user.EmailVerified)
         /// Resends email verification link
         /// </summary>
         public async Task<(bool Succeeded, string? Error)> ResendVerificationEmailAsync(string email)
-    {
+        {
             try
             {
-         var user = await _db.Users
-            .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+                var user = await _db.Users
+                   .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
 
-     if (user == null)
-     {
-     return (false, "المستخدم غير موجود");
-   }
+                if (user == null)
+                {
+                    return (false, "المستخدم غير موجود");
+                }
 
-   if (user.EmailVerified)
-    {
-           return (false, "البريد الإلكتروني مؤكد بالفعل");
-           }
+                if (user.EmailVerified)
+                {
+                    return (false, "البريد الإلكتروني مؤكد بالفعل");
+                }
 
-// Generate new verification token
-       var verificationToken = GenerateEmailVerificationToken();
-    user.EmailVerificationToken = verificationToken;
-    user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
-      user.UpdatedAt = _dateTime.Now;
+                // Generate new verification token
+                var verificationToken = GenerateEmailVerificationToken();
+                user.EmailVerificationToken = verificationToken;
+                user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+                user.UpdatedAt = _dateTime.Now;
 
-        await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-    var fullName = await GetUserFullNameAsync(user.Id);
+                var fullName = await GetUserFullNameAsync(user.Id);
                 await _emailService.SendEmailVerificationAsync(user.Email, fullName, verificationToken);
 
-       _logger.LogInformation("[AuthService] Verification email resent: {UserId}", user.Id);
+                _logger.LogInformation("[AuthService] Verification email resent: {UserId}", user.Id);
 
-       return (true, null);
+                return (true, null);
             }
-      catch (Exception ex)
+            catch (Exception ex)
             {
-         _logger.LogError(ex, "[AuthService] Error resending verification email: {Email}", email);
-      return (false, "حدث خطأ أثناء إعادة إرسال رسالة التحقق");
-   }
+                _logger.LogError(ex, "[AuthService] Error resending verification email: {Email}", email);
+                return (false, "حدث خطأ أثناء إعادة إرسال رسالة التحقق");
+            }
         }
 
-     #endregion
+        #endregion
 
-      #region Password Management
+        #region Password Management
 
- /// <summary>
-    /// Changes user password after verifying current password
-   /// </summary>
+        /// <summary>
+        /// Changes user password after verifying current password
+        /// </summary>
         public async Task<(bool Succeeded, string? Error)> ChangePasswordAsync(
             Guid userId, string currentPassword, string newPassword)
         {
- try
-       {
-       var user = await _db.Users.FindAsync(userId);
-       if (user == null)
-           {
-      return (false, "المستخدم غير موجود");
-        }
+            try
+            {
+                var user = await _db.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return (false, "المستخدم غير موجود");
+                }
 
-    if (!PasswordHasher.Verify(user.PasswordHash, currentPassword))
-          {
-           return (false, "كلمة المرور الحالية غير صحيحة");
-    }
+                if (!PasswordHasher.Verify(user.PasswordHash, currentPassword))
+                {
+                    return (false, "كلمة المرور الحالية غير صحيحة");
+                }
 
-  user.PasswordHash = PasswordHasher.Hash(newPassword);
-  user.UpdatedAt = _dateTime.Now;
+                user.PasswordHash = PasswordHasher.Hash(newPassword);
+                user.UpdatedAt = _dateTime.Now;
 
-            await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-          _logger.LogInformation("[AuthService] Password changed successfully: {UserId}", userId);
-  return (true, null);
-      }
+                _logger.LogInformation("[AuthService] Password changed successfully: {UserId}", userId);
+                return (true, null);
+            }
             catch (Exception ex)
-      {
-            _logger.LogError(ex, "[AuthService] Error changing password: {UserId}", userId);
-    return (false, "حدث خطأ أثناء تغيير كلمة المرور");
-      }
+            {
+                _logger.LogError(ex, "[AuthService] Error changing password: {UserId}", userId);
+                return (false, "حدث خطأ أثناء تغيير كلمة المرور");
+            }
         }
 
- #endregion
+        #endregion
 
         #region User Queries
 
         public async Task<User?> GetUserByIdAsync(Guid userId)
         {
             try
-      {
-     // Use AsSplitQuery to avoid cartesian explosion
-     return await _db.Users
-        .AsNoTracking()
-       .AsSplitQuery()
-              .Include(u => u.Role)
-           .Include(u => u.CustomerProfile)
-       .Include(u => u.TailorProfile)
-            .Include(u => u.CorporateAccount)
-            .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
+            {
+                // Use AsSplitQuery to avoid cartesian explosion
+                return await _db.Users
+                   .AsNoTracking()
+                  .AsSplitQuery()
+                         .Include(u => u.Role)
+                      .Include(u => u.CustomerProfile)
+                  .Include(u => u.TailorProfile)
+                       .Include(u => u.CorporateAccount)
+                       .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             }
             catch (Exception ex)
             {
-  _logger.LogError(ex, "[AuthService] Error getting user by ID: {UserId}", userId);
-      return null;
-        }
+                _logger.LogError(ex, "[AuthService] Error getting user by ID: {UserId}", userId);
+                return null;
+            }
         }
 
-public async Task<User?> GetUserByEmailAsync(string email)
-      {
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
             try
             {
                 // Use AsSplitQuery to avoid cartesian explosion
-       return await _db.Users
-         .AsNoTracking()
-    .AsSplitQuery()
-   .Include(u => u.Role)
- .Include(u => u.CustomerProfile)
-    .Include(u => u.TailorProfile)
-   .Include(u => u.CorporateAccount)
-       .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
+                return await _db.Users
+                  .AsNoTracking()
+             .AsSplitQuery()
+            .Include(u => u.Role)
+          .Include(u => u.CustomerProfile)
+             .Include(u => u.TailorProfile)
+            .Include(u => u.CorporateAccount)
+                .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
             }
             catch (Exception ex)
-        {
-    _logger.LogError(ex, "[AuthService] Error getting user by email: {Email}", email);
-      return null;
+            {
+                _logger.LogError(ex, "[AuthService] Error getting user by email: {Email}", email);
+                return null;
             }
-     }
+        }
 
         public async Task<bool> IsInRoleAsync(Guid userId, string roleName)
-   {
-   try
-      {
-      // Optimized: Only select the role name, don't load the entire user
-      var userRole = await _db.Users
-   .AsNoTracking()
-  .Where(u => u.Id == userId)
-         .Select(u => u.Role.Name)
-     .FirstOrDefaultAsync();
+        {
+            try
+            {
+                // Optimized: Only select the role name, don't load the entire user
+                var userRole = await _db.Users
+             .AsNoTracking()
+            .Where(u => u.Id == userId)
+                   .Select(u => u.Role.Name)
+               .FirstOrDefaultAsync();
 
                 return userRole?.Equals(roleName, StringComparison.OrdinalIgnoreCase) ?? false;
-   }
+            }
             catch (Exception ex)
-          {
-      _logger.LogError(ex, "[AuthService] Error checking role: {UserId}", userId);
-       return false;
-  }
+            {
+                _logger.LogError(ex, "[AuthService] Error checking role: {UserId}", userId);
+                return false;
+            }
         }
 
         #endregion
 
-     #region Claims Building
+        #region Claims Building
 
         /// <summary>
-   /// Builds authentication claims for a user
- /// Note: Consider using UserProfileHelper for consistency
-    /// </summary>
+        /// Builds authentication claims for a user
+        /// Note: Consider using UserProfileHelper for consistency
+        /// </summary>
         public async Task<List<Claim>> GetUserClaimsAsync(User user)
         {
-      var claims = new List<Claim>
+            var claims = new List<Claim>
         {
        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
          new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
        new Claim("UserId", user.Id.ToString())
             };
 
-       // Add role claim
-        if (user.Role != null && !string.IsNullOrEmpty(user.Role.Name))
-    {
-        claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
+            // Add role claim
+            if (user.Role != null && !string.IsNullOrEmpty(user.Role.Name))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
             }
 
- // Get full name from profile
-        string fullName = await GetUserFullNameAsync(user.Id);
-        claims.Add(new Claim(ClaimTypes.Name, fullName));
- claims.Add(new Claim("FullName", fullName));
+            // Get full name from profile
+            string fullName = await GetUserFullNameAsync(user.Id);
+            claims.Add(new Claim(ClaimTypes.Name, fullName));
+            claims.Add(new Claim("FullName", fullName));
 
-       // Add role-specific claims
-   await AddRoleSpecificClaims(claims, user);
+            // Add role-specific claims
+            await AddRoleSpecificClaims(claims, user);
 
-       return claims;
-    }
+            return claims;
+        }
 
         #endregion
 
-     #region Admin Operations
+        #region Admin Operations
 
         public async Task<(bool Succeeded, string? Error)> SetUserActiveStatusAsync(Guid userId, bool isActive)
-   {
+        {
             try
             {
-           var user = await _db.Users.FindAsync(userId);
-   if (user == null)
-      {
-            return (false, "المستخدم غير موجود");
+                var user = await _db.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    return (false, "المستخدم غير موجود");
                 }
 
                 user.IsActive = isActive;
-      user.UpdatedAt = _dateTime.Now;
+                user.UpdatedAt = _dateTime.Now;
 
-      await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-           _logger.LogInformation("[AuthService] User active status changed: {UserId}, IsActive: {IsActive}",
-          userId, isActive);
+                _logger.LogInformation("[AuthService] User active status changed: {UserId}, IsActive: {IsActive}",
+               userId, isActive);
 
-        return (true, null);
+                return (true, null);
             }
             catch (Exception ex)
-      {
-             _logger.LogError(ex, "[AuthService] Error setting user active status: {UserId}", userId);
- return (false, "حدث خطأ أثناء تحديث حالة المستخدم");
+            {
+                _logger.LogError(ex, "[AuthService] Error setting user active status: {UserId}", userId);
+                return (false, "حدث خطأ أثناء تحديث حالة المستخدم");
             }
         }
 
-  public async Task<(bool Succeeded, string? Error)> VerifyTailorAsync(Guid tailorId, bool isVerified)
+        public async Task<(bool Succeeded, string? Error)> VerifyTailorAsync(Guid tailorId, bool isVerified)
         {
-       try
-  {
-  var tailor = await _db.TailorProfiles.FindAsync(tailorId);
-          if (tailor == null)
-         {
-        return (false, "الخياط غير موجود");
-          }
+            try
+            {
+                var tailor = await _db.TailorProfiles.FindAsync(tailorId);
+                if (tailor == null)
+                {
+                    return (false, "الخياط غير موجود");
+                }
 
-     tailor.IsVerified = isVerified;
-        tailor.UpdatedAt = _dateTime.Now;
+                tailor.IsVerified = isVerified;
+                tailor.UpdatedAt = _dateTime.Now;
 
- if (isVerified)
-          {
-                  tailor.VerifiedAt = _dateTime.Now;
-       }
+                if (isVerified)
+                {
+                    tailor.VerifiedAt = _dateTime.Now;
+                }
 
-       await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-       _logger.LogInformation("[AuthService] Tailor verification status changed: {TailorId}, IsVerified: {IsVerified}",
-           tailorId, isVerified);
+                _logger.LogInformation("[AuthService] Tailor verification status changed: {TailorId}, IsVerified: {IsVerified}",
+                    tailorId, isVerified);
 
-              return (true, null);
-    }
+                return (true, null);
+            }
             catch (Exception ex)
-          {
-        _logger.LogError(ex, "[AuthService] Error verifying tailor: {TailorId}", tailorId);
-            return (false, "حدث خطأ أثناء تحديث حالة التحقق");
+            {
+                _logger.LogError(ex, "[AuthService] Error verifying tailor: {TailorId}", tailorId);
+                return (false, "حدث خطأ أثناء تحديث حالة التحقق");
             }
         }
 
         public async Task<(bool Succeeded, string? Error)> ApproveCorporateAsync(Guid corporateId, bool isApproved)
         {
- try
+            try
             {
-     var corporate = await _db.CorporateAccounts.FindAsync(corporateId);
-      if (corporate == null)
-     {
-        return (false, "الحساب المؤسسي غير موجود");
-       }
+                var corporate = await _db.CorporateAccounts.FindAsync(corporateId);
+                if (corporate == null)
+                {
+                    return (false, "الحساب المؤسسي غير موجود");
+                }
 
                 corporate.IsApproved = isApproved;
-corporate.UpdatedAt = _dateTime.Now;
+                corporate.UpdatedAt = _dateTime.Now;
 
-    await _db.SaveChangesAsync();
+                await _db.SaveChangesAsync();
 
-           _logger.LogInformation("[AuthService] Corporate approval status changed: {CorporateId}, IsApproved: {IsApproved}",
-        corporateId, isApproved);
+                _logger.LogInformation("[AuthService] Corporate approval status changed: {CorporateId}, IsApproved: {IsApproved}",
+             corporateId, isApproved);
 
-     return (true, null);
-   }
+                return (true, null);
+            }
             catch (Exception ex)
-   {
-      _logger.LogError(ex, "[AuthService] Error approving corporate: {CorporateId}", corporateId);
-     return (false, "حدث خطأ أثناء تحديث حالة الموافقة");
-    }
-      }
+            {
+                _logger.LogError(ex, "[AuthService] Error approving corporate: {CorporateId}", corporateId);
+                return (false, "حدث خطأ أثناء تحديث حالة الموافقة");
+            }
+        }
 
         #endregion
 
@@ -601,317 +590,317 @@ corporate.UpdatedAt = _dateTime.Now;
         private string? ValidateRegistrationRequest(RegisterRequest request)
         {
             // Validate email format
-    if (!IsValidEmail(request.Email))
+            if (!IsValidEmail(request.Email))
             {
-    return "البريد الإلكتروني غير صالح";
-      }
+                return "البريد الإلكتروني غير صالح";
+            }
 
- // Validate password strength
+            // Validate password strength
             var (isValid, error) = ValidatePassword(request.Password);
             if (!isValid)
             {
-         return error;
+                return error;
             }
 
-        return null;
+            return null;
         }
 
         private async Task<bool> IsEmailTakenAsync(string email)
         {
-      return await _db.Users.AnyAsync(u => u.Email == email);
+            return await _db.Users.AnyAsync(u => u.Email == email);
         }
 
         private async Task<bool> IsPhoneTakenAsync(string phoneNumber)
-     {
-   return await _db.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
+        {
+            return await _db.Users.AnyAsync(u => u.PhoneNumber == phoneNumber);
         }
 
-      private bool IsValidEmail(string email)
-     {
-   try
-          {
-   var addr = new System.Net.Mail.MailAddress(email);
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
                 return addr.Address == email;
             }
-       catch
-  {
-   return false;
+            catch
+            {
+                return false;
             }
-   }
+        }
 
-private (bool IsValid, string? Error) ValidatePassword(string password)
-     {
+        private (bool IsValid, string? Error) ValidatePassword(string password)
+        {
             if (string.IsNullOrWhiteSpace(password))
             {
-  return (false, "كلمة المرور مطلوبة");
-       }
+                return (false, "كلمة المرور مطلوبة");
+            }
 
             if (password.Length < 6)
             {
                 return (false, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
-    }
+            }
 
-         // Check for weak passwords
-     if (WeakPasswords.Contains(password.ToLower()))
-          {
-      return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
-          }
+            // Check for weak passwords
+            if (WeakPasswords.Contains(password.ToLower()))
+            {
+                return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
+            }
 
-    return (true, null);
+            return (true, null);
         }
 
         private User CreateUserEntity(RegisterRequest request)
-   {
+        {
             return new User
-         {
-    Id = Guid.NewGuid(),
-   Email = request.Email,
-           PhoneNumber = request.PhoneNumber,
-       PasswordHash = PasswordHasher.Hash(request.Password),
-       CreatedAt = _dateTime.Now,
-          // Tailors: inactive until evidence provided
+            {
+                Id = Guid.NewGuid(),
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = PasswordHasher.Hash(request.Password),
+                CreatedAt = _dateTime.Now,
+                // Tailors: inactive until evidence provided
                 IsActive = request.Role == RegistrationRole.Tailor ? false : true,
-      IsDeleted = false,
-        EmailNotifications = true,
-        SmsNotifications = false,
-   PromotionalNotifications = false,
-      EmailVerified = false,
-          RoleId = EnsureRoleAsync(request.Role).Result
-    };
+                IsDeleted = false,
+                EmailNotifications = true,
+                SmsNotifications = false,
+                PromotionalNotifications = false,
+                EmailVerified = false,
+                RoleId = EnsureRoleAsync(request.Role).Result
+            };
         }
 
         private async Task CreateProfileAsync(Guid userId, RegisterRequest request)
-  {
-      switch (request.Role)
-     {
-    case RegistrationRole.Customer:
-         var customer = new CustomerProfile
         {
-   Id = Guid.NewGuid(),
-             UserId = userId,
-   FullName = request.FullName ?? string.Empty,
-                 CreatedAt = _dateTime.Now
-      };
-        await _db.CustomerProfiles.AddAsync(customer);
-  _logger.LogInformation("[AuthService] Customer profile created: {UserId}", userId);
-    break;
+            switch (request.Role)
+            {
+                case RegistrationRole.Customer:
+                    var customer = new CustomerProfile
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        FullName = request.FullName ?? string.Empty,
+                        CreatedAt = _dateTime.Now
+                    };
+                    await _db.CustomerProfiles.AddAsync(customer);
+                    _logger.LogInformation("[AuthService] Customer profile created: {UserId}", userId);
+                    break;
 
-            case RegistrationRole.Tailor:
-     // DO NOT CREATE - must provide evidence first
-      _logger.LogInformation("[AuthService] Tailor profile creation deferred: {UserId}", userId);
-        break;
+                case RegistrationRole.Tailor:
+                    // DO NOT CREATE - must provide evidence first
+                    _logger.LogInformation("[AuthService] Tailor profile creation deferred: {UserId}", userId);
+                    break;
 
-          case RegistrationRole.Corporate:
-     var corporate = new CorporateAccount
-        {
-Id = Guid.NewGuid(),
-        UserId = userId,
-           CompanyName = request.CompanyName ?? string.Empty,
-    ContactPerson = request.ContactPerson ?? request.FullName ?? string.Empty,
-     CreatedAt = _dateTime.Now,
-  IsApproved = false
-                };
-             await _db.CorporateAccounts.AddAsync(corporate);
-               _logger.LogInformation("[AuthService] Corporate account created (unapproved): {UserId}", userId);
-    break;
+                case RegistrationRole.Corporate:
+                    var corporate = new CorporateAccount
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = userId,
+                        CompanyName = request.CompanyName ?? string.Empty,
+                        ContactPerson = request.ContactPerson ?? request.FullName ?? string.Empty,
+                        CreatedAt = _dateTime.Now,
+                        IsApproved = false
+                    };
+                    await _db.CorporateAccounts.AddAsync(corporate);
+                    _logger.LogInformation("[AuthService] Corporate account created (unapproved): {UserId}", userId);
+                    break;
+            }
+
+            await _db.SaveChangesAsync();
         }
-
-       await _db.SaveChangesAsync();
-}
 
         private async Task SendEmailVerificationAsync(User user, string? fullName)
         {
-        var verificationToken = GenerateEmailVerificationToken();
-     user.EmailVerificationToken = verificationToken;
-    user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
-     await _db.SaveChangesAsync();
+            var verificationToken = GenerateEmailVerificationToken();
+            user.EmailVerificationToken = verificationToken;
+            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+            await _db.SaveChangesAsync();
 
-        // Send email in background (don't fail registration if email fails)
-   _ = Task.Run(async () =>
-          {
-      try
-        {
-     await _emailService.SendEmailVerificationAsync(
-      user.Email,
-             fullName ?? "مستخدم",
-        verificationToken);
-            }
-              catch (Exception ex)
-            {
-            _logger.LogError(ex, "Failed to send verification email to {Email}", user.Email);
-  }
-            });
+            // Send email in background (don't fail registration if email fails)
+            _ = Task.Run(async () =>
+                   {
+                       try
+                       {
+                           await _emailService.SendEmailVerificationAsync(
+                   user.Email,
+                          fullName ?? "مستخدم",
+                     verificationToken);
+                       }
+                       catch (Exception ex)
+                       {
+                           _logger.LogError(ex, "Failed to send verification email to {Email}", user.Email);
+                       }
+                   });
         }
 
         /// <summary>
         /// Ensures the specified role exists in database
-  /// OPTIMIZED: Uses memory cache to avoid repeated database lookups
-      /// </summary>
+        /// OPTIMIZED: Uses memory cache to avoid repeated database lookups
+        /// </summary>
         private async Task<Guid> EnsureRoleAsync(RegistrationRole desired)
         {
             var name = desired switch
-   {
- RegistrationRole.Customer => "Customer",
-RegistrationRole.Tailor => "Tailor",
-       RegistrationRole.Corporate => "Corporate",
-          _ => "Customer"
+            {
+                RegistrationRole.Customer => "Customer",
+                RegistrationRole.Tailor => "Tailor",
+                RegistrationRole.Corporate => "Corporate",
+                _ => "Customer"
             };
 
-   // Try to get from cache first
+            // Try to get from cache first
             var cacheKey = $"Role_{name}";
- if (_cache.TryGetValue(cacheKey, out Guid cachedRoleId))
+            if (_cache.TryGetValue(cacheKey, out Guid cachedRoleId))
             {
                 _logger.LogDebug("[AuthService] Role retrieved from cache: {RoleName}", name);
-          return cachedRoleId;
-        }
+                return cachedRoleId;
+            }
 
-     var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == name);
-         if (role != null)
-          {
-        // Cache the role ID for 1 hour
-     _cache.Set(cacheKey, role.Id, TimeSpan.FromHours(1));
-        _logger.LogDebug("[AuthService] Role exists and cached: {RoleName}", name);
-                return role.Id;
-     }
-
-         role = new Role
+            var role = await _db.Roles.FirstOrDefaultAsync(r => r.Name == name);
+            if (role != null)
             {
-           Id = Guid.NewGuid(),
-        Name = name,
-           Description = name switch
-           {
- "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
-   "Tailor" => "خياط - يقدم خدمات الخياطة",
+                // Cache the role ID for 1 hour
+                _cache.Set(cacheKey, role.Id, TimeSpan.FromHours(1));
+                _logger.LogDebug("[AuthService] Role exists and cached: {RoleName}", name);
+                return role.Id;
+            }
+
+            role = new Role
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                Description = name switch
+                {
+                    "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
+                    "Tailor" => "خياط - يقدم خدمات الخياطة",
                     "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية",
-        _ => null
-     },
-          CreatedAt = _dateTime.Now
-       };
+                    _ => null
+                },
+                CreatedAt = _dateTime.Now
+            };
 
-    await _db.Roles.AddAsync(role);
-       await _db.SaveChangesAsync();
+            await _db.Roles.AddAsync(role);
+            await _db.SaveChangesAsync();
 
-      // Cache the new role ID
-   _cache.Set(cacheKey, role.Id, TimeSpan.FromHours(1));
+            // Cache the new role ID
+            _cache.Set(cacheKey, role.Id, TimeSpan.FromHours(1));
 
             _logger.LogInformation("[AuthService] New role created and cached: {RoleName} ({RoleId})", name, role.Id);
 
-     return role.Id;
+            return role.Id;
         }
 
         private async Task UpdateLastLoginAsync(Guid userId)
-    {
-      try
-     {
-   // Optimized: Use ExecuteUpdateAsync to avoid loading entity
-  await _db.Users
-     .Where(u => u.Id == userId)
-          .ExecuteUpdateAsync(setters => setters
-        .SetProperty(u => u.LastLoginAt, _dateTime.Now));
-       }
+        {
+            try
+            {
+                // Optimized: Use ExecuteUpdateAsync to avoid loading entity
+                await _db.Users
+                   .Where(u => u.Id == userId)
+                        .ExecuteUpdateAsync(setters => setters
+                      .SetProperty(u => u.LastLoginAt, _dateTime.Now));
+            }
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "[AuthService] Failed to update last login: {UserId}", userId);
- }
-}
+            }
+        }
 
         /// <summary>
-      /// Gets user full name from appropriate profile
+        /// Gets user full name from appropriate profile
         /// OPTIMIZED: Only loads necessary data
         /// </summary>
-    private async Task<string> GetUserFullNameAsync(Guid userId)
- {
-      try
-       {
-              // Optimized: Use projection to only load what we need
-        var userInfo = await _db.Users
-       .AsNoTracking()
-       .Where(u => u.Id == userId)
-             .Select(u => new
-          {
-        u.Email,
-            RoleName = u.Role.Name,
- CustomerName = u.CustomerProfile != null ? u.CustomerProfile.FullName : null,
-      TailorName = u.TailorProfile != null ? u.TailorProfile.FullName : null,
-        CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
-        CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
-                 })
-          .FirstOrDefaultAsync();
+        private async Task<string> GetUserFullNameAsync(Guid userId)
+        {
+            try
+            {
+                // Optimized: Use projection to only load what we need
+                var userInfo = await _db.Users
+               .AsNoTracking()
+               .Where(u => u.Id == userId)
+                     .Select(u => new
+                     {
+                         u.Email,
+                         RoleName = u.Role.Name,
+                         CustomerName = u.CustomerProfile != null ? u.CustomerProfile.FullName : null,
+                         TailorName = u.TailorProfile != null ? u.TailorProfile.FullName : null,
+                         CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
+                         CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
+                     })
+                  .FirstOrDefaultAsync();
 
-         if (userInfo == null) return "مستخدم";
+                if (userInfo == null) return "مستخدم";
 
-         return userInfo.RoleName?.ToLower() switch
-         {
-             "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
-        "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
-           "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم",
-     _ => userInfo.Email ?? "مستخدم"
-            };
+                return userInfo.RoleName?.ToLower() switch
+                {
+                    "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
+                    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
+                    "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم",
+                    _ => userInfo.Email ?? "مستخدم"
+                };
             }
-     catch
-         {
-          return "مستخدم";
-       }
+            catch
+            {
+                return "مستخدم";
+            }
         }
 
         /// <summary>
         /// Adds role-specific claims for authorization
-/// OPTIMIZED: Use projection queries
-     /// </summary>
-  private async Task AddRoleSpecificClaims(List<Claim> claims, User user)
+        /// OPTIMIZED: Use projection queries
+        /// </summary>
+        private async Task AddRoleSpecificClaims(List<Claim> claims, User user)
         {
-         try
+            try
             {
-      switch (user.Role?.Name?.ToLower())
-          {
-         case "tailor":
-             var tailorVerified = await _db.TailorProfiles
-  .AsNoTracking()
-         .Where(t => t.UserId == user.Id)
-         .Select(t => t.IsVerified)
-         .FirstOrDefaultAsync();
-      
-   claims.Add(new Claim("IsVerified", tailorVerified.ToString()));
-           break;
+                switch (user.Role?.Name?.ToLower())
+                {
+                    case "tailor":
+                        var tailorVerified = await _db.TailorProfiles
+             .AsNoTracking()
+                    .Where(t => t.UserId == user.Id)
+                    .Select(t => t.IsVerified)
+                    .FirstOrDefaultAsync();
 
-             case "corporate":
-          var corporateInfo = await _db.CorporateAccounts
-      .AsNoTracking()
-     .Where(c => c.UserId == user.Id)
-       .Select(c => new { c.CompanyName, c.IsApproved })
-      .FirstOrDefaultAsync();
-    
-          if (corporateInfo != null)
-     {
-          claims.Add(new Claim("CompanyName", corporateInfo.CompanyName ?? string.Empty));
-              claims.Add(new Claim("IsApproved", corporateInfo.IsApproved.ToString()));
-             }
-       break;
-        }
-          }
+                        claims.Add(new Claim("IsVerified", tailorVerified.ToString()));
+                        break;
+
+                    case "corporate":
+                        var corporateInfo = await _db.CorporateAccounts
+                    .AsNoTracking()
+                   .Where(c => c.UserId == user.Id)
+                     .Select(c => new { c.CompanyName, c.IsApproved })
+                    .FirstOrDefaultAsync();
+
+                        if (corporateInfo != null)
+                        {
+                            claims.Add(new Claim("CompanyName", corporateInfo.CompanyName ?? string.Empty));
+                            claims.Add(new Claim("IsApproved", corporateInfo.IsApproved.ToString()));
+                        }
+                        break;
+                }
+            }
             catch (Exception ex)
             {
-            _logger.LogWarning(ex, "[AuthService] Error loading profile for claims: {UserId}", user.Id);
-          }
+                _logger.LogWarning(ex, "[AuthService] Error loading profile for claims: {UserId}", user.Id);
+            }
         }
 
         private string GenerateEmailVerificationToken()
-  {
+        {
             // Generate a URL-safe random token
-    var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
-  .Replace("+", "")
-   .Replace("/", "")
-  .Replace("=", "");
-
-    // Ensure we have at least 32 characters, pad with another GUID if needed
-        while (token.Length < 32)
-          {
-      token += Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
           .Replace("+", "")
-    .Replace("/", "")
-    .Replace("=", "");
-   }
-      
+           .Replace("/", "")
+          .Replace("=", "");
+
+            // Ensure we have at least 32 characters, pad with another GUID if needed
+            while (token.Length < 32)
+            {
+                token += Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+                    .Replace("+", "")
+              .Replace("/", "")
+              .Replace("=", "");
+            }
+
             return token.Substring(0, 32);
         }
 

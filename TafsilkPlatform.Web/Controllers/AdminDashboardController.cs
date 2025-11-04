@@ -15,66 +15,66 @@ public class AdminDashboardController : Controller
     private readonly ILogger<AdminDashboardController> _logger;
 
     public AdminDashboardController(AppDbContext context, ILogger<AdminDashboardController> logger)
-  {
-    _context = context;
-      _logger = logger;
+    {
+        _context = context;
+        _logger = logger;
     }
 
     // ============================================
     // 1. DASHBOARD HOME
     // ============================================
-    
+
     [HttpGet("")]
     [HttpGet("Dashboard")]
     public async Task<IActionResult> Index()
     {
         var viewModel = new DashboardHomeViewModel
         {
-    TotalUsers = await _context.Users.CountAsync(),
-     TotalCustomers = await _context.CustomerProfiles.CountAsync(),
- TotalTailors = await _context.TailorProfiles.CountAsync(),
+            TotalUsers = await _context.Users.CountAsync(),
+            TotalCustomers = await _context.CustomerProfiles.CountAsync(),
+            TotalTailors = await _context.TailorProfiles.CountAsync(),
             TotalCorporate = await _context.CorporateAccounts.CountAsync(),
-          
-    PendingTailorVerifications = await _context.TailorProfiles
+
+            PendingTailorVerifications = await _context.TailorProfiles
           .Where(t => !t.IsVerified)
      .CountAsync(),
-            
- // Portfolio reviews - count all images (no Status field yet)
-       PendingPortfolioReviews = await _context.PortfolioImages
+
+            // Portfolio reviews - count all images (no Status field yet)
+            PendingPortfolioReviews = await _context.PortfolioImages
                 .Where(p => !p.IsDeleted)
   .CountAsync(),
-      
-        // Use enum values properly
-          ActiveOrders = await _context.Orders
+
+            // Use enum values properly
+            ActiveOrders = await _context.Orders
           .Where(o => o.Status == OrderStatus.Pending || o.Status == OrderStatus.Processing)
          .CountAsync(),
-      
+
             // Disputes using string Status
-    OpenDisputes = await _context.Disputes
+            OpenDisputes = await _context.Disputes
             .Where(d => d.Status == "Open" || d.Status == "UnderReview")
     .CountAsync(),
-     
-         // Refund requests
-       PendingRefunds = await _context.RefundRequests
+
+            // Refund requests
+            PendingRefunds = await _context.RefundRequests
                 .Where(r => r.Status == "Pending")
    .CountAsync(),
-      
-   // Total revenue from completed payments
-      TotalRevenue = await _context.Payment
+
+            // Total revenue from completed payments
+            TotalRevenue = await _context.Payment
         .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
      .SumAsync(p => (decimal?)p.Amount) ?? 0,
-     
-    RecentActivity = await _context.ActivityLogs
+
+            RecentActivity = await _context.ActivityLogs
   .OrderByDescending(l => l.CreatedAt)
     .Take(10)
  .Include(l => l.User)
   .Select(l => new ActivityLogDto
-         {
-       Action = l.Action,
-   UserName = l.User != null ? l.User.Email : "Unknown",
+  {
+      Action = l.Action,
+      UserName = l.User != null ? l.User.Email : "Unknown",
       Timestamp = l.CreatedAt,
-   IpAddress = l.IpAddress
-   })
+      IpAddress = l.IpAddress
+  })
 .ToListAsync()
         };
 
@@ -89,53 +89,53 @@ public class AdminDashboardController : Controller
     public async Task<IActionResult> Users([FromQuery] string? search, [FromQuery] string? role, [FromQuery] string? status, [FromQuery] int page = 1)
     {
         var query = _context.Users
-  .Include(u => u.Role)
- .Include(u => u.CustomerProfile)
- .Include(u => u.TailorProfile)
-     .Include(u => u.CorporateAccount)
+        .Include(u => u.Role)
+        .Include(u => u.CustomerProfile)
+        .Include(u => u.TailorProfile)
+        .Include(u => u.CorporateAccount)
        .AsQueryable();
 
- if (!string.IsNullOrWhiteSpace(search))
-      {
- query = query.Where(u => u.Email.Contains(search) || (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(u => u.Email.Contains(search) || (u.PhoneNumber != null && u.PhoneNumber.Contains(search)));
         }
 
-if (!string.IsNullOrWhiteSpace(role))
+        if (!string.IsNullOrWhiteSpace(role))
         {
-        query = query.Where(u => u.Role.Name == role);
-     }
+            query = query.Where(u => u.Role.Name == role);
+        }
 
-      if (!string.IsNullOrWhiteSpace(status))
-   {
-      if (status == "Active")
-  query = query.Where(u => u.IsActive && !u.IsDeleted);
-  else if (status == "Inactive")
-      query = query.Where(u => !u.IsActive);
-   else if (status == "Banned")
-       query = query.Where(u => !u.IsActive);
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            if (status == "Active")
+                query = query.Where(u => u.IsActive && !u.IsDeleted);
+            else if (status == "Inactive")
+                query = query.Where(u => !u.IsActive);
+            else if (status == "Banned")
+                query = query.Where(u => !u.IsActive);
         }
 
         var pageSize = 20;
-   var users = await query
-  .OrderByDescending(u => u.CreatedAt)
-.Skip((page - 1) * pageSize)
- .Take(pageSize)
- .ToListAsync();
+        var users = await query
+       .OrderByDescending(u => u.CreatedAt)
+     .Skip((page - 1) * pageSize)
+      .Take(pageSize)
+      .ToListAsync();
 
         var totalUsers = await query.CountAsync();
 
         // Calculate statistics
         var totalUsersCount = await _context.Users.CountAsync();
-  var onlineUsers = await _context.Users
-   .Where(u => u.LastLoginAt.HasValue && 
-        u.LastLoginAt.Value >= DateTime.UtcNow.AddMinutes(-30))
-            .CountAsync();
+        var onlineUsers = await _context.Users
+         .Where(u => u.LastLoginAt.HasValue &&
+              u.LastLoginAt.Value >= DateTime.UtcNow.AddMinutes(-30))
+                  .CountAsync();
         var activeUsers = await _context.Users
           .Where(u => u.IsActive && !u.IsDeleted)
             .CountAsync();
-   var bannedUsers = await _context.Users
-            .Where(u => !u.IsActive)
-         .CountAsync();
+        var bannedUsers = await _context.Users
+                 .Where(u => !u.IsActive)
+              .CountAsync();
 
         ViewBag.TotalUsers = totalUsersCount;
         ViewBag.OnlineUsers = onlineUsers;
@@ -144,21 +144,21 @@ if (!string.IsNullOrWhiteSpace(role))
         ViewBag.SearchTerm = search;
         ViewBag.RoleFilter = role;
         ViewBag.StatusFilter = status;
-     ViewBag.CurrentPage = page;
+        ViewBag.CurrentPage = page;
         ViewBag.TotalPages = (int)Math.Ceiling(totalUsers / (double)pageSize);
 
         return View(users);
-  }
+    }
 
     [HttpPost("Users/Ban/{userId}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> BanUser(Guid userId)
-  {
+    {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
             return NotFound();
 
-// Prevent banning admin users
+        // Prevent banning admin users
         var userRole = await _context.Roles.FindAsync(user.RoleId);
         if (userRole?.Name == "Admin")
         {
@@ -178,17 +178,17 @@ if (!string.IsNullOrWhiteSpace(role))
 
     [HttpPost("Users/Unban/{userId}")]
     [ValidateAntiForgeryToken]
- public async Task<IActionResult> UnbanUser(Guid userId)
-  {
+    public async Task<IActionResult> UnbanUser(Guid userId)
+    {
         var user = await _context.Users.FindAsync(userId);
         if (user == null)
-      return NotFound();
+            return NotFound();
 
         user.IsActive = true;
-      user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedAt = DateTime.UtcNow;
 
-await LogAdminAction("User Unbanned", $"User {user.Email} has been unbanned", "User");
-      await _context.SaveChangesAsync();
+        await LogAdminAction("User Unbanned", $"User {user.Email} has been unbanned", "User");
+        await _context.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "تم إلغاء حظر المستخدم بنجاح";
         return RedirectToAction(nameof(Users));
@@ -197,10 +197,10 @@ await LogAdminAction("User Unbanned", $"User {user.Email} has been unbanned", "U
     [HttpGet("GetOnlineCount")]
     public async Task<IActionResult> GetOnlineCount()
     {
-   var count = await _context.Users
- .Where(u => u.LastLoginAt.HasValue && 
-          u.LastLoginAt.Value >= DateTime.UtcNow.AddMinutes(-30))
-    .CountAsync();
+        var count = await _context.Users
+      .Where(u => u.LastLoginAt.HasValue &&
+               u.LastLoginAt.Value >= DateTime.UtcNow.AddMinutes(-30))
+         .CountAsync();
 
         return Json(new { count });
     }
@@ -208,31 +208,31 @@ await LogAdminAction("User Unbanned", $"User {user.Email} has been unbanned", "U
     [HttpGet("Users/Details/{userId}")]
     public async Task<IActionResult> UserDetails(Guid userId)
     {
-  var user = await _context.Users
-            .Include(u => u.Role)
- .Include(u => u.CustomerProfile)
-       .Include(u => u.TailorProfile)
-    .ThenInclude(t => t!.TailorServices)
-            .Include(u => u.TailorProfile)
-    .ThenInclude(t => t!.PortfolioImages)
-    .Include(u => u.CorporateAccount)
-        .Include(u => u.UserAddresses)
-       .FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _context.Users
+                  .Include(u => u.Role)
+       .Include(u => u.CustomerProfile)
+             .Include(u => u.TailorProfile)
+          .ThenInclude(t => t!.TailorServices)
+                  .Include(u => u.TailorProfile)
+          .ThenInclude(t => t!.PortfolioImages)
+          .Include(u => u.CorporateAccount)
+              .Include(u => u.UserAddresses)
+             .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (user == null)
             return NotFound();
 
         // Get user activity logs
- var activityLogs = await _context.ActivityLogs
-     .Where(a => a.UserId == userId)
-   .OrderByDescending(a => a.CreatedAt)
- .Take(50)
-   .ToListAsync();
+        var activityLogs = await _context.ActivityLogs
+            .Where(a => a.UserId == userId)
+          .OrderByDescending(a => a.CreatedAt)
+        .Take(50)
+          .ToListAsync();
 
- ViewBag.ActivityLogs = activityLogs;
+        ViewBag.ActivityLogs = activityLogs;
 
         // Get orders if customer or tailor
-if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
+        if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
         {
             var orders = await _context.Orders
   .Where(o => o.CustomerId == user.CustomerProfile.Id)
@@ -254,66 +254,66 @@ if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
         }
 
         return View(user);
- }
+    }
 
     [HttpPost("Users/{id}/Suspend")]
     public async Task<IActionResult> SuspendUser(Guid id, [FromForm] string reason)
     {
         var user = await _context.Users.FindAsync(id);
-    if (user == null)
-      return NotFound();
+        if (user == null)
+            return NotFound();
 
- user.IsActive = false;
-    user.UpdatedAt = DateTime.UtcNow;
+        user.IsActive = false;
+        user.UpdatedAt = DateTime.UtcNow;
 
         // Log the action
         await LogAdminAction("User Suspended", $"User {user.Email} suspended. Reason: {reason}", "User");
 
         await _context.SaveChangesAsync();
 
- TempData["Success"] = "User suspended successfully";
+        TempData["Success"] = "User suspended successfully";
         return RedirectToAction(nameof(Users));
     }
 
-  [HttpPost("Users/{id}/Activate")]
+    [HttpPost("Users/{id}/Activate")]
     public async Task<IActionResult> ActivateUser(Guid id)
     {
-     var user = await _context.Users.FindAsync(id);
-  if (user == null)
-   return NotFound();
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+            return NotFound();
 
-   user.IsActive = true;
-      user.UpdatedAt = DateTime.UtcNow;
+        user.IsActive = true;
+        user.UpdatedAt = DateTime.UtcNow;
 
-    await LogAdminAction("User Activated", $"User {user.Email} activated", "User");
+        await LogAdminAction("User Activated", $"User {user.Email} activated", "User");
         await _context.SaveChangesAsync();
 
-    TempData["Success"] = "User activated successfully";
+        TempData["Success"] = "User activated successfully";
         return RedirectToAction(nameof(Users));
     }
 
     [HttpPost("Users/{id}/Delete")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {
-  var user = await _context.Users.FindAsync(id);
- if (user == null)
-    return NotFound();
+        var user = await _context.Users.FindAsync(id);
+        if (user == null)
+            return NotFound();
 
-     user.IsDeleted = true;
-    user.UpdatedAt = DateTime.UtcNow;
+        user.IsDeleted = true;
+        user.UpdatedAt = DateTime.UtcNow;
 
-      await LogAdminAction("User Deleted", $"User {user.Email} marked as deleted", "User");
+        await LogAdminAction("User Deleted", $"User {user.Email} marked as deleted", "User");
         await _context.SaveChangesAsync();
 
-   TempData["Success"] = "User deleted successfully";
- return RedirectToAction(nameof(Users));
+        TempData["Success"] = "User deleted successfully";
+        return RedirectToAction(nameof(Users));
     }
 
     // ============================================
     // 3. TAILOR VERIFICATION
     // ============================================
 
-[HttpGet("Tailors/Verification")]
+    [HttpGet("Tailors/Verification")]
     public async Task<IActionResult> TailorVerification([FromQuery] string? status, [FromQuery] int page = 1)
     {
         var query = _context.TailorProfiles
@@ -321,10 +321,10 @@ if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
             .Include(t => t.PortfolioImages)
         .AsQueryable();
 
- if (!string.IsNullOrWhiteSpace(status))
+        if (!string.IsNullOrWhiteSpace(status))
         {
- if (status == "Pending")
-          query = query.Where(t => !t.IsVerified);
+            if (status == "Pending")
+                query = query.Where(t => !t.IsVerified);
             else if (status == "Verified")
                 query = query.Where(t => t.IsVerified);
         }
@@ -334,20 +334,20 @@ if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
         }
 
         var pageSize = 10;
-      var tailors = await query
-          .OrderByDescending(t => t.CreatedAt)
-     .Skip((page - 1) * pageSize)
-          .Take(pageSize)
-        .ToListAsync();
+        var tailors = await query
+            .OrderByDescending(t => t.CreatedAt)
+       .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+          .ToListAsync();
 
         var totalTailors = await query.CountAsync();
 
-     var viewModel = new TailorVerificationViewModel
+        var viewModel = new TailorVerificationViewModel
         {
             Tailors = tailors,
- CurrentPage = page,
+            CurrentPage = page,
             TotalPages = (int)Math.Ceiling(totalTailors / (double)pageSize),
-    SelectedStatus = status
+            SelectedStatus = status
         };
 
         return View(viewModel);
@@ -356,59 +356,59 @@ if (user.Role?.Name == "Customer" && user.CustomerProfile != null)
     [HttpGet("Tailors/{id}/Review")]
     public async Task<IActionResult> ReviewTailor(Guid id)
     {
-   var tailor = await _context.TailorProfiles
-            .Include(t => t.User)
-         .Include(t => t.PortfolioImages)
-            .Include(t => t.TailorServices)
-    .FirstOrDefaultAsync(t => t.Id == id);
+        var tailor = await _context.TailorProfiles
+                 .Include(t => t.User)
+              .Include(t => t.PortfolioImages)
+                 .Include(t => t.TailorServices)
+         .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tailor == null)
- return NotFound();
+            return NotFound();
 
         return View(tailor);
     }
 
     [HttpPost("Tailors/{id}/Approve")]
     public async Task<IActionResult> ApproveTailor(Guid id, [FromForm] string? notes)
- {
+    {
         var tailor = await _context.TailorProfiles
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tailor == null)
-return NotFound();
+            return NotFound();
 
-   // ✅ FIX: Set both IsVerified AND activate user account
-  tailor.IsVerified = true;
-     tailor.VerifiedAt = DateTime.UtcNow;  // Track when verified
-   tailor.UpdatedAt = DateTime.UtcNow;
+        // ✅ FIX: Set both IsVerified AND activate user account
+        tailor.IsVerified = true;
+        tailor.VerifiedAt = DateTime.UtcNow;  // Track when verified
+        tailor.UpdatedAt = DateTime.UtcNow;
 
         // ✅ CRITICAL FIX: Activate the user account so they can login
         if (tailor.User != null)
         {
             tailor.User.IsActive = true;
-     tailor.User.UpdatedAt = DateTime.UtcNow;
+            tailor.User.UpdatedAt = DateTime.UtcNow;
         }
 
         // Create notification for tailor
         var notification = new Notification
         {
-   UserId = tailor.UserId,
+            UserId = tailor.UserId,
             Title = "تم التحقق من حسابك",
             Message = "تهانينا! تم التحقق من حسابك بنجاح. يمكنك الآن تسجيل الدخول واستقبال الطلبات.",
-  Type = "Success",
+            Type = "Success",
             SentAt = DateTime.UtcNow
-   };
+        };
         _context.Notifications.Add(notification);
 
-        await LogAdminAction("Tailor Approved", 
-            $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) approved and activated. Notes: {notes}", 
+        await LogAdminAction("Tailor Approved",
+            $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) approved and activated. Notes: {notes}",
    "TailorProfile");
-        
+
         await _context.SaveChangesAsync();
 
         TempData["Success"] = "Tailor verified and activated successfully";
-   return RedirectToAction(nameof(TailorVerification));
+        return RedirectToAction(nameof(TailorVerification));
     }
 
     [HttpPost("Tailors/{id}/Reject")]
@@ -421,52 +421,52 @@ return NotFound();
         if (tailor == null)
             return NotFound();
 
-   // ✅ FIX: Set verification status to false and deactivate user
- tailor.IsVerified = false;
+        // ✅ FIX: Set verification status to false and deactivate user
+        tailor.IsVerified = false;
         tailor.UpdatedAt = DateTime.UtcNow;
 
         // ✅ CRITICAL FIX: Deactivate the user account so they cannot login
         if (tailor.User != null)
         {
-         tailor.User.IsActive = false;
-     tailor.User.UpdatedAt = DateTime.UtcNow;
+            tailor.User.IsActive = false;
+            tailor.User.UpdatedAt = DateTime.UtcNow;
         }
 
-     // Create notification for tailor
+        // Create notification for tailor
         var notification = new Notification
         {
-  UserId = tailor.UserId,
+            UserId = tailor.UserId,
             Title = "تم رفض طلب التحقق",
             Message = $"عذراً، تم رفض طلب التحقق من حسابك. السبب: {reason}\n\nيمكنك تقديم طلب جديد بعد تصحيح المشكلة.",
-     Type = "Warning",
+            Type = "Warning",
             SentAt = DateTime.UtcNow
         };
         _context.Notifications.Add(notification);
 
-     await LogAdminAction("Tailor Rejected", 
-   $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) rejected and deactivated. Reason: {reason}", 
-            "TailorProfile");
-        
+        await LogAdminAction("Tailor Rejected",
+      $"Tailor {tailor.FullName} ({tailor.User?.Email ?? "unknown"}) rejected and deactivated. Reason: {reason}",
+               "TailorProfile");
+
         await _context.SaveChangesAsync();
 
         TempData["Info"] = "Tailor verification rejected and account deactivated";
-     return RedirectToAction(nameof(TailorVerification));
+        return RedirectToAction(nameof(TailorVerification));
     }
 
-// ============================================
+    // ============================================
     // 4. PORTFOLIO REVIEW
     // ============================================
 
     [HttpGet("Portfolio")]
     public async Task<IActionResult> PortfolioReview([FromQuery] string? status, [FromQuery] int page = 1)
     {
- var query = _context.PortfolioImages
-.Include(p => p.Tailor)
-       .ThenInclude(t => t!.User)
-   .Where(p => !p.IsDeleted)
-            .AsQueryable();
+        var query = _context.PortfolioImages
+       .Include(p => p.Tailor)
+              .ThenInclude(t => t!.User)
+          .Where(p => !p.IsDeleted)
+                   .AsQueryable();
 
-   var pageSize = 12;
+        var pageSize = 12;
         var images = await query
     .OrderByDescending(p => p.UploadedAt)
        .Skip((page - 1) * pageSize)
@@ -477,8 +477,8 @@ return NotFound();
 
         var viewModel = new PortfolioReviewViewModel
         {
-     Images = images,
-    CurrentPage = page,
+            Images = images,
+            CurrentPage = page,
             TotalPages = (int)Math.Ceiling(totalImages / (double)pageSize),
             SelectedStatus = status
         };
@@ -489,46 +489,46 @@ return NotFound();
     [HttpPost("Portfolio/{id}/Approve")]
     public async Task<IActionResult> ApprovePortfolioImage(Guid id)
     {
- var image = await _context.PortfolioImages
-      .Include(p => p.Tailor)
-      .FirstOrDefaultAsync(p => p.PortfolioImageId == id);
+        var image = await _context.PortfolioImages
+             .Include(p => p.Tailor)
+             .FirstOrDefaultAsync(p => p.PortfolioImageId == id);
 
         if (image == null)
-   return NotFound();
+            return NotFound();
 
- await LogAdminAction("Portfolio Approved", $"Portfolio image {id} for tailor {image.Tailor?.FullName ?? "unknown"} approved", "PortfolioImage");
-     await _context.SaveChangesAsync();
+        await LogAdminAction("Portfolio Approved", $"Portfolio image {id} for tailor {image.Tailor?.FullName ?? "unknown"} approved", "PortfolioImage");
+        await _context.SaveChangesAsync();
 
         return Json(new { success = true, message = "Image approved successfully" });
     }
 
-  [HttpPost("Portfolio/{id}/Reject")]
+    [HttpPost("Portfolio/{id}/Reject")]
     public async Task<IActionResult> RejectPortfolioImage(Guid id, [FromForm] string reason)
     {
-     var image = await _context.PortfolioImages
-.Include(p => p.Tailor)
-    .ThenInclude(t => t!.User)
-.FirstOrDefaultAsync(p => p.PortfolioImageId == id);
+        var image = await _context.PortfolioImages
+   .Include(p => p.Tailor)
+       .ThenInclude(t => t!.User)
+   .FirstOrDefaultAsync(p => p.PortfolioImageId == id);
 
         if (image == null)
-        return NotFound();
+            return NotFound();
 
         // Notify tailor
-  if (image.Tailor != null)
-    {
-        var notification = new Notification
+        if (image.Tailor != null)
         {
-  UserId = image.Tailor.UserId,
-     Title = "تم رفض صورة من معرض أعمالك",
- Message = $"تم رفض إحدى الصور. السبب: {reason}",
-    Type = "Warning",
- SentAt = DateTime.UtcNow
-       };
-     _context.Notifications.Add(notification);
-  }
+            var notification = new Notification
+            {
+                UserId = image.Tailor.UserId,
+                Title = "تم رفض صورة من معرض أعمالك",
+                Message = $"تم رفض إحدى الصور. السبب: {reason}",
+                Type = "Warning",
+                SentAt = DateTime.UtcNow
+            };
+            _context.Notifications.Add(notification);
+        }
 
         await LogAdminAction("Portfolio Rejected", $"Portfolio image {id} rejected. Reason: {reason}", "PortfolioImage");
- await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
         return Json(new { success = true, message = "Image rejected successfully" });
     }
@@ -538,7 +538,7 @@ return NotFound();
     // ============================================
 
     [HttpGet("Orders")]
-  public async Task<IActionResult> Orders([FromQuery] string? status, [FromQuery] int page = 1)
+    public async Task<IActionResult> Orders([FromQuery] string? status, [FromQuery] int page = 1)
     {
         var query = _context.Orders
 .Include(o => o.Customer)
@@ -550,25 +550,25 @@ return NotFound();
 
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<OrderStatus>(status, out var orderStatus))
         {
-       query = query.Where(o => o.Status == orderStatus);
+            query = query.Where(o => o.Status == orderStatus);
         }
 
- var pageSize = 20;
+        var pageSize = 20;
         var orders = await query
             .OrderByDescending(o => o.CreatedAt)
         .Skip((page - 1) * pageSize)
   .Take(pageSize)
             .ToListAsync();
 
-  var totalOrders = await query.CountAsync();
+        var totalOrders = await query.CountAsync();
 
         var viewModel = new OrderManagementViewModel
         {
-      Orders = orders,
-       CurrentPage = page,
-        TotalPages = (int)Math.Ceiling(totalOrders / (double)pageSize),
-    SelectedStatus = status
-    };
+            Orders = orders,
+            CurrentPage = page,
+            TotalPages = (int)Math.Ceiling(totalOrders / (double)pageSize),
+            SelectedStatus = status
+        };
 
         return View(viewModel);
     }
@@ -596,43 +596,43 @@ return NotFound();
     // 6. DISPUTE RESOLUTION
     // ============================================
 
- [HttpGet("Disputes")]
+    [HttpGet("Disputes")]
     public async Task<IActionResult> Disputes([FromQuery] string? status, [FromQuery] int page = 1)
     {
-   var query = _context.Disputes
-      .Include(d => d.Order)
-                .ThenInclude(o => o.Customer)
-     .ThenInclude(c => c.User)
-          .Include(d => d.Order)
-    .ThenInclude(o => o.Tailor)
-       .ThenInclude(t => t.User)
-          .AsQueryable();
+        var query = _context.Disputes
+           .Include(d => d.Order)
+                     .ThenInclude(o => o.Customer)
+          .ThenInclude(c => c.User)
+               .Include(d => d.Order)
+         .ThenInclude(o => o.Tailor)
+            .ThenInclude(t => t.User)
+               .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(status))
-{
-   query = query.Where(d => d.Status == status);
+        {
+            query = query.Where(d => d.Status == status);
         }
-     else
-   {
+        else
+        {
             query = query.Where(d => d.Status != "Resolved" && d.Status != "Closed");
         }
 
-      var pageSize = 10;
-    var disputes = await query
-            .OrderByDescending(d => d.CreatedAt)
-      .Skip((page - 1) * pageSize)
-         .Take(pageSize)
-       .ToListAsync();
+        var pageSize = 10;
+        var disputes = await query
+                .OrderByDescending(d => d.CreatedAt)
+          .Skip((page - 1) * pageSize)
+             .Take(pageSize)
+           .ToListAsync();
 
         var totalDisputes = await query.CountAsync();
 
-  var viewModel = new DisputeManagementViewModel
-    {
-      Disputes = disputes,
-      CurrentPage = page,
-TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
+        var viewModel = new DisputeManagementViewModel
+        {
+            Disputes = disputes,
+            CurrentPage = page,
+            TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
             SelectedStatus = status
-    };
+        };
 
         return View(viewModel);
     }
@@ -640,46 +640,46 @@ TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
     [HttpGet("Disputes/{id}")]
     public async Task<IActionResult> DisputeDetails(Guid id)
     {
-      var dispute = await _context.Disputes
-      .Include(d => d.Order)
-             .ThenInclude(o => o.Customer)
-        .ThenInclude(c => c.User)
+        var dispute = await _context.Disputes
+        .Include(d => d.Order)
+               .ThenInclude(o => o.Customer)
+          .ThenInclude(c => c.User)
+              .Include(d => d.Order)
+               .ThenInclude(o => o.Tailor)
+           .ThenInclude(t => t.User)
             .Include(d => d.Order)
-             .ThenInclude(o => o.Tailor)
-         .ThenInclude(t => t.User)
-          .Include(d => d.Order)
-         .ThenInclude(o => o.orderImages)
-       .FirstOrDefaultAsync(d => d.Id == id);
+           .ThenInclude(o => o.orderImages)
+         .FirstOrDefaultAsync(d => d.Id == id);
 
         if (dispute == null)
             return NotFound();
 
-    return View(dispute);
+        return View(dispute);
     }
 
- [HttpPost("Disputes/{id}/Resolve")]
+    [HttpPost("Disputes/{id}/Resolve")]
     public async Task<IActionResult> ResolveDispute(Guid id, [FromForm] string resolution, [FromForm] string favoredParty)
     {
-     var dispute = await _context.Disputes
-  .Include(d => d.Order)
-   .FirstOrDefaultAsync(d => d.Id == id);
+        var dispute = await _context.Disputes
+     .Include(d => d.Order)
+      .FirstOrDefaultAsync(d => d.Id == id);
 
         if (dispute == null)
-   return NotFound();
+            return NotFound();
 
         dispute.Status = "Resolved";
-  dispute.ResolutionDetails = resolution;
-   dispute.ResolvedAt = DateTime.UtcNow;
+        dispute.ResolutionDetails = resolution;
+        dispute.ResolvedAt = DateTime.UtcNow;
 
         await LogAdminAction("Dispute Resolved", $"Dispute {id} resolved in favor of {favoredParty}. Resolution: {resolution}", "Dispute");
-    await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
-     TempData["Success"] = "Dispute resolved successfully";
-  return RedirectToAction(nameof(Disputes));
+        TempData["Success"] = "Dispute resolved successfully";
+        return RedirectToAction(nameof(Disputes));
     }
 
     // ============================================
-// 7. REFUND MANAGEMENT
+    // 7. REFUND MANAGEMENT
     // ============================================
 
     [HttpGet("Refunds")]
@@ -695,10 +695,10 @@ TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(status))
-  {
+        {
             query = query.Where(r => r.Status == status);
         }
- else
+        else
         {
             query = query.Where(r => r.Status == "Pending");
         }
@@ -710,14 +710,14 @@ TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
   .Take(pageSize)
             .ToListAsync();
 
-   var totalRefunds = await query.CountAsync();
+        var totalRefunds = await query.CountAsync();
 
         var viewModel = new RefundManagementViewModel
-   {
-   Refunds = refunds,
- CurrentPage = page,
-         TotalPages = (int)Math.Ceiling(totalRefunds / (double)pageSize),
-        SelectedStatus = status
+        {
+            Refunds = refunds,
+            CurrentPage = page,
+            TotalPages = (int)Math.Ceiling(totalRefunds / (double)pageSize),
+            SelectedStatus = status
         };
 
         return View(viewModel);
@@ -726,81 +726,81 @@ TotalPages = (int)Math.Ceiling(totalDisputes / (double)pageSize),
     [HttpPost("Refunds/{id}/Approve")]
     public async Task<IActionResult> ApproveRefund(Guid id, [FromForm] string? notes)
     {
-     var refund = await _context.RefundRequests
-       .Include(r => r.Order)
-   .ThenInclude(o => o.Customer)
-    .FirstOrDefaultAsync(r => r.Id == id);
+        var refund = await _context.RefundRequests
+          .Include(r => r.Order)
+      .ThenInclude(o => o.Customer)
+       .FirstOrDefaultAsync(r => r.Id == id);
 
         if (refund == null)
-    return NotFound();
+            return NotFound();
 
-refund.Status = "Approved";
- refund.ProcessedAt = DateTime.UtcNow;
+        refund.Status = "Approved";
+        refund.ProcessedAt = DateTime.UtcNow;
 
         // Create notification
- var notification = new Notification
-  {
- UserId = refund.Order.CustomerId,
-    Title = "تمت الموافقة على طلب الاسترداد",
-Message = $"تمت الموافقة على طلب استرداد {refund.Amount:C}. سيتم تحويل المبلغ خلال 3-5 أيام عمل.",
-   Type = "Success",
-  SentAt = DateTime.UtcNow
-  };
+        var notification = new Notification
+        {
+            UserId = refund.Order.CustomerId,
+            Title = "تمت الموافقة على طلب الاسترداد",
+            Message = $"تمت الموافقة على طلب استرداد {refund.Amount:C}. سيتم تحويل المبلغ خلال 3-5 أيام عمل.",
+            Type = "Success",
+            SentAt = DateTime.UtcNow
+        };
         _context.Notifications.Add(notification);
 
-     await LogAdminAction("Refund Approved", $"Refund {id} for amount {refund.Amount:C} approved", "RefundRequest");
-      await _context.SaveChangesAsync();
+        await LogAdminAction("Refund Approved", $"Refund {id} for amount {refund.Amount:C} approved", "RefundRequest");
+        await _context.SaveChangesAsync();
 
-    TempData["Success"] = "Refund approved successfully";
+        TempData["Success"] = "Refund approved successfully";
         return RedirectToAction(nameof(Refunds));
     }
 
-  [HttpPost("Refunds/{id}/Reject")]
+    [HttpPost("Refunds/{id}/Reject")]
     public async Task<IActionResult> RejectRefund(Guid id, [FromForm] string reason)
     {
-  var refund = await _context.RefundRequests
-    .Include(r => r.Order)
-.ThenInclude(o => o.Customer)
-     .FirstOrDefaultAsync(r => r.Id == id);
+        var refund = await _context.RefundRequests
+          .Include(r => r.Order)
+      .ThenInclude(o => o.Customer)
+           .FirstOrDefaultAsync(r => r.Id == id);
 
-   if (refund == null)
-     return NotFound();
+        if (refund == null)
+            return NotFound();
 
-  refund.Status = "Rejected";
+        refund.Status = "Rejected";
         refund.ProcessedAt = DateTime.UtcNow;
 
-  // Create notification
-    var notification = new Notification
-  {
-      UserId = refund.Order.CustomerId,
-   Title = "تم رفض طلب الاسترداد",
-  Message = $"عذراً، تم رفض طلب الاسترداد. السبب: {reason}",
-Type = "Warning",
-    SentAt = DateTime.UtcNow
- };
+        // Create notification
+        var notification = new Notification
+        {
+            UserId = refund.Order.CustomerId,
+            Title = "تم رفض طلب الاسترداد",
+            Message = $"عذراً، تم رفض طلب الاسترداد. السبب: {reason}",
+            Type = "Warning",
+            SentAt = DateTime.UtcNow
+        };
         _context.Notifications.Add(notification);
 
-      await LogAdminAction("Refund Rejected", $"Refund {id} rejected. Reason: {reason}", "RefundRequest");
-    await _context.SaveChangesAsync();
+        await LogAdminAction("Refund Rejected", $"Refund {id} rejected. Reason: {reason}", "RefundRequest");
+        await _context.SaveChangesAsync();
 
         TempData["Info"] = "Refund rejected";
-      return RedirectToAction(nameof(Refunds));
+        return RedirectToAction(nameof(Refunds));
     }
 
     // ============================================
     // 8. REVIEW MODERATION
     // ============================================
 
- [HttpGet("Reviews")]
+    [HttpGet("Reviews")]
     public async Task<IActionResult> Reviews([FromQuery] string? filter, [FromQuery] int page = 1)
     {
         var query = _context.Reviews
     .Include(r => r.RatingDimensions)
      .AsQueryable();
 
-    if (filter == "Flagged")
+        if (filter == "Flagged")
         {
-       query = query.Where(r => r.Rating <= 2);
+            query = query.Where(r => r.Rating <= 2);
         }
 
         var pageSize = 20;
@@ -816,26 +816,26 @@ Type = "Warning",
         {
             Reviews = reviews,
             CurrentPage = page,
-    TotalPages = (int)Math.Ceiling(totalReviews / (double)pageSize),
-       Filter = filter
+            TotalPages = (int)Math.Ceiling(totalReviews / (double)pageSize),
+            Filter = filter
         };
 
         return View(viewModel);
     }
 
     [HttpPost("Reviews/{id}/Delete")]
- public async Task<IActionResult> DeleteReview(Guid id, [FromForm] string reason)
+    public async Task<IActionResult> DeleteReview(Guid id, [FromForm] string reason)
     {
         var review = await _context.Reviews.FindAsync(id);
-   if (review == null)
-   return NotFound();
+        if (review == null)
+            return NotFound();
 
-     review.IsDeleted = true;
+        review.IsDeleted = true;
 
         await LogAdminAction("Review Deleted", $"Review {id} deleted. Reason: {reason}", "Review");
-      await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
 
-  return Json(new { success = true, message = "Review deleted successfully" });
+        return Json(new { success = true, message = "Review deleted successfully" });
     }
 
     // ============================================
@@ -843,120 +843,120 @@ Type = "Warning",
     // ============================================
 
     [HttpGet("Analytics")]
- public async Task<IActionResult> Analytics()
+    public async Task<IActionResult> Analytics()
     {
-     var viewModel = new AnalyticsViewModel
- {
- // User Analytics
-            TotalUsers = await _context.Users.CountAsync(),
-       NewUsersThisMonth = await _context.Users
-        .Where(u => u.CreatedAt >= DateTime.UtcNow.AddMonths(-1))
-        .CountAsync(),
-   
-          // Order Analytics
-        TotalOrders = await _context.Orders.CountAsync(),
-    CompletedOrders = await _context.Orders
-       .Where(o => o.Status == OrderStatus.Delivered)
-.CountAsync(),
-          
-     // Revenue Analytics
- TotalRevenue = await _context.Payment
-    .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
-.SumAsync(p => (decimal?)p.Amount) ?? 0,
-     RevenueThisMonth = await _context.Payment
-      .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-1))
-    .SumAsync(p => (decimal?)p.Amount) ?? 0,
- 
-   // Tailor Performance - Calculate dynamically
-     TopTailors = await _context.TailorProfiles
-.Include(t => t.User)
-  .Include(t => t.Reviews)
- .Include(t => t.Payments)
-   .Where(t => t.IsVerified)
-         .Select(t => new TailorPerformanceDto
-    {
-         TailorId = t.Id,
-        TailorName = t.FullName ?? t.User.Email,
-  ShopName = t.ShopName,
-     AverageRating = t.Reviews.Any() ? (decimal)t.Reviews.Average(r => r.Rating) : 0m,
-     TotalOrders = _context.Orders.Count(o => o.TailorId == t.Id && o.Status == OrderStatus.Delivered),
-Revenue = t.Payments
-    .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
-       .Sum(p => (decimal?)p.Amount) ?? 0
-     })
-   .OrderByDescending(t => t.AverageRating)
-  .ThenByDescending(t => t.Revenue)
-  .Take(10)
-.ToListAsync(),
- 
-  // Monthly Revenue Chart
-        MonthlyRevenue = await _context.Payment
-           .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-12))
-.GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
-  .Select(g => new MonthlyRevenueDto
+        var viewModel = new AnalyticsViewModel
         {
-   Year = g.Key.Year,
- Month = g.Key.Month,
-    Revenue = g.Sum(p => p.Amount)
-   })
-   .OrderBy(m => m.Year).ThenBy(m => m.Month)
-           .ToListAsync()
-    };
+            // User Analytics
+            TotalUsers = await _context.Users.CountAsync(),
+            NewUsersThisMonth = await _context.Users
+           .Where(u => u.CreatedAt >= DateTime.UtcNow.AddMonths(-1))
+           .CountAsync(),
 
-return View(viewModel);
- }
+            // Order Analytics
+            TotalOrders = await _context.Orders.CountAsync(),
+            CompletedOrders = await _context.Orders
+          .Where(o => o.Status == OrderStatus.Delivered)
+   .CountAsync(),
 
-    // ============================================
- // 10. NOTIFICATIONS
-    // ============================================
+            // Revenue Analytics
+            TotalRevenue = await _context.Payment
+       .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
+   .SumAsync(p => (decimal?)p.Amount) ?? 0,
+            RevenueThisMonth = await _context.Payment
+         .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-1))
+       .SumAsync(p => (decimal?)p.Amount) ?? 0,
 
- [HttpGet("Notifications")]
-    public async Task<IActionResult> Notifications()
-    {
-   var notifications = await _context.Notifications
-     .Include(n => n.User)
-   .OrderByDescending(n => n.SentAt)
-      .Take(100)
-        .ToListAsync();
+            // Tailor Performance - Calculate dynamically
+            TopTailors = await _context.TailorProfiles
+   .Include(t => t.User)
+     .Include(t => t.Reviews)
+    .Include(t => t.Payments)
+      .Where(t => t.IsVerified)
+            .Select(t => new TailorPerformanceDto
+            {
+                TailorId = t.Id,
+                TailorName = t.FullName ?? t.User.Email,
+                ShopName = t.ShopName,
+                AverageRating = t.Reviews.Any() ? (decimal)t.Reviews.Average(r => r.Rating) : 0m,
+                TotalOrders = _context.Orders.Count(o => o.TailorId == t.Id && o.Status == OrderStatus.Delivered),
+                Revenue = t.Payments
+       .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
+          .Sum(p => (decimal?)p.Amount) ?? 0
+            })
+      .OrderByDescending(t => t.AverageRating)
+     .ThenByDescending(t => t.Revenue)
+     .Take(10)
+   .ToListAsync(),
 
-return View(notifications);
+            // Monthly Revenue Chart
+            MonthlyRevenue = await _context.Payment
+              .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed && p.PaidAt >= DateTimeOffset.UtcNow.AddMonths(-12))
+   .GroupBy(p => new { p.PaidAt.Year, p.PaidAt.Month })
+     .Select(g => new MonthlyRevenueDto
+     {
+         Year = g.Key.Year,
+         Month = g.Key.Month,
+         Revenue = g.Sum(p => p.Amount)
+     })
+      .OrderBy(m => m.Year).ThenBy(m => m.Month)
+              .ToListAsync()
+        };
+
+        return View(viewModel);
     }
 
-  [HttpPost("Notifications/Send")]
+    // ============================================
+    // 10. NOTIFICATIONS
+    // ============================================
+
+    [HttpGet("Notifications")]
+    public async Task<IActionResult> Notifications()
+    {
+        var notifications = await _context.Notifications
+          .Include(n => n.User)
+        .OrderByDescending(n => n.SentAt)
+           .Take(100)
+             .ToListAsync();
+
+        return View(notifications);
+    }
+
+    [HttpPost("Notifications/Send")]
     public async Task<IActionResult> SendNotification([FromForm] SendNotificationDto dto)
     {
         // Get target users
         var userQuery = _context.Users.AsQueryable();
 
-if (dto.TargetType == "Role")
-     {
-      userQuery = userQuery.Where(u => u.Role.Name == dto.TargetValue);
+        if (dto.TargetType == "Role")
+        {
+            userQuery = userQuery.Where(u => u.Role.Name == dto.TargetValue);
         }
-    else if (dto.TargetType == "Specific")
-      {
-var userId = Guid.Parse(dto.TargetValue);
-          userQuery = userQuery.Where(u => u.Id == userId);
+        else if (dto.TargetType == "Specific")
+        {
+            var userId = Guid.Parse(dto.TargetValue);
+            userQuery = userQuery.Where(u => u.Id == userId);
         }
 
-     var targetUsers = await userQuery.ToListAsync();
+        var targetUsers = await userQuery.ToListAsync();
 
- foreach (var user in targetUsers)
-     {
-          var notification = new Notification
-      {
-      UserId = user.Id,
-             Title = dto.Title,
-          Message = dto.Message,
-         Type = dto.Type,
-     SentAt = DateTime.UtcNow
+        foreach (var user in targetUsers)
+        {
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = dto.Title,
+                Message = dto.Message,
+                Type = dto.Type,
+                SentAt = DateTime.UtcNow
             };
-    _context.Notifications.Add(notification);
+            _context.Notifications.Add(notification);
         }
 
         await LogAdminAction("Notification Sent", $"Sent '{dto.Title}' to {targetUsers.Count} users", "Notification");
         await _context.SaveChangesAsync();
 
-   TempData["Success"] = $"Notification sent to {targetUsers.Count} users";
+        TempData["Success"] = $"Notification sent to {targetUsers.Count} users";
         return RedirectToAction(nameof(Notifications));
     }
 
@@ -966,44 +966,44 @@ var userId = Guid.Parse(dto.TargetValue);
 
     [HttpGet("AuditLogs")]
     public async Task<IActionResult> AuditLogs([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] int page = 1)
-  {
-     var query = _context.ActivityLogs.AsQueryable();
+    {
+        var query = _context.ActivityLogs.AsQueryable();
 
- if (startDate.HasValue)
-  query = query.Where(a => a.CreatedAt >= startDate.Value);
+        if (startDate.HasValue)
+            query = query.Where(a => a.CreatedAt >= startDate.Value);
 
-     if (endDate.HasValue)
-   query = query.Where(a => a.CreatedAt <= endDate.Value);
+        if (endDate.HasValue)
+            query = query.Where(a => a.CreatedAt <= endDate.Value);
 
-   var pageSize = 50;
-     var logs = await query
-        .OrderByDescending(a => a.CreatedAt)
-   .Skip((page - 1) * pageSize)
-    .Take(pageSize)
-      .Include(a => a.User)
-    .Select(a => new AuditLogDto
-   {
- Action = a.Action,
- Details = a.Details ?? "",
-          PerformedBy = a.User != null ? a.User.Email : "Unknown",
-        Timestamp = a.CreatedAt,
-      IpAddress = a.IpAddress
-  })
-  .ToListAsync();
+        var pageSize = 50;
+        var logs = await query
+           .OrderByDescending(a => a.CreatedAt)
+      .Skip((page - 1) * pageSize)
+       .Take(pageSize)
+         .Include(a => a.User)
+       .Select(a => new AuditLogDto
+       {
+           Action = a.Action,
+           Details = a.Details ?? "",
+           PerformedBy = a.User != null ? a.User.Email : "Unknown",
+           Timestamp = a.CreatedAt,
+           IpAddress = a.IpAddress
+       })
+     .ToListAsync();
 
- var totalLogs = await query.CountAsync();
+        var totalLogs = await query.CountAsync();
 
-      var viewModel = new AuditLogViewModel
-   {
-   Logs = logs,
-CurrentPage = page,
-      TotalPages = (int)Math.Ceiling(totalLogs / (double)pageSize),
-   StartDate = startDate,
- EndDate = endDate
-  };
+        var viewModel = new AuditLogViewModel
+        {
+            Logs = logs,
+            CurrentPage = page,
+            TotalPages = (int)Math.Ceiling(totalLogs / (double)pageSize),
+            StartDate = startDate,
+            EndDate = endDate
+        };
 
-     return View(viewModel);
-  }
+        return View(viewModel);
+    }
 
     // ============================================
     // HELPER METHODS
@@ -1011,22 +1011,22 @@ CurrentPage = page,
 
     private async Task LogAdminAction(string action, string details, string entityType = "System")
     {
-     var adminEmail = User.Identity?.Name ?? "Unknown";
-      
-  var log = new ActivityLog
-  {
-       UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null 
-    ? Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
-      : Guid.Empty,
-  Action = action,
-   EntityType = entityType,
-Details = details,
- IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-   CreatedAt = DateTime.UtcNow,
-            IsAdminAction = true // Mark as admin action
-    };
+        var adminEmail = User.Identity?.Name ?? "Unknown";
 
- _context.ActivityLogs.Add(log);
+        var log = new ActivityLog
+        {
+            UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) != null
+          ? Guid.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value)
+            : Guid.Empty,
+            Action = action,
+            EntityType = entityType,
+            Details = details,
+            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            CreatedAt = DateTime.UtcNow,
+            IsAdminAction = true // Mark as admin action
+        };
+
+        _context.ActivityLogs.Add(log);
     }
 }
 
@@ -1034,8 +1034,8 @@ Details = details,
 public class AuditLogDto
 {
     public string Action { get; set; } = string.Empty;
- public string Details { get; set; } = string.Empty;
- public string PerformedBy { get; set; } = string.Empty;
+    public string Details { get; set; } = string.Empty;
+    public string PerformedBy { get; set; } = string.Empty;
     public DateTime Timestamp { get; set; }
     public string? IpAddress { get; set; }
 }
