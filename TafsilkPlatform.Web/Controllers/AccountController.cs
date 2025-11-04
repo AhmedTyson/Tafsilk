@@ -123,7 +123,6 @@ public class AccountController : Controller
         var role = userType?.ToLowerInvariant() switch
         {
             "tailor" => RegistrationRole.Tailor,
-            "corporate" => RegistrationRole.Corporate,
             _ => RegistrationRole.Customer
         };
 
@@ -149,38 +148,42 @@ public class AccountController : Controller
         if (role == RegistrationRole.Tailor)
         {
             TempData["UserId"] = user.Id.ToString();
-            TempData["UserEmail"] = email;
-            TempData["UserName"] = name;
-            TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
+    TempData["UserEmail"] = email;
+    TempData["UserName"] = name;
+        TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
             return RedirectToAction(nameof(CompleteTailorProfile));
-        }
+  }
 
         // ✅ UPDATED: For Customers - Auto-login and redirect to their dashboard
         if (role == RegistrationRole.Customer)
         {
-            // Build claims for authentication
+ // Build claims for authentication
             var claims = new List<Claim>
-            {
-    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
- new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-new Claim(ClaimTypes.Name, name),
-          new Claim("FullName", name),
-           new Claim(ClaimTypes.Role, "Customer")
+        {
+   new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+      new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Name, name),
+                new Claim("FullName", name),
+     new Claim(ClaimTypes.Role, "Customer")
   };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-          new AuthenticationProperties { IsPersistent = true });
+      var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+   var principal = new ClaimsPrincipal(identity);
+       await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+         new AuthenticationProperties { IsPersistent = true });
 
-            _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
+        _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
 
-            TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
-            return RedirectToAction("Customer", "Dashboards");
+    TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
+    return RedirectToAction("Customer", "Dashboards");
         }
 
-        // For Corporates: Show success and redirect to login (requires email verification)
-        TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
+        // REMOVED: Corporate registration flow
+ // For Corporates: Show success and redirect to login (requires email verification)
+        // TempData["RegisterSuccess"] = "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني وتسجيل الدخول";
+     
+      // Default fallback (should not reach here)
+        TempData["SuccessMessage"] = "تم إنشاء الحساب بنجاح!";
         return RedirectToAction("Login");
     }
 
@@ -206,87 +209,55 @@ new Claim(ClaimTypes.Name, name),
         // Sanitize inputs
         email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
 
-        // Validate
-        if (string.IsNullOrWhiteSpace(email))
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-        else if (!IsValidEmail(email))
+     // Validate
+        if (string.IsNullOrWhiteSpace(email)
+ && !ModelState.ContainsKey(nameof(email)))
+    ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+      else if (!IsValidEmail(email))
             ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
 
-        if (string.IsNullOrWhiteSpace(password))
-            ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+    if (string.IsNullOrWhiteSpace(password))
+  ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
 
         if (!ModelState.IsValid)
-            return View();
+          return View();
 
-        var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
+    var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
 
-        // Handle tailor with incomplete profile
+      // Handle tailor with incomplete profile
         if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user != null)
         {
-            _logger.LogWarning("[AccountController] Tailor {Email} attempted login without complete profile. Redirecting to complete profile page.", email);
+      _logger.LogWarning("[AccountController] Tailor {Email} attempted login without complete profile. Redirecting to complete profile page.", email);
 
-            TempData["UserId"] = user.Id.ToString();
-            TempData["UserEmail"] = user.Email ?? email;
+ TempData["UserId"] = user.Id.ToString();
+TempData["UserEmail"] = user.Email ?? email;
             TempData["UserName"] = user.Email ?? email;
-            TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية antes de تسجيل الدخول";
+   TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية antes de تسجيل الدخول";
 
-            return RedirectToAction(nameof(CompleteTailorProfile));
-        }
+ return RedirectToAction(nameof(CompleteTailorProfile), new { userId = user.Id });
+}
 
         if (!ok || user is null)
         {
-            ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+    ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
             return View();
         }
 
-        // Get full name from profile based on role
-        string fullName = user.Email ?? "مستخدم";
-        var roleName = user.Role?.Name ?? string.Empty;
+        // ✅ FIX: Use AuthService to build claims (avoids concurrent DbContext usage)
+        var claims = await _auth.GetUserClaimsAsync(user);
 
-        if (!string.IsNullOrEmpty(roleName))
-        {
-            switch (roleName.ToLower())
-            {
-                case "customer":
-                    var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-                    if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-                        fullName = customer.FullName;
-                    break;
-                case "tailor":
-                    var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-                    if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-                        fullName = tailor.FullName;
-                    break;
-                case "corporate":
-                    var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
-                    if (corporate != null)
-                        fullName = corporate.ContactPerson ?? corporate.CompanyName ?? user.Email ?? "مستخدم";
-                    break;
-            }
-        }
-
-        // Build claims
-        var claims = new List<Claim>
-        {
-   new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-       new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(ClaimTypes.Name, fullName),
-            new Claim("FullName", fullName)
-        };
-
-        if (!string.IsNullOrEmpty(roleName))
-            claims.Add(new Claim(ClaimTypes.Role, roleName));
-
-        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+ var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-    new AuthenticationProperties { IsPersistent = rememberMe });
+     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+     new AuthenticationProperties { IsPersistent = rememberMe });
 
-        // Redirect to dashboard or return URL
+   var roleName = user.Role?.Name ?? string.Empty;
+        
+   // Redirect to dashboard or return URL
         if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             return Redirect(returnUrl);
 
-        return RedirectToRoleDashboard(roleName);
+     return RedirectToRoleDashboard(roleName);
     }
 
     /// <summary>
@@ -309,71 +280,79 @@ new Claim(ClaimTypes.Name, name),
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> CompleteTailorProfile()
+    public async Task<IActionResult> CompleteTailorProfile(Guid? userId)
     {
+        _logger.LogInformation("[AccountController] CompleteTailorProfile GET accessed. UserId param: {UserId}", userId);
+   
         // Check if coming from registration (unauthenticated)
-        var userIdStr = TempData["UserId"]?.ToString();
+var userIdStr = TempData["UserId"]?.ToString();
 
-        // Keep the data for the POST
-        TempData.Keep("UserId");
+// Keep the data for the POST
+ TempData.Keep("UserId");
         TempData.Keep("UserEmail");
-        TempData.Keep("UserName");
+TempData.Keep("UserName");
+        TempData.Keep("InfoMessage");
 
-        Guid userGuid;
+  Guid userGuid;
         User? user = null;
 
-        // Scenario 1: Unauthenticated tailor (just registered or login redirect)
-        if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
-        {
-            user = await _unitOfWork.Users.GetByIdAsync(userGuid);
-            if (user == null || user.Role?.Name?.ToLower() != "tailor")
-            {
-                TempData["ErrorMessage"] = "حساب غير صالح";
-                return RedirectToAction(nameof(Register));
-            }
-        }
-        // Scenario 2: Authenticated tailor (editing profile after login)
-        else if (User.Identity?.IsAuthenticated == true)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out userGuid))
-                return Unauthorized();
+     // Priority 1: Get from query string parameter (most reliable)
+   if (userId.HasValue && userId.Value != Guid.Empty)
+   {
+     userGuid = userId.Value;
+       _logger.LogInformation("[AccountController] Using UserId from query string: {UserId}", userGuid);
+  }
+ // Priority 2: Get from TempData (fallback)
+      else if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
+     {
+   _logger.LogInformation("[AccountController] Using UserId from TempData: {UserId}", userGuid);
+  }
+        // Priority 3: Check if authenticated tailor (editing profile after login)
+   else if (User.Identity?.IsAuthenticated == true)
+{
+    var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+   if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
+     return Unauthorized();
 
-            user = await _unitOfWork.Users.GetByIdAsync(userGuid);
-            if (user == null)
-                return NotFound();
-
-            // Check if user is a tailor
-            var roleName = User.FindFirstValue(ClaimTypes.Role);
-            if (roleName?.ToLower() != "tailor")
-            {
-                TempData["ErrorMessage"] = "هذه الصفحة مخصصة للخياطين فقط";
-                return RedirectToAction("Index", "Home");
-            }
-        }
-        else
-        {
+     _logger.LogInformation("[AccountController] Using UserId from claims: {UserId}", userGuid);
+   }
+     else
+ {
             // No user ID and not authenticated - redirect to registration
-            TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
-            return RedirectToAction(nameof(Register));
-        }
+        _logger.LogWarning("[AccountController] No UserId available from any source");
+ TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
+     return RedirectToAction(nameof(Register));
+      }
 
-        // CRITICAL: Check if profile already exists (evidence already provided)
+        // ✅ FIX: Use GetUserWithProfileAsync which includes Role navigation property
+      user = await _userRepository.GetUserWithProfileAsync(userGuid);
+ if (user == null || user.Role?.Name?.ToLower() != "tailor")
+     {
+            _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}", 
+                userGuid, user?.Role?.Name ?? "NULL");
+         TempData["ErrorMessage"] = "حساب غير صالح";
+      return RedirectToAction(nameof(Register));
+  }
+
+    _logger.LogInformation("[AccountController] User found: {UserId}, Email: {Email}, Role: {Role}", 
+            user.Id, user.Email, user.Role?.Name);
+
+      // CRITICAL: Check if profile already exists (evidence already provided)
         // This ensures ONE-TIME submission only
         var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
         if (existingProfile != null)
-        {
-            _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to login.", user.Id);
+    {
+ _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to login.", user.Id);
             TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. يمكنك تسجيل الدخول الآن";
-            return RedirectToAction(nameof(Login));
-        }
+return RedirectToAction(nameof(Login));
+  }
 
         var model = new CompleteTailorProfileRequest
-        {
-            UserId = user.Id,
-            Email = TempData["UserEmail"]?.ToString() ?? user.Email,
-            FullName = TempData["UserName"]?.ToString() ?? user.Email
-        };
+      {
+   UserId = user.Id,
+ Email = TempData["UserEmail"]?.ToString() ?? user.Email,
+    FullName = TempData["UserName"]?.ToString() ?? user.Email
+     };
 
         return View(model);
     }
@@ -531,24 +510,43 @@ new Claim(ClaimTypes.Name, name),
                 }
             }
 
-            // Keep user INACTIVE until admin approves
-            user.IsActive = false;
-            user.UpdatedAt = _dateTime.Now;
+            // Keep user ACTIVE so they can use the platform immediately
+       // Admin verification (IsVerified) is checked separately for sensitive features
+            user.IsActive = true; // ✅ FIXED: Allow immediate platform access
+ user.UpdatedAt = _dateTime.Now;
 
-            // Generate email verification token
-            var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+      // Generate email verification token
+     var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
  .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0,32);
 
-            user.EmailVerificationToken = verificationToken;
-            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+       user.EmailVerificationToken = verificationToken;
+       user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
 
-            await _unitOfWork.Users.UpdateAsync(user);
+  await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("[AccountController] Tailor {UserId} completed ONE-TIME profile submission. Awaiting admin review (IsActive=false).", model.UserId);
+    _logger.LogInformation("[AccountController] Tailor {UserId} completed profile submission. User is ACTIVE, profile awaiting verification (IsVerified=false).", model.UserId);
 
-            TempData["RegisterSuccess"] = "تم إكمال ملفك الشخصي بنجاح! سيتم مراجعة طلبك من قبل الإدارة خلال24-48 ساعة. سنرسل لك إشعاراً عند الموافقة على حسابك.";
-            return RedirectToAction(nameof(Login));
+            // ✅ FIX: Auto-login the tailor and redirect to their dashboard
+            // Build claims for authentication
+      var claims = new List<Claim>
+            {
+             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+    new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+                new Claim(ClaimTypes.Name, sanitizedFullName),
+     new Claim("FullName", sanitizedFullName),
+             new Claim(ClaimTypes.Role, "Tailor")
+         };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+         var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+     new AuthenticationProperties { IsPersistent = true });
+
+  _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
+
+        TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن استخدام المنصة. سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
+            return RedirectToAction("Tailor", "Dashboards");
         }
         catch (Exception ex)
         {
@@ -593,18 +591,7 @@ new Claim(ClaimTypes.Name, name),
                 }
             }
 
-            // Try Corporate profile if not found
-            if (imageData == null)
-            {
-                var corporateProfile = await _unitOfWork.Corporates.GetByUserIdAsync(id);
-                if (corporateProfile?.ProfilePictureData != null)
-                {
-                    imageData = corporateProfile.ProfilePictureData;
-                    contentType = corporateProfile.ProfilePictureContentType ?? "image/jpeg";
-                }
-            }
-
-            // Return image or placeholder
+    // Return image or placeholder
             if (imageData != null)
                 return File(imageData, contentType ?? "image/jpeg");
 
@@ -745,7 +732,7 @@ new Claim(ClaimTypes.Name, name),
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult ForgotPassword()
+    public IActionResult ForgottenPassword()
     {
         return View();
     }
@@ -959,24 +946,19 @@ new Claim(ClaimTypes.Name, name),
                 if (!string.IsNullOrEmpty(roleName))
                 {
                     switch (roleName.ToLower())
-                    {
-                        case "customer":
-                            var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
-                            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-                                fullName = customer.FullName;
-                            break;
-                        case "tailor":
-                            var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
-                            if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-                                fullName = tailor.FullName;
-                            break;
-                        case "corporate":
-                            var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(existingUser.Id);
-                            if (corporate != null)
-                                fullName = corporate.ContactPerson ?? corporate.CompanyName ?? existingUser.Email ?? "مستخدم";
-                            break;
-                    }
-                }
+                  {
+    case "customer":
+   var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
+                 if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+             fullName = customer.FullName;
+     break;
+   case "tailor":
+     var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
+      if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+             fullName = tailor.FullName;
+            break;
+        }
+     }
 
                 var userClaims = new List<Claim>
             {
@@ -1105,9 +1087,9 @@ new Claim(ClaimTypes.Name, name),
             // Determine role
             var role = model.UserType?.ToLowerInvariant() switch
             {
-                "tailor" => RegistrationRole.Tailor,
-                "corporate" => RegistrationRole.Corporate,
-                _ => RegistrationRole.Customer
+     "tailor" => RegistrationRole.Tailor,
+     // "corporate" => RegistrationRole.Corporate, // REMOVED: Corporate feature
+         _ => RegistrationRole.Customer
             };
 
             // Create registration request
@@ -1171,11 +1153,6 @@ new Claim(ClaimTypes.Name, name),
                         var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
                         if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
                             fullName = tailor.FullName;
-                        break;
-                    case "corporate":
-                        var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(user.Id);
-                        if (corporate != null)
-                            fullName = corporate.ContactPerson ?? corporate.CompanyName ?? fullName;
                         break;
                 }
             }
@@ -1303,9 +1280,9 @@ new Claim(ClaimTypes.Name, name),
         return (roleName?.ToLowerInvariant()) switch
         {
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
-            "corporate" => RedirectToAction("Corporate", "Dashboards"),
-            "admin" => RedirectToAction("Index", "Admin"),
-            _ => RedirectToAction("Customer", "Dashboards")
+            // "corporate" => RedirectToAction("Corporate", "Dashboards"), // REMOVED: Corporate feature
+       "admin" => RedirectToAction("Index", "Admin"),
+          _ => RedirectToAction("Customer", "Dashboards")
         };
     }
 

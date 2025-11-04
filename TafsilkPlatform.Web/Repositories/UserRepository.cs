@@ -57,12 +57,12 @@ public class UserRepository : EfRepository<User>, IUserRepository
     {
         // Use AsSplitQuery to avoid cartesian explosion with multiple includes
         return await _db.Users
-.AsNoTracking()
+            .AsNoTracking()
             .AsSplitQuery()
-  .Include(u => u.CustomerProfile)
+            .Include(u => u.Role)              // ✅ CRITICAL: Include Role!
+            .Include(u => u.CustomerProfile)
      .Include(u => u.TailorProfile)
-            .Include(u => u.CorporateAccount)
-            .FirstOrDefaultAsync(u => u.Id == id);
+      .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
     }
 
     public async Task UpdateUserStatusAsync(Guid userId, bool isActive)

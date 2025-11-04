@@ -87,10 +87,7 @@ public class ApiAuthController : ControllerBase
         return Ok(new
         {
             success = true,
-            message = request.Role == RegistrationRole.Corporate
-                ? "تم إنشاء الحساب بنجاح. ينتظر موافقة الإدارة" // Account created successfully. Awaiting admin approval
-                : "تم إنشاء الحساب بنجاح. يرجى تسجيل الدخول", // Account created successfully. Please login
-            requiresApproval = request.Role == RegistrationRole.Corporate,
+            message = "تم إنشاء الحساب بنجاح. يرجى تسجيل الدخول", // Account created successfully. Please login
             userId = User?.Id
         });
     }
@@ -151,7 +148,6 @@ public class ApiAuthController : ControllerBase
             string message = roleName switch
             {
                 "tailor" => "حسابك قيد المراجعة من قبل الإدارة. سيتم إشعارك عند الموافقة", // Your account is under admin review. You'll be notified upon approval
-                "corporate" => "حسابك الشركي قيد المراجعة من قبل الإدارة", // Your corporate account is under admin review
                 _ => "حسابك غير نشط. يرجى الاتصال بالدعم" // Your account is inactive. Please contact support
             };
 
@@ -243,17 +239,6 @@ public class ApiAuthController : ControllerBase
                     experienceYears = tailor.ExperienceYears
                 } : null;
                 break;
-
-            case "corporate":
-                var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(userGuid);
-                profileData = corporate != null ? new
-                {
-                    companyName = corporate.CompanyName,
-                    contactPerson = corporate.ContactPerson,
-                    industry = corporate.Industry,
-                    isApproved = corporate.IsApproved
-                } : null;
-                break;
         }
 
         return Ok(new
@@ -336,12 +321,6 @@ public class ApiAuthController : ControllerBase
         if (user.Role?.Name?.ToLower() == "tailor" && user.TailorProfile != null)
         {
             claims.Add(new Claim("IsVerified", user.TailorProfile.IsVerified.ToString()));
-        }
-
-        // Add approval status for corporates
-        if (user.Role?.Name?.ToLower() == "corporate" && user.CorporateAccount != null)
-        {
-            claims.Add(new Claim("IsApproved", user.CorporateAccount.IsApproved.ToString()));
         }
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));

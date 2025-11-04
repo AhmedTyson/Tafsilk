@@ -51,11 +51,6 @@ namespace TafsilkPlatform.Web.Interfaces
         /// Verifies a tailor profile
         /// </summary>
         Task<(bool Succeeded, string? Error)> VerifyTailorAsync(Guid tailorId, bool isVerified);
-        
-        /// <summary>
-   /// Approves a corporate account
-        /// </summary>
-        Task<(bool Succeeded, string? Error)> ApproveCorporateAsync(Guid corporateId, bool isApproved);
 
     /// <summary>
     /// Verifies user email using verification token

@@ -300,22 +300,17 @@ align-items: center;
     }
 
     .role-badge.customer {
-        background: rgba(37, 99, 235, 0.1);
+        background: #28a745;
    color: var(--primary-blue);
     }
 
     .role-badge.tailor {
-        background: rgba(245, 158, 11, 0.1);
+        background: #17a2b8;
         color: var(--warning-yellow);
     }
 
-    .role-badge.corporate {
-        background: rgba(139, 92, 246, 0.1);
-  color: #8b5cf6;
-    }
-
     .role-badge.admin {
-      background: rgba(239, 68, 68, 0.1);
+      background: #dc3545;
         color: var(--danger-red);
  }
 
@@ -507,11 +502,11 @@ align-items: center;
       <div class="filter-group">
        <label class="filter-label">الدور</label>
        <select name="role" class="filter-select">
-      <option value="">الكل</option>
-   <option value="Customer" selected="@(ViewBag.RoleFilter == "Customer")">عميل</option>
-          <option value="Tailor" selected="@(ViewBag.RoleFilter == "Tailor")">خياط</option>
-     <option value="Corporate" selected="@(ViewBag.RoleFilter == "Corporate")">شركة</option>
-         <option value="Admin" selected="@(ViewBag.RoleFilter == "Admin")">مدير</option>
+      <option value="">كل الأدوار</option>
+      <option value="Customer">عميل</option>
+  <option value="Tailor">خياط</option>
+  @* <option value="Corporate">شركة</option> *@ @* REMOVED: Corporate feature *@
+      <option value="Admin">مدير</option>
         </select>
         </div>
 
@@ -591,7 +586,6 @@ align-items: center;
        <h4>
         @(user.CustomerProfile?.FullName ?? 
       user.TailorProfile?.FullName ?? 
-        user.CorporateAccount?.CompanyName ?? 
        "مستخدم")
      </h4>
        <p>@user.Email</p>
@@ -605,8 +599,7 @@ align-items: center;
             {
     "Customer" => "عميل",
             "Tailor" => "خياط",
-          "Corporate" => "شركة",
-   "Admin" => "مدير",
+          "Admin" => "مدير",
              _ => "غير محدد"
           };
      }

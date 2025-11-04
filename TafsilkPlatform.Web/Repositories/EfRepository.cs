@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Specifications;
 
 namespace TafsilkPlatform.Web.Repositories;
 
@@ -65,28 +64,5 @@ return Task.CompletedTask;
     {
         var query = predicate is null ? _set.AsQueryable() : _set.Where(predicate);
         return await query.AsNoTracking().Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
-    }
-
-    // New: Specification pattern support
-    public virtual async Task<T?> GetBySpecAsync(ISpecification<T> spec)
-    {
-        var query = SpecificationEvaluator.GetQuery(_set.AsQueryable(), spec);
-        return await query.FirstOrDefaultAsync();
-    }
-
-    public virtual async Task<IEnumerable<T>> ListAsync(ISpecification<T> spec)
-    {
-        var query = SpecificationEvaluator.GetQuery(_set.AsQueryable(), spec);
-        return await query.AsNoTracking().ToListAsync();
-    }
-
-    public virtual async Task<int> CountAsync(ISpecification<T> spec)
-  {
-        var query = _set.AsQueryable();
-        if (spec.Criteria != null)
-        {
-            query = query.Where(spec.Criteria);
-        }
-        return await query.CountAsync();
     }
 }

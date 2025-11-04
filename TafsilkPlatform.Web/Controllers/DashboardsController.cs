@@ -34,13 +34,6 @@ public class DashboardsController : Controller
         return View();
     }
 
-    [Authorize(Roles = "Corporate")]
-    public IActionResult Corporate()
-    {
-        ViewData["Title"] = "لوحة الشركة";
-        return View();
-    }
-
     [Authorize(Roles = "Tailor")]
     public async Task<IActionResult> Tailor()
     {
@@ -97,24 +90,15 @@ public class DashboardsController : Controller
        var completedOrders = orders.Where(o => o.Status == OrderStatus.Delivered).ToList();
      model.TotalRevenue = (decimal)completedOrders.Sum(o => o.TotalPrice);
 
-        var monthlyOrders = completedOrders
+     var monthlyOrders = completedOrders
    .Where(o => o.CreatedAt >= DateTimeOffset.UtcNow.AddMonths(-1))
          .ToList();
-            model.MonthlyRevenue = (decimal)monthlyOrders.Sum(o => o.TotalPrice);
+      model.MonthlyRevenue = (decimal)monthlyOrders.Sum(o => o.TotalPrice);
 
- // Get wallet balance (if Wallet table exists)
-   try
-      {
- var wallet = await _context.Set<Wallet>()
-    .FirstOrDefaultAsync(w => w.UserId == tailor.UserId);
-        model.WalletBalance = wallet?.Balance ?? 0;
-      }
-      catch
-        {
-      model.WalletBalance = 0;
-        }
+  // Wallet balance not available (Wallet feature removed)
+            model.WalletBalance = 0;
 
-          // Get pending payments
+ // Get pending payments
             var pendingPayments = await _context.Payment
      .Where(p => p.TailorId == tailor.Id && 
     p.PaymentStatus == Enums.PaymentStatus.Pending)

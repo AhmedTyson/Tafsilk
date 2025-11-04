@@ -24,8 +24,4 @@ public class RegisterRequest
     public string? ShopName { get; set; }
     public string? Address { get; set; }
     public string? City { get; set; }
-
-    // Corporate-specific fields
-    public string? CompanyName { get; set; }
- public string? ContactPerson { get; set; }
 }

@@ -31,21 +31,15 @@
    <h3 class="mb-1">
         @(Model.CustomerProfile?.FullName ?? 
   Model.TailorProfile?.FullName ?? 
-     Model.CorporateAccount?.CompanyName ?? 
           "مستخدم")
         </h3>
   <p class="text-muted mb-3">@Model.Email</p>
 
         @{
   var roleClass = Model.Role?.Name?.ToLower() ?? "customer";
-              var roleText = Model.Role?.Name switch
-           {
-"Customer" => "عميل",
-     "Tailor" => "خياط",
-              "Corporate" => "شركة",
-   "Admin" => "مدير",
- _ => "غير محدد"
- };
+              var roleText = Model.Role?.Name == "Customer" ? "عميل" :
+   Model.Role?.Name == "Tailor" ? "خياط" :
+      Model.Role?.Name == "Admin" ? "مدير" : "مستخدم";
          }
  <span class="badge bg-primary mb-3">@roleText</span>
 
@@ -250,38 +244,41 @@ else
         <td>@Model.TailorProfile.PortfolioImages.Count(p => !p.IsDeleted)</td>
              </tr>
    }
+             @* REMOVED: Corporate Profile Section - Corporate feature has been removed
              @if (Model.CorporateAccount != null)
-             {
-      <tr>
+         {
+       <tr>
    <th>اسم الشركة:</th>
     <td>@(Model.CorporateAccount.CompanyName ?? "غير محدد")</td>
              </tr>
     <tr>
-     <th>الشخص المسؤول:</th>
+  <th>الشخص المسؤول:</th>
       <td>@(Model.CorporateAccount.ContactPerson ?? "غير محدد")</td>
     </tr>
-     <tr>
+           <tr>
   <th>المجال الصناعي:</th>
            <td>@(Model.CorporateAccount.Industry ?? "غير محدد")</td>
-        </tr>
-      <tr>
+    </tr>
+       <tr>
    <th>الرقم الضريبي:</th>
   <td>@(Model.CorporateAccount.TaxNumber ?? "غير محدد")</td>
        </tr>
-     <tr>
-                <th>حالة الموافقة:</th>
+      <tr>
+       <th>حالة الموافقة:</th>
   <td>
  @if (Model.CorporateAccount.IsApproved)
-           {
-        <span class="badge bg-success">موافق عليه</span>
-         }
-             else
-                    {
-    <span class="badge bg-warning">قيد المراجعة</span>
+     {
+  <span class="badge badge-success">تمت الموافقة</span>
+ }
+            else
+  {
+           <span class="badge badge-warning">بانتظار الموافقة</span>
      }
-                  </td>
-                </tr>
+      </td>
+   </tr>
        }
+*@
+
          </table>
 
                @if (Model.UserAddresses.Any())

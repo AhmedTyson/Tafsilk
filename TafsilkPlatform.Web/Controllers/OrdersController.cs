@@ -158,7 +158,7 @@ return RedirectToAction("SearchTailors", "Profiles");
                 OrderId = Guid.NewGuid(),
     CustomerId = customer.Id,
         TailorId = model.TailorId,
-Discription = model.Description ?? string.Empty,
+  Description = model.Description ?? string.Empty, // ✅ FIXED: Use correct property name
          OrderType = model.ServiceType ?? "خدمة عامة",
      Status = OrderStatus.Pending,
                 CreatedAt = DateTimeOffset.UtcNow,
@@ -333,7 +333,7 @@ _db.OrderImages.Add(orderImage);
       {
          OrderId = order.OrderId,
          OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(),
-           Description = order.Discription,
+     Description = order.Description, // ✅ FIXED: Use correct property name
      ServiceType = order.OrderType,
     Status = order.Status,
      StatusDisplay = GetStatusDisplay(order.Status),

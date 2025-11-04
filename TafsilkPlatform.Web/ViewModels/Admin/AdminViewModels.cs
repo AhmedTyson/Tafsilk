@@ -10,14 +10,16 @@ public class DashboardHomeViewModel
  public int TotalUsers { get; set; }
     public int TotalCustomers { get; set; }
     public int TotalTailors { get; set; }
-    public int TotalCorporate { get; set; }
     public int PendingTailorVerifications { get; set; }
     public int PendingPortfolioReviews { get; set; }
     public int ActiveOrders { get; set; }
-    public int OpenDisputes { get; set; }
- public int PendingRefunds { get; set; }
     public decimal TotalRevenue { get; set; }
     public List<ActivityLogDto> RecentActivity { get; set; } = new();
+}
+
+// Alias for backward compatibility
+public class ActivityLogViewModel : ActivityLogDto
+{
 }
 
 public class ActivityLogDto
@@ -75,28 +77,6 @@ public class OrderManagementViewModel
 }
 
 // ============================================
-// DISPUTE MANAGEMENT
-// ============================================
-public class DisputeManagementViewModel
-{
-    public List<Dispute> Disputes { get; set; } = new();
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public string? SelectedStatus { get; set; }
-}
-
-// ============================================
-// REFUND MANAGEMENT
-// ============================================
-public class RefundManagementViewModel
-{
-    public List<RefundRequest> Refunds { get; set; } = new();
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public string? SelectedStatus { get; set; }
-}
-
-// ============================================
 // REVIEW MODERATION
 // ============================================
 public class ReviewModerationViewModel
@@ -136,7 +116,7 @@ public class MonthlyRevenueDto
 {
     public int Year { get; set; }
     public int Month { get; set; }
-    public decimal Revenue { get; set; }
+ public decimal Revenue { get; set; }
     
     public string MonthName => new DateTime(Year, Month, 1).ToString("MMMM yyyy");
 }
@@ -146,7 +126,7 @@ public class MonthlyRevenueDto
 // ============================================
 public class SendNotificationDto
 {
-    public string Title { get; set; } = string.Empty;
+ public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string Type { get; set; } = "Info"; // Info, Success, Warning, Error
     public string TargetType { get; set; } = "All"; // All, Role, Specific
@@ -158,7 +138,7 @@ public class SendNotificationDto
 // ============================================
 public class AuditLogViewModel
 {
-    public List<TafsilkPlatform.Web.Controllers.AuditLogDto> Logs { get; set; } = new();
+    public List<ActivityLogDto> Logs { get; set; } = new(); // Use local ActivityLogDto instead
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public DateTime? StartDate { get; set; }

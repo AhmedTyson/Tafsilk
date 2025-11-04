@@ -14,7 +14,7 @@ namespace TafsilkPlatform.Web.Models
         [Key]
         [Required]
         public Guid OrderId { get; set; }
-        public required string Discription { get; set; }
+        public required string Description { get; set; } // ✅ FIXED: Corrected typo from "Discription"
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? DueDate { get; set; }
         public double TotalPrice { get; set; }
@@ -29,7 +29,6 @@ namespace TafsilkPlatform.Web.Models
         public required TailorProfile Tailor { get; set; }
 
         public ICollection<OrderImages> orderImages { get; set; } = new List<OrderImages>();
-        public ICollection<Quote> quote { get; set; } = new List<Quote>();
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }

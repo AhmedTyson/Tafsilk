@@ -38,9 +38,9 @@ public static class ClaimsPrincipalExtensions
  }
 
     /// <summary>
-/// Checks if user is a Corporate
+    /// Checks if user is a Corporate
     /// </summary>
-    public static bool IsCorporate(this ClaimsPrincipal user)
+    /*public static bool IsCorporate(this ClaimsPrincipal user)
     {
         return user.IsInRole("Corporate");
     }
@@ -58,6 +58,7 @@ public static class ClaimsPrincipalExtensions
        bool.TryParse(isApprovedClaim.Value, out bool isApproved) && 
         isApproved;
  }
+    */
 
     /// <summary>
     /// Checks if user is an Admin
@@ -109,19 +110,23 @@ return null;
     }
 
     /// <summary>
-/// Gets company name for corporate users
+    /// Gets tailor verification status
     /// </summary>
-  public static string? GetCompanyName(this ClaimsPrincipal user)
+    public static bool IsTailorVerified(this ClaimsPrincipal user)
     {
- return user.FindFirst("CompanyName")?.Value;
+ if (!user.IsTailor())
+     return false;
+
+   var isVerifiedClaim = user.FindFirst("IsVerified");
+     return isVerifiedClaim != null && bool.TryParse(isVerifiedClaim.Value, out bool isVerified) && isVerified;
     }
 
     /// <summary>
-    /// Checks if user is a service provider (Tailor or Corporate)
+    /// Checks if user is a service provider (Tailor only - Corporate feature removed)
     /// </summary>
     public static bool IsServiceProvider(this ClaimsPrincipal user)
     {
-        return user.IsTailor() || user.IsCorporate();
+  return user.IsTailor(); // || user.IsCorporate(); // REMOVED: Corporate
     }
 
     /// <summary>

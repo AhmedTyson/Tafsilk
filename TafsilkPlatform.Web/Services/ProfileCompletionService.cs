@@ -1,6 +1,5 @@
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
 using Microsoft.EntityFrameworkCore;
+using TafsilkPlatform.Web.Data;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -11,7 +10,7 @@ public interface IProfileCompletionService
 {
     Task<ProfileCompletionResult> GetCustomerCompletionAsync(Guid userId);
     Task<ProfileCompletionResult> GetTailorCompletionAsync(Guid userId);
-    Task<ProfileCompletionResult> GetCorporateCompletionAsync(Guid userId);
+    // Task<ProfileCompletionResult> GetCorporateCompletionAsync(Guid userId);
 }
 
 /// <summary>
@@ -20,7 +19,7 @@ public interface IProfileCompletionService
 public class ProfileCompletionResult
 {
     public int CompletionPercentage { get; set; }
-  public List<ProfileCompletionItem> Items { get; set; } = new();
+    public List<ProfileCompletionItem> Items { get; set; } = new();
     public List<string> MissingFields { get; set; } = new();
     public bool IsComplete => CompletionPercentage >= 100;
 }
@@ -49,7 +48,7 @@ public class ProfileCompletionService : IProfileCompletionService
         _db = db;
     }
 
-public async Task<ProfileCompletionResult> GetCustomerCompletionAsync(Guid userId)
+    public async Task<ProfileCompletionResult> GetCustomerCompletionAsync(Guid userId)
     {
         var customer = await _db.CustomerProfiles
       .Include(c => c.User)
@@ -60,7 +59,7 @@ public async Task<ProfileCompletionResult> GetCustomerCompletionAsync(Guid userI
       .FirstOrDefaultAsync(u => u.Id == userId);
 
         if (customer == null || user == null)
-      {
+        {
             return new ProfileCompletionResult();
         }
 
@@ -122,19 +121,19 @@ new ProfileCompletionItem
        }
         };
 
-     var completedWeight = items.Where(i => i.IsCompleted).Sum(i => i.Weight);
+        var completedWeight = items.Where(i => i.IsCompleted).Sum(i => i.Weight);
         var totalWeight = items.Sum(i => i.Weight);
         var percentage = (int)((double)completedWeight / totalWeight * 100);
 
         var missingFields = items.Where(i => !i.IsCompleted).Select(i => i.Label).ToList();
 
-return new ProfileCompletionResult
+        return new ProfileCompletionResult
         {
-   CompletionPercentage = percentage,
-   Items = items,
-     MissingFields = missingFields
+            CompletionPercentage = percentage,
+            Items = items,
+            MissingFields = missingFields
         };
-}
+    }
 
     public async Task<ProfileCompletionResult> GetTailorCompletionAsync(Guid userId)
     {
@@ -151,7 +150,7 @@ return new ProfileCompletionResult
             return new ProfileCompletionResult();
         }
 
-    var items = new List<ProfileCompletionItem>
+        var items = new List<ProfileCompletionItem>
         {
       new ProfileCompletionItem
      {
@@ -234,113 +233,31 @@ Label = "الخدمات المقدمة",
             }
         };
 
-   var completedWeight = items.Where(i => i.IsCompleted).Sum(i => i.Weight);
-        var totalWeight = items.Sum(i => i.Weight);
-   var percentage = (int)((double)completedWeight / totalWeight * 100);
-
-        var missingFields = items.Where(i => !i.IsCompleted).Select(i => i.Label).ToList();
-
-  return new ProfileCompletionResult
-        {
-        CompletionPercentage = percentage,
-  Items = items,
-      MissingFields = missingFields
-        };
-    }
-
-    public async Task<ProfileCompletionResult> GetCorporateCompletionAsync(Guid userId)
-    {
-      var corporate = await _db.CorporateAccounts
-     .Include(c => c.User)
-     .FirstOrDefaultAsync(c => c.UserId == userId);
-
-        var user = await _db.Users
-            .Include(u => u.UserAddresses)
-     .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (corporate == null || user == null)
-        {
- return new ProfileCompletionResult();
-        }
-
-      var items = new List<ProfileCompletionItem>
-        {
-    new ProfileCompletionItem
-       {
-        Label = "اسم الشركة",
-  IsCompleted = !string.IsNullOrWhiteSpace(corporate.CompanyName),
-           Weight = 20,
-              Icon = "fa-building"
-     },
-       new ProfileCompletionItem
-      {
-     Label = "اسم المسؤول",
-        IsCompleted = !string.IsNullOrWhiteSpace(corporate.ContactPerson),
-         Weight = 15,
-             ActionUrl = "/Profiles/EditCorporateProfile",
-        Icon = "fa-user-tie"
-        },
- new ProfileCompletionItem
-  {
-      Label = "رقم الهاتف",
-                IsCompleted = !string.IsNullOrWhiteSpace(user.PhoneNumber),
-                Weight = 15,
-         ActionUrl = "/Profiles/EditCorporateProfile",
-    Icon = "fa-phone"
-},
-          new ProfileCompletionItem
-    {
- Label = "البريد الإلكتروني مؤكد",
-            IsCompleted = user.EmailVerified,
-          Weight = 10,
-             ActionUrl = !user.EmailVerified ? "/Account/ResendVerificationEmail" : null,
-    Icon = "fa-envelope-open-text"
-    },
-       new ProfileCompletionItem
-      {
-      Label = "المجال الصناعي",
-           IsCompleted = !string.IsNullOrWhiteSpace(corporate.Industry),
-                Weight = 10,
- ActionUrl = "/Profiles/EditCorporateProfile",
-    Icon = "fa-industry"
-            },
- new ProfileCompletionItem
-     {
-       Label = "الرقم الضريبي",
-         IsCompleted = !string.IsNullOrWhiteSpace(corporate.TaxNumber),
-       Weight = 10,
-             ActionUrl = "/Profiles/EditCorporateProfile",
-   Icon = "fa-file-invoice"
- },
-          new ProfileCompletionItem
-            {
-  Label = "عنوان الشركة",
-   IsCompleted = user.UserAddresses.Any(),
-                Weight = 15,
-        ActionUrl = "/Profiles/Corporate/Addresses",
-         Icon = "fa-map-marker-alt"
-            },
-       new ProfileCompletionItem
-            {
-       Label = "نبذة عن الشركة",
-                IsCompleted = !string.IsNullOrWhiteSpace(corporate.Bio),
-      Weight = 5,
-      ActionUrl = "/Profiles/EditCorporateProfile",
-    Icon = "fa-info-circle"
-    }
-     };
-
         var completedWeight = items.Where(i => i.IsCompleted).Sum(i => i.Weight);
         var totalWeight = items.Sum(i => i.Weight);
         var percentage = (int)((double)completedWeight / totalWeight * 100);
 
         var missingFields = items.Where(i => !i.IsCompleted).Select(i => i.Label).ToList();
 
- return new ProfileCompletionResult
+        return new ProfileCompletionResult
         {
-       CompletionPercentage = percentage,
+            CompletionPercentage = percentage,
             Items = items,
             MissingFields = missingFields
         };
+    }
+
+    // REMOVED: GetCorporateCompletionAsync - Corporate feature removed
+    public async Task<ProfileCompletionResult> GetCorporateCompletionAsync(Guid userId)
+    {
+        // Corporate feature has been removed
+      // Return empty result
+        await Task.CompletedTask;
+      return new ProfileCompletionResult
+        {
+     CompletionPercentage = 0,
+  Items = new List<ProfileCompletionItem>(),
+            MissingFields = new List<string>()
+  };
     }
 }

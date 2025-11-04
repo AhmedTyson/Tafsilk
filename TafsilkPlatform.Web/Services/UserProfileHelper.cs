@@ -58,8 +58,7 @@ if (string.IsNullOrEmpty(roleName))
   return roleName?.ToLower() switch
             {
        "customer" => await GetCustomerNameAsync(userId),
-        "tailor" => await GetTailorNameAsync(userId),
-    "corporate" => await GetCorporateNameAsync(userId),
+    "tailor" => await GetTailorNameAsync(userId),
        _ => "مستخدم"
             };
         }
@@ -91,13 +90,6 @@ if (string.IsNullOrEmpty(roleName))
             {
                 return (tailor.ProfilePictureData, tailor.ProfilePictureContentType ?? "image/jpeg");
    }
-
-          // Try Corporate profile
-    var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(userId);
-    if (corporate?.ProfilePictureData != null)
-       {
-           return (corporate.ProfilePictureData, corporate.ProfilePictureContentType ?? "image/jpeg");
-            }
 
      return (null, null);
         }
@@ -172,39 +164,17 @@ var user = await _unitOfWork.Users.GetByIdAsync(userId);
     return user?.Email ?? "مستخدم";
     }
 
-    private async Task<string> GetCorporateNameAsync(Guid userId)
-    {
-      var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(userId);
-        if (corporate != null)
-        {
-            return corporate.ContactPerson ?? corporate.CompanyName ?? "";
-  }
-
-        // Fallback to user email
-        var user = await _unitOfWork.Users.GetByIdAsync(userId);
-        return user?.Email ?? "مستخدم";
-    }
-
     private async Task AddRoleSpecificClaimsAsync(List<Claim> claims, Guid userId, string? roleName)
     {
-  switch (roleName?.ToLower())
-   {
-   case "tailor":
-   var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(userId);
-     if (tailor != null)
+        switch (roleName?.ToLower())
         {
-           claims.Add(new Claim("IsVerified", tailor.IsVerified.ToString()));
-       }
- break;
-
-          case "corporate":
-   var corporate = await _unitOfWork.Corporates.GetByUserIdAsync(userId);
-    if (corporate != null)
-                {
-         claims.Add(new Claim("CompanyName", corporate.CompanyName ?? string.Empty));
-          claims.Add(new Claim("IsApproved", corporate.IsApproved.ToString()));
-        }
-      break;
+            case "tailor":
+       var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(userId);
+    if (tailor != null)
+     {
+       claims.Add(new Claim("IsVerified", tailor.IsVerified.ToString()));
+      }
+   break;
         }
     }
 

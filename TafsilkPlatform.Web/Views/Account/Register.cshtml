@@ -71,11 +71,13 @@
      <i class="fas fa-user" aria-hidden="true"></i>
      <span>عميل</span>
 </button>
-     <button type="button" class="user-type-option" data-type="corporate" aria-pressed="false">
+     @* REMOVED: Corporate option - feature has been removed
+       <button type="button" class="user-type-option" data-type="corporate" aria-pressed="false">
           <i class="fas fa-building" aria-hidden="true"></i>
        <span>شركة</span>
   </button>
-            </div>
+   *@
+  </div>
 
 <!-- OAuth Buttons -->
 <div class="oauth-buttons" role="group" aria-label="التسجيل عبر الشبكات الاجتماعية">
@@ -297,10 +299,8 @@ aria-required="true"
           if (selectedUserType === "tailor") {
       formTitle.textContent = "انضم كخياط محترف";
           } else if (selectedUserType === "customer") {
-               formTitle.textContent = "إنشاء حساب عميل";
-    } else if (selectedUserType === "corporate") {
-               formTitle.textContent = "إنشاء حساب شركة";
-        }
+      formTitle.textContent = "إنشاء حساب عميل";
+ } 
 });
     });
 

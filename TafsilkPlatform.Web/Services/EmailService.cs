@@ -190,13 +190,14 @@ public class EmailService : IEmailService
     {
         try
         {
-       var roleArabic = role switch
-         {
-                "Customer" => "عميل",
-        "Tailor" => "خياط",
-         "Corporate" => "عميل مؤسسي",
-                _ => "مستخدم"
-};
+       var roleText = role switch
+        {
+      "Customer" => "عميل",
+"Tailor" => "خياط",
+           // "Corporate" => "عميل مؤسسي", // REMOVED: Corporate feature
+      "Admin" => "مدير",
+ _ => "مستخدم"
+       };
 
             var subject = "مرحباً بك في منصة تفصيلك!";
           var body = $@"
@@ -222,7 +223,7 @@ public class EmailService : IEmailService
         </div>
         <div class='title'>مرحباً {fullName}،</div>
         <div class='message'>
- <p>نرحب بك في منصة تفصيلك كـ <strong>{roleArabic}</strong>!</p>
+ <p>نرحب بك في منصة تفصيلك كـ <strong>{roleText}</strong>!</p>
           <p>تم تأكيد بريدك الإلكتروني بنجاح ويمكنك الآن الاستمتاع بجميع مزايا المنصة.</p>
         </div>
         <div style='text-align: center;'>

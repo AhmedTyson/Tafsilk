@@ -58,15 +58,7 @@
 <span>لوحة التحكم</span>
     </a>
        }
-    else if (role == "Corporate")
-    {
-    <a asp-controller="Dashboards" asp-action="Corporate" class="btn btn-outline desktop-only">
-  <i class="fas fa-tachometer-alt"></i>
-   <span>لوحة التحكم</span>
-    </a>
-      }
      }
-
     @if (User.Identity?.IsAuthenticated == true)
 {
        @* Authenticated User Menu *@
@@ -94,7 +86,7 @@
  "Admin" => "مسؤول النظام",
  "Tailor" => "خياط",
    "Customer" => "عميل",
-     "Corporate" => "عميل مؤسسي",
+     // "Corporate" => "عميل مؤسسي", // REMOVED: Corporate feature
    _ => "مستخدم"
   };
   }
@@ -149,6 +141,7 @@ alt="@fullName" />
   <span>لوحة التحكم</span>
      </a>
      }
+     @* REMOVED: Corporate dashboard - feature has been removed
      else if (currentRole == "Corporate")
      {
 <a asp-controller="Dashboards" asp-action="Corporate" class="dropdown-item mobile-only">
@@ -156,6 +149,7 @@ alt="@fullName" />
    <span>لوحة التحكم</span>
   </a>
 }
+*@
 
  @* Profile Link - Role Specific *@
  @if (currentRole == "Tailor")
@@ -172,13 +166,6 @@ alt="@fullName" />
      <span>الملف الشخصي</span>
   </a>
      }
-   else if (currentRole == "Corporate")
- {
-  <a asp-controller="Profiles" asp-action="CorporateProfile" class="dropdown-item">
-   <i class="fas fa-user"></i>
-   <span>الملف الشخصي</span>
-   </a>
-         }
         else if (currentRole == "Admin")
         {
       @* Admins don't have a traditional profile page, redirect to admin dashboard *@

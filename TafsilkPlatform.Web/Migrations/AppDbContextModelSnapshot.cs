@@ -44,172 +44,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("AppSettings");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ActivityLog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Details")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
-                    b.Property<Guid?>("EntityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("nvarchar(45)");
-
-                    b.Property<bool>("IsAdminAction")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK_ActivityLogs");
-
-                    b.HasIndex("IsAdminAction")
-                        .HasDatabaseName("IX_ActivityLogs_IsAdminAction");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_ActivityLogs_UserId");
-
-                    b.ToTable("ActivityLogs", (string)null);
-
-                    b.HasDiscriminator().HasValue("ActivityLog");
-
-                    b.UseTphMappingStrategy();
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContractStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RFQId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RFQId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Contracts");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ContactPerson")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Industry")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsApproved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("ProfilePictureContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePictureData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("TaxNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Corporat__3214EC07AC002547");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_CorporateAccounts_UserId");
-
-                    b.HasIndex(new[] { "UserId" }, "UQ__Corporat__1788CC4D39440DF8")
-                        .IsUnique();
-
-                    b.ToTable("CorporateAccounts");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -268,120 +102,6 @@ namespace TafsilkPlatform.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("CustomerProfiles");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
-                {
-                    b.Property<Guid>("DeviceTokenId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Devicetoken")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("DeviceTokenId")
-                        .HasName("PK_DeviceTokens");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_DeviceTokens_UserId");
-
-                    b.ToTable("DeviceTokens", (string)null);
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OpenedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionDetails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResolvedByAdminId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OpenedByUserId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ResolvedByAdminId");
-
-                    b.ToTable("Disputes");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ErrorLog", b =>
-                {
-                    b.Property<Guid>("ErrorLogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("StackTrace")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ErrorLogId");
-
-                    b.ToTable("ErrorLogs");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
@@ -454,7 +174,7 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Discription")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -660,114 +380,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("PortfolioImages", (string)null);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
-                {
-                    b.Property<Guid>("QuoteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("EstimatedDays")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("ProposedPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("QuoteId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Quotes");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Budget")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<Guid>("CorporateAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Deadline")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CorporateAccountId");
-
-                    b.ToTable("RFQs");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("BidAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EstimatedDelivery")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RFQId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RFQId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("RFQBids");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
                 {
                     b.Property<Guid>("RatingDimensionId")
@@ -827,41 +439,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId");
 
                     b.ToTable("RefreshTokens");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RequestedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("RequestedBy");
-
-                    b.ToTable("RefundRequests");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
@@ -955,34 +532,6 @@ namespace TafsilkPlatform.Web.Migrations
                         .HasName("PK__Roles__3214EC07CB85E41E");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorBadge", b =>
-                {
-                    b.Property<Guid>("TailorBadgeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BadgeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EarnedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TailorBadgeId");
-
-                    b.ToTable("TailorBadges");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
@@ -1292,82 +841,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("UserAddresses");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
-                {
-                    b.Property<int>("WalletId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("WalletId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Wallet");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserActivityLog", b =>
-                {
-                    b.HasBaseType("TafsilkPlatform.Web.Models.ActivityLog");
-
-                    b.Property<Guid>("UserActivityLogId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ToTable("ActivityLogs", (string)null);
-
-                    b.HasDiscriminator().HasValue("UserActivityLog");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ActivityLog", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
-                        .WithMany()
-                        .HasForeignKey("RFQId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RFQ");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("CorporateAccount")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.CorporateAccount", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_CorporateAccounts_Users");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.HasOne("TafsilkPlatform.Web.Models.User", "User")
@@ -1378,43 +851,6 @@ namespace TafsilkPlatform.Web.Migrations
                         .HasConstraintName("FK_CustomerProfiles_Users");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "OpenedByUser")
-                        .WithMany()
-                        .HasForeignKey("OpenedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "ResolvedByAdmin")
-                        .WithMany()
-                        .HasForeignKey("ResolvedByAdminId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("OpenedByUser");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("ResolvedByAdmin");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
@@ -1506,55 +942,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("Tailor");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
-                        .WithMany("quote")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Tailor");
-
-                    b.Navigation("order");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.CorporateAccount", "CorporateAccount")
-                        .WithMany()
-                        .HasForeignKey("CorporateAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("CorporateAccount");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
-                        .WithMany("Bids")
-                        .HasForeignKey("RFQId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RFQ");
-
-                    b.Navigation("Tailor");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
                 {
                     b.HasOne("TafsilkPlatform.Web.Models.Review", "Review")
@@ -1576,25 +963,6 @@ namespace TafsilkPlatform.Web.Migrations
                         .HasConstraintName("FK_RefreshTokens_Users");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "RequestedByUser")
-                        .WithMany()
-                        .HasForeignKey("RequestedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("RequestedByUser");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
@@ -1681,17 +1049,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.Navigation("Payments");
@@ -1708,13 +1065,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("orderImages");
-
-                    b.Navigation("quote");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
-                {
-                    b.Navigation("Bids");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
@@ -1740,8 +1090,6 @@ namespace TafsilkPlatform.Web.Migrations
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
-                    b.Navigation("CorporateAccount");
-
                     b.Navigation("CustomerProfile");
 
                     b.Navigation("RefreshTokens");
@@ -1749,8 +1097,6 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("TailorProfile");
 
                     b.Navigation("UserAddresses");
-
-                    b.Navigation("Wallet");
                 });
 #pragma warning restore 612, 618
         }

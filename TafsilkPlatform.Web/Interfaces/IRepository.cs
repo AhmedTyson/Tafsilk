@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using TafsilkPlatform.Web.Specifications;
 
 namespace TafsilkPlatform.Web.Interfaces
 {
@@ -14,10 +13,5 @@ namespace TafsilkPlatform.Web.Interfaces
         Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null);
-
-        // New: Specification pattern support
-        Task<T?> GetBySpecAsync(ISpecification<T> spec);
-        Task<IEnumerable<T>> ListAsync(ISpecification<T> spec);
-        Task<int> CountAsync(ISpecification<T> spec);
     }
 }

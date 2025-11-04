@@ -102,13 +102,9 @@ namespace TafsilkPlatform.Web.Services
                 {
                     await CreateProfileAsync(user.Id, request);
 
-                    // ✅ UPDATED: Only send email verification for Corporate accounts
-                    // Customers are automatically verified and can login immediately
-                    if (request.Role == RegistrationRole.Corporate)
-                    {
-                        await SendEmailVerificationAsync(user, request.FullName);
-                    }
-                    else if (request.Role == RegistrationRole.Customer)
+                    // ✅ UPDATED: Auto-verify customers - they can login immediately
+                    // REMOVED: Corporate email verification
+                    if (request.Role == RegistrationRole.Customer)
                     {
                         // Auto-verify customers - they can login immediately
                         user.EmailVerified = true;
@@ -147,115 +143,187 @@ namespace TafsilkPlatform.Web.Services
                 return (false, "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.", null);
             }
         }
-        #endregion
-
-        #region Login Validation
-
-        /// <summary>
-        /// Validates user credentials
-        /// Checks: email/password, account status, tailor profile existence
-        /// OPTIMIZED: Uses compiled query and minimal includes
-        /// </summary>
+        // Called by: [POST] /Account/Login, /ApiAuth/Login
         public async Task<(bool Succeeded, string? Error, User? User)> ValidateUserAsync(string email, string password)
         {
+
             try
+
             {
+
                 _logger.LogInformation("[AuthService] Login attempt for: {Email}", email);
 
+
+
                 // Get user with role information using compiled query
+
                 var user = await _getUserForLoginQuery(_db, email);
 
+
+
                 if (user == null)
+
                 {
+
                     _logger.LogWarning("[AuthService] Login failed - User not found: {Email}", email);
+
                     return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+
                 }
+
+
 
                 // Verify password
+
                 if (!PasswordHasher.Verify(user.PasswordHash, password))
+
                 {
+
                     _logger.LogWarning("[AuthService] Login failed - Invalid password: {Email}", email);
+
                     return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+
                 }
+
+
 
                 // CRITICAL: Check if tailor has submitted evidence - use compiled query
+
                 if (user.Role?.Name?.ToLower() == "tailor")
+
                 {
+
                     var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
+
                     if (!hasTailorProfile)
+
                     {
+
                         _logger.LogWarning("[AuthService] Login attempt - Tailor has not provided evidence yet: {Email}", email);
+
                         // Always allow login to complete profile if tailor profile is missing
+
                         _logger.LogInformation("[AuthService] Redirecting new tailor to evidence submission: {Email}", email);
+
                         return (false, "TAILOR_INCOMPLETE_PROFILE", user);
+
                     }
+
                 }
+
+
 
                 // Check account status
+
                 if (!user.IsActive)
+
                 {
+
                     _logger.LogWarning("[AuthService] Login failed - User is inactive: {Email}", email);
 
+
+
                     // ✅ IMPROVED: More specific messages based on role and state
+
                     string message;
 
+
+
                     if (user.Role?.Name?.ToLower() == "tailor")
+
                     {
+
                         var hasTailorProfile = await _hasTailorProfileQuery(_db, user.Id);
 
+
+
                         if (!hasTailorProfile)
+
                         {
+
                             // Evidence not submitted yet (should not reach here anymore)
+
                             message = "يجب تقديم الأوراق الثبوتية أولاً لإكمال التسجيل. يرجى إكمال التسجيل عبر رابط التسجيل.";
+
                             _logger.LogInformation("[AuthService] Tailor has not submitted evidence yet: {Email}", email);
+
                         }
+
                         else
+
                         {
+
                             // Evidence submitted, waiting for admin approval or banned
+
                             message = "حسابك قيد المراجعة من قبل الإدارة أو تم حظرك. سيتم تفعيله خلال24-48 ساعة عمل أو يرجى التواصل مع الدعم.";
+
                             _logger.LogInformation("[AuthService] Tailor awaiting admin approval or banned: {Email}", email);
+
                         }
+
                     }
+
                     else
+
                     {
+
                         message = "حسابك غير نشط. يرجى التواصل مع الدعم.";
+
                     }
+
+
 
                     return (false, message, null);
+
                 }
+
+
 
                 if (user.IsDeleted)
+
                 {
+
                     _logger.LogWarning("[AuthService] Login failed - User is deleted: {Email}", email);
+
                     return (false, "حسابك غير موجود. يرجى التواصل مع الدعم.", null);
+
                 }
 
+
+
                 // Update last login timestamp (don't fail login if this fails)
+
                 _ = Task.Run(async () => await UpdateLastLoginAsync(user.Id));
 
+
+
                 _logger.LogInformation("[AuthService] Login successful: {UserId}, Email: {Email}", user.Id, user.Email);
+
                 return (true, null, user);
+
             }
+
             catch (Exception ex)
+
             {
+
                 _logger.LogError(ex, "[AuthService] Login error for: {Email}", email);
+
                 return (false, "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.", null);
+
             }
-        }
 
-        #endregion
-
+        }        #endregion
         #region Email Verification
-
+        
         /// <summary>
-        /// Verifies user email using verification token from email link
         /// </summary>
-        public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
-        {
-            try
-            {
-                var user = await _db.Users
-      .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
+  public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
+      {
+       try
+      {
+      var user = await _db.Users
+                    .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
 
                 if (user == null)
                 {
@@ -400,12 +468,11 @@ namespace TafsilkPlatform.Web.Services
             {
                 // Use AsSplitQuery to avoid cartesian explosion
                 return await _db.Users
-                   .AsNoTracking()
+                    .AsNoTracking()
                   .AsSplitQuery()
                          .Include(u => u.Role)
                       .Include(u => u.CustomerProfile)
                   .Include(u => u.TailorProfile)
-                       .Include(u => u.CorporateAccount)
                        .FirstOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
             }
             catch (Exception ex)
@@ -426,7 +493,6 @@ namespace TafsilkPlatform.Web.Services
             .Include(u => u.Role)
           .Include(u => u.CustomerProfile)
              .Include(u => u.TailorProfile)
-            .Include(u => u.CorporateAccount)
                 .FirstOrDefaultAsync(u => u.Email == email && !u.IsDeleted);
             }
             catch (Exception ex)
@@ -479,15 +545,68 @@ namespace TafsilkPlatform.Web.Services
                 claims.Add(new Claim(ClaimTypes.Role, user.Role.Name));
             }
 
-            // Get full name from profile
-            string fullName = await GetUserFullNameAsync(user.Id);
-            claims.Add(new Claim(ClaimTypes.Name, fullName));
-            claims.Add(new Claim("FullName", fullName));
+            // ✅ FIXED: Get full name from already-loaded navigation properties
+    // This avoids querying the database again and prevents concurrency issues
+  string fullName = GetFullNameFromUser(user);
+      claims.Add(new Claim(ClaimTypes.Name, fullName));
+  claims.Add(new Claim("FullName", fullName));
 
-            // Add role-specific claims
-            await AddRoleSpecificClaims(claims, user);
+            // ✅ FIXED: Add role-specific claims from already-loaded data
+        AddRoleSpecificClaimsFromUser(claims, user);
 
-            return claims;
+ return await Task.FromResult(claims);
+ }
+
+        /// <summary>
+        /// Gets full name from already-loaded user navigation properties
+ /// No database query - uses in-memory data
+        /// </summary>
+        private string GetFullNameFromUser(User user)
+        {
+  switch (user.Role?.Name?.ToLower())
+ {
+       case "customer":
+ return user.CustomerProfile?.FullName ?? user.Email ?? "مستخدم";
+
+   case "tailor":
+     return user.TailorProfile?.FullName ?? user.Email ?? "مستخدم";
+
+
+   default:
+return user.Email ?? "مستخدم";
+        }
+ }
+        /// <summary>
+    /// Adds role-specific claims from already-loaded user data
+        /// No database query - uses in-memory data
+        /// </summary>
+      private void AddRoleSpecificClaimsFromUser(List<Claim> claims, User user)
+      {
+       try
+       {
+   switch (user.Role?.Name?.ToLower())
+ {
+       case "tailor":
+        if (user.TailorProfile != null)
+   {
+           claims.Add(new Claim("IsVerified", user.TailorProfile.IsVerified.ToString()));
+     }
+ break;
+
+      // REMOVED: Corporate case
+      // case "corporate":
+        //  if (user.CorporateAccount != null)
+ // {
+     //   claims.Add(new Claim("CompanyName", user.CorporateAccount.CompanyName ?? string.Empty));
+//     claims.Add(new Claim("IsApproved", user.CorporateAccount.IsApproved.ToString()));
+      //   }
+       //   break;
+      }
+        }
+  catch (Exception ex)
+     {
+     _logger.LogWarning(ex, "[AuthService] Error adding role-specific claims: {UserId}", user.Id);
+       }
         }
 
         #endregion
@@ -550,33 +669,6 @@ namespace TafsilkPlatform.Web.Services
             {
                 _logger.LogError(ex, "[AuthService] Error verifying tailor: {TailorId}", tailorId);
                 return (false, "حدث خطأ أثناء تحديث حالة التحقق");
-            }
-        }
-
-        public async Task<(bool Succeeded, string? Error)> ApproveCorporateAsync(Guid corporateId, bool isApproved)
-        {
-            try
-            {
-                var corporate = await _db.CorporateAccounts.FindAsync(corporateId);
-                if (corporate == null)
-                {
-                    return (false, "الحساب المؤسسي غير موجود");
-                }
-
-                corporate.IsApproved = isApproved;
-                corporate.UpdatedAt = _dateTime.Now;
-
-                await _db.SaveChangesAsync();
-
-                _logger.LogInformation("[AuthService] Corporate approval status changed: {CorporateId}, IsApproved: {IsApproved}",
-             corporateId, isApproved);
-
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AuthService] Error approving corporate: {CorporateId}", corporateId);
-                return (false, "حدث خطأ أثناء تحديث حالة الموافقة");
             }
         }
 
@@ -689,20 +781,6 @@ namespace TafsilkPlatform.Web.Services
                     // DO NOT CREATE - must provide evidence first
                     _logger.LogInformation("[AuthService] Tailor profile creation deferred: {UserId}", userId);
                     break;
-
-                case RegistrationRole.Corporate:
-                    var corporate = new CorporateAccount
-                    {
-                        Id = Guid.NewGuid(),
-                        UserId = userId,
-                        CompanyName = request.CompanyName ?? string.Empty,
-                        ContactPerson = request.ContactPerson ?? request.FullName ?? string.Empty,
-                        CreatedAt = _dateTime.Now,
-                        IsApproved = false
-                    };
-                    await _db.CorporateAccounts.AddAsync(corporate);
-                    _logger.LogInformation("[AuthService] Corporate account created (unapproved): {UserId}", userId);
-                    break;
             }
 
             await _db.SaveChangesAsync();
@@ -742,7 +820,7 @@ namespace TafsilkPlatform.Web.Services
             {
                 RegistrationRole.Customer => "Customer",
                 RegistrationRole.Tailor => "Tailor",
-                RegistrationRole.Corporate => "Corporate",
+                // RegistrationRole.Corporate => "Corporate", // REMOVED: Corporate feature
                 _ => "Customer"
             };
 
@@ -765,17 +843,17 @@ namespace TafsilkPlatform.Web.Services
 
             role = new Role
             {
-                Id = Guid.NewGuid(),
-                Name = name,
-                Description = name switch
-                {
-                    "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
-                    "Tailor" => "خياط - يقدم خدمات الخياطة",
-                    "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية",
-                    _ => null
-                },
-                CreatedAt = _dateTime.Now
-            };
+     Id = Guid.NewGuid(),
+         Name = name,
+          Description = name switch
+      {
+  "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
+            "Tailor" => "خياط - يقدم خدمات الخياطة",
+       // "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية", // REMOVED: Corporate feature
+_ => null
+         },
+   CreatedAt = _dateTime.Now
+  };
 
             await _db.Roles.AddAsync(role);
             await _db.SaveChangesAsync();
@@ -821,68 +899,28 @@ namespace TafsilkPlatform.Web.Services
                          u.Email,
                          RoleName = u.Role.Name,
                          CustomerName = u.CustomerProfile != null ? u.CustomerProfile.FullName : null,
-                         TailorName = u.TailorProfile != null ? u.TailorProfile.FullName : null,
-                         CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
-                         CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
-                     })
-                  .FirstOrDefaultAsync();
+                         TailorName = u.TailorProfile != null ? u.TailorProfile.FullName : null
+                         // REMOVED: Corporate fields
+                       // CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
+ // CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
+  })
+       .FirstOrDefaultAsync();
 
-                if (userInfo == null) return "مستخدم";
+    if (userInfo == null) return "مستخدم";
 
-                return userInfo.RoleName?.ToLower() switch
-                {
-                    "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
-                    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
-                    "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم",
-                    _ => userInfo.Email ?? "مستخدم"
-                };
-            }
-            catch
-            {
-                return "مستخدم";
-            }
-        }
-
-        /// <summary>
-        /// Adds role-specific claims for authorization
-        /// OPTIMIZED: Use projection queries
-        /// </summary>
-        private async Task AddRoleSpecificClaims(List<Claim> claims, User user)
-        {
-            try
-            {
-                switch (user.Role?.Name?.ToLower())
-                {
-                    case "tailor":
-                        var tailorVerified = await _db.TailorProfiles
-             .AsNoTracking()
-                    .Where(t => t.UserId == user.Id)
-                    .Select(t => t.IsVerified)
-                    .FirstOrDefaultAsync();
-
-                        claims.Add(new Claim("IsVerified", tailorVerified.ToString()));
-                        break;
-
-                    case "corporate":
-                        var corporateInfo = await _db.CorporateAccounts
-                    .AsNoTracking()
-                   .Where(c => c.UserId == user.Id)
-                     .Select(c => new { c.CompanyName, c.IsApproved })
-                    .FirstOrDefaultAsync();
-
-                        if (corporateInfo != null)
-                        {
-                            claims.Add(new Claim("CompanyName", corporateInfo.CompanyName ?? string.Empty));
-                            claims.Add(new Claim("IsApproved", corporateInfo.IsApproved.ToString()));
-                        }
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[AuthService] Error loading profile for claims: {UserId}", user.Id);
-            }
-        }
+return userInfo.RoleName?.ToLower() switch
+     {
+   "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
+    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
+  // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم", // REMOVED
+        _ => userInfo.Email ?? "مستخدم"
+       };
+}
+     catch
+     {
+       return "مستخدم";
+      }
+ }
 
         private string GenerateEmailVerificationToken()
         {

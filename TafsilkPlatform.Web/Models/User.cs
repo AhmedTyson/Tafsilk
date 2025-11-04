@@ -96,8 +96,6 @@ namespace TafsilkPlatform.Web.Models
         public virtual Role Role { get; set; } = null!;
         public virtual TailorProfile? TailorProfile { get; set; }
         public virtual CustomerProfile? CustomerProfile { get; set; }
-        public virtual CorporateAccount? CorporateAccount { get; set; }
-        public virtual Wallet? Wallet { get; set; }
         public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 

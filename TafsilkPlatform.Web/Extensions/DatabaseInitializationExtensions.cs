@@ -32,6 +32,10 @@ public static class DatabaseInitializationExtensions
             TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db, configuration, logger);
             logger.LogInformation("✓ Initial data seeded successfully");
 
+            // TODO: Fix DatabaseSeeder property names to match actual models
+            // Temporarily commented out until models are fixed
+            // await TafsilkPlatform.Web.Data.Seed.DatabaseSeeder.SeedTestDataAsync(db, logger);
+
             // Apply performance indexes
             await ApplyPerformanceIndexesAsync(db, logger);
 
@@ -64,33 +68,25 @@ public static class DatabaseInitializationExtensions
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_TailorProfiles_UserId_IsVerified' AND object_id = OBJECT_ID('TailorProfiles'))
        CREATE NONCLUSTERED INDEX [IX_TailorProfiles_UserId_IsVerified] ON [TailorProfiles]([UserId], [IsVerified]);",
 
-                // Index 4: Corporate Approval
-                @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_CorporateAccounts_UserId_IsApproved' AND object_id = OBJECT_ID('CorporateAccounts'))
-    CREATE NONCLUSTERED INDEX [IX_CorporateAccounts_UserId_IsApproved] ON [CorporateAccounts]([UserId], [IsApproved]);",
-
-                // Index 5: Customer Orders
+                // Index 4: Customer Orders
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Orders_CustomerId_Status' AND object_id = OBJECT_ID('Orders'))
   CREATE NONCLUSTERED INDEX [IX_Orders_CustomerId_Status] ON [Orders]([CustomerId], [Status]) INCLUDE ([CreatedAt], [TotalPrice]);",
 
-                // Index 6: Tailor Orders
+                // Index 5: Tailor Orders
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Orders_TailorId_Status' AND object_id = OBJECT_ID('Orders'))
           CREATE NONCLUSTERED INDEX [IX_Orders_TailorId_Status] ON [Orders]([TailorId], [Status]) INCLUDE ([CreatedAt], [TotalPrice]);",
 
-                // Index 7: Notifications
+                // Index 6: Notifications
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Notifications_UserId_IsRead' AND object_id = OBJECT_ID('Notifications'))
 CREATE NONCLUSTERED INDEX [IX_Notifications_UserId_IsRead] ON [Notifications]([UserId], [IsRead]) WHERE [IsDeleted] = 0;",
 
-                // Index 8: Reviews
+                // Index 7: Reviews
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Reviews_TailorId_CreatedAt' AND object_id = OBJECT_ID('Reviews'))
 CREATE NONCLUSTERED INDEX [IX_Reviews_TailorId_CreatedAt] ON [Reviews]([TailorId], [CreatedAt] DESC) INCLUDE ([Rating]) WHERE [IsDeleted] = 0;",
 
-                // Index 9: Refresh Tokens
+                // Index 8: Refresh Tokens
                 @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_RefreshTokens_UserId_ExpiresAt' AND object_id = OBJECT_ID('RefreshTokens'))
- CREATE NONCLUSTERED INDEX [IX_RefreshTokens_UserId_ExpiresAt] ON [RefreshTokens]([UserId], [ExpiresAt] DESC) WHERE [RevokedAt] IS NULL;",
-
-                // Index 10: Activity Logs
-                @"IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ActivityLogs_UserId_CreatedAt' AND object_id = OBJECT_ID('ActivityLogs'))
-    CREATE NONCLUSTERED INDEX [IX_ActivityLogs_UserId_CreatedAt] ON [ActivityLogs]([UserId], [CreatedAt] DESC);"
+ CREATE NONCLUSTERED INDEX [IX_RefreshTokens_UserId_ExpiresAt] ON [RefreshTokens]([UserId], [ExpiresAt] DESC) WHERE [RevokedAt] IS NULL;"
             };
 
             int indexesCreated = 0;

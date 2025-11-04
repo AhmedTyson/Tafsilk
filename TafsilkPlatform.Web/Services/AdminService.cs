@@ -49,18 +49,25 @@ namespace TafsilkPlatform.Web.Services
  /// </summary>
         private async Task LogAdminActionAsync(Guid adminUserId, string action, string details, string entityType = "System")
       {
-            var log = new ActivityLog
-       {
-     UserId = adminUserId,
-    Action = action,
-       EntityType = entityType,
-       Details = details,
-    IpAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
-     CreatedAt = DateTime.UtcNow,
-       IsAdminAction = true // Mark as admin action
-   };
-     
-   await _unitOfWork.Context.ActivityLogs.AddAsync(log);
+      // TODO: ActivityLog feature removed - implement alternative logging if needed
+            // var log = new ActivityLog
+   // {
+   //     UserId = adminUserId,
+   //     Action = action,
+    // EntityType = entityType,
+            //     Details = details,
+     //     IpAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
+            //     CreatedAt = DateTime.UtcNow,
+            //     IsAdminAction = true
+       // };
+            
+         // await _unitOfWork.Context.ActivityLogs.AddAsync(log);
+    
+ // Use standard logging instead
+            _logger.LogInformation("[AdminAction] Admin {AdminId} performed {Action} on {EntityType}. Details: {Details}", 
+          adminUserId, action, entityType, details);
+            
+      await Task.CompletedTask;
         }
 
         // ==================== TAILOR VERIFICATION ====================

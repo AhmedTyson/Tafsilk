@@ -85,9 +85,9 @@
    <a href="@Url.Action("Disputes", "AdminDashboard")" class="nav-link">
         <i class="fas fa-exclamation-triangle"></i>
    <span class="nav-text">حل النزاعات</span>
-     @if (Model.OpenDisputes > 0)
+     @* REMOVED: Dispute feature *@ @if (false)
   {
-          <span class="badge">@Model.OpenDisputes</span>
+          <span class="badge">0 @* REMOVED: Disputes feature *@</span>
             }
               </a>
        </li>
@@ -95,9 +95,9 @@
             <a href="@Url.Action("Refunds", "AdminDashboard")" class="nav-link">
       <i class="fas fa-money-bill-wave"></i>
   <span class="nav-text">طلبات الاسترداد</span>
-          @if (Model.PendingRefunds > 0)
+          @* REMOVED: Refund feature *@ @if (false)
          {
-        <span class="badge">@Model.PendingRefunds</span>
+        <span class="badge">0 @* REMOVED: Refunds feature *@</span>
    }
                 </a>
   </li>
@@ -292,7 +292,7 @@
   </div>
 
    <!-- Urgent Actions -->
-      @if (Model.OpenDisputes > 0 || Model.PendingRefunds > 0 || Model.PendingPortfolioReviews > 0)
+      @* REMOVED: Disputes & Refunds *@ @if (false || Model.PendingPortfolioReviews > 0)
      {
             <div class="alert-section">
        <h2 class="section-title">
@@ -301,14 +301,14 @@
                 </h2>
        
                 <div class="alert-grid">
-   @if (Model.OpenDisputes > 0)
+   @* REMOVED: Dispute feature *@ @if (false)
           {
       <div class="alert-card danger">
              <div class="alert-icon">
            <i class="fas fa-exclamation-triangle"></i>
      </div>
                  <div class="alert-content">
-         <h3>@Model.OpenDisputes نزاع مفتوح</h3>
+         <h3>0 @* REMOVED: Disputes feature *@ نزاع مفتوح</h3>
    <p>هناك نزاعات تحتاج للمراجعة والحل</p>
    </div>
       <div class="alert-action">
@@ -319,14 +319,14 @@
             </div>
         }
 
-           @if (Model.PendingRefunds > 0)
+           @* REMOVED: Refund feature *@ @if (false)
       {
         <div class="alert-card warning">
     <div class="alert-icon">
      <i class="fas fa-money-bill-wave"></i>
      </div>
              <div class="alert-content">
-      <h3>@Model.PendingRefunds طلب استرداد</h3>
+      <h3>0 @* REMOVED: Refunds feature *@ طلب استرداد</h3>
           <p>هناك طلبات استرداد بانتظار الموافقة</p>
          </div>
      <div class="alert-action">
