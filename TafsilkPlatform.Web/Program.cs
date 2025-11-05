@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Scalar.AspNetCore;
 using System.Text;
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Extensions;
@@ -21,13 +20,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 // Add services to the container
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
-  {
+{
       options.JsonSerializerOptions.PropertyNamingPolicy = null;
       options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
   });
@@ -39,18 +36,18 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
  {
         Version = "v1",
-        Title = "Tafsilk Platform API",
+  Title = "Tafsilk Platform API",
     Description = "Tafsilk - منصة الخياطين والتفصيل - API Documentation",
         Contact = new OpenApiContact
         {
          Name = "Tafsilk Platform",
-      Email = "support@tafsilk.com",
-        Url = new Uri("https://tafsilk.com")
+    Email = "support@tafsilk.com",
+    Url = new Uri("https://tafsilk.com")
         },
         License = new OpenApiLicense
         {
    Name = "Use under Tafsilk License",
-            Url = new Uri("https://tafsilk.com/license")
+   Url = new Uri("https://tafsilk.com/license")
       }
 });
 
@@ -312,6 +309,20 @@ if (app.Environment.IsDevelopment())
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
+    
+    // ✅ SWAGGER MIDDLEWARE
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+      options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tafsilk Platform API v1");
+options.RoutePrefix = "swagger";
+    options.DocumentTitle = "Tafsilk Platform API";
+        options.DisplayRequestDuration();
+        options.EnableDeepLinking();
+        options.EnableFilter();
+        options.ShowExtensions();
+     options.EnableTryItOutByDefault();
+    });
 }
 else
 {
@@ -319,9 +330,6 @@ else
     app.UseHsts();
 }
 
-// ✅ Enable Swagger UI
-app.UseSwagger();
-app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -336,22 +344,9 @@ app.UseMiddleware<UserStatusMiddleware>();
 app.MapControllers();
 
 app.MapControllerRoute(
-  name: "default",
+    name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ✅ SCALAR API DOCUMENTATION - Must be after MapControllers()
-if (app.Environment.IsDevelopment())
-{
-    app.MapScalarApiReference(options =>
-    {
-        options
-            .WithTitle("Tafsilk Platform API")
-          .WithTheme(ScalarTheme.Purple)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
-            .WithDarkMode(true)
-      .WithSidebar(true);
-    });
-}
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
 startupLogger.LogInformation("=== Tafsilk Platform Started Successfully ===");
@@ -363,11 +358,10 @@ if (app.Environment.IsDevelopment())
     var urls = app.Urls;
     if (urls.Any())
     {
-        foreach (var url in urls)
+     foreach (var url in urls)
         {
  startupLogger.LogInformation("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
-    startupLogger.LogInformation("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
- startupLogger.LogInformation("🟣 Scalar API Docs available at: {ScalarUrl}", $"{url}/scalar/v1");
+  startupLogger.LogInformation("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
         }
     }
     else
@@ -375,8 +369,6 @@ if (app.Environment.IsDevelopment())
    // Fallback to common development URLs
      startupLogger.LogInformation("🔷 Swagger UI available at: https://localhost:7186/swagger");
         startupLogger.LogInformation("🔷 Swagger UI available at: http://localhost:5140/swagger");
-        startupLogger.LogInformation("🟣 Scalar API Docs available at: https://localhost:7186/scalar/v1");
-        startupLogger.LogInformation("🟣 Scalar API Docs available at: http://localhost:5140/scalar/v1");
     }
 }
 
