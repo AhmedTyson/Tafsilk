@@ -44,7 +44,7 @@ public class FeaturesSettings
 public class EmailSettings
 {
     public string SmtpHost { get; set; } = string.Empty;
-  public int SmtpPort { get; set; } = 587;
+    public int SmtpPort { get; set; } = 587;
     public string SmtpUsername { get; set; } = string.Empty;
     public string SmtpPassword { get; set; } = string.Empty;
     public string FromEmail { get; set; } = string.Empty;
@@ -55,7 +55,7 @@ public class EmailSettings
 public class FileUploadSettings
 {
     public long MaxFileSizeBytes { get; set; } = 10 * 1024 * 1024; // 10MB
- public long MaxImageSizeBytes { get; set; } = 5 * 1024 * 1024; // 5MB
+    public long MaxImageSizeBytes { get; set; } = 5 * 1024 * 1024; // 5MB
     public string[] AllowedImageExtensions { get; set; } = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
     public string[] AllowedDocumentExtensions { get; set; } = { ".pdf", ".doc", ".docx" };
     public string UploadPath { get; set; } = "wwwroot/uploads";
@@ -63,12 +63,12 @@ public class FileUploadSettings
 
 public class SecuritySettings
 {
-  public int MaxLoginAttempts { get; set; } = 5;
+    public int MaxLoginAttempts { get; set; } = 5;
     public int LockoutMinutes { get; set; } = 15;
     public int PasswordResetTokenExpirationHours { get; set; } = 1;
     public int EmailVerificationTokenExpirationHours { get; set; } = 24;
     public bool RequireEmailVerification { get; set; } = true;
- public bool RequireTwoFactorForAdmin { get; set; } = false;
+    public bool RequireTwoFactorForAdmin { get; set; } = false;
 }
 
 public class PerformanceSettings
@@ -88,18 +88,18 @@ public static class ConfigurationExtensions
     public static AppSettings GetAppSettings(this IConfiguration configuration)
     {
         var settings = new AppSettings();
-   
+
         configuration.GetSection("Jwt").Bind(settings.Jwt);
         configuration.GetSection("Application").Bind(settings.Application);
         configuration.GetSection("Features").Bind(settings.Features);
-  configuration.GetSection("Email").Bind(settings.Email);
+        configuration.GetSection("Email").Bind(settings.Email);
         configuration.GetSection("FileUpload").Bind(settings.FileUpload);
-  configuration.GetSection("Security").Bind(settings.Security);
+        configuration.GetSection("Security").Bind(settings.Security);
         configuration.GetSection("Performance").Bind(settings.Performance);
-        
-  return settings;
+
+        return settings;
     }
-    
+
     public static IServiceCollection ConfigureAppSettings(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtSettings>(configuration.GetSection("Jwt"));
@@ -107,9 +107,9 @@ public static class ConfigurationExtensions
         services.Configure<FeaturesSettings>(configuration.GetSection("Features"));
         services.Configure<EmailSettings>(configuration.GetSection("Email"));
         services.Configure<FileUploadSettings>(configuration.GetSection("FileUpload"));
-      services.Configure<SecuritySettings>(configuration.GetSection("Security"));
+        services.Configure<SecuritySettings>(configuration.GetSection("Security"));
         services.Configure<PerformanceSettings>(configuration.GetSection("Performance"));
-        
-    return services;
+
+        return services;
     }
 }

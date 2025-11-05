@@ -16,7 +16,7 @@ public class ResetPasswordViewModel
     [Display(Name = "كلمة المرور الجديدة")]
     public string NewPassword { get; set; } = string.Empty;
 
- [Required(ErrorMessage = "تأكيد كلمة المرور مطلوب")]
+    [Required(ErrorMessage = "تأكيد كلمة المرور مطلوب")]
     [Compare(nameof(NewPassword), ErrorMessage = "كلمات المرور غير متطابقة")]
     [DataType(DataType.Password)]
     [Display(Name = "تأكيد كلمة المرور")]

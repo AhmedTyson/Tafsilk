@@ -12,7 +12,7 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static bool IsTailor(this ClaimsPrincipal user)
     {
-     return user.IsInRole("Tailor");
+        return user.IsInRole("Tailor");
     }
 
     /// <summary>
@@ -20,12 +20,12 @@ public static class ClaimsPrincipalExtensions
     /// </summary>
     public static bool IsVerifiedTailor(this ClaimsPrincipal user)
     {
-   if (!user.IsTailor())
+        if (!user.IsTailor())
             return false;
 
         var isVerifiedClaim = user.FindFirst("IsVerified");
-        return isVerifiedClaim != null && 
-     bool.TryParse(isVerifiedClaim.Value, out bool isVerified) && 
+        return isVerifiedClaim != null &&
+     bool.TryParse(isVerifiedClaim.Value, out bool isVerified) &&
     isVerified;
     }
 
@@ -35,7 +35,7 @@ public static class ClaimsPrincipalExtensions
     public static bool IsCustomer(this ClaimsPrincipal user)
     {
         return user.IsInRole("Customer");
- }
+    }
 
     /// <summary>
     /// Checks if user is a Corporate
@@ -63,32 +63,32 @@ public static class ClaimsPrincipalExtensions
     /// <summary>
     /// Checks if user is an Admin
     /// </summary>
- public static bool IsAdmin(this ClaimsPrincipal user)
+    public static bool IsAdmin(this ClaimsPrincipal user)
     {
         return user.IsInRole("Admin");
-  }
+    }
 
     /// <summary>
     /// Gets user ID from claims
- /// </summary>
+    /// </summary>
     public static Guid? GetUserId(this ClaimsPrincipal user)
-{
-        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier) ?? 
+    {
+        var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier) ??
      user.FindFirst("UserId");
-        
+
         if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
-     {
-         return userId;
+        {
+            return userId;
         }
 
-return null;
+        return null;
     }
 
     /// <summary>
     /// Gets user email from claims
     /// </summary>
     public static string? GetUserEmail(this ClaimsPrincipal user)
-  {
+    {
         return user.FindFirst(ClaimTypes.Email)?.Value;
     }
 
@@ -97,16 +97,16 @@ return null;
     /// </summary>
     public static string? GetFullName(this ClaimsPrincipal user)
     {
-   return user.FindFirst("FullName")?.Value ?? 
-    user.FindFirst(ClaimTypes.Name)?.Value;
+        return user.FindFirst("FullName")?.Value ??
+         user.FindFirst(ClaimTypes.Name)?.Value;
     }
 
     /// <summary>
- /// Gets user role name from claims
+    /// Gets user role name from claims
     /// </summary>
     public static string? GetRoleName(this ClaimsPrincipal user)
     {
-  return user.FindFirst(ClaimTypes.Role)?.Value;
+        return user.FindFirst(ClaimTypes.Role)?.Value;
     }
 
     /// <summary>
@@ -114,11 +114,11 @@ return null;
     /// </summary>
     public static bool IsTailorVerified(this ClaimsPrincipal user)
     {
- if (!user.IsTailor())
-     return false;
+        if (!user.IsTailor())
+            return false;
 
-   var isVerifiedClaim = user.FindFirst("IsVerified");
-     return isVerifiedClaim != null && bool.TryParse(isVerifiedClaim.Value, out bool isVerified) && isVerified;
+        var isVerifiedClaim = user.FindFirst("IsVerified");
+        return isVerifiedClaim != null && bool.TryParse(isVerifiedClaim.Value, out bool isVerified) && isVerified;
     }
 
     /// <summary>
@@ -126,19 +126,19 @@ return null;
     /// </summary>
     public static bool IsServiceProvider(this ClaimsPrincipal user)
     {
-  return user.IsTailor(); // || user.IsCorporate(); // REMOVED: Corporate
+        return user.IsTailor(); // || user.IsCorporate(); // REMOVED: Corporate
     }
 
     /// <summary>
     /// Checks if user has any of the specified roles
- /// </summary>
+    /// </summary>
     public static bool IsInAnyRole(this ClaimsPrincipal user, params string[] roles)
     {
- return roles.Any(role => user.IsInRole(role));
+        return roles.Any(role => user.IsInRole(role));
     }
 
     /// <summary>
-/// Checks if user has all of the specified roles
+    /// Checks if user has all of the specified roles
     /// </summary>
     public static bool IsInAllRoles(this ClaimsPrincipal user, params string[] roles)
     {

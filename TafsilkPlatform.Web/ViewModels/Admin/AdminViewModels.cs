@@ -7,7 +7,7 @@ namespace TafsilkPlatform.Web.ViewModels.Admin;
 // ============================================
 public class DashboardHomeViewModel
 {
- public int TotalUsers { get; set; }
+    public int TotalUsers { get; set; }
     public int TotalCustomers { get; set; }
     public int TotalTailors { get; set; }
     public int PendingTailorVerifications { get; set; }
@@ -26,7 +26,7 @@ public class ActivityLogDto
 {
     public string Action { get; set; } = string.Empty;
     public string UserName { get; set; } = string.Empty;
- public DateTime Timestamp { get; set; }
+    public DateTime Timestamp { get; set; }
     public string? IpAddress { get; set; }
 }
 
@@ -39,7 +39,7 @@ public class UserManagementViewModel
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public string? SearchTerm { get; set; }
- public string? SelectedRole { get; set; }
+    public string? SelectedRole { get; set; }
     public string? SelectedStatus { get; set; }
 }
 
@@ -48,10 +48,10 @@ public class UserManagementViewModel
 // ============================================
 public class TailorVerificationViewModel
 {
- public List<TailorProfile> Tailors { get; set; } = new();
+    public List<TailorProfile> Tailors { get; set; } = new();
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
-  public string? SelectedStatus { get; set; }
+    public string? SelectedStatus { get; set; }
 }
 
 // ============================================
@@ -81,9 +81,9 @@ public class OrderManagementViewModel
 // ============================================
 public class ReviewModerationViewModel
 {
-  public List<Review> Reviews { get; set; } = new();
+    public List<Review> Reviews { get; set; } = new();
     public int CurrentPage { get; set; }
- public int TotalPages { get; set; }
+    public int TotalPages { get; set; }
     public string? Filter { get; set; }
 }
 
@@ -116,8 +116,8 @@ public class MonthlyRevenueDto
 {
     public int Year { get; set; }
     public int Month { get; set; }
- public decimal Revenue { get; set; }
-    
+    public decimal Revenue { get; set; }
+
     public string MonthName => new DateTime(Year, Month, 1).ToString("MMMM yyyy");
 }
 
@@ -126,7 +126,7 @@ public class MonthlyRevenueDto
 // ============================================
 public class SendNotificationDto
 {
- public string Title { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public string Type { get; set; } = "Info"; // Info, Success, Warning, Error
     public string TargetType { get; set; } = "All"; // All, Role, Specific

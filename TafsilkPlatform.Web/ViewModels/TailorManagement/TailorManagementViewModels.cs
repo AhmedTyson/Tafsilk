@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace TafsilkPlatform.Web.ViewModels.TailorManagement;
 
@@ -21,7 +20,7 @@ public class PortfolioItemDto
     public string? Title { get; set; }
     public string? Category { get; set; }
     public string? Description { get; set; }
- public decimal? EstimatedPrice { get; set; }
+    public decimal? EstimatedPrice { get; set; }
     public bool IsFeatured { get; set; }
     public bool IsBeforeAfter { get; set; }
     public int DisplayOrder { get; set; }
@@ -36,39 +35,6 @@ public class AddPortfolioImageViewModel
     [Required(ErrorMessage = "يرجى إدخال عنوان الصورة")]
     [StringLength(100, ErrorMessage = "العنوان يجب أن لا يتجاوز 100 حرف")]
     [Display(Name = "عنوان الصورة")]
- public string? Title { get; set; }
-
-    [StringLength(50, ErrorMessage = "الفئة يجب أن لا تتجاوز 50 حرف")]
-    [Display(Name = "الفئة")]
-    public string? Category { get; set; }
-
-    [StringLength(500, ErrorMessage = "الوصف يجب أن لا يتجاوز 500 حرف")]
-  [Display(Name = "الوصف")]
-    public string? Description { get; set; }
-
-  [Display(Name = "السعر التقديري")]
-    [Range(0, 999999, ErrorMessage = "السعر يجب أن يكون بين 0 و 999999")]
-    public decimal? EstimatedPrice { get; set; }
-
-    [Display(Name = "صورة مميزة")]
-    public bool IsFeatured { get; set; }
-
-    [Display(Name = "صورة قبل وبعد")]
-    public bool IsBeforeAfter { get; set; }
-
-    [Required(ErrorMessage = "يرجى اختيار صورة")]
-    [Display(Name = "الصورة")]
-    public IFormFile? ImageFile { get; set; }
-}
-
-public class EditPortfolioImageViewModel
-{
-    public Guid Id { get; set; }
-  public Guid TailorId { get; set; }
-
-    [Required(ErrorMessage = "يرجى إدخال عنوان الصورة")]
-    [StringLength(100, ErrorMessage = "العنوان يجب أن لا يتجاوز 100 حرف")]
-[Display(Name = "عنوان الصورة")]
     public string? Title { get; set; }
 
     [StringLength(50, ErrorMessage = "الفئة يجب أن لا تتجاوز 50 حرف")]
@@ -86,11 +52,44 @@ public class EditPortfolioImageViewModel
     [Display(Name = "صورة مميزة")]
     public bool IsFeatured { get; set; }
 
-  [Display(Name = "صورة قبل وبعد")]
+    [Display(Name = "صورة قبل وبعد")]
+    public bool IsBeforeAfter { get; set; }
+
+    [Required(ErrorMessage = "يرجى اختيار صورة")]
+    [Display(Name = "الصورة")]
+    public IFormFile? ImageFile { get; set; }
+}
+
+public class EditPortfolioImageViewModel
+{
+    public Guid Id { get; set; }
+    public Guid TailorId { get; set; }
+
+    [Required(ErrorMessage = "يرجى إدخال عنوان الصورة")]
+    [StringLength(100, ErrorMessage = "العنوان يجب أن لا يتجاوز 100 حرف")]
+    [Display(Name = "عنوان الصورة")]
+    public string? Title { get; set; }
+
+    [StringLength(50, ErrorMessage = "الفئة يجب أن لا تتجاوز 50 حرف")]
+    [Display(Name = "الفئة")]
+    public string? Category { get; set; }
+
+    [StringLength(500, ErrorMessage = "الوصف يجب أن لا يتجاوز 500 حرف")]
+    [Display(Name = "الوصف")]
+    public string? Description { get; set; }
+
+    [Display(Name = "السعر التقديري")]
+    [Range(0, 999999, ErrorMessage = "السعر يجب أن يكون بين 0 و 999999")]
+    public decimal? EstimatedPrice { get; set; }
+
+    [Display(Name = "صورة مميزة")]
+    public bool IsFeatured { get; set; }
+
+    [Display(Name = "صورة قبل وبعد")]
     public bool IsBeforeAfter { get; set; }
 
     [Display(Name = "ترتيب العرض")]
-  public int DisplayOrder { get; set; }
+    public int DisplayOrder { get; set; }
 
     [Display(Name = "صورة جديدة")]
     public IFormFile? NewImageFile { get; set; }
@@ -107,7 +106,7 @@ public class ManageServicesViewModel
     public Guid TailorId { get; set; }
     public string TailorName { get; set; } = string.Empty;
     public List<ServiceItemDto> Services { get; set; } = new();
-  public int TotalServices { get; set; }
+    public int TotalServices { get; set; }
     public decimal AveragePrice { get; set; }
 }
 
@@ -136,13 +135,13 @@ public class AddServiceViewModel
 
     [Required(ErrorMessage = "يرجى إدخال السعر الأساسي")]
     [Range(1, 999999, ErrorMessage = "السعر يجب أن يكون بين 1 و 999999")]
-  [Display(Name = "السعر الأساسي (ريال)")]
+    [Display(Name = "السعر الأساسي (ريال)")]
     public decimal BasePrice { get; set; }
 
     [Required(ErrorMessage = "يرجى إدخال المدة التقديرية")]
     [Range(1, 365, ErrorMessage = "المدة يجب أن تكون بين 1 و 365 يوم")]
     [Display(Name = "المدة التقديرية (بالأيام)")]
- public int EstimatedDuration { get; set; }
+    public int EstimatedDuration { get; set; }
 }
 
 public class EditServiceViewModel
@@ -168,7 +167,7 @@ public class EditServiceViewModel
     [Required(ErrorMessage = "يرجى إدخال المدة التقديرية")]
     [Range(1, 365, ErrorMessage = "المدة يجب أن تكون بين 1 و 365 يوم")]
     [Display(Name = "المدة التقديرية (بالأيام)")]
- public int EstimatedDuration { get; set; }
+    public int EstimatedDuration { get; set; }
 }
 
 #endregion
@@ -189,7 +188,7 @@ public class ServicePriceDto
     public decimal CurrentPrice { get; set; }
 
     [Required(ErrorMessage = "يرجى إدخال السعر الجديد")]
-[Range(1, 999999, ErrorMessage = "السعر يجب أن يكون بين 1 و 999999")]
+    [Range(1, 999999, ErrorMessage = "السعر يجب أن يكون بين 1 و 999999")]
     [Display(Name = "السعر الجديد")]
     public decimal NewPrice { get; set; }
 }

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.Data;
 
 namespace TafsilkPlatform.Web.Repositories;
 

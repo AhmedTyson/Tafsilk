@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 using TafsilkPlatform.Web.Models;
 
 namespace TafsilkPlatform.Web.Data;
@@ -49,12 +46,12 @@ public partial class AppDbContext : DbContext
     sqlOptions =>
     {
         // OPTIMIZATION: Enable query splitting to avoid cartesian explosion
-         sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-      });
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+    });
         }
 
-    // OPTIMIZATION: Only enable sensitive data logging in Development environment
-  // This will be controlled by the environment-specific configuration in Program.cs
+        // OPTIMIZATION: Only enable sensitive data logging in Development environment
+        // This will be controlled by the environment-specific configuration in Program.cs
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -62,122 +59,122 @@ public partial class AppDbContext : DbContext
         // User Entity
         modelBuilder.Entity<User>(entity =>
         {
-          entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07AA820590");
+            entity.HasKey(e => e.Id).HasName("PK__Users__3214EC07AA820590");
 
-   entity.HasIndex(e => e.Email, "IX_Users_Email");
-         entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
-     entity.HasIndex(e => e.Email, "UQ__Users__A9D10534975288F0").IsUnique();
+            entity.HasIndex(e => e.Email, "IX_Users_Email");
+            entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
+            entity.HasIndex(e => e.Email, "UQ__Users__A9D10534975288F0").IsUnique();
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-       entity.Property(e => e.Email).HasMaxLength(255);
-   entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Email).HasMaxLength(255);
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
-       entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
-         entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
+            entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
+            entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
             entity.Property(e => e.PromotionalNotifications).HasDefaultValue(true);
 
-   entity.HasOne(d => d.Role)
-                .WithMany(p => p.Users)
-      .HasForeignKey(d => d.RoleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Users_Roles");
+            entity.HasOne(d => d.Role)
+                         .WithMany(p => p.Users)
+               .HasForeignKey(d => d.RoleId)
+                         .OnDelete(DeleteBehavior.ClientSetNull)
+                         .HasConstraintName("FK_Users_Roles");
         });
 
         // Role Entity
         modelBuilder.Entity<Role>(entity =>
  {
-            entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
+     entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.Description).HasMaxLength(255);
-    entity.Property(e => e.Name).HasMaxLength(50);
-    entity.Property(e => e.Permissions).HasMaxLength(2000); // JSON permissions
-          entity.Property(e => e.Priority).HasDefaultValue(0);
-        });
+     entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+     entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+     entity.Property(e => e.Description).HasMaxLength(255);
+     entity.Property(e => e.Name).HasMaxLength(50);
+     entity.Property(e => e.Permissions).HasMaxLength(2000); // JSON permissions
+     entity.Property(e => e.Priority).HasDefaultValue(0);
+ });
 
         // CustomerProfile Entity
-   modelBuilder.Entity<CustomerProfile>(entity =>
-        {
-     entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
+        modelBuilder.Entity<CustomerProfile>(entity =>
+             {
+                 entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
 
-      entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
-      entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
+                 entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
+                 entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.City).HasMaxLength(100);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.FullName).HasMaxLength(255);
-       entity.Property(e => e.Gender).HasMaxLength(20);
-      entity.Property(e => e.Bio).HasMaxLength(1000);
+                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+                 entity.Property(e => e.City).HasMaxLength(100);
+                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+                 entity.Property(e => e.FullName).HasMaxLength(255);
+                 entity.Property(e => e.Gender).HasMaxLength(20);
+                 entity.Property(e => e.Bio).HasMaxLength(1000);
 #pragma warning disable CS0618
- entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+                 entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
 #pragma warning restore CS0618
-            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-          entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+                 entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+                 entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
-            entity.HasOne(d => d.User)
-      .WithOne(p => p.CustomerProfile)
-         .HasForeignKey<CustomerProfile>(d => d.UserId)
-          .OnDelete(DeleteBehavior.NoAction)
-    .HasConstraintName("FK_CustomerProfiles_Users");
-        });
+                 entity.HasOne(d => d.User)
+           .WithOne(p => p.CustomerProfile)
+              .HasForeignKey<CustomerProfile>(d => d.UserId)
+               .OnDelete(DeleteBehavior.NoAction)
+         .HasConstraintName("FK_CustomerProfiles_Users");
+             });
 
-   // TailorProfile Entity
+        // TailorProfile Entity
         modelBuilder.Entity<TailorProfile>(entity =>
         {
-   entity.HasKey(e => e.Id).HasName("PK__TailorPr__3214EC07A3FCF42C");
+            entity.HasKey(e => e.Id).HasName("PK__TailorPr__3214EC07A3FCF42C");
 
             entity.HasIndex(e => e.UserId, "IX_TailorProfiles_UserId");
-          entity.HasIndex(e => e.UserId, "UQ__TailorPr__1788CC4D37A4BF4A").IsUnique();
+            entity.HasIndex(e => e.UserId, "UQ__TailorPr__1788CC4D37A4BF4A").IsUnique();
 
-         entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.FullName).HasMaxLength(255);
-        entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.Address).HasMaxLength(500);
-  entity.Property(e => e.Bio).HasMaxLength(1000);
+            entity.Property(e => e.Bio).HasMaxLength(1000);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-     entity.Property(e => e.IsVerified).HasDefaultValue(false);
+            entity.Property(e => e.IsVerified).HasDefaultValue(false);
             entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
- entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
-    entity.Property(e => e.PricingRange).HasMaxLength(100);
+            entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
+            entity.Property(e => e.PricingRange).HasMaxLength(100);
             entity.Property(e => e.ShopName).HasMaxLength(255);
 #pragma warning disable CS0618
-   entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
 #pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-     entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+            entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
-    entity.HasOne(d => d.User)
-     .WithOne(p => p.TailorProfile)
-                .HasForeignKey<TailorProfile>(d => d.UserId)
-    .OnDelete(DeleteBehavior.NoAction)
-          .HasConstraintName("FK_TailorProfiles_Users");
+            entity.HasOne(d => d.User)
+             .WithOne(p => p.TailorProfile)
+                        .HasForeignKey<TailorProfile>(d => d.UserId)
+            .OnDelete(DeleteBehavior.NoAction)
+                  .HasConstraintName("FK_TailorProfiles_Users");
         });
 
         // UserAddress Entity
         modelBuilder.Entity<UserAddress>(entity =>
         {
-        entity.HasKey(e => e.Id).HasName("PK__UserAddr__3214EC07DDE0E48B");
+            entity.HasKey(e => e.Id).HasName("PK__UserAddr__3214EC07DDE0E48B");
 
             entity.HasIndex(e => e.UserId, "IX_UserAddresses_UserId");
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-          entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-    entity.Property(e => e.IsDefault).HasDefaultValue(false);
+            entity.Property(e => e.IsDefault).HasDefaultValue(false);
             entity.Property(e => e.Label).HasMaxLength(100);
             entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
-        entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
-      entity.Property(e => e.Street).HasMaxLength(255);
+            entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
+            entity.Property(e => e.Street).HasMaxLength(255);
 
-        entity.HasOne(d => d.User)
-    .WithMany(p => p.UserAddresses)
-    .HasForeignKey(d => d.UserId)
-    .OnDelete(DeleteBehavior.NoAction)
-                .HasConstraintName("FK_UserAddresses_Users");
+            entity.HasOne(d => d.User)
+        .WithMany(p => p.UserAddresses)
+        .HasForeignKey(d => d.UserId)
+        .OnDelete(DeleteBehavior.NoAction)
+                    .HasConstraintName("FK_UserAddresses_Users");
         });
 
         // RefreshToken Entity
@@ -185,34 +182,34 @@ entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
         {
             entity.HasKey(e => e.Id).HasName("PK__RefreshT__3214EC07E9DA722D");
 
-          entity.HasIndex(e => e.ExpiresAt, "IX_RefreshTokens_ExpiresAt");
-  entity.HasIndex(e => e.UserId, "IX_RefreshTokens_UserId");
+            entity.HasIndex(e => e.ExpiresAt, "IX_RefreshTokens_ExpiresAt");
+            entity.HasIndex(e => e.UserId, "IX_RefreshTokens_UserId");
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-        entity.HasOne(d => d.User)
-       .WithMany(p => p.RefreshTokens)
- .HasForeignKey(d => d.UserId)
-     .OnDelete(DeleteBehavior.NoAction)
-    .HasConstraintName("FK_RefreshTokens_Users");
+            entity.HasOne(d => d.User)
+           .WithMany(p => p.RefreshTokens)
+     .HasForeignKey(d => d.UserId)
+         .OnDelete(DeleteBehavior.NoAction)
+        .HasConstraintName("FK_RefreshTokens_Users");
         });
 
         // Order Entity + relations
         modelBuilder.Entity<Order>(entity =>
         {
             entity.Property(o => o.CustomerId).IsRequired();
-      entity.Property(o => o.TailorId).IsRequired();
+            entity.Property(o => o.TailorId).IsRequired();
 
-  entity.HasOne(o => o.Customer)
-                .WithMany(c => c.orders)
-    .HasForeignKey(o => o.CustomerId)
-       .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(o => o.Customer)
+                          .WithMany(c => c.orders)
+              .HasForeignKey(o => o.CustomerId)
+                 .OnDelete(DeleteBehavior.NoAction);
 
-      entity.HasOne(o => o.Tailor)
-          .WithMany()
-                .HasForeignKey(o => o.TailorId)
-           .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(o => o.Tailor)
+                .WithMany()
+                      .HasForeignKey(o => o.TailorId)
+                 .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasMany(o => o.Items)
  .WithOne(oi => oi.Order)
@@ -224,63 +221,63 @@ entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
      .HasForeignKey(oi => oi.OrderId)
   .OnDelete(DeleteBehavior.NoAction);
 
-      entity.HasMany(o => o.Payments)
-         .WithOne(p => p.Order)
-      .HasForeignKey(p => p.OrderId)
-       .OnDelete(DeleteBehavior.NoAction);
+            entity.HasMany(o => o.Payments)
+               .WithOne(p => p.Order)
+            .HasForeignKey(p => p.OrderId)
+             .OnDelete(DeleteBehavior.NoAction);
         });
 
         // OrderItem Entity - Fix decimal precision
         modelBuilder.Entity<OrderItem>(entity =>
         {
-        entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18,2);
-    entity.Property(e => e.Total).HasColumnType("decimal(18,2)").HasPrecision(18,2);
-            
-         entity.HasOne(e => e.Order)
-           .WithMany(o => o.Items)
-                .HasForeignKey(e => e.OrderId)
-  .OnDelete(DeleteBehavior.NoAction);
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+            entity.Property(e => e.Total).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+
+            entity.HasOne(e => e.Order)
+              .WithMany(o => o.Items)
+                   .HasForeignKey(e => e.OrderId)
+     .OnDelete(DeleteBehavior.NoAction);
         });
 
         // Payment Entity - Fix decimal precision
-modelBuilder.Entity<Payment>(entity =>
-   {
-     entity.Property(e => e.Amount).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-   
-            entity.HasOne(p => p.Customer)
-           .WithMany(cp => cp.Payments)
-      .HasForeignKey(p => p.CustomerId)
-         .OnDelete(DeleteBehavior.NoAction);
+        modelBuilder.Entity<Payment>(entity =>
+           {
+               entity.Property(e => e.Amount).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
 
-            entity.HasOne(p => p.Order)
-             .WithMany(o => o.Payments)
-             .HasForeignKey(p => p.OrderId)
-                .OnDelete(DeleteBehavior.NoAction);
+               entity.HasOne(p => p.Customer)
+      .WithMany(cp => cp.Payments)
+ .HasForeignKey(p => p.CustomerId)
+    .OnDelete(DeleteBehavior.NoAction);
 
-entity.HasOne(p => p.Tailor)
-    .WithMany(tp => tp.Payments)
-       .HasForeignKey(p => p.TailorId)
- .OnDelete(DeleteBehavior.NoAction);
-        });
+               entity.HasOne(p => p.Order)
+        .WithMany(o => o.Payments)
+        .HasForeignKey(p => p.OrderId)
+           .OnDelete(DeleteBehavior.NoAction);
 
-      // Notification Entity - Fix shadow property warning
+               entity.HasOne(p => p.Tailor)
+           .WithMany(tp => tp.Payments)
+              .HasForeignKey(p => p.TailorId)
+        .OnDelete(DeleteBehavior.NoAction);
+           });
+
+        // Notification Entity - Fix shadow property warning
         modelBuilder.Entity<Notification>(entity =>
         {
             entity.ToTable("Notifications");
-      entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
+            entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
 
-    entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
+            entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
             entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-          entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
-  entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
-          entity.Property(e => e.UserId).IsRequired(false); // NULL for system messages
+            entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
+            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.UserId).IsRequired(false); // NULL for system messages
             entity.Property(e => e.AudienceType).HasMaxLength(50); // "All", "Customers", "Tailors"
             entity.Property(e => e.IsRead).HasDefaultValue(false);
- entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
-          entity.Property(e => e.IsDeleted).HasDefaultValue(false);
+            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-      entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
-      entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_Notifications_AudienceType");
+            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
+            entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_Notifications_AudienceType");
 
             entity.HasOne(n => n.User)
    .WithMany()
@@ -293,20 +290,20 @@ entity.HasOne(p => p.Tailor)
         // PortfolioImage Entity - Fix shadow property warning and decimal precision
         modelBuilder.Entity<PortfolioImage>(entity =>
         {
-       entity.ToTable("PortfolioImages");
-  entity.HasKey(e => e.PortfolioImageId).HasName("PK_PortfolioImages");
+            entity.ToTable("PortfolioImages");
+            entity.HasKey(e => e.PortfolioImageId).HasName("PK_PortfolioImages");
 
- entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
+            entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
             entity.Property(e => e.ImageUrl).HasMaxLength(500);
-  entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
-          entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-            
-  // FIXED: Add decimal precision for EstimatedPrice
-          entity.Property(e => e.EstimatedPrice)
-   .HasColumnType("decimal(18,2)")
-      .HasPrecision(18, 2);
+            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
+            // FIXED: Add decimal precision for EstimatedPrice
+            entity.Property(e => e.EstimatedPrice)
+     .HasColumnType("decimal(18,2)")
+        .HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_PortfolioImages_TailorId");
 
             entity.HasOne(pi => pi.Tailor)
      .WithMany(t => t.PortfolioImages)
@@ -316,44 +313,44 @@ entity.HasOne(p => p.Tailor)
         });
 
         // TailorService Entity - Fix shadow property warning
-modelBuilder.Entity<TailorService>(entity =>
-        {
-entity.ToTable("TailorServices");
-            entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
+        modelBuilder.Entity<TailorService>(entity =>
+                {
+                    entity.ToTable("TailorServices");
+                    entity.HasKey(e => e.TailorServiceId).HasName("PK_TailorServices");
 
-     entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
-      entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+                    entity.Property(e => e.ServiceName).IsRequired().HasMaxLength(100);
+                    entity.Property(e => e.Description).HasMaxLength(500);
+                    entity.Property(e => e.BasePrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
 
- entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
+                    entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_TailorServices_TailorId");
 
-        entity.HasOne(ts => ts.Tailor)
-  .WithMany(t => t.TailorServices)
-        .HasForeignKey(ts => ts.TailorId)
-      .HasPrincipalKey(t => t.Id)
-                .OnDelete(DeleteBehavior.NoAction);
-        });
+                    entity.HasOne(ts => ts.Tailor)
+      .WithMany(t => t.TailorServices)
+            .HasForeignKey(ts => ts.TailorId)
+          .HasPrincipalKey(t => t.Id)
+                    .OnDelete(DeleteBehavior.NoAction);
+                });
 
- // Review Entity - FIXED: Remove ambiguous relationships
+        // Review Entity - FIXED: Remove ambiguous relationships
         modelBuilder.Entity<Review>(entity =>
         {
-        entity.ToTable("Reviews");
+            entity.ToTable("Reviews");
             entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
 
             entity.Property(e => e.Comment).HasMaxLength(1000);
-          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
-         entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
-          entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
+            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
+            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
             entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
 
-        // FIXED: Use explicit HasForeignKey with proper principal keys
-        entity.HasOne(r => r.Order)
-                .WithMany()
-            .HasForeignKey(r => r.OrderId)
-       .HasPrincipalKey(o => o.OrderId)
-      .OnDelete(DeleteBehavior.NoAction);
+            // FIXED: Use explicit HasForeignKey with proper principal keys
+            entity.HasOne(r => r.Order)
+                    .WithMany()
+                .HasForeignKey(r => r.OrderId)
+           .HasPrincipalKey(o => o.OrderId)
+          .OnDelete(DeleteBehavior.NoAction);
 
             entity.HasOne(r => r.Tailor)
        .WithMany()
@@ -361,34 +358,34 @@ entity.ToTable("TailorServices");
  .HasPrincipalKey(t => t.Id)
  .OnDelete(DeleteBehavior.NoAction);
 
-       entity.HasOne(r => r.Customer)
-      .WithMany()
-    .HasForeignKey(r => r.CustomerId)
-           .HasPrincipalKey(c => c.Id)
-      .OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(r => r.Customer)
+           .WithMany()
+         .HasForeignKey(r => r.CustomerId)
+                .HasPrincipalKey(c => c.Id)
+           .OnDelete(DeleteBehavior.NoAction);
 
- entity.HasMany(r => r.RatingDimensions)
-     .WithOne(rd => rd.Review)
-        .HasForeignKey(rd => rd.ReviewId)
-                .OnDelete(DeleteBehavior.NoAction);
+            entity.HasMany(r => r.RatingDimensions)
+                .WithOne(rd => rd.Review)
+                   .HasForeignKey(rd => rd.ReviewId)
+                           .OnDelete(DeleteBehavior.NoAction);
         });
 
         // OrderImages Entity - Fix shadow property warning
-      modelBuilder.Entity<OrderImages>(entity =>
-        {
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
+        modelBuilder.Entity<OrderImages>(entity =>
+          {
+              entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
 
-        entity.HasOne(oi => oi.Order)
-     .WithMany(o => o.orderImages)
-  .HasForeignKey(oi => oi.OrderId)
-         .HasPrincipalKey(o => o.OrderId)
-      .OnDelete(DeleteBehavior.NoAction);
-        });
+              entity.HasOne(oi => oi.Order)
+         .WithMany(o => o.orderImages)
+      .HasForeignKey(oi => oi.OrderId)
+             .HasPrincipalKey(o => o.OrderId)
+          .OnDelete(DeleteBehavior.NoAction);
+          });
 
         // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
         {
-foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+            foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
     }
 

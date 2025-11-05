@@ -26,7 +26,7 @@ public class AccountController(
 {
     private readonly IAuthService _auth = auth;
     private readonly IUserRepository _userRepository = userRepository;
-  private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IFileUploadService _fileUploadService = fileUploadService;
     private readonly ILogger<AccountController> _logger = logger;
     private readonly IDateTimeService _dateTime = dateTime;
@@ -34,21 +34,21 @@ public class AccountController(
     #region Registration & Login
 
     /// <summary>
- /// Displays the registration page. Redirects authenticated users to their dashboard.
+    /// Displays the registration page. Redirects authenticated users to their dashboard.
     /// </summary>
-  [HttpGet]
+    [HttpGet]
     [AllowAnonymous]
     public IActionResult Register()
- {
-      // If user is already authenticated, redirect to their dashboard
+    {
+        // If user is already authenticated, redirect to their dashboard
         if (User.Identity?.IsAuthenticated == true)
         {
-  var roleName = User.FindFirstValue(ClaimTypes.Role);
+            var roleName = User.FindFirstValue(ClaimTypes.Role);
             _logger.LogInformation("[AccountController] Authenticated user {Email} attempted to access Register. Redirecting to dashboard.",
            User.FindFirstValue(ClaimTypes.Email));
-   TempData["InfoMessage"] = "أنت مسجل دخول بالفعل. يرجى تسجيل الخروج أولاً إذا كنت تريد إنشاء حساب جديد.";
+            TempData["InfoMessage"] = "أنت مسجل دخول بالفعل. يرجى تسجيل الخروج أولاً إذا كنت تريد إنشاء حساب جديد.";
             return RedirectToRoleDashboard(roleName);
-     }
+        }
 
         return View();
     }
@@ -61,121 +61,121 @@ public class AccountController(
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(string name, string email, string password, string userType, string? phoneNumber)
     {
- // If user is already authenticated, redirect to their dashboard
-    if (User.Identity?.IsAuthenticated == true)
-{
+        // If user is already authenticated, redirect to their dashboard
+        if (User.Identity?.IsAuthenticated == true)
+        {
             var roleName = User.FindFirstValue(ClaimTypes.Role);
-          _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
-      User.FindFirstValue(ClaimTypes.Email));
+            _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
+        User.FindFirstValue(ClaimTypes.Email));
             TempData["ErrorMessage"] = "أنت مسجل دخول بالفعل. لا يمكنك إنشاء حساب جديد أثناء تسجيل الدخول.";
-     return RedirectToRoleDashboard(roleName);
-     }
+            return RedirectToRoleDashboard(roleName);
+        }
 
         // Sanitize inputs
         name = SanitizeInput(name ?? string.Empty, 100);
         email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
 
-   // Validate name
+        // Validate name
         if (string.IsNullOrWhiteSpace(name))
-   ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
+            ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
         else if (name.Length < 2)
             ModelState.AddModelError(nameof(name), "الاسم يجب أن يكون حرفين على الأقل");
         else if (name.Length > 100)
-         ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
+            ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
 
         // Validate email
         if (string.IsNullOrWhiteSpace(email))
-   ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-  else if (!IsValidEmail(email))
+            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        else if (!IsValidEmail(email))
             ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح. يرجى إدخال بريد إلكتروني صحيح");
 
-  // Validate password
-    if (string.IsNullOrWhiteSpace(password))
-        ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+        // Validate password
+        if (string.IsNullOrWhiteSpace(password))
+            ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
         else
         {
-          var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
-        if (!isValidPassword)
-        ModelState.AddModelError(nameof(password), passwordError!);
-    }
+            var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
+            if (!isValidPassword)
+                ModelState.AddModelError(nameof(password), passwordError!);
+        }
 
-      // Validate phone number
+        // Validate phone number
         if (!string.IsNullOrWhiteSpace(phoneNumber))
         {
-    var (isValidPhone, phoneError) = ValidatePhoneNumber(phoneNumber);
-    if (!isValidPhone)
-     ModelState.AddModelError(nameof(phoneNumber), phoneError!);
+            var (isValidPhone, phoneError) = ValidatePhoneNumber(phoneNumber);
+            if (!isValidPhone)
+                ModelState.AddModelError(nameof(phoneNumber), phoneError!);
         }
 
         if (!ModelState.IsValid)
-  return View();
+            return View();
 
-   var role = userType?.ToLowerInvariant() switch
+        var role = userType?.ToLowerInvariant() switch
         {
-          "tailor" => RegistrationRole.Tailor,
+            "tailor" => RegistrationRole.Tailor,
             _ => RegistrationRole.Customer
         };
 
         var req = new RegisterRequest
-   {
-        Email = email,
-     Password = password,
-   FullName = name,
- PhoneNumber = phoneNumber,
-      Role = role
-};
+        {
+            Email = email,
+            Password = password,
+            FullName = name,
+            PhoneNumber = phoneNumber,
+            Role = role
+        };
 
         var (ok, err, user) = await _auth.RegisterAsync(req);
         if (!ok || user is null)
         {
-          ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
-       return View();
-}
+            ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
+            return View();
+        }
 
         _logger.LogInformation("[AccountController] User registered successfully: {Email}, Role: {Role}", email, role);
 
         // For Tailors: Redirect to CompleteTailorProfile (better UX wizard)
-      if (role == RegistrationRole.Tailor)
+        if (role == RegistrationRole.Tailor)
         {
             TempData["UserId"] = user.Id.ToString();
-    TempData["UserEmail"] = email;
-    TempData["UserName"] = name;
-        TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
-         return RedirectToAction(nameof(CompleteTailorProfile));
-  }
+            TempData["UserEmail"] = email;
+            TempData["UserName"] = name;
+            TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
+            return RedirectToAction(nameof(CompleteTailorProfile));
+        }
 
         // ✅ UPDATED: For Customers - Auto-login and redirect to their dashboard
         if (role == RegistrationRole.Customer)
         {
- // Build claims for authentication using collection expression
-    List<Claim> claims =
-            [
-       new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            // Build claims for authentication using collection expression
+            List<Claim> claims =
+                    [
+               new(ClaimTypes.NameIdentifier, user.Id.ToString()),
         new(ClaimTypes.Email, user.Email ?? string.Empty),
              new(ClaimTypes.Name, name),
     new("FullName", name),
                 new(ClaimTypes.Role, "Customer")
-       ];
+               ];
 
-      var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-   var principal = new ClaimsPrincipal(identity);
-       await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-         new AuthenticationProperties { IsPersistent = true });
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+              new AuthenticationProperties { IsPersistent = true });
 
-        _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
+            _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
 
-    TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
-    return RedirectToAction("Customer", "Dashboards");
-     }
+            TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
+            return RedirectToAction("Customer", "Dashboards");
+        }
 
         // Default fallback (should not reach here)
         TempData["SuccessMessage"] = "تم إنشاء الحساب بنجاح!";
-    return RedirectToAction("Login");
+        return RedirectToAction("Login");
     }
 
     /// <summary>
     /// Displays the login page.
-  /// </summary>
+    /// </summary>
     [HttpGet]
     [AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
@@ -195,54 +195,54 @@ public class AccountController(
         // Sanitize inputs
         email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
 
-     // Validate
-      if (string.IsNullOrWhiteSpace(email) && !ModelState.ContainsKey(nameof(email)))
- ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-      else if (!IsValidEmail(email))
+        // Validate
+        if (string.IsNullOrWhiteSpace(email) && !ModelState.ContainsKey(nameof(email)))
+            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+        else if (!IsValidEmail(email))
             ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
 
-    if (string.IsNullOrWhiteSpace(password))
-  ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+        if (string.IsNullOrWhiteSpace(password))
+            ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
 
         if (!ModelState.IsValid)
-  return View();
+            return View();
 
-var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
+        var (ok, err, user) = await _auth.ValidateUserAsync(email, password);
 
-      // Handle tailor with incomplete profile
+        // Handle tailor with incomplete profile
         if (!ok && err == "TAILOR_INCOMPLETE_PROFILE" && user is not null)
         {
-      _logger.LogWarning("[AccountController] Tailor {Email} attempted login without complete profile. Redirecting to complete profile page.", email);
+            _logger.LogWarning("[AccountController] Tailor {Email} attempted login without complete profile. Redirecting to complete profile page.", email);
 
- TempData["UserId"] = user.Id.ToString();
-TempData["UserEmail"] = user.Email ?? email;
-   TempData["UserName"] = user.Email ?? email;
-   TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية قبل تسجيل الدخول";
+            TempData["UserId"] = user.Id.ToString();
+            TempData["UserEmail"] = user.Email ?? email;
+            TempData["UserName"] = user.Email ?? email;
+            TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية قبل تسجيل الدخول";
 
- return RedirectToAction(nameof(CompleteTailorProfile), new { userId = user.Id });
-}
+            return RedirectToAction(nameof(CompleteTailorProfile), new { userId = user.Id });
+        }
 
         if (!ok || user is null)
         {
-ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
-         return View();
+            ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+            return View();
         }
 
         // ✅ FIX: Use AuthService to build claims (avoids concurrent DbContext usage)
         var claims = await _auth.GetUserClaimsAsync(user);
 
- var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-  var principal = new ClaimsPrincipal(identity);
-     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-     new AuthenticationProperties { IsPersistent = rememberMe });
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        var principal = new ClaimsPrincipal(identity);
+        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+        new AuthenticationProperties { IsPersistent = rememberMe });
 
-   var roleName = user.Role?.Name ?? string.Empty;
-        
-   // Redirect to dashboard or return URL
- if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-   return Redirect(returnUrl);
+        var roleName = user.Role?.Name ?? string.Empty;
 
-     return RedirectToRoleDashboard(roleName);
+        // Redirect to dashboard or return URL
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            return Redirect(returnUrl);
+
+        return RedirectToRoleDashboard(roleName);
     }
 
     /// <summary>
@@ -252,7 +252,7 @@ ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
 
@@ -268,76 +268,76 @@ await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme
     public async Task<IActionResult> CompleteTailorProfile(Guid? userId)
     {
         _logger.LogInformation("[AccountController] CompleteTailorProfile GET accessed. UserId param: {UserId}", userId);
-   
-        // Check if coming from registration (unauthenticated)
-var userIdStr = TempData["UserId"]?.ToString();
 
-// Keep the data for the POST
- TempData.Keep("UserId");
+        // Check if coming from registration (unauthenticated)
+        var userIdStr = TempData["UserId"]?.ToString();
+
+        // Keep the data for the POST
+        TempData.Keep("UserId");
         TempData.Keep("UserEmail");
-TempData.Keep("UserName");
+        TempData.Keep("UserName");
         TempData.Keep("InfoMessage");
 
-  Guid userGuid;
+        Guid userGuid;
         User? user = null;
 
-     // Priority 1: Get from query string parameter (most reliable)
-   if (userId.HasValue && userId.Value != Guid.Empty)
-   {
-     userGuid = userId.Value;
-       _logger.LogInformation("[AccountController] Using UserId from query string: {UserId}", userGuid);
-  }
- // Priority 2: Get from TempData (fallback)
-      else if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
-     {
-   _logger.LogInformation("[AccountController] Using UserId from TempData: {UserId}", userGuid);
-  }
+        // Priority 1: Get from query string parameter (most reliable)
+        if (userId.HasValue && userId.Value != Guid.Empty)
+        {
+            userGuid = userId.Value;
+            _logger.LogInformation("[AccountController] Using UserId from query string: {UserId}", userGuid);
+        }
+        // Priority 2: Get from TempData (fallback)
+        else if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
+        {
+            _logger.LogInformation("[AccountController] Using UserId from TempData: {UserId}", userGuid);
+        }
         // Priority 3: Check if authenticated tailor (editing profile after login)
-   else if (User.Identity?.IsAuthenticated == true)
-{
-    var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-   if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
-     return Unauthorized();
+        else if (User.Identity?.IsAuthenticated == true)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
+                return Unauthorized();
 
-     _logger.LogInformation("[AccountController] Using UserId from claims: {UserId}", userGuid);
-   }
-     else
- {
+            _logger.LogInformation("[AccountController] Using UserId from claims: {UserId}", userGuid);
+        }
+        else
+        {
             // No user ID and not authenticated - redirect to registration
-        _logger.LogWarning("[AccountController] No UserId available from any source");
- TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
-     return RedirectToAction(nameof(Register));
-      }
+            _logger.LogWarning("[AccountController] No UserId available from any source");
+            TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى التسجيل مرة أخرى";
+            return RedirectToAction(nameof(Register));
+        }
 
         // ✅ FIX: Use GetUserWithProfileAsync which includes Role navigation property
-      user = await _userRepository.GetUserWithProfileAsync(userGuid);
- if (user == null || user.Role?.Name?.ToLower() != "tailor")
-     {
-            _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}", 
+        user = await _userRepository.GetUserWithProfileAsync(userGuid);
+        if (user == null || user.Role?.Name?.ToLower() != "tailor")
+        {
+            _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}",
                 userGuid, user?.Role?.Name ?? "NULL");
-         TempData["ErrorMessage"] = "حساب غير صالح";
-      return RedirectToAction(nameof(Register));
-  }
+            TempData["ErrorMessage"] = "حساب غير صالح";
+            return RedirectToAction(nameof(Register));
+        }
 
-    _logger.LogInformation("[AccountController] User found: {UserId}, Email: {Email}, Role: {Role}", 
-            user.Id, user.Email, user.Role?.Name);
+        _logger.LogInformation("[AccountController] User found: {UserId}, Email: {Email}, Role: {Role}",
+                user.Id, user.Email, user.Role?.Name);
 
-      // CRITICAL: Check if profile already exists (evidence already provided)
+        // CRITICAL: Check if profile already exists (evidence already provided)
         // This ensures ONE-TIME submission only
         var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
         if (existingProfile != null)
-    {
- _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to login.", user.Id);
+        {
+            _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to login.", user.Id);
             TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. يمكنك تسجيل الدخول الآن";
-return RedirectToAction(nameof(Login));
-  }
+            return RedirectToAction(nameof(Login));
+        }
 
         var model = new CompleteTailorProfileRequest
-      {
-   UserId = user.Id,
- Email = TempData["UserEmail"]?.ToString() ?? user.Email,
-    FullName = TempData["UserName"]?.ToString() ?? user.Email
-     };
+        {
+            UserId = user.Id,
+            Email = TempData["UserEmail"]?.ToString() ?? user.Email,
+            FullName = TempData["UserName"]?.ToString() ?? user.Email
+        };
 
         return View(model);
     }
@@ -496,25 +496,25 @@ return RedirectToAction(nameof(Login));
             }
 
             // Keep user ACTIVE so they can use the platform immediately
-       // Admin verification (IsVerified) is checked separately for sensitive features
+            // Admin verification (IsVerified) is checked separately for sensitive features
             user.IsActive = true; // ✅ FIXED: Allow immediate platform access
- user.UpdatedAt = _dateTime.Now;
+            user.UpdatedAt = _dateTime.Now;
 
-      // Generate email verification token
-     var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
- .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0,32);
+            // Generate email verification token
+            var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+        .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0, 32);
 
-       user.EmailVerificationToken = verificationToken;
-       user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+            user.EmailVerificationToken = verificationToken;
+            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
 
-  await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.Users.UpdateAsync(user);
             await _unitOfWork.SaveChangesAsync();
 
-    _logger.LogInformation("[AccountController] Tailor {UserId} completed profile submission. User is ACTIVE, profile awaiting verification (IsVerified=false).", model.UserId);
+            _logger.LogInformation("[AccountController] Tailor {UserId} completed profile submission. User is ACTIVE, profile awaiting verification (IsVerified=false).", model.UserId);
 
             // ✅ FIX: Auto-login the tailor and redirect to their dashboard
             // Build claims for authentication
-      var claims = new List<Claim>
+            var claims = new List<Claim>
             {
              new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -524,13 +524,13 @@ return RedirectToAction(nameof(Login));
          };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-         var principal = new ClaimsPrincipal(identity);
+            var principal = new ClaimsPrincipal(identity);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
      new AuthenticationProperties { IsPersistent = true });
 
-  _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
+            _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
 
-        TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن استخدام المنصة. سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
+            TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن استخدام المنصة. سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
             return RedirectToAction("Tailor", "Dashboards");
         }
         catch (Exception ex)
@@ -576,7 +576,7 @@ return RedirectToAction(nameof(Login));
                 }
             }
 
-    // Return image or placeholder
+            // Return image or placeholder
             if (imageData != null)
                 return File(imageData, contentType ?? "image/jpeg");
 
@@ -844,72 +844,72 @@ return RedirectToAction(nameof(Login));
     }
 
     /// <summary>
- /// Handles Google OAuth response.
- /// </summary>
+    /// Handles Google OAuth response.
+    /// </summary>
     [HttpGet]
-  [AllowAnonymous]
-  public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
     {
         return await HandleOAuthResponse("Google", returnUrl);
     }
 
     /// <summary>
- /// Handles OAuth response for Google.
- /// </summary>
+    /// Handles OAuth response for Google.
+    /// </summary>
     private async Task<IActionResult> HandleOAuthResponse(string provider, string? returnUrl = null)
     {
-      try
+        try
         {
-        var authenticateResult = await HttpContext.AuthenticateAsync(provider);
+            var authenticateResult = await HttpContext.AuthenticateAsync(provider);
 
-    if (!authenticateResult.Succeeded)
-   {
-      TempData["ErrorMessage"] = $"فشل تسجيل الدخول عبر {provider}";
-    return RedirectToAction(nameof(Login));
-}
+            if (!authenticateResult.Succeeded)
+            {
+                TempData["ErrorMessage"] = $"فشل تسجيل الدخول عبر {provider}";
+                return RedirectToAction(nameof(Login));
+            }
 
-      var claims = authenticateResult.Principal?.Claims;
-          var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            var claims = authenticateResult.Principal?.Claims;
+            var email = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var name = claims?.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-   var providerId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+            var providerId = claims?.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
             // Get profile picture from Google
-      string? picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value
-?? claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
+            string? picture = claims?.FirstOrDefault(c => c.Type == "urn:google:picture")?.Value
+      ?? claims?.FirstOrDefault(c => c.Type == "picture")?.Value;
 
-   if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(email))
             {
-     TempData["ErrorMessage"] = $"لم نتمكن من الحصول على بريدك الإلكتروني من {provider}";
-     return RedirectToAction(nameof(Login));
-  }
+                TempData["ErrorMessage"] = $"لم نتمكن من الحصول على بريدك الإلكتروني من {provider}";
+                return RedirectToAction(nameof(Login));
+            }
 
-      // Check if user exists
-       var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
+            // Check if user exists
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
 
             if (existingUser != null)
-     {
+            {
                 // User exists, sign them in
-     string fullName = existingUser.Email ?? "مستخدم";
-      var roleName = existingUser.Role?.Name ?? string.Empty;
+                string fullName = existingUser.Email ?? "مستخدم";
+                var roleName = existingUser.Role?.Name ?? string.Empty;
 
-       if (!string.IsNullOrEmpty(roleName))
-   {
-   switch (roleName.ToLower())
-             {
- case "customer":
-   var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
-        if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-          fullName = customer.FullName;
-     break;
-   case "tailor":
-     var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
-      if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-         fullName = tailor.FullName;
-          break;
-        }
-     }
+                if (!string.IsNullOrEmpty(roleName))
+                {
+                    switch (roleName.ToLower())
+                    {
+                        case "customer":
+                            var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
+                            if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+                                fullName = customer.FullName;
+                            break;
+                        case "tailor":
+                            var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
+                            if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+                                fullName = tailor.FullName;
+                            break;
+                    }
+                }
 
-           var userClaims = new List<Claim>
+                var userClaims = new List<Claim>
           {
            new Claim(ClaimTypes.NameIdentifier, existingUser.Id.ToString()),
      new Claim(ClaimTypes.Email, existingUser.Email ?? string.Empty),
@@ -917,37 +917,37 @@ return RedirectToAction(nameof(Login));
       new Claim("FullName", fullName)
    };
 
-    if (!string.IsNullOrEmpty(roleName))
-   userClaims.Add(new Claim(ClaimTypes.Role, roleName));
+                if (!string.IsNullOrEmpty(roleName))
+                    userClaims.Add(new Claim(ClaimTypes.Role, roleName));
 
-  var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-      var principal = new ClaimsPrincipal(identity);
+                var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-      new AuthenticationProperties { IsPersistent = true });
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+              new AuthenticationProperties { IsPersistent = true });
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-     return Redirect(returnUrl);
+                    return Redirect(returnUrl);
 
-             return RedirectToRoleDashboard(roleName);
-     }
-  else
-         {
-// New user - store data in session and redirect to complete registration
-     TempData["OAuthProvider"] = provider;
-        TempData["OAuthEmail"] = email;
-       TempData["OAuthName"] = name ?? string.Empty;
-        TempData["OAuthPicture"] = picture ?? string.Empty;
-            TempData["OAuthId"] = providerId ?? string.Empty;
+                return RedirectToRoleDashboard(roleName);
+            }
+            else
+            {
+                // New user - store data in session and redirect to complete registration
+                TempData["OAuthProvider"] = provider;
+                TempData["OAuthEmail"] = email;
+                TempData["OAuthName"] = name ?? string.Empty;
+                TempData["OAuthPicture"] = picture ?? string.Empty;
+                TempData["OAuthId"] = providerId ?? string.Empty;
 
-     return RedirectToAction(nameof(CompleteSocialRegistration));
-      }
-     }
+                return RedirectToAction(nameof(CompleteSocialRegistration));
+            }
+        }
         catch (Exception ex)
         {
-        TempData["ErrorMessage"] = $"حدث خطأ أثناء تسجيل الدخول: {ex.Message}";
-   return RedirectToAction(nameof(Login));
-    }
+            TempData["ErrorMessage"] = $"حدث خطأ أثناء تسجيل الدخول: {ex.Message}";
+            return RedirectToAction(nameof(Login));
+        }
     }
 
     /// <summary>
@@ -961,12 +961,12 @@ return RedirectToAction(nameof(Login));
     }
 
     /// <summary>
-  /// Displays the complete social registration page for new OAuth users.
-  /// </summary>
+    /// Displays the complete social registration page for new OAuth users.
+    /// </summary>
     [HttpGet]
     [AllowAnonymous]
     public IActionResult CompleteSocialRegistration()
-  {
+    {
         var provider = TempData["OAuthProvider"]?.ToString() ?? "Google";
         var email = TempData["OAuthEmail"]?.ToString();
         var name = TempData["OAuthName"]?.ToString();
@@ -977,19 +977,19 @@ return RedirectToAction(nameof(Login));
 
         // Keep data for the form
         TempData.Keep("OAuthProvider");
-  TempData.Keep("OAuthEmail");
-  TempData.Keep("OAuthName");
+        TempData.Keep("OAuthEmail");
+        TempData.Keep("OAuthName");
         TempData.Keep("OAuthPicture");
         TempData.Keep("OAuthId");
 
         var model = new CompleteGoogleRegistrationViewModel
-     {
+        {
             Email = email,
             FullName = name ?? string.Empty,
-ProfilePictureUrl = picture
-      };
+            ProfilePictureUrl = picture
+        };
 
-    ViewData["Provider"] = provider;
+        ViewData["Provider"] = provider;
         return View("CompleteGoogleRegistration", model);
     }
 
@@ -999,7 +999,7 @@ ProfilePictureUrl = picture
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-  public async Task<IActionResult> CompleteGoogleRegistration(CompleteGoogleRegistrationViewModel model)
+    public async Task<IActionResult> CompleteGoogleRegistration(CompleteGoogleRegistrationViewModel model)
     {
         return await CompleteSocialRegistrationPost(model);
     }
@@ -1023,89 +1023,89 @@ ProfilePictureUrl = picture
         if (!ModelState.IsValid)
             return View("CompleteGoogleRegistration", model);
 
-    var provider = TempData["OAuthProvider"]?.ToString() ?? "Google";
-    var email = TempData["OAuthEmail"]?.ToString();
-    var oauthId = TempData["OAuthId"]?.ToString();
-   var picture = TempData["OAuthPicture"]?.ToString();
+        var provider = TempData["OAuthProvider"]?.ToString() ?? "Google";
+        var email = TempData["OAuthEmail"]?.ToString();
+        var oauthId = TempData["OAuthId"]?.ToString();
+        var picture = TempData["OAuthPicture"]?.ToString();
 
         if (string.IsNullOrEmpty(email))
-       return RedirectToAction(nameof(Register));
+            return RedirectToAction(nameof(Register));
 
         try
         {
             // Determine role
             var role = model.UserType?.ToLowerInvariant() switch
             {
-     "tailor" => RegistrationRole.Tailor,
-         _ => RegistrationRole.Customer
+                "tailor" => RegistrationRole.Tailor,
+                _ => RegistrationRole.Customer
             };
 
-    // Create registration request
- var registerRequest = new RegisterRequest
-         {
-        Email = email,
-          Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
-    FullName = model.FullName,
-     PhoneNumber = model.PhoneNumber,
-    Role = role
-       };
+            // Create registration request
+            var registerRequest = new RegisterRequest
+            {
+                Email = email,
+                Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                Role = role
+            };
 
             var (ok, err, user) = await _auth.RegisterAsync(registerRequest);
 
             if (!ok || user == null)
-          {
-          ModelState.AddModelError(string.Empty, err ?? "فشل إنشاء الحساب");
+            {
+                ModelState.AddModelError(string.Empty, err ?? "فشل إنشاء الحساب");
                 ViewData["Provider"] = provider;
-         return View("CompleteGoogleRegistration", model);
-         }
+                return View("CompleteGoogleRegistration", model);
+            }
 
-     // Update profile picture if available from OAuth provider
- if (!string.IsNullOrEmpty(picture))
-   {
-      if (role == RegistrationRole.Customer)
+            // Update profile picture if available from OAuth provider
+            if (!string.IsNullOrEmpty(picture))
             {
-    var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-        if (customerProfile != null)
-           {
-  // TODO: Download and store the OAuth profile picture
-    await _unitOfWork.Customers.UpdateAsync(customerProfile);
-               }
-             }
-  else if (role == RegistrationRole.Tailor)
-     {
-    var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-         if (tailorProfile != null)
-            {
-  // TODO: Download and store the OAuth profile picture
-         await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
-         }
-      }
+                if (role == RegistrationRole.Customer)
+                {
+                    var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+                    if (customerProfile != null)
+                    {
+                        // TODO: Download and store the OAuth profile picture
+                        await _unitOfWork.Customers.UpdateAsync(customerProfile);
+                    }
+                }
+                else if (role == RegistrationRole.Tailor)
+                {
+                    var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+                    if (tailorProfile != null)
+                    {
+                        // TODO: Download and store the OAuth profile picture
+                        await _unitOfWork.Tailors.UpdateAsync(tailorProfile);
+                    }
+                }
 
- await _unitOfWork.SaveChangesAsync();
-     }
+                await _unitOfWork.SaveChangesAsync();
+            }
 
-        // Sign in the user
+            // Sign in the user
             string fullName = model.FullName;
             var roleName = user.Role?.Name ?? string.Empty;
 
-   if (!string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(fullName))
-      {
-  switch (roleName.ToLower())
-   {
-         case "customer":
-        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
-      if (customer != null && !string.IsNullOrEmpty(customer.FullName))
-     fullName = customer.FullName;
-        break;
-  case "tailor":
-   var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
-         if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
-              fullName = tailor.FullName;
-  break;
-          }
+            if (!string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(fullName))
+            {
+                switch (roleName.ToLower())
+                {
+                    case "customer":
+                        var customer = await _unitOfWork.Customers.GetByUserIdAsync(user.Id);
+                        if (customer != null && !string.IsNullOrEmpty(customer.FullName))
+                            fullName = customer.FullName;
+                        break;
+                    case "tailor":
+                        var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+                        if (tailor != null && !string.IsNullOrEmpty(tailor.FullName))
+                            fullName = tailor.FullName;
+                        break;
+                }
             }
 
-      var userClaims = new List<Claim>
+            var userClaims = new List<Claim>
         {
        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -1113,11 +1113,11 @@ ProfilePictureUrl = picture
       new Claim("FullName", fullName)
             };
 
-        if (!string.IsNullOrEmpty(roleName))
-   userClaims.Add(new Claim(ClaimTypes.Role, roleName));
+            if (!string.IsNullOrEmpty(roleName))
+                userClaims.Add(new Claim(ClaimTypes.Role, roleName));
 
-       var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
-      var principal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(userClaims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
      new AuthenticationProperties { IsPersistent = true });
@@ -1126,8 +1126,8 @@ ProfilePictureUrl = picture
         }
         catch (Exception ex)
         {
- ModelState.AddModelError(string.Empty, $"حدث خطأ: {ex.Message}");
-ViewData["Provider"] = provider;
+            ModelState.AddModelError(string.Empty, $"حدث خطأ: {ex.Message}");
+            ViewData["Provider"] = provider;
             return View("CompleteGoogleRegistration", model);
         }
     }
@@ -1225,8 +1225,8 @@ ViewData["Provider"] = provider;
     /// </summary>
     private IActionResult RedirectToRoleDashboard(string? roleName) =>
         roleName?.ToLowerInvariant() switch
-    {
-"tailor" => RedirectToAction("Tailor", "Dashboards"),
+        {
+            "tailor" => RedirectToAction("Tailor", "Dashboards"),
             "admin" => RedirectToAction("Index", "Admin"),
             _ => RedirectToAction("Customer", "Dashboards")
         };
@@ -1240,8 +1240,8 @@ ViewData["Provider"] = provider;
             return false;
 
         try
- {
- var addr = new System.Net.Mail.MailAddress(email);
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
             return addr.Address == email && email.Contains('@') && email.Length <= 254;
         }
         catch
@@ -1251,34 +1251,34 @@ ViewData["Provider"] = provider;
     }
 
     /// <summary>
-/// Validates password strength and returns a tuple indicating validity and error message.
+    /// Validates password strength and returns a tuple indicating validity and error message.
     /// </summary>
     private static (bool IsValid, string? Error) ValidatePasswordStrength(string password)
     {
-     if (string.IsNullOrWhiteSpace(password))
-       return (false, "كلمة المرور مطلوبة");
+        if (string.IsNullOrWhiteSpace(password))
+            return (false, "كلمة المرور مطلوبة");
 
         if (password.Length < 8)
-    return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+            return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
 
         if (password.Length > 128)
-          return (false, "كلمة المرور طويلة جداً");
+            return (false, "كلمة المرور طويلة جداً");
 
- if (!password.Any(char.IsUpper))
+        if (!password.Any(char.IsUpper))
             return (false, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل");
 
         if (!password.Any(char.IsLower))
-      return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
+            return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
 
         if (!password.Any(char.IsDigit))
-      return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
+            return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
 
         if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
             return (false, "كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل");
 
         string[] weakPasswords = ["password1!", "qwerty123!", "admin123!", "welcome1!", "Password1!", "Qwerty123!"];
-     if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
-     return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
+        if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
+            return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
 
         return (true, null);
     }
@@ -1294,13 +1294,13 @@ ViewData["Provider"] = provider;
         var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
 
         if (digitsOnly.Length < 9)
-     return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
+            return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
 
         string[] invalidPrefixes = ["000", "111", "222", "333", "444", "555", "666", "777", "888", "999"];
-     if (invalidPrefixes.Any(digitsOnly.StartsWith) || 
-        digitsOnly == new string('0', digitsOnly.Length) ||
-            digitsOnly == new string('1', digitsOnly.Length) || 
-       digitsOnly == new string('2', digitsOnly.Length))
+        if (invalidPrefixes.Any(digitsOnly.StartsWith) ||
+           digitsOnly == new string('0', digitsOnly.Length) ||
+               digitsOnly == new string('1', digitsOnly.Length) ||
+          digitsOnly == new string('2', digitsOnly.Length))
         {
             return (false, "رقم الهاتف ضعيف جداً. يرجى اختيار رقم آخر");
         }
@@ -1316,7 +1316,7 @@ ViewData["Provider"] = provider;
         if (file is null || file.Length == 0)
             return (false, "الملف مطلوب");
 
- var maxSize = fileType == "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+        var maxSize = fileType == "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
         if (file.Length > maxSize)
             return (false, $"حجم الملف كبير جداً. الحد الأقصى {maxSize / (1024 * 1024)} ميجابايت");
 
@@ -1324,18 +1324,18 @@ ViewData["Provider"] = provider;
       ? [".jpg", ".jpeg", ".png", ".gif", ".webp"]
       : [".pdf", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
 
-     var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-if (!allowedExtensions.Contains(extension))
-  return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+            return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
 
-  string[] allowedContentTypes = fileType == "image"
-            ? ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
-            : ["application/pdf", "application/msword", 
+        string[] allowedContentTypes = fileType == "image"
+                  ? ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
+                  : ["application/pdf", "application/msword",
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       "image/jpeg", "image/png"];
 
         if (!allowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
-         return (false, "نوع محتوى الملف غير صحيح");
+            return (false, "نوع محتوى الملف غير صحيح");
 
         var fileName = Path.GetFileName(file.FileName);
         if (fileName.Contains("..") || fileName.Contains('/') || fileName.Contains('\\'))
@@ -1349,18 +1349,18 @@ if (!allowedExtensions.Contains(extension))
     /// </summary>
     private static string SanitizeInput(string? input, int maxLength)
     {
-      if (string.IsNullOrWhiteSpace(input))
-      return string.Empty;
+        if (string.IsNullOrWhiteSpace(input))
+            return string.Empty;
 
         input = input.Trim();
         input = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
 
         string[] sqlPatterns = ["--", ";--", "';", "')", "' OR '", "' AND '", "DROP ", "INSERT ", "DELETE ", "UPDATE ", "EXEC "];
         foreach (var pattern in sqlPatterns)
-input = input.Replace(pattern, "", StringComparison.OrdinalIgnoreCase);
+            input = input.Replace(pattern, "", StringComparison.OrdinalIgnoreCase);
 
         if (input.Length > maxLength)
-   input = input[..maxLength];
+            input = input[..maxLength];
 
         return input;
     }

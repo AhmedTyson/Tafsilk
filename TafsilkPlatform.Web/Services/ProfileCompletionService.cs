@@ -251,13 +251,13 @@ Label = "الخدمات المقدمة",
     public async Task<ProfileCompletionResult> GetCorporateCompletionAsync(Guid userId)
     {
         // Corporate feature has been removed
-      // Return empty result
+        // Return empty result
         await Task.CompletedTask;
-      return new ProfileCompletionResult
+        return new ProfileCompletionResult
         {
-     CompletionPercentage = 0,
-  Items = new List<ProfileCompletionItem>(),
+            CompletionPercentage = 0,
+            Items = new List<ProfileCompletionItem>(),
             MissingFields = new List<string>()
-  };
+        };
     }
 }

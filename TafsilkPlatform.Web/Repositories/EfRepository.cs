@@ -1,7 +1,7 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Interfaces;
+using System.Linq.Expressions;
 using TafsilkPlatform.Web.Data;
+using TafsilkPlatform.Web.Interfaces;
 
 namespace TafsilkPlatform.Web.Repositories;
 
@@ -12,7 +12,7 @@ public class EfRepository<T> : IRepository<T> where T : class
 
     public EfRepository(AppDbContext db)
     {
-     _db = db;
+        _db = db;
         _set = _db.Set<T>();
     }
 
@@ -34,20 +34,20 @@ public class EfRepository<T> : IRepository<T> where T : class
 
     public virtual async Task<T> AddAsync(T entity)
     {
-     await _set.AddAsync(entity);
+        await _set.AddAsync(entity);
         return entity;
     }
 
     public virtual Task UpdateAsync(T entity)
-{
+    {
         _set.Update(entity);
         return Task.CompletedTask;
     }
 
     public virtual Task DeleteAsync(T entity)
     {
-  _set.Remove(entity);
-return Task.CompletedTask;
+        _set.Remove(entity);
+        return Task.CompletedTask;
     }
 
     public virtual async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
@@ -57,8 +57,8 @@ return Task.CompletedTask;
 
     public virtual async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
     {
-      return predicate is null ? await _set.CountAsync() : await _set.CountAsync(predicate);
-  }
+        return predicate is null ? await _set.CountAsync() : await _set.CountAsync(predicate);
+    }
 
     public virtual async Task<IEnumerable<T>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<T, bool>>? predicate = null)
     {

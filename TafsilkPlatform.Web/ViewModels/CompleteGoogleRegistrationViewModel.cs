@@ -10,7 +10,7 @@ public class CompleteGoogleRegistrationViewModel
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "الاسم الكامل مطلوب")]
-[Display(Name = "الاسم الكامل")]
+    [Display(Name = "الاسم الكامل")]
     public string FullName { get; set; } = string.Empty;
 
     [Phone(ErrorMessage = "رقم الهاتف غير صالح")]

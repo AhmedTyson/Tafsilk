@@ -6,23 +6,23 @@ namespace TafsilkPlatform.Web.Common;
 public class Result<T>
 {
     public bool IsSuccess { get; }
-  public T? Value { get; }
+    public T? Value { get; }
     public string? Error { get; }
     public Dictionary<string, List<string>>? ValidationErrors { get; }
 
     private Result(bool isSuccess, T? value, string? error, Dictionary<string, List<string>>? validationErrors = null)
     {
         IsSuccess = isSuccess;
-      Value = value;
+        Value = value;
         Error = error;
         ValidationErrors = validationErrors;
     }
 
     public static Result<T> Success(T value) => new(true, value, null);
-    
+
     public static Result<T> Failure(string error) => new(false, default, error);
-    
-    public static Result<T> ValidationFailure(Dictionary<string, List<string>> errors) 
+
+    public static Result<T> ValidationFailure(Dictionary<string, List<string>> errors)
         => new(false, default, "خطأ في التحقق من البيانات", errors);
 }
 
@@ -36,11 +36,11 @@ public class Result
 
     private Result(bool isSuccess, string? error)
     {
-   IsSuccess = isSuccess;
+        IsSuccess = isSuccess;
         Error = error;
     }
 
     public static Result Success() => new(true, null);
-    
+
     public static Result Failure(string error) => new(false, error);
 }

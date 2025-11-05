@@ -313,17 +313,18 @@ namespace TafsilkPlatform.Web.Services
 
             }
 
-        }        #endregion
+        }
+        #endregion
         #region Email Verification
-        
+
         /// <summary>
         /// </summary>
-  public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
-      {
-       try
-      {
-      var user = await _db.Users
-                    .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
+        public async Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token)
+        {
+            try
+            {
+                var user = await _db.Users
+                              .FirstOrDefaultAsync(u => u.EmailVerificationToken == token && !u.IsDeleted);
 
                 if (user == null)
                 {
@@ -546,67 +547,67 @@ namespace TafsilkPlatform.Web.Services
             }
 
             // ✅ FIXED: Get full name from already-loaded navigation properties
-    // This avoids querying the database again and prevents concurrency issues
-  string fullName = GetFullNameFromUser(user);
-      claims.Add(new Claim(ClaimTypes.Name, fullName));
-  claims.Add(new Claim("FullName", fullName));
+            // This avoids querying the database again and prevents concurrency issues
+            string fullName = GetFullNameFromUser(user);
+            claims.Add(new Claim(ClaimTypes.Name, fullName));
+            claims.Add(new Claim("FullName", fullName));
 
             // ✅ FIXED: Add role-specific claims from already-loaded data
-        AddRoleSpecificClaimsFromUser(claims, user);
+            AddRoleSpecificClaimsFromUser(claims, user);
 
- return await Task.FromResult(claims);
- }
+            return await Task.FromResult(claims);
+        }
 
         /// <summary>
         /// Gets full name from already-loaded user navigation properties
- /// No database query - uses in-memory data
+        /// No database query - uses in-memory data
         /// </summary>
         private string GetFullNameFromUser(User user)
         {
-  switch (user.Role?.Name?.ToLower())
- {
-       case "customer":
- return user.CustomerProfile?.FullName ?? user.Email ?? "مستخدم";
+            switch (user.Role?.Name?.ToLower())
+            {
+                case "customer":
+                    return user.CustomerProfile?.FullName ?? user.Email ?? "مستخدم";
 
-   case "tailor":
-     return user.TailorProfile?.FullName ?? user.Email ?? "مستخدم";
+                case "tailor":
+                    return user.TailorProfile?.FullName ?? user.Email ?? "مستخدم";
 
 
-   default:
-return user.Email ?? "مستخدم";
+                default:
+                    return user.Email ?? "مستخدم";
+            }
         }
- }
         /// <summary>
-    /// Adds role-specific claims from already-loaded user data
+        /// Adds role-specific claims from already-loaded user data
         /// No database query - uses in-memory data
         /// </summary>
-      private void AddRoleSpecificClaimsFromUser(List<Claim> claims, User user)
-      {
-       try
-       {
-   switch (user.Role?.Name?.ToLower())
- {
-       case "tailor":
-        if (user.TailorProfile != null)
-   {
-           claims.Add(new Claim("IsVerified", user.TailorProfile.IsVerified.ToString()));
-     }
- break;
+        private void AddRoleSpecificClaimsFromUser(List<Claim> claims, User user)
+        {
+            try
+            {
+                switch (user.Role?.Name?.ToLower())
+                {
+                    case "tailor":
+                        if (user.TailorProfile != null)
+                        {
+                            claims.Add(new Claim("IsVerified", user.TailorProfile.IsVerified.ToString()));
+                        }
+                        break;
 
-      // REMOVED: Corporate case
-      // case "corporate":
-        //  if (user.CorporateAccount != null)
- // {
-     //   claims.Add(new Claim("CompanyName", user.CorporateAccount.CompanyName ?? string.Empty));
-//     claims.Add(new Claim("IsApproved", user.CorporateAccount.IsApproved.ToString()));
-      //   }
-       //   break;
-      }
-        }
-  catch (Exception ex)
-     {
-     _logger.LogWarning(ex, "[AuthService] Error adding role-specific claims: {UserId}", user.Id);
-       }
+                        // REMOVED: Corporate case
+                        // case "corporate":
+                        //  if (user.CorporateAccount != null)
+                        // {
+                        //   claims.Add(new Claim("CompanyName", user.CorporateAccount.CompanyName ?? string.Empty));
+                        //     claims.Add(new Claim("IsApproved", user.CorporateAccount.IsApproved.ToString()));
+                        //   }
+                        //   break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[AuthService] Error adding role-specific claims: {UserId}", user.Id);
+            }
         }
 
         #endregion
@@ -843,17 +844,17 @@ return user.Email ?? "مستخدم";
 
             role = new Role
             {
-     Id = Guid.NewGuid(),
-         Name = name,
-          Description = name switch
-      {
-  "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
-            "Tailor" => "خياط - يقدم خدمات الخياطة",
-       // "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية", // REMOVED: Corporate feature
-_ => null
-         },
-   CreatedAt = _dateTime.Now
-  };
+                Id = Guid.NewGuid(),
+                Name = name,
+                Description = name switch
+                {
+                    "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
+                    "Tailor" => "خياط - يقدم خدمات الخياطة",
+                    // "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية", // REMOVED: Corporate feature
+                    _ => null
+                },
+                CreatedAt = _dateTime.Now
+            };
 
             await _db.Roles.AddAsync(role);
             await _db.SaveChangesAsync();
@@ -901,26 +902,26 @@ _ => null
                          CustomerName = u.CustomerProfile != null ? u.CustomerProfile.FullName : null,
                          TailorName = u.TailorProfile != null ? u.TailorProfile.FullName : null
                          // REMOVED: Corporate fields
-                       // CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
- // CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
-  })
+                         // CorporatePerson = u.CorporateAccount != null ? u.CorporateAccount.ContactPerson : null,
+                         // CompanyName = u.CorporateAccount != null ? u.CorporateAccount.CompanyName : null
+                     })
        .FirstOrDefaultAsync();
 
-    if (userInfo == null) return "مستخدم";
+                if (userInfo == null) return "مستخدم";
 
-return userInfo.RoleName?.ToLower() switch
-     {
-   "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
-    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
-  // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم", // REMOVED
-        _ => userInfo.Email ?? "مستخدم"
-       };
-}
-     catch
-     {
-       return "مستخدم";
-      }
- }
+                return userInfo.RoleName?.ToLower() switch
+                {
+                    "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
+                    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
+                    // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم", // REMOVED
+                    _ => userInfo.Email ?? "مستخدم"
+                };
+            }
+            catch
+            {
+                return "مستخدم";
+            }
+        }
 
         private string GenerateEmailVerificationToken()
         {

@@ -9,7 +9,7 @@ public class AuthorizeTailorAttribute : AuthorizeAttribute
 {
     public AuthorizeTailorAttribute()
     {
-  Policy = "TailorPolicy";
+        Policy = "TailorPolicy";
     }
 }
 
@@ -21,7 +21,7 @@ public class AuthorizeVerifiedTailorAttribute : AuthorizeAttribute
     public AuthorizeVerifiedTailorAttribute()
     {
         Policy = "VerifiedTailorPolicy";
- }
+    }
 }
 
 /// <summary>
@@ -31,7 +31,7 @@ public class AuthorizeCustomerAttribute : AuthorizeAttribute
 {
     public AuthorizeCustomerAttribute()
     {
-     Policy = "CustomerPolicy";
+        Policy = "CustomerPolicy";
     }
 }
 
@@ -64,7 +64,7 @@ public class AuthorizeAdminAttribute : AuthorizeAttribute
 {
     public AuthorizeAdminAttribute()
     {
-     Policy = "AdminPolicy";
+        Policy = "AdminPolicy";
     }
 }
 
@@ -75,7 +75,7 @@ public class AuthorizeCustomerOrTailorAttribute : AuthorizeAttribute
 {
     public AuthorizeCustomerOrTailorAttribute()
     {
-     Policy = "CustomerOrTailorPolicy";
+        Policy = "CustomerOrTailorPolicy";
     }
 }
 

@@ -1,7 +1,6 @@
 using System.Security.Claims;
-using System.Threading.Tasks;
-using TafsilkPlatform.Web.ViewModels;
 using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.Web.ViewModels;
 
 namespace TafsilkPlatform.Web.Interfaces
 {
@@ -11,55 +10,55 @@ namespace TafsilkPlatform.Web.Interfaces
         /// Registers a new user with the specified role
         /// </summary>
         Task<(bool Succeeded, string? Error, User? User)> RegisterAsync(RegisterRequest request);
- 
+
         /// <summary>
-    /// Validates user credentials and returns user with role information
+        /// Validates user credentials and returns user with role information
         /// </summary>
         Task<(bool Succeeded, string? Error, User? User)> ValidateUserAsync(string email, string password);
-        
+
         /// <summary>
-     /// Gets user by ID with role and profile information
- /// </summary>
+        /// Gets user by ID with role and profile information
+        /// </summary>
         Task<User?> GetUserByIdAsync(Guid userId);
-        
-      /// <summary>
+
+        /// <summary>
         /// Gets user by email with role and profile information
-     /// </summary>
+        /// </summary>
         Task<User?> GetUserByEmailAsync(string email);
-      
+
         /// <summary>
         /// Changes user password
- /// </summary>
+        /// </summary>
         Task<(bool Succeeded, string? Error)> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword);
-        
+
         /// <summary>
         /// Checks if user has a specific role
         /// </summary>
         Task<bool> IsInRoleAsync(Guid userId, string roleName);
-     
+
         /// <summary>
         /// Gets user claims for authentication
         /// </summary>
         Task<List<Claim>> GetUserClaimsAsync(User user);
-        
+
         /// <summary>
         /// Activates or deactivates a user account
         /// </summary>
         Task<(bool Succeeded, string? Error)> SetUserActiveStatusAsync(Guid userId, bool isActive);
-      
-   /// <summary>
+
+        /// <summary>
         /// Verifies a tailor profile
         /// </summary>
         Task<(bool Succeeded, string? Error)> VerifyTailorAsync(Guid tailorId, bool isVerified);
 
-    /// <summary>
-    /// Verifies user email using verification token
-    /// </summary>
-    Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token);
+        /// <summary>
+        /// Verifies user email using verification token
+        /// </summary>
+        Task<(bool Succeeded, string? Error)> VerifyEmailAsync(string token);
 
-    /// <summary>
-    /// Resends email verification link
-    /// </summary>
-    Task<(bool Succeeded, string? Error)> ResendVerificationEmailAsync(string email);
- }
+        /// <summary>
+        /// Resends email verification link
+        /// </summary>
+        Task<(bool Succeeded, string? Error)> ResendVerificationEmailAsync(string email);
+    }
 }

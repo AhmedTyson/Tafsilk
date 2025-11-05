@@ -1,6 +1,4 @@
-using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace TafsilkPlatform.Web.ViewModels.Tailor;
 
@@ -30,7 +28,7 @@ public class EditTailorProfileViewModel
     // Shop Details
     [Required(ErrorMessage = "اسم الورشة مطلوب")]
     [StringLength(100, ErrorMessage = "اسم الورشة لا يمكن أن يتجاوز 100 حرف")]
-  [Display(Name = "اسم الورشة")]
+    [Display(Name = "اسم الورشة")]
     public string ShopName { get; set; } = string.Empty;
 
     [StringLength(500, ErrorMessage = "الوصف لا يمكن أن يتجاوز 500 حرف")]
@@ -47,7 +45,7 @@ public class EditTailorProfileViewModel
 
     // Location
     [StringLength(100, ErrorMessage = "المدينة لا يمكن أن تتجاوز 100 حرف")]
-  [Display(Name = "المدينة")]
+    [Display(Name = "المدينة")]
     public string? City { get; set; }
 
     [StringLength(100, ErrorMessage = "المنطقة لا يمكن أن تتجاوز 100 حرف")]
@@ -59,7 +57,7 @@ public class EditTailorProfileViewModel
     public string? Address { get; set; }
 
     [Display(Name = "خط الطول")]
- public decimal? Longitude { get; set; }
+    public decimal? Longitude { get; set; }
 
     [Display(Name = "خط العرض")]
     public decimal? Latitude { get; set; }
@@ -71,7 +69,7 @@ public class EditTailorProfileViewModel
 
     // Profile Picture
     [Display(Name = "صورة الملف الشخصي")]
-public IFormFile? ProfilePicture { get; set; }
+    public IFormFile? ProfilePicture { get; set; }
 
     public string? CurrentProfilePictureUrl { get; set; }
     public byte[]? CurrentProfilePictureData { get; set; }
@@ -79,7 +77,7 @@ public IFormFile? ProfilePicture { get; set; }
 
     // Business Hours
     [Display(Name = "ساعات العمل")]
-  public string? BusinessHours { get; set; }
+    public string? BusinessHours { get; set; }
 
     // Social Media
     [Url(ErrorMessage = "رابط فيسبوك غير صالح")]
@@ -116,7 +114,7 @@ public static class EgyptCities
 {
     public static List<string> GetAll()
     {
-   return new List<string>
+        return new List<string>
       {
             "القاهرة",
             "الجيزة",
@@ -168,5 +166,5 @@ public static class TailorSpecializations
             "أزياء خاصة",
             "جميع الأنواع"
       };
-  }
+    }
 }

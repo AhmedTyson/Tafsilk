@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace TafsilkPlatform.Web.Models
 {
     public class Review

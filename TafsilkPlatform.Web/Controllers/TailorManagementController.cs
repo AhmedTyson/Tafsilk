@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Extensions;
 using TafsilkPlatform.Web.Models;
@@ -40,56 +39,56 @@ public class TailorManagementController : Controller
     [HttpGet("portfolio")]
     public async Task<IActionResult> ManagePortfolio()
     {
-   try
+        try
         {
             var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
-          if (tailor == null)
+            if (tailor == null)
                 return NotFound("الملف الشخصي غير موجود");
 
-     var portfolioImages = await _context.PortfolioImages
-       .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
-                .OrderByDescending(p => p.IsFeatured)
-       .ThenByDescending(p => p.CreatedAt)
-      .ToListAsync();
+            var portfolioImages = await _context.PortfolioImages
+              .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
+                       .OrderByDescending(p => p.IsFeatured)
+              .ThenByDescending(p => p.CreatedAt)
+             .ToListAsync();
 
-   var model = new ManagePortfolioViewModel
+            var model = new ManagePortfolioViewModel
             {
-        TailorId = tailor.Id,
-       TailorName = tailor.FullName ?? "خياط",
-     Images = portfolioImages.Select(p => new PortfolioItemDto
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "خياط",
+                Images = portfolioImages.Select(p => new PortfolioItemDto
                 {
-         Id = p.PortfolioImageId,
-     Title = p.Title,
-         Category = p.Category,
-     Description = p.Description,
-     EstimatedPrice = p.EstimatedPrice,
-     IsFeatured = p.IsFeatured,
-       IsBeforeAfter = p.IsBeforeAfter,
-           DisplayOrder = p.DisplayOrder,
-  UploadedAt = p.UploadedAt,
-       HasImageData = p.ImageData != null
+                    Id = p.PortfolioImageId,
+                    Title = p.Title,
+                    Category = p.Category,
+                    Description = p.Description,
+                    EstimatedPrice = p.EstimatedPrice,
+                    IsFeatured = p.IsFeatured,
+                    IsBeforeAfter = p.IsBeforeAfter,
+                    DisplayOrder = p.DisplayOrder,
+                    UploadedAt = p.UploadedAt,
+                    HasImageData = p.ImageData != null
                 }).ToList(),
-            TotalImages = portfolioImages.Count,
-          FeaturedCount = portfolioImages.Count(p => p.IsFeatured),
-          MaxAllowedImages = 50 // Configure as needed
- };
+                TotalImages = portfolioImages.Count,
+                FeaturedCount = portfolioImages.Count(p => p.IsFeatured),
+                MaxAllowedImages = 50 // Configure as needed
+            };
 
-        ViewData["Title"] = "إدارة معرض الأعمال";
+            ViewData["Title"] = "إدارة معرض الأعمال";
             return View(model);
-  }
+        }
         catch (Exception ex)
-     {
-        _logger.LogError(ex, "Error loading portfolio management");
- TempData["Error"] = "حدث خطأ أثناء تحميل معرض الأعمال";
-     return RedirectToAction("Tailor", "Dashboards");
+        {
+            _logger.LogError(ex, "Error loading portfolio management");
+            TempData["Error"] = "حدث خطأ أثناء تحميل معرض الأعمال";
+            return RedirectToAction("Tailor", "Dashboards");
         }
     }
 
     /// <summary>
     /// Add new portfolio image form
- /// GET: /tailor/manage/portfolio/add
+    /// GET: /tailor/manage/portfolio/add
     /// </summary>
     [HttpGet("portfolio/add")]
     public async Task<IActionResult> AddPortfolioImage()
@@ -98,16 +97,16 @@ public class TailorManagementController : Controller
         var tailor = await GetTailorProfileAsync(userId);
 
         if (tailor == null)
-          return NotFound();
+            return NotFound();
 
         var model = new AddPortfolioImageViewModel
         {
             TailorId = tailor.Id
         };
 
-    ViewBag.Categories = GetPortfolioCategories();
+        ViewBag.Categories = GetPortfolioCategories();
         return View(model);
-  }
+    }
 
     /// <summary>
     /// Save new portfolio image
@@ -118,98 +117,98 @@ public class TailorManagementController : Controller
     public async Task<IActionResult> AddPortfolioImage(AddPortfolioImageViewModel model)
     {
         try
-    {
-      var userId = User.GetUserId();
+        {
+            var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
- if (tailor == null || tailor.Id != model.TailorId)
-          return Unauthorized();
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
 
-  if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-      ViewBag.Categories = GetPortfolioCategories();
-        return View(model);
-     }
-
-         // Validate image file
-  if (model.ImageFile == null || model.ImageFile.Length == 0)
-     {
-      ModelState.AddModelError(nameof(model.ImageFile), "يرجى اختيار صورة");
                 ViewBag.Categories = GetPortfolioCategories();
-          return View(model);
-          }
+                return View(model);
+            }
 
-       if (!_fileUploadService.IsValidImage(model.ImageFile))
+            // Validate image file
+            if (model.ImageFile == null || model.ImageFile.Length == 0)
             {
-       ModelState.AddModelError(nameof(model.ImageFile), "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF)");
-    ViewBag.Categories = GetPortfolioCategories();
-            return View(model);
+                ModelState.AddModelError(nameof(model.ImageFile), "يرجى اختيار صورة");
+                ViewBag.Categories = GetPortfolioCategories();
+                return View(model);
+            }
+
+            if (!_fileUploadService.IsValidImage(model.ImageFile))
+            {
+                ModelState.AddModelError(nameof(model.ImageFile), "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF)");
+                ViewBag.Categories = GetPortfolioCategories();
+                return View(model);
             }
 
             if (model.ImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
             {
-      ModelState.AddModelError(nameof(model.ImageFile), $"حجم الصورة يجب أن يكون أقل من {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
-       ViewBag.Categories = GetPortfolioCategories();
-       return View(model);
- }
-
-            // Check image count limit
-         var currentImageCount = await _context.PortfolioImages
-      .CountAsync(p => p.TailorId == tailor.Id && !p.IsDeleted);
-
-      if (currentImageCount >= 50) // Configure as needed
-            {
-    TempData["Error"] = "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)";
-   return RedirectToAction(nameof(ManagePortfolio));
+                ModelState.AddModelError(nameof(model.ImageFile), $"حجم الصورة يجب أن يكون أقل من {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
+                ViewBag.Categories = GetPortfolioCategories();
+                return View(model);
             }
 
- // Read image data
+            // Check image count limit
+            var currentImageCount = await _context.PortfolioImages
+         .CountAsync(p => p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (currentImageCount >= 50) // Configure as needed
+            {
+                TempData["Error"] = "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)";
+                return RedirectToAction(nameof(ManagePortfolio));
+            }
+
+            // Read image data
             byte[] imageData;
             using (var memoryStream = new MemoryStream())
             {
-            await model.ImageFile.CopyToAsync(memoryStream);
-          imageData = memoryStream.ToArray();
+                await model.ImageFile.CopyToAsync(memoryStream);
+                imageData = memoryStream.ToArray();
             }
 
-   // Get next display order
+            // Get next display order
             var maxOrder = await _context.PortfolioImages
      .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
         .MaxAsync(p => (int?)p.DisplayOrder) ?? 0;
 
-        // Create portfolio image
-    var portfolioImage = new PortfolioImage
-          {
-           PortfolioImageId = Guid.NewGuid(),
-       TailorId = tailor.Id,
-  Title = model.Title,
-  Category = model.Category,
-      Description = model.Description,
-      EstimatedPrice = model.EstimatedPrice,
-  IsFeatured = model.IsFeatured,
-       IsBeforeAfter = model.IsBeforeAfter,
-          DisplayOrder = maxOrder + 1,
-          ImageData = imageData,
-     ContentType = model.ImageFile.ContentType,
-          UploadedAt = DateTime.UtcNow,
-   CreatedAt = DateTime.UtcNow,
-   IsDeleted = false
- };
+            // Create portfolio image
+            var portfolioImage = new PortfolioImage
+            {
+                PortfolioImageId = Guid.NewGuid(),
+                TailorId = tailor.Id,
+                Title = model.Title,
+                Category = model.Category,
+                Description = model.Description,
+                EstimatedPrice = model.EstimatedPrice,
+                IsFeatured = model.IsFeatured,
+                IsBeforeAfter = model.IsBeforeAfter,
+                DisplayOrder = maxOrder + 1,
+                ImageData = imageData,
+                ContentType = model.ImageFile.ContentType,
+                UploadedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                IsDeleted = false
+            };
 
-     _context.PortfolioImages.Add(portfolioImage);
-    await _context.SaveChangesAsync();
+            _context.PortfolioImages.Add(portfolioImage);
+            await _context.SaveChangesAsync();
 
-  _logger.LogInformation("Portfolio image added for tailor {TailorId}", tailor.Id);
+            _logger.LogInformation("Portfolio image added for tailor {TailorId}", tailor.Id);
             TempData["Success"] = "تم إضافة الصورة بنجاح إلى معرض الأعمال";
 
             return RedirectToAction(nameof(ManagePortfolio));
         }
         catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error adding portfolio image");
+        {
+            _logger.LogError(ex, "Error adding portfolio image");
             ModelState.AddModelError("", "حدث خطأ أثناء إضافة الصورة");
-  ViewBag.Categories = GetPortfolioCategories();
-  return View(model);
- }
+            ViewBag.Categories = GetPortfolioCategories();
+            return View(model);
+        }
     }
 
     /// <summary>
@@ -221,118 +220,118 @@ public class TailorManagementController : Controller
     {
         try
         {
-     var userId = User.GetUserId();
+            var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
-         if (tailor == null)
+            if (tailor == null)
                 return NotFound();
 
-   var image = await _context.PortfolioImages
-         .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+            var image = await _context.PortfolioImages
+                  .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
- if (image == null)
-            return NotFound("الصورة غير موجودة");
+            if (image == null)
+                return NotFound("الصورة غير موجودة");
 
-     var model = new EditPortfolioImageViewModel
-      {
+            var model = new EditPortfolioImageViewModel
+            {
                 Id = image.PortfolioImageId,
-      TailorId = tailor.Id,
-           Title = image.Title,
-     Category = image.Category,
-   Description = image.Description,
-    EstimatedPrice = image.EstimatedPrice,
-      IsFeatured = image.IsFeatured,
-         IsBeforeAfter = image.IsBeforeAfter,
-        DisplayOrder = image.DisplayOrder,
-    HasCurrentImage = image.ImageData != null
-};
+                TailorId = tailor.Id,
+                Title = image.Title,
+                Category = image.Category,
+                Description = image.Description,
+                EstimatedPrice = image.EstimatedPrice,
+                IsFeatured = image.IsFeatured,
+                IsBeforeAfter = image.IsBeforeAfter,
+                DisplayOrder = image.DisplayOrder,
+                HasCurrentImage = image.ImageData != null
+            };
 
-      ViewBag.Categories = GetPortfolioCategories();
-          return View(model);
-   }
-    catch (Exception ex)
+            ViewBag.Categories = GetPortfolioCategories();
+            return View(model);
+        }
+        catch (Exception ex)
         {
-_logger.LogError(ex, "Error loading portfolio image for editing");
+            _logger.LogError(ex, "Error loading portfolio image for editing");
             TempData["Error"] = "حدث خطأ أثناء تحميل الصورة";
             return RedirectToAction(nameof(ManagePortfolio));
         }
     }
 
-  /// <summary>
+    /// <summary>
     /// Update portfolio image
     /// POST: /tailor/manage/portfolio/edit/{id}
     /// </summary>
     [HttpPost("portfolio/edit/{id:guid}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditPortfolioImage(Guid id, EditPortfolioImageViewModel model)
- {
+    {
         try
         {
-   var userId = User.GetUserId();
-var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null || tailor.Id != model.TailorId)
-        return Unauthorized();
+                return Unauthorized();
 
- if (id != model.Id)
-    return BadRequest();
+            if (id != model.Id)
+                return BadRequest();
 
-          var image = await _context.PortfolioImages
-                .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+            var image = await _context.PortfolioImages
+                  .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
- if (image == null)
-     return NotFound();
+            if (image == null)
+                return NotFound();
 
-       if (!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-      ViewBag.Categories = GetPortfolioCategories();
-       return View(model);
-    }
+                ViewBag.Categories = GetPortfolioCategories();
+                return View(model);
+            }
 
-         // Update image info
-         image.Title = model.Title;
-    image.Category = model.Category;
+            // Update image info
+            image.Title = model.Title;
+            image.Category = model.Category;
             image.Description = model.Description;
             image.EstimatedPrice = model.EstimatedPrice;
- image.IsFeatured = model.IsFeatured;
-         image.IsBeforeAfter = model.IsBeforeAfter;
-      image.DisplayOrder = model.DisplayOrder;
+            image.IsFeatured = model.IsFeatured;
+            image.IsBeforeAfter = model.IsBeforeAfter;
+            image.DisplayOrder = model.DisplayOrder;
 
             // Update image data if new file provided
-      if (model.NewImageFile != null && model.NewImageFile.Length > 0)
-        {
-     if (!_fileUploadService.IsValidImage(model.NewImageFile))
-        {
-     ModelState.AddModelError(nameof(model.NewImageFile), "نوع الملف غير صالح");
-         ViewBag.Categories = GetPortfolioCategories();
-   return View(model);
-       }
+            if (model.NewImageFile != null && model.NewImageFile.Length > 0)
+            {
+                if (!_fileUploadService.IsValidImage(model.NewImageFile))
+                {
+                    ModelState.AddModelError(nameof(model.NewImageFile), "نوع الملف غير صالح");
+                    ViewBag.Categories = GetPortfolioCategories();
+                    return View(model);
+                }
 
-       if (model.NewImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
-              {
-   ModelState.AddModelError(nameof(model.NewImageFile), "حجم الملف كبير جداً");
-      ViewBag.Categories = GetPortfolioCategories();
-        return View(model);
-       }
+                if (model.NewImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
+                {
+                    ModelState.AddModelError(nameof(model.NewImageFile), "حجم الملف كبير جداً");
+                    ViewBag.Categories = GetPortfolioCategories();
+                    return View(model);
+                }
 
-         using (var memoryStream = new MemoryStream())
-          {
-      await model.NewImageFile.CopyToAsync(memoryStream);
-          image.ImageData = memoryStream.ToArray();
-         image.ContentType = model.NewImageFile.ContentType;
-       }
-        }
+                using (var memoryStream = new MemoryStream())
+                {
+                    await model.NewImageFile.CopyToAsync(memoryStream);
+                    image.ImageData = memoryStream.ToArray();
+                    image.ContentType = model.NewImageFile.ContentType;
+                }
+            }
 
- await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} updated for tailor {TailorId}", id, tailor.Id);
-        TempData["Success"] = "تم تحديث الصورة بنجاح";
+            TempData["Success"] = "تم تحديث الصورة بنجاح";
 
             return RedirectToAction(nameof(ManagePortfolio));
-   }
+        }
         catch (Exception ex)
         {
-       _logger.LogError(ex, "Error updating portfolio image");
+            _logger.LogError(ex, "Error updating portfolio image");
             ModelState.AddModelError("", "حدث خطأ أثناء تحديث الصورة");
             ViewBag.Categories = GetPortfolioCategories();
             return View(model);
@@ -340,66 +339,66 @@ var tailor = await GetTailorProfileAsync(userId);
     }
 
     /// <summary>
-/// Delete portfolio image
+    /// Delete portfolio image
     /// POST: /tailor/manage/portfolio/delete/{id}
     /// </summary>
     [HttpPost("portfolio/delete/{id:guid}")]
     [ValidateAntiForgeryToken]
-  public async Task<IActionResult> DeletePortfolioImage(Guid id)
+    public async Task<IActionResult> DeletePortfolioImage(Guid id)
     {
-     try
+        try
         {
-          var userId = User.GetUserId();
-          var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
-  if (tailor == null)
-    return Unauthorized();
+            if (tailor == null)
+                return Unauthorized();
 
-     var image = await _context.PortfolioImages
-   .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+            var image = await _context.PortfolioImages
+          .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
-    if (image == null)
-      return NotFound();
+            if (image == null)
+                return NotFound();
 
-     // Soft delete
+            // Soft delete
             image.IsDeleted = true;
-     await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} deleted for tailor {TailorId}", id, tailor.Id);
-   TempData["Success"] = "تم حذف الصورة بنجاح";
+            TempData["Success"] = "تم حذف الصورة بنجاح";
 
-    return RedirectToAction(nameof(ManagePortfolio));
+            return RedirectToAction(nameof(ManagePortfolio));
         }
-    catch (Exception ex)
-      {
- _logger.LogError(ex, "Error deleting portfolio image");
-  TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
-       return RedirectToAction(nameof(ManagePortfolio));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting portfolio image");
+            TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
+            return RedirectToAction(nameof(ManagePortfolio));
         }
     }
 
     /// <summary>
     /// Get portfolio image
     /// GET: /tailor/manage/portfolio/image/{id}
- /// </summary>
+    /// </summary>
     [HttpGet("portfolio/image/{id:guid}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPortfolioImage(Guid id)
     {
-      try
+        try
         {
             var image = await _context.PortfolioImages
       .FirstOrDefaultAsync(p => p.PortfolioImageId == id && !p.IsDeleted);
 
             if (image == null || image.ImageData == null)
-    return NotFound();
+                return NotFound();
 
             return File(image.ImageData, image.ContentType ?? "image/jpeg");
-      }
+        }
         catch (Exception ex)
         {
- _logger.LogError(ex, "Error retrieving portfolio image {ImageId}", id);
-      return NotFound();
+            _logger.LogError(ex, "Error retrieving portfolio image {ImageId}", id);
+            return NotFound();
         }
     }
 
@@ -409,31 +408,31 @@ var tailor = await GetTailorProfileAsync(userId);
     /// </summary>
     [HttpPost("portfolio/toggle-featured/{id:guid}")]
     [ValidateAntiForgeryToken]
-  public async Task<IActionResult> ToggleFeatured(Guid id)
+    public async Task<IActionResult> ToggleFeatured(Guid id)
     {
         try
         {
-   var userId = User.GetUserId();
-          var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-           return Unauthorized();
+                return Unauthorized();
 
-       var image = await _context.PortfolioImages
-             .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+            var image = await _context.PortfolioImages
+                  .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
-   if (image == null)
-     return NotFound();
+            if (image == null)
+                return NotFound();
 
-   image.IsFeatured = !image.IsFeatured;
-   await _context.SaveChangesAsync();
+            image.IsFeatured = !image.IsFeatured;
+            await _context.SaveChangesAsync();
 
-   return Json(new { success = true, isFeatured = image.IsFeatured });
+            return Json(new { success = true, isFeatured = image.IsFeatured });
         }
-   catch (Exception ex)
-{
+        catch (Exception ex)
+        {
             _logger.LogError(ex, "Error toggling featured status");
- return Json(new { success = false, message = "حدث خطأ" });
+            return Json(new { success = false, message = "حدث خطأ" });
         }
     }
 
@@ -445,46 +444,46 @@ var tailor = await GetTailorProfileAsync(userId);
     /// View and manage services
     /// GET: /tailor/manage/services
     /// </summary>
- [HttpGet("services")]
+    [HttpGet("services")]
     public async Task<IActionResult> ManageServices()
     {
-  try
+        try
         {
-      var userId = User.GetUserId();
-         var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
-        if (tailor == null)
-  return NotFound("الملف الشخصي غير موجود");
+            if (tailor == null)
+                return NotFound("الملف الشخصي غير موجود");
 
-      var services = await _context.TailorServices
-      .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
-       .OrderBy(s => s.ServiceName)
-    .ToListAsync();
+            var services = await _context.TailorServices
+            .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
+             .OrderBy(s => s.ServiceName)
+          .ToListAsync();
 
-     var model = new ManageServicesViewModel
-   {
+            var model = new ManageServicesViewModel
+            {
                 TailorId = tailor.Id,
                 TailorName = tailor.FullName ?? "خياط",
-            Services = services.Select(s => new ServiceItemDto
-           {
-        Id = s.TailorServiceId,
+                Services = services.Select(s => new ServiceItemDto
+                {
+                    Id = s.TailorServiceId,
                     ServiceName = s.ServiceName,
-    Description = s.Description,
-      BasePrice = s.BasePrice,
-EstimatedDuration = s.EstimatedDuration
-         }).ToList(),
-         TotalServices = services.Count,
-           AveragePrice = services.Any() ? services.Average(s => s.BasePrice) : 0
-};
+                    Description = s.Description,
+                    BasePrice = s.BasePrice,
+                    EstimatedDuration = s.EstimatedDuration
+                }).ToList(),
+                TotalServices = services.Count,
+                AveragePrice = services.Any() ? services.Average(s => s.BasePrice) : 0
+            };
 
-   ViewData["Title"] = "إدارة الخدمات";
-        return View(model);
+            ViewData["Title"] = "إدارة الخدمات";
+            return View(model);
         }
         catch (Exception ex)
         {
-   _logger.LogError(ex, "Error loading services management");
-     TempData["Error"] = "حدث خطأ أثناء تحميل الخدمات";
-        return RedirectToAction("Tailor", "Dashboards");
+            _logger.LogError(ex, "Error loading services management");
+            TempData["Error"] = "حدث خطأ أثناء تحميل الخدمات";
+            return RedirectToAction("Tailor", "Dashboards");
         }
     }
 
@@ -499,14 +498,14 @@ EstimatedDuration = s.EstimatedDuration
         var tailor = await GetTailorProfileAsync(userId);
 
         if (tailor == null)
-   return NotFound();
+            return NotFound();
 
         var model = new AddServiceViewModel
         {
-        TailorId = tailor.Id
+            TailorId = tailor.Id
         };
 
-    ViewBag.ServiceTypes = GetServiceTypes();
+        ViewBag.ServiceTypes = GetServiceTypes();
         return View(model);
     }
 
@@ -518,62 +517,62 @@ EstimatedDuration = s.EstimatedDuration
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddService(AddServiceViewModel model)
     {
-     try
-      {
-  var userId = User.GetUserId();
+        try
+        {
+            var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null || tailor.Id != model.TailorId)
-     return Unauthorized();
+                return Unauthorized();
 
-         if (!ModelState.IsValid)
-     {
-             ViewBag.ServiceTypes = GetServiceTypes();
-return View(model);
-         }
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
+            }
 
-    // Check for duplicate service name
+            // Check for duplicate service name
             var existingService = await _context.TailorServices
    .AnyAsync(s => s.TailorId == tailor.Id && s.ServiceName == model.ServiceName && !s.IsDeleted);
 
-        if (existingService)
-  {
-     ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
+            if (existingService)
+            {
+                ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
                 ViewBag.ServiceTypes = GetServiceTypes();
- return View(model);
- }
+                return View(model);
+            }
 
-        // Create service
-   var service = new TailorService
-      {
-     TailorServiceId = Guid.NewGuid(),
-    TailorId = tailor.Id,
-              ServiceName = model.ServiceName,
-    Description = model.Description,
-     BasePrice = model.BasePrice,
-      EstimatedDuration = model.EstimatedDuration,
-      IsDeleted = false
-        };
+            // Create service
+            var service = new TailorService
+            {
+                TailorServiceId = Guid.NewGuid(),
+                TailorId = tailor.Id,
+                ServiceName = model.ServiceName,
+                Description = model.Description,
+                BasePrice = model.BasePrice,
+                EstimatedDuration = model.EstimatedDuration,
+                IsDeleted = false
+            };
 
             _context.TailorServices.Add(service);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service added for tailor {TailorId}", tailor.Id);
-  TempData["Success"] = "تم إضافة الخدمة بنجاح";
+            TempData["Success"] = "تم إضافة الخدمة بنجاح";
 
-   return RedirectToAction(nameof(ManageServices));
+            return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding service");
-   ModelState.AddModelError("", "حدث خطأ أثناء إضافة الخدمة");
-         ViewBag.ServiceTypes = GetServiceTypes();
+            ModelState.AddModelError("", "حدث خطأ أثناء إضافة الخدمة");
+            ViewBag.ServiceTypes = GetServiceTypes();
             return View(model);
         }
     }
 
     /// <summary>
-/// Edit service
+    /// Edit service
     /// GET: /tailor/manage/services/edit/{id}
     /// </summary>
     [HttpGet("services/edit/{id:guid}")]
@@ -581,84 +580,84 @@ return View(model);
     {
         try
         {
-         var userId = User.GetUserId();
+            var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
-     if (tailor == null)
-    return NotFound();
+            if (tailor == null)
+                return NotFound();
 
             var service = await _context.TailorServices
         .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
 
             if (service == null)
-            return NotFound("الخدمة غير موجودة");
+                return NotFound("الخدمة غير موجودة");
 
             var model = new EditServiceViewModel
-   {
-     Id = service.TailorServiceId,
-           TailorId = tailor.Id,
+            {
+                Id = service.TailorServiceId,
+                TailorId = tailor.Id,
                 ServiceName = service.ServiceName,
-          Description = service.Description,
-      BasePrice = service.BasePrice,
-     EstimatedDuration = service.EstimatedDuration
+                Description = service.Description,
+                BasePrice = service.BasePrice,
+                EstimatedDuration = service.EstimatedDuration
             };
 
-     ViewBag.ServiceTypes = GetServiceTypes();
-   return View(model);
+            ViewBag.ServiceTypes = GetServiceTypes();
+            return View(model);
         }
         catch (Exception ex)
- {
-        _logger.LogError(ex, "Error loading service for editing");
-  TempData["Error"] = "حدث خطأ أثناء تحميل الخدمة";
-  return RedirectToAction(nameof(ManageServices));
-   }
+        {
+            _logger.LogError(ex, "Error loading service for editing");
+            TempData["Error"] = "حدث خطأ أثناء تحميل الخدمة";
+            return RedirectToAction(nameof(ManageServices));
+        }
     }
 
     /// <summary>
- /// Update service
+    /// Update service
     /// POST: /tailor/manage/services/edit/{id}
     /// </summary>
     [HttpPost("services/edit/{id:guid}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditService(Guid id, EditServiceViewModel model)
     {
-try
- {
-     var userId = User.GetUserId();
-   var tailor = await GetTailorProfileAsync(userId);
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
-       if (tailor == null || tailor.Id != model.TailorId)
-   return Unauthorized();
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
 
             if (id != model.Id)
-        return BadRequest();
+                return BadRequest();
 
-  var service = await _context.TailorServices
-           .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
+            var service = await _context.TailorServices
+                     .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
 
-       if (service == null)
-       return NotFound();
+            if (service == null)
+                return NotFound();
 
-        if (!ModelState.IsValid)
- {
+            if (!ModelState.IsValid)
+            {
                 ViewBag.ServiceTypes = GetServiceTypes();
-       return View(model);
+                return View(model);
             }
 
-       // Check for duplicate service name (excluding current service)
+            // Check for duplicate service name (excluding current service)
             var existingService = await _context.TailorServices
         .AnyAsync(s => s.TailorId == tailor.Id && s.ServiceName == model.ServiceName && s.TailorServiceId != id && !s.IsDeleted);
 
             if (existingService)
-    {
-    ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
-   ViewBag.ServiceTypes = GetServiceTypes();
-         return View(model);
+            {
+                ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
             }
 
-          // Update service
-service.ServiceName = model.ServiceName;
-          service.Description = model.Description;
+            // Update service
+            service.ServiceName = model.ServiceName;
+            service.Description = model.Description;
             service.BasePrice = model.BasePrice;
             service.EstimatedDuration = model.EstimatedDuration;
 
@@ -671,55 +670,55 @@ service.ServiceName = model.ServiceName;
         }
         catch (Exception ex)
         {
-    _logger.LogError(ex, "Error updating service");
+            _logger.LogError(ex, "Error updating service");
             ModelState.AddModelError("", "حدث خطأ أثناء تحديث الخدمة");
-       ViewBag.ServiceTypes = GetServiceTypes();
-     return View(model);
-    }
+            ViewBag.ServiceTypes = GetServiceTypes();
+            return View(model);
+        }
     }
 
     /// <summary>
     /// Delete service
     /// POST: /tailor/manage/services/delete/{id}
     /// </summary>
-  [HttpPost("services/delete/{id:guid}")]
+    [HttpPost("services/delete/{id:guid}")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteService(Guid id)
     {
         try
         {
             var userId = User.GetUserId();
-     var tailor = await GetTailorProfileAsync(userId);
+            var tailor = await GetTailorProfileAsync(userId);
 
-  if (tailor == null)
-         return Unauthorized();
+            if (tailor == null)
+                return Unauthorized();
 
-       var service = await _context.TailorServices
-    .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
+            var service = await _context.TailorServices
+         .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
 
             if (service == null)
-         return NotFound();
+                return NotFound();
 
-// Soft delete
-       service.IsDeleted = true;
-      await _context.SaveChangesAsync();
+            // Soft delete
+            service.IsDeleted = true;
+            await _context.SaveChangesAsync();
 
-        _logger.LogInformation("Service {ServiceId} deleted for tailor {TailorId}", id, tailor.Id);
-   TempData["Success"] = "تم حذف الخدمة بنجاح";
+            _logger.LogInformation("Service {ServiceId} deleted for tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "تم حذف الخدمة بنجاح";
 
-         return RedirectToAction(nameof(ManageServices));
+            return RedirectToAction(nameof(ManageServices));
         }
-    catch (Exception ex)
+        catch (Exception ex)
         {
- _logger.LogError(ex, "Error deleting service");
-       TempData["Error"] = "حدث خطأ أثناء حذف الخدمة";
-         return RedirectToAction(nameof(ManageServices));
+            _logger.LogError(ex, "Error deleting service");
+            TempData["Error"] = "حدث خطأ أثناء حذف الخدمة";
+            return RedirectToAction(nameof(ManageServices));
         }
     }
 
     #endregion
 
-#region Pricing Management
+    #region Pricing Management
 
     /// <summary>
     /// Bulk update service prices
@@ -728,40 +727,40 @@ service.ServiceName = model.ServiceName;
     [HttpGet("pricing")]
     public async Task<IActionResult> ManagePricing()
     {
-  try
+        try
         {
-   var userId = User.GetUserId();
-       var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-     return NotFound("الملف الشخصي غير موجود");
+                return NotFound("الملف الشخصي غير موجود");
 
             var services = await _context.TailorServices
      .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
               .OrderBy(s => s.ServiceName)
        .ToListAsync();
 
-         var model = new ManagePricingViewModel
+            var model = new ManagePricingViewModel
             {
                 TailorId = tailor.Id,
-              TailorName = tailor.FullName ?? "خياط",
-            ServicePrices = services.Select(s => new ServicePriceDto
-           {
-  ServiceId = s.TailorServiceId,
-        ServiceName = s.ServiceName,
-     CurrentPrice = s.BasePrice,
-    NewPrice = s.BasePrice
-   }).ToList()
+                TailorName = tailor.FullName ?? "خياط",
+                ServicePrices = services.Select(s => new ServicePriceDto
+                {
+                    ServiceId = s.TailorServiceId,
+                    ServiceName = s.ServiceName,
+                    CurrentPrice = s.BasePrice,
+                    NewPrice = s.BasePrice
+                }).ToList()
             };
 
-  ViewData["Title"] = "إدارة الأسعار";
+            ViewData["Title"] = "إدارة الأسعار";
             return View(model);
         }
-    catch (Exception ex)
+        catch (Exception ex)
         {
-    _logger.LogError(ex, "Error loading pricing management");
-  TempData["Error"] = "حدث خطأ أثناء تحميل إدارة الأسعار";
-    return RedirectToAction("Tailor", "Dashboards");
+            _logger.LogError(ex, "Error loading pricing management");
+            TempData["Error"] = "حدث خطأ أثناء تحميل إدارة الأسعار";
+            return RedirectToAction("Tailor", "Dashboards");
         }
     }
 
@@ -769,51 +768,51 @@ service.ServiceName = model.ServiceName;
     /// Update service prices
     /// POST: /tailor/manage/pricing
     /// </summary>
- [HttpPost("pricing")]
+    [HttpPost("pricing")]
     [ValidateAntiForgeryToken]
-  public async Task<IActionResult> UpdatePricing(ManagePricingViewModel model)
+    public async Task<IActionResult> UpdatePricing(ManagePricingViewModel model)
     {
-   try
+        try
         {
-       var userId = User.GetUserId();
-   var tailor = await GetTailorProfileAsync(userId);
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
 
-     if (tailor == null || tailor.Id != model.TailorId)
-          return Unauthorized();
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
 
-          if (!ModelState.IsValid)
-        return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             // Update service prices
             foreach (var servicePrice in model.ServicePrices)
             {
-      var service = await _context.TailorServices
-            .FirstOrDefaultAsync(s => s.TailorServiceId == servicePrice.ServiceId && s.TailorId == tailor.Id);
+                var service = await _context.TailorServices
+                      .FirstOrDefaultAsync(s => s.TailorServiceId == servicePrice.ServiceId && s.TailorId == tailor.Id);
 
-      if (service != null && servicePrice.NewPrice > 0)
-            {
-        service.BasePrice = servicePrice.NewPrice;
-  }
-      }
+                if (service != null && servicePrice.NewPrice > 0)
+                {
+                    service.BasePrice = servicePrice.NewPrice;
+                }
+            }
 
-        await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
             _logger.LogInformation("Prices updated for tailor {TailorId}", tailor.Id);
             TempData["Success"] = "تم تحديث الأسعار بنجاح";
 
-  return RedirectToAction(nameof(ManageServices));
+            return RedirectToAction(nameof(ManageServices));
         }
- catch (Exception ex)
+        catch (Exception ex)
         {
-       _logger.LogError(ex, "Error updating pricing");
-        ModelState.AddModelError("", "حدث خطأ أثناء تحديث الأسعار");
+            _logger.LogError(ex, "Error updating pricing");
+            ModelState.AddModelError("", "حدث خطأ أثناء تحديث الأسعار");
             return View(model);
         }
     }
 
     #endregion
 
- #region Getting Started
+    #region Getting Started
 
     /// <summary>
     /// Getting started guide for new tailors
@@ -827,17 +826,17 @@ service.ServiceName = model.ServiceName;
 
     #endregion
 
- #region Helper Methods
+    #region Helper Methods
 
     private async Task<TailorProfile?> GetTailorProfileAsync(Guid? userId)
     {
-if (!userId.HasValue || userId.Value == Guid.Empty)
-     return null;
+        if (!userId.HasValue || userId.Value == Guid.Empty)
+            return null;
 
         return await _context.TailorProfiles
         .Include(t => t.User)
        .FirstOrDefaultAsync(t => t.UserId == userId.Value);
-  }
+    }
 
     private List<string> GetPortfolioCategories()
     {
@@ -856,9 +855,9 @@ if (!userId.HasValue || userId.Value == Guid.Empty)
    };
     }
 
- private List<string> GetServiceTypes()
+    private List<string> GetServiceTypes()
     {
-    return new List<string>
+        return new List<string>
     {
       "تفصيل ثوب رجالي",
         "تفصيل فستان نسائي",

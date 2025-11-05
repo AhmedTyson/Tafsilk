@@ -1,12 +1,10 @@
-using Microsoft.AspNetCore.Http;
-
 namespace TafsilkPlatform.Web.Services;
 
 public interface IFileUploadService
 {
     /// <summary>
     /// Uploads a profile picture and returns the file path
-  /// </summary>
+    /// </summary>
     Task<string> UploadProfilePictureAsync(IFormFile file, string userId);
 
     /// <summary>
@@ -20,7 +18,7 @@ public interface IFileUploadService
     bool IsValidImage(IFormFile file);
 
     /// <summary>
- /// Gets the allowed file extensions
+    /// Gets the allowed file extensions
     /// </summary>
     string[] GetAllowedExtensions();
 

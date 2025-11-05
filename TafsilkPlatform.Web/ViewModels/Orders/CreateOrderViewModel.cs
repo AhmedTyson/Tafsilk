@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace TafsilkPlatform.Web.ViewModels.Orders;
 
@@ -18,11 +17,11 @@ public class CreateOrderViewModel
 
     // Service Selection
     public List<ServiceOptionViewModel> AvailableServices { get; set; } = new();
-    
+
     [Required(ErrorMessage = "يرجى اختيار نوع الخدمة")]
     public Guid? SelectedServiceId { get; set; }
-    
-  public string? ServiceType { get; set; }
+
+    public string? ServiceType { get; set; }
 
     // Order Details
     [Required(ErrorMessage = "يرجى إدخال وصف الطلب")]
@@ -33,15 +32,15 @@ public class CreateOrderViewModel
     [Display(Name = "صور مرجعية")]
     public List<IFormFile>? ReferenceImages { get; set; }
 
-  // Measurements
- [Display(Name = "المقاسات")]
-  public string? Measurements { get; set; }
+    // Measurements
+    [Display(Name = "المقاسات")]
+    public string? Measurements { get; set; }
 
     [Display(Name = "ملاحظات إضافية")]
     [StringLength(1000, ErrorMessage = "الملاحظات يجب أن لا تتجاوز 1000 حرف")]
     public string? AdditionalNotes { get; set; }
 
- // Appointment
+    // Appointment
     [Display(Name = "تاريخ التسليم المطلوب")]
     public DateTimeOffset? DueDate { get; set; }
 

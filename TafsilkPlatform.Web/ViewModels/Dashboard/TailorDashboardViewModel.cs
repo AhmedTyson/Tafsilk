@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using TafsilkPlatform.Web.Models;
 
 namespace TafsilkPlatform.Web.ViewModels.Dashboard;
@@ -13,7 +11,7 @@ public class TailorDashboardViewModel
     public Guid TailorId { get; set; }
     public string FullName { get; set; } = string.Empty;
     public string ShopName { get; set; } = string.Empty;
-  public bool IsVerified { get; set; }
+    public bool IsVerified { get; set; }
     public string? City { get; set; }
     public decimal? AverageRating { get; set; }
     public int TotalReviews { get; set; }
@@ -35,14 +33,14 @@ public class TailorDashboardViewModel
     public int ActiveServices { get; set; }
     public int PortfolioImagesCount { get; set; }
 
-  // Recent Orders
+    // Recent Orders
     public List<RecentOrderDto> RecentOrders { get; set; } = new();
 
     // Rating Breakdown
     public RatingBreakdown RatingBreakdown { get; set; } = new();
 
     // Alerts
-  public List<DashboardAlert> Alerts { get; set; } = new();
+    public List<DashboardAlert> Alerts { get; set; } = new();
 
     // Performance Metrics
     public PerformanceMetrics Performance { get; set; } = new();
@@ -71,7 +69,7 @@ public class RatingBreakdown
     public int FiveStars { get; set; }
     public int FourStars { get; set; }
     public int ThreeStars { get; set; }
-public int TwoStars { get; set; }
+    public int TwoStars { get; set; }
     public int OneStar { get; set; }
 
     public int TotalReviews => FiveStars + FourStars + ThreeStars + TwoStars + OneStar;
@@ -101,7 +99,7 @@ public class DashboardAlert
 /// </summary>
 public class PerformanceMetrics
 {
-public decimal OrderGrowthPercentage { get; set; }
+    public decimal OrderGrowthPercentage { get; set; }
     public decimal RevenueGrowthPercentage { get; set; }
     public decimal AverageOrderValue { get; set; }
     public decimal AverageCompletionTime { get; set; } // in days

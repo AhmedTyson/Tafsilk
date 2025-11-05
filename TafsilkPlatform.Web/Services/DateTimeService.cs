@@ -1,5 +1,3 @@
-using System;
-
 namespace TafsilkPlatform.Web.Services;
 
 /// <summary>
@@ -10,10 +8,10 @@ public interface IDateTimeService
     /// <summary>
     /// Gets the current date and time in Egypt timezone (Cairo)
     /// </summary>
- DateTime Now { get; }
+    DateTime Now { get; }
 
     /// <summary>
-  /// Gets the current date in Egypt timezone (Cairo)
+    /// Gets the current date in Egypt timezone (Cairo)
     /// </summary>
     DateTime Today { get; }
 
@@ -43,23 +41,23 @@ public class DateTimeService : IDateTimeService
         // UTC+2 (Standard) / UTC+3 (Daylight Saving Time when applicable)
         try
         {
-     _egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
-   }
-    catch
+            _egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Egypt Standard Time");
+        }
+        catch
         {
-     // Fallback for Linux/Mac systems
-    try
-  {
-        _egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
-   }
+            // Fallback for Linux/Mac systems
+            try
+            {
+                _egyptTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Africa/Cairo");
+            }
             catch
-   {
-   // Final fallback: Create custom timezone
-          _egyptTimeZone = TimeZoneInfo.CreateCustomTimeZone(
-          "Egypt Standard Time",
-         TimeSpan.FromHours(2),
-"Egypt Standard Time",
-   "Egypt Standard Time");
+            {
+                // Final fallback: Create custom timezone
+                _egyptTimeZone = TimeZoneInfo.CreateCustomTimeZone(
+                "Egypt Standard Time",
+               TimeSpan.FromHours(2),
+      "Egypt Standard Time",
+         "Egypt Standard Time");
             }
         }
     }
@@ -68,12 +66,12 @@ public class DateTimeService : IDateTimeService
 
     public DateTime Today => Now.Date;
 
-  public DateTime ConvertFromUtc(DateTime utcDateTime)
+    public DateTime ConvertFromUtc(DateTime utcDateTime)
     {
- if (utcDateTime.Kind != DateTimeKind.Utc)
+        if (utcDateTime.Kind != DateTimeKind.Utc)
         {
-        utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
-    }
+            utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+        }
         return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, _egyptTimeZone);
     }
 

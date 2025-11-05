@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.Data;
-using System.Linq.Expressions;
 
 namespace TafsilkPlatform.Web.Repositories;
 
@@ -43,7 +42,7 @@ public class UserRepository : EfRepository<User>, IUserRepository
     public Task<bool> IsPhoneUniqueAsync(string phoneNumber)
         => _isPhoneUniqueCompiledQuery(_db, phoneNumber);
 
-  public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
+    public async Task<IEnumerable<User>> GetUsersByRoleAsync(string role)
     {
         // Optimized: Only include Role, not all profiles
         return await _db.Users
@@ -51,7 +50,7 @@ public class UserRepository : EfRepository<User>, IUserRepository
    .Include(u => u.Role)
        .Where(u => u.Role.Name == role)
             .ToListAsync();
-  }
+    }
 
     public async Task<User?> GetUserWithProfileAsync(Guid id)
     {

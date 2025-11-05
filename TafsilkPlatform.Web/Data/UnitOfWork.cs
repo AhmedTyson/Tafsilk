@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Data;
 
 namespace TafsilkPlatform.Web.Data;
 

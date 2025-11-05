@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace TafsilkPlatform.Web.ViewModels;
 
@@ -15,21 +14,21 @@ public class CompleteTailorProfileRequest
 
     [Required(ErrorMessage = "رقم الهاتف مطلوب")]
     [Phone(ErrorMessage = "رقم الهاتف غير صحيح")]
- [Display(Name = "رقم الهاتف")]
+    [Display(Name = "رقم الهاتف")]
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "العنوان مطلوب")]
     [Display(Name = "عنوان الورشة")]
- public string Address { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
 
- [Display(Name = "المدينة")]
+    [Display(Name = "المدينة")]
     public string? City { get; set; }
 
     [Required(ErrorMessage = "وصف الورشة مطلوب")]
     [Display(Name = "وصف الورشة والخدمات")]
     public string Description { get; set; } = string.Empty;
 
-  [Display(Name = "سنوات الخبرة")]
+    [Display(Name = "سنوات الخبرة")]
     [Range(0, 100, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 100")]
     public int? ExperienceYears { get; set; }
 
@@ -48,8 +47,8 @@ public class CompleteTailorProfileRequest
     [Display(Name = "عينات من الأعمال")]
     public List<IFormFile>? WorkSamples
     {
-  get => PortfolioImages;
- set => PortfolioImages = value;
+        get => PortfolioImages;
+        set => PortfolioImages = value;
     }
 
     [Display(Name = "وثائق إضافية (اختياري)")]
@@ -60,9 +59,9 @@ public class CompleteTailorProfileRequest
     public bool AgreeToTerms { get; set; }
 
     // User ID (set from authenticated user or registration)
-  public Guid UserId { get; set; }
+    public Guid UserId { get; set; }
 
- // Email and FullName (for display)
+    // Email and FullName (for display)
     public string? Email { get; set; }
     public string? FullName { get; set; }
 }

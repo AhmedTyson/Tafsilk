@@ -1,12 +1,12 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using TafsilkPlatform.Web.ViewModels;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.Web.ViewModels;
 
 namespace TafsilkPlatform.Web.Controllers;
 

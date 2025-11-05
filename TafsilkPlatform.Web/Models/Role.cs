@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,7 +17,7 @@ namespace TafsilkPlatform.Web.Models
         [StringLength(255, ErrorMessage = "Description cannot exceed 255 characters")]
         [DataType(DataType.MultilineText)]
         public string? Description { get; set; }
-        
+
         /// <summary>
         /// JSON string of permissions for this role
         /// Example: {"CanVerifyTailors": true, "CanManageUsers": true, "CanViewReports": true}
@@ -27,7 +25,7 @@ namespace TafsilkPlatform.Web.Models
         /// </summary>
         [MaxLength(2000)]
         public string? Permissions { get; set; }
- 
+
         /// <summary>
         /// Priority level for role hierarchy (higher = more privileges)
         /// Admin = 100, Tailor = 50, Customer = 10, etc.
@@ -40,7 +38,7 @@ namespace TafsilkPlatform.Web.Models
 
         // Navigation properties
         public virtual ICollection<User> Users { get; set; } = new List<User>();
-     
+
         /// <summary>
         /// Helper to check if this role is an admin role
         /// </summary>

@@ -4,7 +4,7 @@ namespace TafsilkPlatform.Web.ViewModels.Orders;
 
 public class OrderDetailsViewModel
 {
- // Order Information
+    // Order Information
     public Guid OrderId { get; set; }
     public string OrderNumber { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -20,7 +20,7 @@ public class OrderDetailsViewModel
     public string? CustomerPhone { get; set; }
 
     // Tailor Information
-  public Guid TailorId { get; set; }
+    public Guid TailorId { get; set; }
     public string? TailorName { get; set; }
     public string? TailorShopName { get; set; }
     public string? TailorPhone { get; set; }
@@ -39,7 +39,7 @@ public class OrderDetailsViewModel
 
     // User Context
     public bool IsCustomer { get; set; }
-  public bool IsTailor { get; set; }
+    public bool IsTailor { get; set; }
 
     // Status Timeline
     public List<OrderStatusHistoryViewModel> StatusHistory { get; set; } = new();
@@ -48,7 +48,7 @@ public class OrderDetailsViewModel
 public class OrderItemViewModel
 {
     public Guid ItemId { get; set; }
- public string ServiceName { get; set; } = string.Empty;
+    public string ServiceName { get; set; } = string.Empty;
     public int Quantity { get; set; }
     public decimal Price { get; set; }
     public string? Notes { get; set; }
@@ -64,6 +64,6 @@ public class OrderStatusHistoryViewModel
 {
     public OrderStatus Status { get; set; }
     public string StatusDisplay { get; set; } = string.Empty;
-  public DateTimeOffset Timestamp { get; set; }
+    public DateTimeOffset Timestamp { get; set; }
     public string? Notes { get; set; }
 }

@@ -22,54 +22,54 @@ public class AdminDashboardController : BaseController
         _db = db;
     }
 
- /// <summary>
+    /// <summary>
     /// Admin Dashboard Home
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         try
-   {
-   // Get basic counts
-       var totalUsers = await _db.Users.CountAsync(u => !u.IsDeleted);
-  var totalCustomers = await _db.CustomerProfiles.CountAsync();
-   var totalTailors = await _db.TailorProfiles.CountAsync();
-  var pendingVerifications = await _db.TailorProfiles.CountAsync(t => !t.IsVerified);
-   var pendingPortfolioReviews = await _db.PortfolioImages.CountAsync(p => !p.IsDeleted);
-        var activeOrders = await _db.Orders.CountAsync(o => 
-  o.Status != TafsilkPlatform.Web.Models.OrderStatus.Delivered && 
-        o.Status != TafsilkPlatform.Web.Models.OrderStatus.Cancelled);
- var totalRevenue = await _db.Orders
-   .Where(o => o.Status == TafsilkPlatform.Web.Models.OrderStatus.Delivered)
-     .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+        {
+            // Get basic counts
+            var totalUsers = await _db.Users.CountAsync(u => !u.IsDeleted);
+            var totalCustomers = await _db.CustomerProfiles.CountAsync();
+            var totalTailors = await _db.TailorProfiles.CountAsync();
+            var pendingVerifications = await _db.TailorProfiles.CountAsync(t => !t.IsVerified);
+            var pendingPortfolioReviews = await _db.PortfolioImages.CountAsync(p => !p.IsDeleted);
+            var activeOrders = await _db.Orders.CountAsync(o =>
+      o.Status != TafsilkPlatform.Web.Models.OrderStatus.Delivered &&
+            o.Status != TafsilkPlatform.Web.Models.OrderStatus.Cancelled);
+            var totalRevenue = await _db.Orders
+              .Where(o => o.Status == TafsilkPlatform.Web.Models.OrderStatus.Delivered)
+                .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
 
-      var viewModel = new DashboardHomeViewModel
-    {
-       TotalUsers = totalUsers,
-    TotalCustomers = totalCustomers,
-     TotalTailors = totalTailors,
-       PendingTailorVerifications = pendingVerifications,
-     PendingPortfolioReviews = pendingPortfolioReviews,
-    ActiveOrders = activeOrders,
-    TotalRevenue = totalRevenue,
-      RecentActivity = new List<ActivityLogDto>()
-   };
+            var viewModel = new DashboardHomeViewModel
+            {
+                TotalUsers = totalUsers,
+                TotalCustomers = totalCustomers,
+                TotalTailors = totalTailors,
+                PendingTailorVerifications = pendingVerifications,
+                PendingPortfolioReviews = pendingPortfolioReviews,
+                ActiveOrders = activeOrders,
+                TotalRevenue = totalRevenue,
+                RecentActivity = new List<ActivityLogDto>()
+            };
 
             return View(viewModel);
-      }
+        }
         catch (Exception ex)
         {
-  _logger.LogError(ex, "Error loading admin dashboard");
+            _logger.LogError(ex, "Error loading admin dashboard");
             TempData["Error"] = "حدث خطأ أثناء تحميل لوحة التحكم";
             return View(new DashboardHomeViewModel());
-   }
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Users()
     {
         try
-   {
+        {
             var users = await _db.Users
  .Include(u => u.Role)
        .Include(u => u.CustomerProfile)
@@ -78,47 +78,47 @@ public class AdminDashboardController : BaseController
         .OrderByDescending(u => u.CreatedAt)
  .ToListAsync();
 
-   return View(users);
+            return View(users);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading users page");
             TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المستخدمين";
             return View(new List<TafsilkPlatform.Web.Models.User>());
-  }
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> UserDetails(Guid id)
     {
-      try
- {
+        try
+        {
             var user = await _db.Users
               .Include(u => u.Role)
    .Include(u => u.CustomerProfile)
      .Include(u => u.TailorProfile)
            .FirstOrDefaultAsync(u => u.Id == id);
 
-       if (user == null)
-{
+            if (user == null)
+            {
                 TempData["Error"] = "المستخدم غير موجود";
                 return RedirectToAction(nameof(Users));
             }
 
             return View(user);
         }
-    catch (Exception ex)
+        catch (Exception ex)
         {
-      _logger.LogError(ex, "Error loading user details for {UserId}", id);
-       TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل المستخدم";
-          return RedirectToAction(nameof(Users));
+            _logger.LogError(ex, "Error loading user details for {UserId}", id);
+            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل المستخدم";
+            return RedirectToAction(nameof(Users));
         }
-}
+    }
 
     [HttpGet]
     public async Task<IActionResult> TailorVerification()
     {
- try
+        try
         {
             var pendingTailors = await _db.TailorProfiles
            .Include(t => t.User)
@@ -126,13 +126,13 @@ public class AdminDashboardController : BaseController
                 .OrderByDescending(t => t.CreatedAt)
          .ToListAsync();
 
-     return View(pendingTailors);
+            return View(pendingTailors);
         }
         catch (Exception ex)
         {
-          _logger.LogError(ex, "Error loading tailor verification page");
-     TempData["Error"] = "حدث خطأ أثناء تحميل صفحة التحقق من الخياطين";
-      return View(new List<TafsilkPlatform.Web.Models.TailorProfile>());
+            _logger.LogError(ex, "Error loading tailor verification page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة التحقق من الخياطين";
+            return View(new List<TafsilkPlatform.Web.Models.TailorProfile>());
         }
     }
 
@@ -141,24 +141,24 @@ public class AdminDashboardController : BaseController
     {
         try
         {
-       var tailor = await _db.TailorProfiles
-      .Include(t => t.User)
-             .Include(t => t.PortfolioImages)
-           .Include(t => t.TailorServices)
-     .FirstOrDefaultAsync(t => t.Id == id);
+            var tailor = await _db.TailorProfiles
+           .Include(t => t.User)
+                  .Include(t => t.PortfolioImages)
+                .Include(t => t.TailorServices)
+          .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tailor == null)
- {
-         TempData["Error"] = "الخياط غير موجود";
-       return RedirectToAction(nameof(TailorVerification));
-       }
+            {
+                TempData["Error"] = "الخياط غير موجود";
+                return RedirectToAction(nameof(TailorVerification));
+            }
 
-  return View(tailor);
+            return View(tailor);
         }
         catch (Exception ex)
         {
- _logger.LogError(ex, "Error loading tailor review for {TailorId}", id);
-       TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل الخياط";
+            _logger.LogError(ex, "Error loading tailor review for {TailorId}", id);
+            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل الخياط";
             return RedirectToAction(nameof(TailorVerification));
         }
     }
@@ -167,65 +167,65 @@ public class AdminDashboardController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ApproveTailor(Guid id)
     {
-    try
+        try
         {
             var tailor = await _db.TailorProfiles.FindAsync(id);
-       if (tailor == null)
-  {
-       TempData["Error"] = "الخياط غير موجود";
-      return RedirectToAction(nameof(TailorVerification));
+            if (tailor == null)
+            {
+                TempData["Error"] = "الخياط غير موجود";
+                return RedirectToAction(nameof(TailorVerification));
             }
 
-    tailor.IsVerified = true;
-         tailor.VerifiedAt = DateTime.UtcNow;
-   tailor.UpdatedAt = DateTime.UtcNow;
+            tailor.IsVerified = true;
+            tailor.VerifiedAt = DateTime.UtcNow;
+            tailor.UpdatedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
 
             TempData["Success"] = "تم الموافقة على تحقق الخياط بنجاح";
-         return RedirectToAction(nameof(TailorVerification));
+            return RedirectToAction(nameof(TailorVerification));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error approving tailor {TailorId}", id);
             TempData["Error"] = "حدث خطأ أثناء الموافقة على التحقق";
-       return RedirectToAction(nameof(TailorVerification));
-   }
+            return RedirectToAction(nameof(TailorVerification));
+        }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> RejectTailor(Guid id, string? reason)
     {
-try
+        try
         {
-  var tailor = await _db.TailorProfiles.FindAsync(id);
-   if (tailor == null)
-        {
-       TempData["Error"] = "الخياط غير موجود";
-   return RedirectToAction(nameof(TailorVerification));
-    }
+            var tailor = await _db.TailorProfiles.FindAsync(id);
+            if (tailor == null)
+            {
+                TempData["Error"] = "الخياط غير موجود";
+                return RedirectToAction(nameof(TailorVerification));
+            }
 
-         tailor.IsVerified = false;
+            tailor.IsVerified = false;
             tailor.UpdatedAt = DateTime.UtcNow;
 
-await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
 
             TempData["Success"] = "تم رفض طلب التحقق";
- return RedirectToAction(nameof(TailorVerification));
-      }
+            return RedirectToAction(nameof(TailorVerification));
+        }
         catch (Exception ex)
-      {
+        {
             _logger.LogError(ex, "Error rejecting tailor {TailorId}", id);
-          TempData["Error"] = "حدث خطأ أثناء رفض الطلب";
-   return RedirectToAction(nameof(TailorVerification));
+            TempData["Error"] = "حدث خطأ أثناء رفض الطلب";
+            return RedirectToAction(nameof(TailorVerification));
         }
     }
 
     [HttpGet]
     public async Task<IActionResult> PortfolioReview()
     {
-  try
+        try
         {
             var images = await _db.PortfolioImages
      .Include(p => p.Tailor)
@@ -238,10 +238,10 @@ await _db.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-        _logger.LogError(ex, "Error loading portfolio review page");
+            _logger.LogError(ex, "Error loading portfolio review page");
             TempData["Error"] = "حدث خطأ أثناء تحميل صفحة مراجعة الصور";
-     return View(new List<TafsilkPlatform.Web.Models.PortfolioImage>());
-     }
+            return View(new List<TafsilkPlatform.Web.Models.PortfolioImage>());
+        }
     }
 
     [HttpGet]
@@ -257,35 +257,35 @@ await _db.SaveChangesAsync();
       .OrderByDescending(o => o.CreatedAt)
       .ToListAsync();
 
-   return View(orders);
+            return View(orders);
         }
         catch (Exception ex)
         {
-         _logger.LogError(ex, "Error loading orders page");
-    TempData["Error"] = "حدث خطأ أثناء تحميل صفحة الطلبات";
-      return View(new List<TafsilkPlatform.Web.Models.Order>());
+            _logger.LogError(ex, "Error loading orders page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة الطلبات";
+            return View(new List<TafsilkPlatform.Web.Models.Order>());
         }
     }
 
     [HttpGet]
     public IActionResult Disputes()
     {
-    TempData["Info"] = "ميزة النزاعات غير متاحة حالياً";
-   return View();
+        TempData["Info"] = "ميزة النزاعات غير متاحة حالياً";
+        return View();
     }
 
     [HttpGet]
     public IActionResult Refunds()
     {
         TempData["Info"] = "ميزة طلبات الاسترداد غير متاحة حالياً";
-    return View();
+        return View();
     }
 
-[HttpGet]
-public async Task<IActionResult> Reviews()
+    [HttpGet]
+    public async Task<IActionResult> Reviews()
     {
         try
-    {
+        {
             var reviews = await _db.Reviews
         .Include(r => r.Tailor)
        .ThenInclude(t => t.User)
@@ -295,40 +295,40 @@ public async Task<IActionResult> Reviews()
         .OrderByDescending(r => r.CreatedAt)
        .ToListAsync();
 
-   return View(reviews);
-      }
+            return View(reviews);
+        }
         catch (Exception ex)
         {
-         _logger.LogError(ex, "Error loading reviews page");
-       TempData["Error"] = "حدث خطأ أثناء تحميل صفحة التقييمات";
+            _logger.LogError(ex, "Error loading reviews page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة التقييمات";
             return View(new List<TafsilkPlatform.Web.Models.Review>());
-     }
+        }
     }
 
     [HttpGet]
-  public IActionResult Analytics()
- {
+    public IActionResult Analytics()
+    {
         return View();
     }
 
     [HttpGet]
-public async Task<IActionResult> Notifications()
+    public async Task<IActionResult> Notifications()
     {
-  try
-   {
-     var adminId = GetUserId();
-   var notifications = await _db.Notifications
-        .Where(n => n.UserId == adminId)
-        .OrderByDescending(n => n.SentAt)
-   .ToListAsync();
+        try
+        {
+            var adminId = GetUserId();
+            var notifications = await _db.Notifications
+                 .Where(n => n.UserId == adminId)
+                 .OrderByDescending(n => n.SentAt)
+            .ToListAsync();
 
             return View(notifications);
         }
         catch (Exception ex)
-      {
-          _logger.LogError(ex, "Error loading notifications");
-    TempData["Error"] = "حدث خطأ أثناء تحميل الإشعارات";
-    return View(new List<TafsilkPlatform.Web.Models.Notification>());
+        {
+            _logger.LogError(ex, "Error loading notifications");
+            TempData["Error"] = "حدث خطأ أثناء تحميل الإشعارات";
+            return View(new List<TafsilkPlatform.Web.Models.Notification>());
         }
     }
 
@@ -336,6 +336,6 @@ public async Task<IActionResult> Notifications()
     public IActionResult AuditLogs()
     {
         TempData["Info"] = "ميزة سجلات التدقيق قيد التطوير";
- return View();
+        return View();
     }
 }

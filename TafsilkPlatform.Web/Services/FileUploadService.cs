@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.Http;
-
 namespace TafsilkPlatform.Web.Services;
 
 public class FileUploadService : IFileUploadService
 {
-  private readonly IWebHostEnvironment _environment;
+    private readonly IWebHostEnvironment _environment;
     private readonly ILogger<FileUploadService> _logger;
     private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
     private const long MaxFileSizeInBytes = 5 * 1024 * 1024; // 5MB
@@ -12,50 +10,50 @@ public class FileUploadService : IFileUploadService
     public FileUploadService(IWebHostEnvironment environment, ILogger<FileUploadService> logger)
     {
         _environment = environment;
-_logger = logger;
-  }
+        _logger = logger;
+    }
 
     public async Task<string> UploadProfilePictureAsync(IFormFile file, string userId)
     {
         try
-      {
-        if (file == null || file.Length == 0)
+        {
+            if (file == null || file.Length == 0)
             {
-       throw new ArgumentException("File is empty");
+                throw new ArgumentException("File is empty");
             }
 
-  if (!IsValidImage(file))
-     {
-        throw new ArgumentException("Invalid file type. Only images are allowed.");
-    }
+            if (!IsValidImage(file))
+            {
+                throw new ArgumentException("Invalid file type. Only images are allowed.");
+            }
 
-       if (file.Length > MaxFileSizeInBytes)
-     {
-      throw new ArgumentException($"File size exceeds maximum allowed size of {MaxFileSizeInBytes / 1024 / 1024}MB");
-  }
+            if (file.Length > MaxFileSizeInBytes)
+            {
+                throw new ArgumentException($"File size exceeds maximum allowed size of {MaxFileSizeInBytes / 1024 / 1024}MB");
+            }
 
-     // Create uploads directory if it doesn't exist
+            // Create uploads directory if it doesn't exist
             var uploadsPath = Path.Combine(_environment.WebRootPath, "uploads", "profiles");
-        if (!Directory.Exists(uploadsPath))
-    {
-         Directory.CreateDirectory(uploadsPath);
-   }
+            if (!Directory.Exists(uploadsPath))
+            {
+                Directory.CreateDirectory(uploadsPath);
+            }
 
-       // Generate unique filename
-      var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-    var fileName = $"{userId}_{Guid.NewGuid()}{extension}";
-      var filePath = Path.Combine(uploadsPath, fileName);
+            // Generate unique filename
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var fileName = $"{userId}_{Guid.NewGuid()}{extension}";
+            var filePath = Path.Combine(uploadsPath, fileName);
 
-          // Save file
-   using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-     await file.CopyToAsync(stream);
-    }
+            // Save file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
 
-        // Return relative path for database storage
-    return $"/uploads/profiles/{fileName}";
-    }
-catch (Exception ex)
+            // Return relative path for database storage
+            return $"/uploads/profiles/{fileName}";
+        }
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Error uploading profile picture for user {UserId}", userId);
             throw;
@@ -66,50 +64,50 @@ catch (Exception ex)
     {
         try
         {
-     if (string.IsNullOrEmpty(filePath))
-        {
-        return false;
-}
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return false;
+            }
 
             // Convert relative path to absolute
             var absolutePath = Path.Combine(_environment.WebRootPath, filePath.TrimStart('/'));
 
-    if (File.Exists(absolutePath))
+            if (File.Exists(absolutePath))
             {
                 await Task.Run(() => File.Delete(absolutePath));
-             _logger.LogInformation("Deleted profile picture: {FilePath}", filePath);
-  return true;
-         }
+                _logger.LogInformation("Deleted profile picture: {FilePath}", filePath);
+                return true;
+            }
 
-          return false;
+            return false;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting profile picture: {FilePath}", filePath);
             return false;
-  }
+        }
     }
 
     public bool IsValidImage(IFormFile file)
     {
         if (file == null)
         {
-      return false;
-      }
+            return false;
+        }
 
         // Check extension
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!_allowedExtensions.Contains(extension))
         {
-       return false;
+            return false;
         }
 
         // Check MIME type
         var allowedMimeTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
         if (!allowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
-      {
-          return false;
-    }
+        {
+            return false;
+        }
 
         return true;
     }
@@ -121,6 +119,6 @@ catch (Exception ex)
 
     public long GetMaxFileSizeInBytes()
     {
-  return MaxFileSizeInBytes;
+        return MaxFileSizeInBytes;
     }
 }

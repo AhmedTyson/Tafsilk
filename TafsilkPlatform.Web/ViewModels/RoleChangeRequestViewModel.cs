@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
 
 namespace TafsilkPlatform.Web.ViewModels;
 
@@ -7,13 +6,13 @@ public class RoleChangeRequestViewModel
 {
     [Required(ErrorMessage = "الدور المستهدف مطلوب")]
     [Display(Name = "الدور المطلوب")]
-public string TargetRole { get; set; } = string.Empty;
+    public string TargetRole { get; set; } = string.Empty;
 
     [Display(Name = "اسم المتجر")]
     public string? ShopName { get; set; }
 
     [Display(Name = "العنوان")]
-    public string? Address { get; set;  }
+    public string? Address { get; set; }
 
     [Display(Name = "سنوات الخبرة")]
     [Range(0, 50, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 50")]

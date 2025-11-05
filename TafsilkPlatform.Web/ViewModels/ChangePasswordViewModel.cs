@@ -12,7 +12,7 @@ public class ChangePasswordViewModel
     [Required(ErrorMessage = "كلمة المرور الجديدة مطلوبة")]
     [MinLength(6, ErrorMessage = "كلمة المرور يجب أن تكون 6 أحرف على الأقل")]
     [DataType(DataType.Password)]
- [Display(Name = "كلمة المرور الجديدة")]
+    [Display(Name = "كلمة المرور الجديدة")]
     public string NewPassword { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "تأكيد كلمة المرور مطلوب")]

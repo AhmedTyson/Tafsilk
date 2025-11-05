@@ -7,7 +7,7 @@ public class CustomerOrdersViewModel
     public List<OrderSummaryViewModel> Orders { get; set; } = new();
     public int TotalOrders => Orders.Count;
     public int PendingOrders => Orders.Count(o => o.Status == OrderStatus.Pending);
-  public int ProcessingOrders => Orders.Count(o => o.Status == OrderStatus.Processing);
+    public int ProcessingOrders => Orders.Count(o => o.Status == OrderStatus.Processing);
     public int CompletedOrders => Orders.Count(o => o.Status == OrderStatus.Delivered);
 }
 
@@ -32,6 +32,6 @@ public class OrderSummaryViewModel
     public string StatusDisplay { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? DueDate { get; set; }
- public decimal TotalPrice { get; set; }
+    public decimal TotalPrice { get; set; }
     public bool IsPaid { get; set; }
 }

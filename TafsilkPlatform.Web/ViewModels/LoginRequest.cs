@@ -9,8 +9,8 @@ public class LoginRequest
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "كلمة المرور مطلوبة")]
- [DataType(DataType.Password)]
- public string Password { get; set; } = string.Empty;
+    [DataType(DataType.Password)]
+    public string Password { get; set; } = string.Empty;
 
     public bool RememberMe { get; set; }
 }

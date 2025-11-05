@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
 
 namespace TafsilkPlatform.Web.Security;
 
@@ -16,23 +15,23 @@ public class VerifiedTailorRequirement : IAuthorizationRequirement
 public class VerifiedTailorHandler : AuthorizationHandler<VerifiedTailorRequirement>
 {
     protected override Task HandleRequirementAsync(
-  AuthorizationHandlerContext context, 
+  AuthorizationHandlerContext context,
         VerifiedTailorRequirement requirement)
     {
         // Check if user is authenticated
-    if (!context.User.Identity?.IsAuthenticated ?? true)
- {
+        if (!context.User.Identity?.IsAuthenticated ?? true)
+        {
             return Task.CompletedTask;
         }
 
-// Check if user has Tailor role
+        // Check if user has Tailor role
         var isTailor = context.User.IsInRole("Tailor");
-   if (!isTailor)
-{
-       return Task.CompletedTask;
+        if (!isTailor)
+        {
+            return Task.CompletedTask;
         }
 
-      // Check if verified
+        // Check if verified
         var isVerifiedClaim = context.User.FindFirst("IsVerified");
         if (isVerifiedClaim != null && bool.TryParse(isVerifiedClaim.Value, out bool isVerified) && isVerified)
         {
@@ -60,26 +59,26 @@ public class ApprovedCorporateHandler : AuthorizationHandler<ApprovedCorporateRe
    ApprovedCorporateRequirement requirement)
     {
         // Check if user is authenticated
-   if (!context.User.Identity?.IsAuthenticated ?? true)
+        if (!context.User.Identity?.IsAuthenticated ?? true)
         {
- return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
-  // Check if user has Corporate role
-  var isCorporate = context.User.IsInRole("Corporate");
+        // Check if user has Corporate role
+        var isCorporate = context.User.IsInRole("Corporate");
         if (!isCorporate)
- {
-   return Task.CompletedTask;
+        {
+            return Task.CompletedTask;
         }
 
-// Check if approved
+        // Check if approved
         var isApprovedClaim = context.User.FindFirst("IsApproved");
-     if (isApprovedClaim != null && bool.TryParse(isApprovedClaim.Value, out bool isApproved) && isApproved)
- {
-     context.Succeed(requirement);
-  }
+        if (isApprovedClaim != null && bool.TryParse(isApprovedClaim.Value, out bool isApproved) && isApproved)
+        {
+            context.Succeed(requirement);
+        }
 
-   return Task.CompletedTask;
+        return Task.CompletedTask;
     }
 }
 
@@ -99,15 +98,15 @@ public class ActiveUserHandler : AuthorizationHandler<ActiveUserRequirement>
      AuthorizationHandlerContext context,
         ActiveUserRequirement requirement)
     {
-  // Check if user is authenticated
+        // Check if user is authenticated
         if (!context.User.Identity?.IsAuthenticated ?? true)
- {
-   return Task.CompletedTask;
-   }
+        {
+            return Task.CompletedTask;
+        }
 
-      // Check if user is active (this check happens during login, but we can add extra verification)
-      // If user reached here, they passed login checks, so they're active
-   context.Succeed(requirement);
+        // Check if user is active (this check happens during login, but we can add extra verification)
+        // If user reached here, they passed login checks, so they're active
+        context.Succeed(requirement);
 
         return Task.CompletedTask;
     }

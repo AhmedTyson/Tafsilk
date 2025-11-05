@@ -1,7 +1,5 @@
 using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -35,19 +33,19 @@ public class EmailService : IEmailService
         IConfiguration configuration,
      ILogger<EmailService> logger)
     {
-    _configuration = configuration;
-    _logger = logger;
+        _configuration = configuration;
+        _logger = logger;
 
         // Load SMTP settings from configuration
         _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
- _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
-  _fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
+        _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
+        _fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
         _fromName = _configuration["Email:FromName"] ?? "منصة تفصيلك";
- _username = _configuration["Email:Username"] ?? "";
+        _username = _configuration["Email:Username"] ?? "";
         _password = _configuration["Email:Password"] ?? "";
         _enableSsl = bool.Parse(_configuration["Email:EnableSsl"] ?? "true");
 
-    // Log configuration status
+        // Log configuration status
         var isConfigured = !string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password);
         if (!isConfigured)
         {
@@ -55,17 +53,17 @@ public class EmailService : IEmailService
         }
     }
 
- /// <summary>
+    /// <summary>
     /// Send email verification link
-/// </summary>
+    /// </summary>
     public async Task<bool> SendEmailVerificationAsync(string email, string fullName, string verificationToken)
     {
         try
-      {
-    var verificationUrl = $"{_configuration["App:BaseUrl"]}/Account/VerifyEmail?token={verificationToken}";
+        {
+            var verificationUrl = $"{_configuration["App:BaseUrl"]}/Account/VerifyEmail?token={verificationToken}";
 
-       var subject = "تأكيد البريد الإلكتروني - منصة تفصيلك";
-      var body = $@"
+            var subject = "تأكيد البريد الإلكتروني - منصة تفصيلك";
+            var body = $@"
 <!DOCTYPE html>
 <html dir='rtl' lang='ar'>
 <head>
@@ -110,12 +108,12 @@ public class EmailService : IEmailService
 </body>
 </html>";
 
- return await SendEmailAsync(email, subject, body);
-      }
+            return await SendEmailAsync(email, subject, body);
+        }
         catch (Exception ex)
-  {
-  _logger.LogError(ex, "Error sending verification email to {Email}", email);
-    return false;
+        {
+            _logger.LogError(ex, "Error sending verification email to {Email}", email);
+            return false;
         }
     }
 
@@ -126,10 +124,10 @@ public class EmailService : IEmailService
     {
         try
         {
-        var resetUrl = $"{_configuration["App:BaseUrl"]}/Account/ResetPassword?token={resetToken}";
+            var resetUrl = $"{_configuration["App:BaseUrl"]}/Account/ResetPassword?token={resetToken}";
 
-       var subject = "إعادة تعيين كلمة المرور - منصة تفصيلك";
-         var body = $@"
+            var subject = "إعادة تعيين كلمة المرور - منصة تفصيلك";
+            var body = $@"
 <!DOCTYPE html>
 <html dir='rtl' lang='ar'>
 <head>
@@ -174,12 +172,12 @@ public class EmailService : IEmailService
 </body>
 </html>";
 
-         return await SendEmailAsync(email, subject, body);
+            return await SendEmailAsync(email, subject, body);
         }
         catch (Exception ex)
         {
-   _logger.LogError(ex, "Error sending password reset email to {Email}", email);
-         return false;
+            _logger.LogError(ex, "Error sending password reset email to {Email}", email);
+            return false;
         }
     }
 
@@ -190,17 +188,17 @@ public class EmailService : IEmailService
     {
         try
         {
-       var roleText = role switch
-        {
-      "Customer" => "عميل",
-"Tailor" => "خياط",
-           // "Corporate" => "عميل مؤسسي", // REMOVED: Corporate feature
-      "Admin" => "مدير",
- _ => "مستخدم"
-       };
+            var roleText = role switch
+            {
+                "Customer" => "عميل",
+                "Tailor" => "خياط",
+                // "Corporate" => "عميل مؤسسي", // REMOVED: Corporate feature
+                "Admin" => "مدير",
+                _ => "مستخدم"
+            };
 
             var subject = "مرحباً بك في منصة تفصيلك!";
-          var body = $@"
+            var body = $@"
 <!DOCTYPE html>
 <html dir='rtl' lang='ar'>
 <head>
@@ -239,8 +237,8 @@ public class EmailService : IEmailService
             return await SendEmailAsync(email, subject, body);
         }
         catch (Exception ex)
-    {
-       _logger.LogError(ex, "Error sending welcome email to {Email}", email);
+        {
+            _logger.LogError(ex, "Error sending welcome email to {Email}", email);
             return false;
         }
     }
@@ -281,11 +279,11 @@ public class EmailService : IEmailService
 </body>
 </html>";
 
-    return await SendEmailAsync(email, subject, body);
+            return await SendEmailAsync(email, subject, body);
         }
         catch (Exception ex)
-   {
-        _logger.LogError(ex, "Error sending notification email to {Email}", email);
+        {
+            _logger.LogError(ex, "Error sending notification email to {Email}", email);
             return false;
         }
     }
@@ -298,42 +296,42 @@ public class EmailService : IEmailService
         // Check if email is configured
         if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password))
         {
-    _logger.LogWarning("Email service not configured. Skipping email to {Email}", toEmail);
- // In development, just log the email instead of sending
-            _logger.LogInformation("EMAIL PREVIEW:\nTo: {Email}\nSubject: {Subject}\nBody: {Body}", 
+            _logger.LogWarning("Email service not configured. Skipping email to {Email}", toEmail);
+            // In development, just log the email instead of sending
+            _logger.LogInformation("EMAIL PREVIEW:\nTo: {Email}\nSubject: {Subject}\nBody: {Body}",
       toEmail, subject, htmlBody.Substring(0, Math.Min(200, htmlBody.Length)));
-     return true; // Return true in development mode
+            return true; // Return true in development mode
         }
 
         try
         {
-      using var message = new MailMessage();
-     message.From = new MailAddress(_fromEmail, _fromName);
-       message.To.Add(new MailAddress(toEmail));
-       message.Subject = subject;
+            using var message = new MailMessage();
+            message.From = new MailAddress(_fromEmail, _fromName);
+            message.To.Add(new MailAddress(toEmail));
+            message.Subject = subject;
             message.Body = htmlBody;
-      message.IsBodyHtml = true;
-      message.Priority = MailPriority.Normal;
+            message.IsBodyHtml = true;
+            message.Priority = MailPriority.Normal;
 
-        using var smtpClient = new SmtpClient(_smtpHost, _smtpPort);
-       smtpClient.EnableSsl = _enableSsl;
-  smtpClient.UseDefaultCredentials = false;
-          smtpClient.Credentials = new NetworkCredential(_username, _password);
-  smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+            using var smtpClient = new SmtpClient(_smtpHost, _smtpPort);
+            smtpClient.EnableSsl = _enableSsl;
+            smtpClient.UseDefaultCredentials = false;
+            smtpClient.Credentials = new NetworkCredential(_username, _password);
+            smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
             smtpClient.Timeout = 30000; // 30 seconds
 
             await smtpClient.SendMailAsync(message);
 
-          _logger.LogInformation("Email sent successfully to {Email}", toEmail);
-  return true;
-      }
-      catch (SmtpException ex)
-     {
+            _logger.LogInformation("Email sent successfully to {Email}", toEmail);
+            return true;
+        }
+        catch (SmtpException ex)
+        {
             _logger.LogError(ex, "SMTP error sending email to {Email}: {Error}", toEmail, ex.Message);
             return false;
         }
- catch (Exception ex)
-    {
+        catch (Exception ex)
+        {
             _logger.LogError(ex, "Unexpected error sending email to {Email}", toEmail);
             return false;
         }

@@ -1,5 +1,5 @@
-using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Services;
 
 namespace TafsilkPlatform.Web.Extensions;
 
@@ -13,10 +13,10 @@ public static class ServiceCollectionExtensions
         // Core services
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IValidationService, ValidationService>();
-        
+
         // Specialized services
         services.AddScoped<ITailorRegistrationService, TailorRegistrationService>();
-        
+
         return services;
     }
 }

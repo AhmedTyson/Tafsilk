@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Services;
+using TafsilkPlatform.Web.Extensions;
 using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Middleware;
 using TafsilkPlatform.Web.Repositories;
 using TafsilkPlatform.Web.Security;
-using TafsilkPlatform.Web.Middleware;
-using TafsilkPlatform.Web.Extensions;
+using TafsilkPlatform.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,19 +24,19 @@ builder.Logging.AddDebug();
 builder.Services.AddControllersWithViews()
     .AddJsonOptions(options =>
   {
-   options.JsonSerializerOptions.PropertyNamingPolicy = null;
+      options.JsonSerializerOptions.PropertyNamingPolicy = null;
       options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
-    });
+  });
 
 // Configure Antiforgery
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = ".AspNetCore.Antiforgery.Tafsilk";
     options.Cookie.HttpOnly = true;
-  options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-      ? CookieSecurePolicy.None
-        : CookieSecurePolicy.Always;
-options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.None
+          : CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // Configure session
@@ -44,12 +44,12 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddDataProtection();
 builder.Services.AddSession(options =>
 {
- options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.Name = ".Tafsilk.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
-        ? CookieSecurePolicy.None 
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+        ? CookieSecurePolicy.None
       : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
@@ -59,7 +59,7 @@ builder.Services.AddSession(options =>
 var authBuilder = builder.Services.AddAuthentication(options =>
 {
     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-  options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 });
 
@@ -71,12 +71,12 @@ authBuilder.AddCookie(options =>
     options.AccessDeniedPath = "/Account/Login";
     options.Cookie.Name = ".Tafsilk.Auth";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
-    ? CookieSecurePolicy.None 
+    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+    ? CookieSecurePolicy.None
  : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
-options.ExpireTimeSpan = TimeSpan.FromDays(14);
-options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+    options.SlidingExpiration = true;
 });
 
 // JWT authentication for API
@@ -90,12 +90,12 @@ authBuilder.AddJwtBearer("Jwt", options =>
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
-      ValidateIssuer = true,
-      ValidIssuer = jwtIssuer,
-  ValidateAudience = true,
-    ValidAudience = jwtAudience,
-    ValidateIssuerSigningKey = true,
-     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(5)
     };
@@ -109,26 +109,26 @@ if (enableGoogleOAuth)
     var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
     if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
-  {
-     authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-        {
-    options.ClientId = googleClientId;
-  options.ClientSecret = googleClientSecret;
-   options.CallbackPath = "/signin-google";
-  options.SaveTokens = true;
-    
-    // Request additional scopes
- options.Scope.Add("profile");
-    options.Scope.Add("email");
-   });
-   
+    {
+        authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+           {
+               options.ClientId = googleClientId;
+               options.ClientSecret = googleClientSecret;
+               options.CallbackPath = "/signin-google";
+               options.SaveTokens = true;
+
+               // Request additional scopes
+               options.Scope.Add("profile");
+               options.Scope.Add("email");
+           });
+
         builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Information);
         var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
-    logger.LogInformation("✅ Google OAuth configured successfully");
+        logger.LogInformation("✅ Google OAuth configured successfully");
     }
     else
     {
-      var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
+        var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
         logger.LogWarning("⚠️ Google OAuth enabled but credentials not configured. Add ClientId and ClientSecret to appsettings.json");
     }
 }
@@ -140,18 +140,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
    builder.Configuration.GetConnectionString("DefaultConnection"),
    sqlOptions =>
       {
-   sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
-      sqlOptions.EnableRetryOnFailure(
-    maxRetryCount: 3,
- maxRetryDelay: TimeSpan.FromSeconds(5),
-      errorNumbersToAdd: null);
-        });
+          sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
+          sqlOptions.EnableRetryOnFailure(
+        maxRetryCount: 3,
+     maxRetryDelay: TimeSpan.FromSeconds(5),
+          errorNumbersToAdd: null);
+      });
 
-if (builder.Environment.IsDevelopment())
+    if (builder.Environment.IsDevelopment())
     {
-  options.EnableSensitiveDataLogging();
-   options.EnableDetailedErrors();
- }
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+    }
 });
 
 // Register repositories - Only keep what's actually used
@@ -196,36 +196,36 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 // Authorization policies
 builder.Services.AddAuthorization(options =>
 {
- options.AddPolicy("AdminPolicy", policy =>
-    {
-     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-        policy.RequireRole("Admin");
-  });
+    options.AddPolicy("AdminPolicy", policy =>
+       {
+           policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+           policy.RequireRole("Admin");
+       });
 
- options.AddPolicy("TailorPolicy", policy =>
-    {
-    policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-   policy.RequireRole("Tailor");
-    });
+    options.AddPolicy("TailorPolicy", policy =>
+       {
+           policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
+           policy.RequireRole("Tailor");
+       });
 
     options.AddPolicy("VerifiedTailorPolicy", policy =>
     {
-   policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
+        policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
         policy.RequireRole("Tailor");
-    policy.RequireClaim("IsVerified", "True");
+        policy.RequireClaim("IsVerified", "True");
     });
 
     options.AddPolicy("CustomerPolicy", policy =>
     {
         policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-      policy.RequireRole("Customer");
+        policy.RequireRole("Customer");
     });
 
-  options.AddPolicy("AuthenticatedPolicy", policy =>
-    {
-   policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-    policy.RequireAuthenticatedUser();
- });
+    options.AddPolicy("AuthenticatedPolicy", policy =>
+      {
+          policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+          policy.RequireAuthenticatedUser();
+      });
 });
 
 var app = builder.Build();
