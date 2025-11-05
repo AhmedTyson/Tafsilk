@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using System.Text;
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Extensions;
@@ -28,13 +30,79 @@ builder.Services.AddControllersWithViews()
       options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
   });
 
+// ✅ SWAGGER/OPENAPI CONFIGURATION
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+ {
+        Version = "v1",
+        Title = "Tafsilk Platform API",
+    Description = "Tafsilk - منصة الخياطين والتفصيل - API Documentation",
+        Contact = new OpenApiContact
+        {
+         Name = "Tafsilk Platform",
+      Email = "support@tafsilk.com",
+        Url = new Uri("https://tafsilk.com")
+        },
+        License = new OpenApiLicense
+        {
+   Name = "Use under Tafsilk License",
+            Url = new Uri("https://tafsilk.com/license")
+      }
+});
+
+    // Add JWT Authentication
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+    Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
+    });
+
+    // Add Cookie Authentication
+    options.AddSecurityDefinition("Cookie", new OpenApiSecurityScheme
+    {
+        Name = ".Tafsilk.Auth",
+        Type = SecuritySchemeType.ApiKey,
+      In = ParameterLocation.Cookie,
+   Description = "Cookie-based authentication"
+  });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+    new OpenApiSecurityScheme
+            {
+              Reference = new OpenApiReference
+        {
+     Type = ReferenceType.SecurityScheme,
+           Id = "Bearer"
+          }
+            },
+      Array.Empty<string>()
+      }
+    });
+
+    // Include XML comments if available
+    var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    if (File.Exists(xmlPath))
+    {
+    options.IncludeXmlComments(xmlPath);
+    }
+});
+
 // Configure Antiforgery
 builder.Services.AddAntiforgery(options =>
 {
     options.Cookie.Name = ".AspNetCore.Antiforgery.Tafsilk";
     options.Cookie.HttpOnly = true;
     options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
-        ? CookieSecurePolicy.None
+     ? CookieSecurePolicy.None
           : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
 });
@@ -45,8 +113,8 @@ builder.Services.AddDataProtection();
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
-    options.Cookie.Name = ".Tafsilk.Session";
-    options.Cookie.HttpOnly = true;
+ options.Cookie.Name = ".Tafsilk.Session";
+ options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
     options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
         ? CookieSecurePolicy.None
@@ -75,7 +143,7 @@ authBuilder.AddCookie(options =>
     ? CookieSecurePolicy.None
  : CookieSecurePolicy.Always;
     options.Cookie.SameSite = SameSiteMode.Lax;
-    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+ options.ExpireTimeSpan = TimeSpan.FromDays(14);
     options.SlidingExpiration = true;
 });
 
@@ -91,12 +159,12 @@ authBuilder.AddJwtBearer("Jwt", options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = jwtIssuer,
-        ValidateAudience = true,
-        ValidAudience = jwtAudience,
+      ValidIssuer = jwtIssuer,
+   ValidateAudience = true,
+    ValidAudience = jwtAudience,
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-        ValidateLifetime = true,
+    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+     ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(5)
     };
 });
@@ -110,21 +178,21 @@ if (enableGoogleOAuth)
 
     if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
     {
-        authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
+      authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
            {
-               options.ClientId = googleClientId;
-               options.ClientSecret = googleClientSecret;
-               options.CallbackPath = "/signin-google";
-               options.SaveTokens = true;
+     options.ClientId = googleClientId;
+  options.ClientSecret = googleClientSecret;
+           options.CallbackPath = "/signin-google";
+        options.SaveTokens = true;
 
-               // Request additional scopes
-               options.Scope.Add("profile");
-               options.Scope.Add("email");
-           });
+        // Request additional scopes
+        options.Scope.Add("profile");
+         options.Scope.Add("email");
+    });
 
         builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Information);
-        var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
-        logger.LogInformation("✅ Google OAuth configured successfully");
+  var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
+   logger.LogInformation("✅ Google OAuth configured successfully");
     }
     else
     {
@@ -136,13 +204,13 @@ if (enableGoogleOAuth)
 // Database context
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(
+  options.UseSqlServer(
    builder.Configuration.GetConnectionString("DefaultConnection"),
    sqlOptions =>
       {
-          sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
-          sqlOptions.EnableRetryOnFailure(
-        maxRetryCount: 3,
+       sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
+       sqlOptions.EnableRetryOnFailure(
+   maxRetryCount: 3,
      maxRetryDelay: TimeSpan.FromSeconds(5),
           errorNumbersToAdd: null);
       });
@@ -196,35 +264,35 @@ builder.Services.AddSingleton<ITokenService, TokenService>();
 // Authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AdminPolicy", policy =>
+ options.AddPolicy("AdminPolicy", policy =>
        {
-           policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-           policy.RequireRole("Admin");
-       });
+  policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+     policy.RequireRole("Admin");
+   });
 
     options.AddPolicy("TailorPolicy", policy =>
-       {
+   {
            policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
            policy.RequireRole("Tailor");
        });
 
     options.AddPolicy("VerifiedTailorPolicy", policy =>
     {
-        policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-        policy.RequireRole("Tailor");
+     policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
+      policy.RequireRole("Tailor");
         policy.RequireClaim("IsVerified", "True");
     });
 
     options.AddPolicy("CustomerPolicy", policy =>
     {
         policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-        policy.RequireRole("Customer");
+   policy.RequireRole("Customer");
     });
 
     options.AddPolicy("AuthenticatedPolicy", policy =>
       {
-          policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-          policy.RequireAuthenticatedUser();
+     policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+  policy.RequireAuthenticatedUser();
       });
 });
 
@@ -247,6 +315,22 @@ else
     app.UseHsts();
 }
 
+// ✅ SWAGGER MIDDLEWARE - MUST BE BEFORE UseRouting()
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tafsilk Platform API v1");
+        options.RoutePrefix = "swagger"; // Access at https://localhost:7186/swagger
+        options.DocumentTitle = "Tafsilk Platform API";
+        options.DisplayRequestDuration();
+    options.EnableDeepLinking();
+   options.EnableFilter();
+      options.ShowExtensions();
+    });
+}
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -257,13 +341,52 @@ app.UseAuthorization();
 // Check user status after authentication
 app.UseMiddleware<UserStatusMiddleware>();
 
+// ✅ MAP CONTROLLERS - Required for API endpoint discovery
+app.MapControllers();
+
 app.MapControllerRoute(
-    name: "default",
+  name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// ✅ SCALAR API DOCUMENTATION - Must be after MapControllers()
+if (app.Environment.IsDevelopment())
+{
+    app.MapScalarApiReference(options =>
+    {
+        options
+            .WithTitle("Tafsilk Platform API")
+          .WithTheme(ScalarTheme.Purple)
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+            .WithDarkMode(true)
+      .WithSidebar(true);
+    });
+}
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
 startupLogger.LogInformation("=== Tafsilk Platform Started Successfully ===");
 startupLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
 startupLogger.LogInformation("Authentication Schemes: Cookies, JWT, Google");
+
+if (app.Environment.IsDevelopment())
+{
+    var urls = app.Urls;
+    if (urls.Any())
+    {
+        foreach (var url in urls)
+        {
+ startupLogger.LogInformation("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
+    startupLogger.LogInformation("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
+ startupLogger.LogInformation("🟣 Scalar API Docs available at: {ScalarUrl}", $"{url}/scalar/v1");
+        }
+    }
+    else
+  {
+   // Fallback to common development URLs
+     startupLogger.LogInformation("🔷 Swagger UI available at: https://localhost:7186/swagger");
+        startupLogger.LogInformation("🔷 Swagger UI available at: http://localhost:5140/swagger");
+        startupLogger.LogInformation("🟣 Scalar API Docs available at: https://localhost:7186/scalar/v1");
+        startupLogger.LogInformation("🟣 Scalar API Docs available at: http://localhost:5140/scalar/v1");
+    }
+}
 
 app.Run();
