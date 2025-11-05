@@ -19,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Add services to the container
 builder.Services.AddControllersWithViews()
@@ -168,6 +170,8 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<ITailorServiceRepository, TailorServiceRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IRatingDimensionRepository, RatingDimensionRepository>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
 
 // Register Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -247,6 +251,9 @@ else
     app.UseHsts();
 }
 
+// ✅ Enable Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

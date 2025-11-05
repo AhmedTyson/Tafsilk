@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.Web.Data;
+using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.Orders;
@@ -16,18 +17,21 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize]
 public class OrdersController : Controller
 {
+    
     private readonly AppDbContext _db;
     private readonly ILogger<OrdersController> _logger;
     private readonly IFileUploadService _fileUploadService;
-
+    private readonly IOrderService _orderService;
     public OrdersController(
         AppDbContext db,
         ILogger<OrdersController> logger,
-        IFileUploadService fileUploadService)
+        IFileUploadService fileUploadService,
+        IOrderService orderService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
+        _orderService = orderService;
     }
 
     #region Customer Order Actions
