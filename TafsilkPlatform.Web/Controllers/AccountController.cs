@@ -353,191 +353,242 @@ public class AccountController(
         if (!ModelState.IsValid)
             return View(model);
 
-        try
+     try
         {
             // Get the user - model.UserId comes from hidden field
-            var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
+       var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
             if (user == null || user.Role?.Name?.ToLower() != "tailor")
             {
-                ModelState.AddModelError(string.Empty, "حساب غير صالح");
-                return View(model);
-            }
+          ModelState.AddModelError(string.Empty, "حساب غير صالح");
+   return View(model);
+       }
 
             // CRITICAL: Check if profile already exists - BLOCK double submission
-            var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
-            if (existingProfile != null)
-            {
-                _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
-                TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
-                return RedirectToAction(nameof(Login));
-            }
+       var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
+  if (existingProfile != null)
+       {
+            _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
+    TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
+     return RedirectToAction(nameof(Login));
+         }
 
             // Validate that required evidence documents are provided
-            if (model.IdDocument == null || model.IdDocument.Length == 0)
+            if (model.IdDocumentFront == null || model.IdDocumentFront.Length == 0)
             {
-                ModelState.AddModelError(nameof(model.IdDocument), "يجب تحميل صورة الهوية الشخصية");
-                return View(model);
-            }
+     ModelState.AddModelError(nameof(model.IdDocumentFront), "يجب تحميل صورة الهوية الشخصية (الوجه الأمامي)");
+           return View(model);
+         }
             else
             {
-                var (isValidId, idError) = ValidateFileUpload(model.IdDocument, "document");
+     var (isValidId, idError) = ValidateFileUpload(model.IdDocumentFront, "document");
                 if (!isValidId)
-                {
-                    ModelState.AddModelError(nameof(model.IdDocument), idError!);
-                    return View(model);
-                }
+        {
+   ModelState.AddModelError(nameof(model.IdDocumentFront), idError!);
+      return View(model);
+             }
             }
 
-            // Validate portfolio images (at least 3)
+      // Validate portfolio images (at least 3)
             if ((model.PortfolioImages == null || !model.PortfolioImages.Any()) &&
            (model.WorkSamples == null || !model.WorkSamples.Any()))
-            {
-                ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من أعمالك السابقة");
+          {
+      ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من أعمالك السابقة");
                 return View(model);
-            }
-            else
-            {
-                var portfolioFiles = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
+  }
+          else
+         {
+  var portfolioFiles = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
                 if (portfolioFiles.Count < 3)
-                {
-                    ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من معرض الأعمال");
-                    return View(model);
-                }
+   {
+               ModelState.AddModelError(string.Empty, "يجب تحميل على الأقل 3 صور من معرض الأعمال");
+      return View(model);
+      }
 
-                if (portfolioFiles.Count > 10)
+         if (portfolioFiles.Count > 10)
                 {
-                    ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
-                    return View(model);
-                }
+             ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
+        return View(model);
+         }
 
-                foreach (var image in portfolioFiles)
+   foreach (var image in portfolioFiles)
+      {
+      var (isValidImage, imageError) = ValidateFileUpload(image, "image");
+      if (!isValidImage)
                 {
-                    var (isValidImage, imageError) = ValidateFileUpload(image, "image");
-                    if (!isValidImage)
-                    {
-                        ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
-                        return View(model);
-                    }
-                }
+        ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
+         return View(model);
             }
+     }
+        }
 
-            // Sanitize text inputs
-            var sanitizedFullName = SanitizeInput(model.FullName, 100);
-            var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
+     // Sanitize text inputs
+ var sanitizedFullName = SanitizeInput(model.FullName, 100);
+          var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
             var sanitizedAddress = SanitizeInput(model.Address, 200);
             var sanitizedCity = SanitizeInput(model.City, 50);
-            var sanitizedDescription = SanitizeInput(model.Description, 1000);
+      var sanitizedDescription = SanitizeInput(model.Description, 1000);
 
-            // Create tailor profile NOW (this is the ONE AND ONLY TIME)
-            var tailorProfile = new TailorProfile
-            {
-                Id = Guid.NewGuid(),
-                UserId = model.UserId,
-                FullName = sanitizedFullName,
-                ShopName = sanitizedWorkshopName,
-                Address = sanitizedAddress,
-                City = sanitizedCity,
-                Bio = sanitizedDescription,
-                ExperienceYears = model.ExperienceYears,
-                IsVerified = false, // Awaiting admin approval
-                CreatedAt = _dateTime.Now
-            };
-
-            // Store ID document as evidence
-            if (model.IdDocument != null && model.IdDocument.Length > 0)
-            {
-                using var memoryStream = new MemoryStream();
-                await model.IdDocument.CopyToAsync(memoryStream);
-                tailorProfile.ProfilePictureData = memoryStream.ToArray();
-                tailorProfile.ProfilePictureContentType = model.IdDocument.ContentType;
-            }
+       // Create tailor profile NOW (this is the ONE AND ONLY TIME)
+      var tailorProfile = new TailorProfile
+     {
+        Id = Guid.NewGuid(),
+ UserId = model.UserId,
+          FullName = sanitizedFullName,
+   ShopName = sanitizedWorkshopName,
+         Address = sanitizedAddress,
+      City = sanitizedCity,
+    Bio = sanitizedDescription,
+     ExperienceYears = model.ExperienceYears,
+    IsVerified = false, // Awaiting admin approval
+   CreatedAt = _dateTime.Now
+  };
 
             await _unitOfWork.Tailors.AddAsync(tailorProfile);
 
-            // Save portfolio images
-            var portfolioFilesToSave = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
-            if (portfolioFilesToSave.Any())
+   // ✅ NEW: Create verification record with identity documents
+      var verification = new TailorVerification
+{
+          Id = Guid.NewGuid(),
+                TailorProfileId = tailorProfile.Id,
+         NationalIdNumber = SanitizeInput(model.NationalIdNumber, 50) ?? string.Empty,
+    FullLegalName = SanitizeInput(model.FullLegalName, 200) ?? string.Empty,
+           Nationality = SanitizeInput(model.Nationality, 100),
+                DateOfBirth = model.DateOfBirth,
+  CommercialRegistrationNumber = SanitizeInput(model.CommercialRegistrationNumber, 100),
+             ProfessionalLicenseNumber = SanitizeInput(model.ProfessionalLicenseNumber, 100),
+ AdditionalNotes = SanitizeInput(model.AdditionalNotes, 500),
+                Status = VerificationStatus.Pending,
+           SubmittedAt = _dateTime.Now
+            };
+
+            // Store ID document front (required)
+      if (model.IdDocumentFront != null && model.IdDocumentFront.Length > 0)
             {
-                var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
+       using var memoryStream = new MemoryStream();
+    await model.IdDocumentFront.CopyToAsync(memoryStream);
+ verification.IdDocumentFrontData = memoryStream.ToArray();
+         verification.IdDocumentFrontContentType = model.IdDocumentFront.ContentType;
+      }
 
-                // Create directory if it doesn't exist (async-compatible approach)
-                if (!Directory.Exists(portfolioFolderPath))
-                {
-                    Directory.CreateDirectory(portfolioFolderPath);
-                }
-
-                int imageIndex = 0;
-                foreach (var image in portfolioFilesToSave.Take(10))
-                {
-                    if (image.Length > 0)
-                    {
-                        var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
-                        var filePath = Path.Combine(portfolioFolderPath, fileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true))
-                        {
-                            await image.CopyToAsync(stream);
-                        }
-
-                        var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
-                        var portfolioImage = new PortfolioImage
-                        {
-                            PortfolioImageId = Guid.NewGuid(),
-                            TailorId = tailorProfile.Id,
-                            ImageUrl = relativeUrl,
-                            IsBeforeAfter = false,
-                            UploadedAt = _dateTime.Now,
-                            IsDeleted = false
-                        };
-
-                        await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
-                    }
-                }
+   // Store ID document back (optional)
+        if (model.IdDocumentBack != null && model.IdDocumentBack.Length > 0)
+       {
+     using var memoryStream = new MemoryStream();
+ await model.IdDocumentBack.CopyToAsync(memoryStream);
+    verification.IdDocumentBackData = memoryStream.ToArray();
+           verification.IdDocumentBackContentType = model.IdDocumentBack.ContentType;
             }
 
-            // Keep user ACTIVE so they can use the platform immediately
+            // Store commercial registration (optional)
+       if (model.CommercialRegistration != null && model.CommercialRegistration.Length > 0)
+            {
+        using var memoryStream = new MemoryStream();
+      await model.CommercialRegistration.CopyToAsync(memoryStream);
+           verification.CommercialRegistrationData = memoryStream.ToArray();
+           verification.CommercialRegistrationContentType = model.CommercialRegistration.ContentType;
+}
+
+     // Store professional license (optional)
+     if (model.ProfessionalLicense != null && model.ProfessionalLicense.Length > 0)
+            {
+      using var memoryStream = new MemoryStream();
+             await model.ProfessionalLicense.CopyToAsync(memoryStream);
+        verification.ProfessionalLicenseData = memoryStream.ToArray();
+     verification.ProfessionalLicenseContentType = model.ProfessionalLicense.ContentType;
+        }
+
+ await _unitOfWork.Context.Set<TailorVerification>().AddAsync(verification);
+
+     // Save portfolio images
+            var portfolioFilesToSave = model.PortfolioImages ?? model.WorkSamples ?? new List<IFormFile>();
+     if (portfolioFilesToSave.Any())
+         {
+                var portfolioFolderPath = Path.Combine("wwwroot", "uploads", "portfolio", tailorProfile.Id.ToString());
+
+       // Create directory if it doesn't exist (async-compatible approach)
+   if (!Directory.Exists(portfolioFolderPath))
+      {
+           Directory.CreateDirectory(portfolioFolderPath);
+       }
+
+    int imageIndex = 0;
+      foreach (var image in portfolioFilesToSave.Take(10))
+                {
+     if (image.Length > 0)
+            {
+                  var fileName = $"portfolio_{_dateTime.Now.Ticks}_{imageIndex++}{Path.GetExtension(image.FileName)}";
+          var filePath = Path.Combine(portfolioFolderPath, fileName);
+
+               using (var stream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, useAsync: true))
+     {
+     await image.CopyToAsync(stream);
+            }
+
+            var relativeUrl = $"/uploads/portfolio/{tailorProfile.Id}/{fileName}";
+      var portfolioImage = new PortfolioImage
+         {
+                 PortfolioImageId = Guid.NewGuid(),
+      TailorId = tailorProfile.Id,
+  ImageUrl = relativeUrl,
+      IsBeforeAfter = false,
+           UploadedAt = _dateTime.Now,
+          IsDeleted = false
+           };
+
+      await _unitOfWork.Context.Set<PortfolioImage>().AddAsync(portfolioImage);
+       }
+                }
+}
+
+         // Keep user ACTIVE so they can use the platform immediately
             // Admin verification (IsVerified) is checked separately for sensitive features
-            user.IsActive = true; // ✅ FIXED: Allow immediate platform access
+     user.IsActive = true; // ✅ FIXED: Allow immediate platform access
             user.UpdatedAt = _dateTime.Now;
 
-            // Generate email verification token
-            var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
+            // Update phone number if provided
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
+        {
+    user.PhoneNumber = model.PhoneNumber;
+            }
+
+   // Generate email verification token
+          var verificationToken = Convert.ToBase64String(Guid.NewGuid().ToByteArray())
         .Replace("+", "").Replace("/", "").Replace("=", "").Substring(0, 32);
 
-            user.EmailVerificationToken = verificationToken;
-            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+    user.EmailVerificationToken = verificationToken;
+      user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
 
             await _unitOfWork.Users.UpdateAsync(user);
-            await _unitOfWork.SaveChangesAsync();
+         await _unitOfWork.SaveChangesAsync();
 
-            _logger.LogInformation("[AccountController] Tailor {UserId} completed profile submission. User is ACTIVE, profile awaiting verification (IsVerified=false).", model.UserId);
+            _logger.LogInformation("[AccountController] Tailor {UserId} completed profile submission with verification documents. User is ACTIVE, profile awaiting admin verification (IsVerified=false).", model.UserId);
 
-            // ✅ FIX: Auto-login the tailor and redirect to their dashboard
-            // Build claims for authentication
-            var claims = new List<Claim>
-            {
-             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+  // ✅ FIX: Auto-login the tailor and redirect to their dashboard
+  // Build claims for authentication
+   var claims = new List<Claim>
+       {
+    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim(ClaimTypes.Name, sanitizedFullName),
+        new Claim(ClaimTypes.Name, sanitizedFullName),
      new Claim("FullName", sanitizedFullName),
-             new Claim(ClaimTypes.Role, "Tailor")
+       new Claim(ClaimTypes.Role, "Tailor")
          };
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-     new AuthenticationProperties { IsPersistent = true });
+        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+      var principal = new ClaimsPrincipal(identity);
+ await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+ new AuthenticationProperties { IsPersistent = true });
 
-            _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
+        _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
 
             TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن استخدام المنصة. سيتم مراجعة طلبك من قبل الإدارة خلال 24-48 ساعة.";
-            return RedirectToAction("Tailor", "Dashboards");
+        return RedirectToAction("Tailor", "Dashboards");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
-            ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
-            return View(model);
+          ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+      return View(model);
         }
     }
 

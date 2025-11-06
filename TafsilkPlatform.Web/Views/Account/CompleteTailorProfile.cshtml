@@ -699,16 +699,48 @@ cursor: pointer;
      <!-- Step 1: Basic Information -->
                <div class="form-step active" id="step1">
   <h2 class="step-title">المعلومات الأساسية</h2>
-         <div class="form-grid">
+ 
+       @* ✅ NEW: Identity Verification Section *@
+     <div class="verification-section mb-4">
+       <h3 class="verification-title">
+                 <i class="fas fa-id-card"></i>
+      معلومات الهوية (مطلوبة للتحقق)
+             </h3>
+        <div class="form-grid">
+   <div class="form-group">
+   <label asp-for="NationalIdNumber" class="form-label">رقم الهوية الوطنية / الإقامة *</label>
+       <input asp-for="NationalIdNumber" class="form-control" required />
+          <span asp-validation-for="NationalIdNumber" class="error-message show"></span>
+    </div>
+        <div class="form-group">
+            <label asp-for="FullLegalName" class="form-label">الاسم الكامل (كما في الهوية) *</label>
+         <input asp-for="FullLegalName" class="form-control" required />
+            <span asp-validation-for="FullLegalName" class="error-message show"></span>
+        </div>
+        <div class="form-group">
+          <label asp-for="Nationality" class="form-label">الجنسية</label>
+   <input asp-for="Nationality" class="form-control" />
+          <span asp-validation-for="Nationality" class="error-message show"></span>
+      </div>
+      <div class="form-group">
+         <label asp-for="DateOfBirth" class="form-label">تاريخ الميلاد</label>
+      <input asp-for="DateOfBirth" type="date" class="form-control" />
+               <span asp-validation-for="DateOfBirth" class="error-message show"></span>
+      </div>
+ </div>
+      </div>
+
+    @* Workshop Information *@
+    <div class="form-grid">
      <div class="form-group">
-          <label asp-for="WorkshopName" class="form-label">اسم الورشة</label>
+     <label asp-for="WorkshopName" class="form-label">اسم الورشة *</label>
     <input asp-for="WorkshopName" class="form-control" id="workshopName" required />
-        <span asp-validation-for="WorkshopName" class="error-message show"></span>
+   <span asp-validation-for="WorkshopName" class="error-message show"></span>
        </div>
               <div class="form-group">
-            <label asp-for="WorkshopType" class="form-label">نوع الورشة</label>
-       <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
-           <option value="">اختر نوع الورشة</option>
+  <label asp-for="WorkshopType" class="form-label">نوع الورشة *</label>
+  <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
+   <option value="">اختر نوع الورشة</option>
         <option value="tailoring">تفصيل وخياطة</option>
      <option value="design">تصميم أزياء</option>
     <option value="embroidery">تطريز وزخرفة</option>
@@ -717,19 +749,32 @@ cursor: pointer;
        </select>
   <span asp-validation-for="WorkshopType" class="error-message show"></span>
       </div>
+      
+      @* Optional Business Registration *@
+     <div class="form-group">
+     <label asp-for="CommercialRegistrationNumber" class="form-label">رقم السجل التجاري (اختياري)</label>
+       <input asp-for="CommercialRegistrationNumber" class="form-control" />
+      <span asp-validation-for="CommercialRegistrationNumber" class="error-message show"></span>
+              </div>
          <div class="form-group">
+        <label asp-for="ProfessionalLicenseNumber" class="form-label">رقم الرخصة المهنية (اختياري)</label>
+ <input asp-for="ProfessionalLicenseNumber" class="form-control" />
+     <span asp-validation-for="ProfessionalLicenseNumber" class="error-message show"></span>
+  </div>
+
+       <div class="form-group">
     <label class="form-label">اسم صاحب الورشة</label>
-                <input type="text" class="form-control" value="@Model?.FullName" readonly />
-             </div>
+      <input type="text" class="form-control" value="@Model?.FullName" readonly />
+ </div>
         <div class="form-group">
-      <label asp-for="PhoneNumber" class="form-label">رقم الهاتف</label>
+   <label asp-for="PhoneNumber" class="form-label">رقم الهاتف *</label>
       <input asp-for="PhoneNumber" class="form-control" id="phone" required />
-               <span asp-validation-for="PhoneNumber" class="error-message show"></span>
-          </div>
+   <span asp-validation-for="PhoneNumber" class="error-message show"></span>
+   </div>
           <div class="form-group">
       <label class="form-label">البريد الإلكتروني</label>
-        <input type="email" class="form-control" value="@Model?.Email" readonly />
-         </div>
+   <input type="email" class="form-control" value="@Model?.Email" readonly />
+  </div>
          <div class="form-group">
                <label asp-for="City" class="form-label">المدينة</label>
       <select asp-for="City" class="form-control">
@@ -791,103 +836,154 @@ cursor: pointer;
    <div class="form-step" id="step2">
    <h2 class="step-title">الوثائق والمستندات</h2>
 
-           <div class="verification-section">
-        <h3 class="verification-title">
+ <div class="verification-section">
+      <h3 class="verification-title">
     <i class="fas fa-shield-alt"></i>
-             عملية التحقق من الهوية
-         </h3>
-  <div class="verification-steps">
+       عملية التحقق من الهوية
+   </h3>
+    <div class="verification-steps">
   <div class="verification-step">
-           <div class="step-number">1</div>
-         <div class="step-content">
-             <h4>صورة الهوية الشخصية</h4>
-     <p class="step-description">صورة واضحة للهوية الشخصية أو جواز السفر</p>
-              </div>
-         </div>
-             <div class="verification-step">
-    <div class="step-number">2</div>
- <div class="step-content">
-         <h4>صور من معرض الأعمال</h4>
-   <p class="step-description">صور توضح جودة العمل والخبرة في المجال (3 على الأقل)</p>
-  </div>
- </div>
-       <div class="verification-step">
- <div class="step-number">3</div>
+        <div class="step-number">1</div>
     <div class="step-content">
-  <h4>وثيقة السجل التجاري (اختياري)</h4>
+  <h4>صورة الهوية الوطنية - الوجه الأمامي</h4>
+         <p class="step-description">صورة واضحة للوجه الأمامي من الهوية الشخصية أو الإقامة (إلزامي)</p>
+     </div>
+     </div>
+   <div class="verification-step">
+            <div class="step-number">2</div>
+   <div class="step-content">
+         <h4>صورة الهوية الوطنية - الوجه الخلفي</h4>
+  <p class="step-description">صورة واضحة للوجه الخلفي من الهوية (اختياري لكن مفضل)</p>
+      </div>
+       </div>
+   <div class="verification-step">
+    <div class="step-number">3</div>
+     <div class="step-content">
+   <h4>صور معرض الأعمال</h4>
+ <p class="step-description">صور توضح جودة العمل والخبرة في المجال (3 على الأقل)</p>
+ </div>
+  </div>
+    <div class="verification-step">
+ <div class="step-number">4</div>
+    <div class="step-content">
+  <h4>السجل التجاري / الرخصة (اختياري)</h4>
     <p class="step-description">لتحسين فرص الموثوقية والثقة</p>
     </div>
   </div>
-    <div class="verification-step">
-       <div class="step-number">4</div>
-        <div class="step-content">
-                <h4>شهادات الخبرة (اختياري)</h4>
-      <p class="step-description">شهادات تدريب أو خبرة في مجال الخياطة</p>
-          </div>
-    </div>
    </div>
             </div>
 
-      <div class="form-group">
-                  <label asp-for="IdDocument" class="form-label">رفع صورة الهوية الشخصية</label>
-           <div class="upload-area" id="idUploadArea">
-        <div class="upload-icon">
-<i class="fas fa-cloud-upload-alt"></i>
+   @* ✅ UPDATED: ID Front (Required) *@
+   <div class="form-group">
+     <label asp-for="IdDocumentFront" class="form-label">صورة الهوية - الوجه الأمامي * (إلزامي)</label>
+ <div class="upload-area" id="idFrontUploadArea">
+   <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
         </div>
-      <div class="upload-text">
-          <p>اسحب وأفلت الصورة هنا أو</p>
+     <div class="upload-text">
+         <p>اسحب وأفلت الصورة هنا أو</p>
       </div>
-                <div class="upload-btn">
- <i class="fas fa-plus"></i>
-         <span>اختر الصورة</span>
-    <input asp-for="IdDocument" accept="image/*" style="display: none;" id="idUpload" />
+     <div class="upload-btn">
+        <i class="fas fa-plus"></i>
+    <span>اختر الصورة</span>
+      <input asp-for="IdDocumentFront" accept="image/*" style="display: none;" id="idFrontUpload" />
     </div>
-                 </div>
- <div class="uploaded-files" id="idUploadedFiles"></div>
-           <span asp-validation-for="IdDocument" class="error-message show"></span>
-      </div>
+       </div>
+          <div class="uploaded-files" id="idFrontUploadedFiles"></div>
+         <span asp-validation-for="IdDocumentFront" class="error-message show"></span>
+ </div>
 
-                 <div class="form-group">
-   <label asp-for="PortfolioImages" class="form-label">رفع صور من معرض الأعمال (3 صور على الأقل)</label>
+      @* ✅ NEW: ID Back (Optional) *@
+  <div class="form-group">
+    <label asp-for="IdDocumentBack" class="form-label">صورة الهوية - الوجه الخلفي (اختياري)</label>
+ <div class="upload-area" id="idBackUploadArea">
+     <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+  </div>
+   <div class="upload-text">
+     <p>اسحب وأفلت الصورة هنا أو</p>
+   </div>
+   <div class="upload-btn">
+          <i class="fas fa-plus"></i>
+    <span>اختر الصورة</span>
+         <input asp-for="IdDocumentBack" accept="image/*" style="display: none;" id="idBackUpload" />
+    </div>
+      </div>
+    <div class="uploaded-files" id="idBackUploadedFiles"></div>
+        <span asp-validation-for="IdDocumentBack" class="error-message show"></span>
+  </div>
+
+         @* Portfolio Images *@
+        <div class="form-group">
+   <label asp-for="PortfolioImages" class="form-label">رفع صور من معرض الأعمال * (3 صور على الأقل)</label>
       <div class="upload-area" id="portfolioUploadArea">
-            <div class="upload-icon">
-                <i class="fas fa-cloud-upload-alt"></i>
+   <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
   </div>
        <div class="upload-text">
-             <p>اسحب وأفلت الصور هنا أو</p>
+    <p>اسحب وأفلت الصور هنا أو</p>
       </div>
            <div class="upload-btn">
-    <i class="fas fa-plus"></i>
+ <i class="fas fa-plus"></i>
         <span>اختر الصور</span>
             <input asp-for="PortfolioImages" accept="image/*" multiple style="display: none;" id="portfolioUpload" />
-              </div>
+        </div>
               </div>
    <div class="uploaded-files" id="portfolioUploadedFiles"></div>
         <span asp-validation-for="PortfolioImages" class="error-message show"></span>
   </div>
 
+      @* ✅ NEW: Commercial Registration (Optional) *@
   <div class="form-group">
-       <label asp-for="AdditionalDocuments" class="form-label">رفع وثائق إضافية (اختياري)</label>
-          <div class="upload-area" id="docsUploadArea">
-           <div class="upload-icon">
-    <i class="fas fa-cloud-upload-alt"></i>
-   </div>
-  <div class="upload-text">
-  <p>اسحب وأفلت الملفات هنا أو</p>
-             </div>
-         <div class="upload-btn">
-           <i class="fas fa-plus"></i>
-                    <span>اختر الملفات</span>
-        <input asp-for="AdditionalDocuments" accept=".pdf,.doc,.docx,image/*" multiple style="display: none;" id="docsUpload" />
+        <label asp-for="CommercialRegistration" class="form-label">صورة السجل التجاري (اختياري)</label>
+          <div class="upload-area" id="commercialUploadArea">
+          <div class="upload-icon">
+      <i class="fas fa-cloud-upload-alt"></i>
+     </div>
+<div class="upload-text">
+    <p>اسحب وأفلت الصورة هنا أو</p>
+      </div>
+  <div class="upload-btn">
+       <i class="fas fa-plus"></i>
+       <span>اختر الصورة</span>
+    <input asp-for="CommercialRegistration" accept="image/*,.pdf" style="display: none;" id="commercialUpload" />
         </div>
-           </div>
-    <div class="uploaded-files" id="docsUploadedFiles"></div>
-           <span asp-validation-for="AdditionalDocuments" class="error-message show"></span>
+     </div>
+            <div class="uploaded-files" id="commercialUploadedFiles"></div>
+    <span asp-validation-for="CommercialRegistration" class="error-message show"></span>
+ </div>
+
+      @* ✅ NEW: Professional License (Optional) *@
+     <div class="form-group">
+   <label asp-for="ProfessionalLicense" class="form-label">صورة الرخصة المهنية (اختياري)</label>
+        <div class="upload-area" id="licenseUploadArea">
+     <div class="upload-icon">
+    <i class="fas fa-cloud-upload-alt"></i>
+  </div>
+  <div class="upload-text">
+          <p>اسحب وأفلت الصورة هنا أو</p>
+        </div>
+    <div class="upload-btn">
+        <i class="fas fa-plus"></i>
+       <span>اختر الصورة</span>
+         <input asp-for="ProfessionalLicense" accept="image/*,.pdf" style="display: none;" id="licenseUpload" />
+   </div>
+   </div>
+       <div class="uploaded-files" id="licenseUploadedFiles"></div>
+     <span asp-validation-for="ProfessionalLicense" class="error-message show"></span>
             </div>
 
-             <div class="form-navigation">
-      <button type="button" class="btn btn-outline" id="backToStep1">السابق</button>
-             <button type="button" class="btn btn-primary" id="nextToStep3">التالي</button>
+     @* Additional Notes *@
+        <div class="form-group full-width">
+       <label asp-for="AdditionalNotes" class="form-label">ملاحظات إضافية (اختياري)</label>
+        <textarea asp-for="AdditionalNotes" class="form-control" rows="3" 
+        placeholder="أي معلومات إضافية ترغب في مشاركتها مع فريق المراجعة"></textarea>
+ <span asp-validation-for="AdditionalNotes" class="error-message show"></span>
+           </div>
+
+ <div class="form-navigation">
+    <button type="button" class="btn btn-outline" id="backToStep1">السابق</button>
+           <button type="button" class="btn btn-primary" id="nextToStep3">التالي</button>
     </div>
   </div>
 
