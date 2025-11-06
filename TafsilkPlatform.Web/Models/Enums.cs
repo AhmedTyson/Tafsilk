@@ -2,12 +2,33 @@ namespace TafsilkPlatform.Web.Models
 {
     public class Enums
     {
+        /// <summary>
+        /// Payment methods supported by Tafsilk platform
+        /// </summary>
         public enum PaymentType
         {
+            /// <summary>Credit/Debit Card</summary>
             Card = 0,
+
+            /// <summary>Generic Mobile Wallet</summary>
             Wallet = 1,
+
+            /// <summary>Bank Transfer</summary>
             BankTransfer = 2,
+
+            /// <summary>Cash on Delivery/Pickup</summary>
             Cash = 3,
+
+            /// <summary>Vodafone Cash (Egypt)</summary>
+            VodafoneCash = 4,
+
+            /// <summary>Orange Cash (Egypt/MENA)</summary>
+            OrangeCash = 5,
+
+            /// <summary>Etisalat Cash (UAE/MENA)</summary>
+            EtisalatCash = 6,
+
+            /// <summary>Other payment methods</summary>
             Other = 99
         }
 
@@ -17,13 +38,28 @@ namespace TafsilkPlatform.Web.Models
             Completed = 1,
             Failed = 2,
             Refunded = 3,
-            Cancelled = 4
+            Cancelled = 4,
+
+            /// <summary>Partial payment made (e.g., deposit)</summary>
+            PartiallyPaid = 5
         }
 
+        /// <summary>
+        /// Transaction direction
+        /// </summary>
         public enum TransactionType
         {
+            /// <summary>Money coming in (customer pays)</summary>
             Credit = 0,
-            Debit = 1
+
+            /// <summary>Money going out (refund to customer)</summary>
+            Debit = 1,
+
+            /// <summary>Deposit payment (partial upfront)</summary>
+            Deposit = 2,
+
+            /// <summary>Final/remaining payment</summary>
+            FinalPayment = 3
         }
 
         public enum DisputeStatus
@@ -42,6 +78,5 @@ namespace TafsilkPlatform.Web.Models
             Rejected = 3
         }
     }
-
 }
 

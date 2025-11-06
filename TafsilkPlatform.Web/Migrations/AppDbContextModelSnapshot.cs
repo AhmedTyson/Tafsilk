@@ -44,6 +44,264 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("AppSettings");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Complaint", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdminResponse")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("ComplaintType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Other");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<string>("DesiredResolution")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Medium");
+
+                    b.Property<DateTime?>("ResolvedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ResolvedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Open");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("TailorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id")
+                        .HasName("PK_Complaints");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_Complaints_CustomerId");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("IX_Complaints_OrderId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Complaints_Status");
+
+                    b.HasIndex("TailorId")
+                        .HasDatabaseName("IX_Complaints_TailorId");
+
+                    b.ToTable("Complaints", (string)null);
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.ComplaintAttachment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComplaintId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("FileData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("FileName")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.HasKey("Id")
+                        .HasName("PK_ComplaintAttachments");
+
+                    b.HasIndex("ComplaintId")
+                        .HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
+
+                    b.ToTable("ComplaintAttachments", (string)null);
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerLoyalty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LifetimePoints")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReferralCode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("ReferralsCount")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ReferredBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tier")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasDefaultValue("Bronze");
+
+                    b.Property<int>("TotalOrders")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id")
+                        .HasName("PK_CustomerLoyalty");
+
+                    b.HasIndex("CustomerId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CustomerLoyalty_CustomerId");
+
+                    b.HasIndex("ReferralCode")
+                        .HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
+
+                    b.ToTable("CustomerLoyalty", (string)null);
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerMeasurement", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("AbayaLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ArmLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("Chest")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<string>("CustomMeasurementsJson")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GarmentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("Hips")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("InseamLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal?>("NeckCircumference")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal?>("OutseamLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ShoulderWidth")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("SleeveLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ThighCircumference")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal?>("ThobeLength")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("Waist")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_CustomerMeasurements");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_CustomerMeasurements_CustomerId");
+
+                    b.ToTable("CustomerMeasurements", (string)null);
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -102,6 +360,108 @@ namespace TafsilkPlatform.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("CustomerProfiles");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.IdempotencyKey", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<string>("Endpoint")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastAccessedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Method")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("ResponseJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<int?>("StatusCode")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Key")
+                        .HasName("PK_IdempotencyKeys");
+
+                    b.HasIndex("ExpiresAtUtc")
+                        .HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_IdempotencyKeys_Status");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_IdempotencyKeys_UserId");
+
+                    b.ToTable("IdempotencyKeys", (string)null);
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.LoyaltyTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("CustomerLoyaltyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("RelatedOrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("Id")
+                        .HasName("PK_LoyaltyTransactions");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
+
+                    b.HasIndex("CustomerLoyaltyId")
+                        .HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
+
+                    b.ToTable("LoyaltyTransactions", (string)null);
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
@@ -174,6 +534,18 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("DeliveryAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("DepositAmount")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("DepositPaid")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("DepositPaidAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -181,15 +553,34 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Property<DateTimeOffset?>("DueDate")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("FulfillmentMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("MeasurementsJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("OrderType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset?>("QuoteProvidedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("RequiresDeposit")
+                        .HasColumnType("bit");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.Property<Guid>("TailorId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double?>("TailorQuote")
+                        .HasColumnType("float");
+
+                    b.Property<string>("TailorQuoteNotes")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
@@ -690,6 +1081,112 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("TailorServices", (string)null);
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdditionalNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CommercialRegistrationContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("CommercialRegistrationData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("CommercialRegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullLegalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("IdDocumentBackContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("IdDocumentBackData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("IdDocumentFrontContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("IdDocumentFrontData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("NationalIdNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProfessionalLicenseContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfessionalLicenseData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfessionalLicenseNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("TailorProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_TailorVerifications");
+
+                    b.HasIndex("ReviewedByAdminId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_TailorVerifications_Status");
+
+                    b.HasIndex("TailorProfileId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TailorVerifications_TailorProfileId");
+
+                    b.ToTable("TailorVerifications", (string)null);
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -841,6 +1338,66 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("UserAddresses");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Complaint", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
+                        .WithMany("Complaints")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
+                        .WithMany("Complaints")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
+                        .WithMany()
+                        .HasForeignKey("TailorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Tailor");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.ComplaintAttachment", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.Complaint", "Complaint")
+                        .WithMany("Attachments")
+                        .HasForeignKey("ComplaintId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Complaint");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerLoyalty", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
+                        .WithOne("Loyalty")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.CustomerLoyalty", "CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerMeasurement", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
+                        .WithMany("SavedMeasurements")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
                     b.HasOne("TafsilkPlatform.Web.Models.User", "User")
@@ -851,6 +1408,17 @@ namespace TafsilkPlatform.Web.Migrations
                         .HasConstraintName("FK_CustomerProfiles_Users");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.LoyaltyTransaction", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerLoyalty", "CustomerLoyalty")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CustomerLoyaltyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("CustomerLoyalty");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
@@ -1025,6 +1593,24 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("Tailor");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorVerification", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "ReviewedByAdmin")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByAdminId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "TailorProfile")
+                        .WithOne("Verification")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.TailorVerification", "TailorProfileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ReviewedByAdmin");
+
+                    b.Navigation("TailorProfile");
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.HasOne("TafsilkPlatform.Web.Models.Role", "Role")
@@ -1049,17 +1635,35 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Complaint", b =>
+                {
+                    b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerLoyalty", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
                 {
+                    b.Navigation("Complaints");
+
+                    b.Navigation("Loyalty");
+
                     b.Navigation("Payments");
 
                     b.Navigation("Reviews");
+
+                    b.Navigation("SavedMeasurements");
 
                     b.Navigation("orders");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
                 {
+                    b.Navigation("Complaints");
+
                     b.Navigation("Items");
 
                     b.Navigation("Payments");
@@ -1086,6 +1690,8 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("Reviews");
 
                     b.Navigation("TailorServices");
+
+                    b.Navigation("Verification");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>

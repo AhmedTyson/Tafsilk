@@ -23,6 +23,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<TailorProfile> TailorProfiles { get; set; }
+    public virtual DbSet<TailorVerification> TailorVerifications { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
@@ -35,6 +36,19 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TailorService> TailorServices { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<AppSetting> AppSettings { get; set; }
+    // ✅ IDEMPOTENCY: Idempotency keys for preventing duplicate requests
+    public virtual DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
+    
+    // ✅ NEW: Loyalty and rewards system
+    public virtual DbSet<CustomerLoyalty> CustomerLoyalties { get; set; }
+    public virtual DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
+    
+    // ✅ NEW: Saved measurements for faster rebooking
+    public virtual DbSet<CustomerMeasurement> CustomerMeasurements { get; set; }
+    
+    // ✅ NEW: Complaints and support system
+    public virtual DbSet<Complaint> Complaints { get; set; }
+    public virtual DbSet<ComplaintAttachment> ComplaintAttachments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -153,6 +167,45 @@ public partial class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_TailorProfiles_Users");
         });
+
+        // TailorVerification Entity
+        modelBuilder.Entity<TailorVerification>(entity =>
+        {
+            entity.ToTable("TailorVerifications");
+         entity.HasKey(e => e.Id).HasName("PK_TailorVerifications");
+
+          entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.NationalIdNumber).IsRequired().HasMaxLength(50);
+      entity.Property(e => e.FullLegalName).IsRequired().HasMaxLength(200);
+ entity.Property(e => e.Nationality).HasMaxLength(100);
+     entity.Property(e => e.CommercialRegistrationNumber).HasMaxLength(100);
+            entity.Property(e => e.ProfessionalLicenseNumber).HasMaxLength(100);
+         entity.Property(e => e.IdDocumentFrontContentType).HasMaxLength(100);
+        entity.Property(e => e.IdDocumentBackContentType).HasMaxLength(100);
+    entity.Property(e => e.CommercialRegistrationContentType).HasMaxLength(100);
+            entity.Property(e => e.ProfessionalLicenseContentType).HasMaxLength(100);
+            entity.Property(e => e.ReviewNotes).HasMaxLength(1000);
+            entity.Property(e => e.RejectionReason).HasMaxLength(1000);
+            entity.Property(e => e.AdditionalNotes).HasMaxLength(500);
+    entity.Property(e => e.Status).HasDefaultValue(VerificationStatus.Pending);
+   entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.TailorProfileId).HasDatabaseName("IX_TailorVerifications_TailorProfileId");
+     entity.HasIndex(e => e.Status).HasDatabaseName("IX_TailorVerifications_Status");
+
+            entity.HasOne(v => v.TailorProfile)
+           .WithOne(t => t.Verification)
+   .HasForeignKey<TailorVerification>(v => v.TailorProfileId)
+    .HasPrincipalKey<TailorProfile>(t => t.Id)
+            .OnDelete(DeleteBehavior.NoAction);
+
+         entity.HasOne(v => v.ReviewedByAdmin)
+            .WithMany()
+    .HasForeignKey(v => v.ReviewedByAdminId)
+                .HasPrincipalKey(u => u.Id)
+            .OnDelete(DeleteBehavior.NoAction)
+     .IsRequired(false);
+  });
 
         // UserAddress Entity
         modelBuilder.Entity<UserAddress>(entity =>
@@ -382,10 +435,161 @@ public partial class AppDbContext : DbContext
           .OnDelete(DeleteBehavior.NoAction);
           });
 
-        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
-        foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        // ✅ IDEMPOTENCY: IdempotencyKey Entity Configuration
+    modelBuilder.Entity<IdempotencyKey>(entity =>
+      {
+     entity.ToTable("IdempotencyKeys");
+    entity.HasKey(e => e.Key).HasName("PK_IdempotencyKeys");
+
+    entity.Property(e => e.Key).IsRequired().HasMaxLength(128);
+entity.Property(e => e.Status).HasDefaultValue(IdempotencyStatus.InProgress);
+  entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("(getutcdate())");
+   entity.Property(e => e.ContentType).HasMaxLength(100);
+      entity.Property(e => e.Endpoint).HasMaxLength(500);
+       entity.Property(e => e.Method).HasMaxLength(10);
+
+  // Indexes for performance
+     entity.HasIndex(e => e.Status).HasDatabaseName("IX_IdempotencyKeys_Status");
+        entity.HasIndex(e => e.ExpiresAtUtc).HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
+     entity.HasIndex(e => e.UserId).HasDatabaseName("IX_IdempotencyKeys_UserId");
+     });
+        
+        // ✅ NEW: CustomerLoyalty Entity Configuration
+     modelBuilder.Entity<CustomerLoyalty>(entity =>
         {
-            foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+        entity.ToTable("CustomerLoyalty");
+            entity.HasKey(e => e.Id).HasName("PK_CustomerLoyalty");
+            
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+  entity.Property(e => e.Tier).HasMaxLength(50).HasDefaultValue("Bronze");
+   entity.Property(e => e.ReferralCode).HasMaxLength(20);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+       
+   entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerLoyalty_CustomerId").IsUnique();
+            entity.HasIndex(e => e.ReferralCode).HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
+
+            entity.HasOne(l => l.Customer)
+    .WithOne(c => c.Loyalty)
+           .HasForeignKey<CustomerLoyalty>(l => l.CustomerId)
+  .OnDelete(DeleteBehavior.NoAction);
+    });
+        
+        // ✅ NEW: LoyaltyTransaction Entity Configuration
+        modelBuilder.Entity<LoyaltyTransaction>(entity =>
+      {
+   entity.ToTable("LoyaltyTransactions");
+        entity.HasKey(e => e.Id).HasName("PK_LoyaltyTransactions");
+
+      entity.Property(e => e.Id).ValueGeneratedOnAdd();
+     entity.Property(e => e.Type).IsRequired().HasMaxLength(20);
+         entity.Property(e => e.Description).HasMaxLength(200);
+        entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+      
+     entity.HasIndex(e => e.CustomerLoyaltyId).HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
+   entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
+    
+    entity.HasOne(t => t.CustomerLoyalty)
+     .WithMany(l => l.Transactions)
+   .HasForeignKey(t => t.CustomerLoyaltyId)
+     .OnDelete(DeleteBehavior.NoAction);
+        });
+        
+  // ✅ NEW: CustomerMeasurement Entity Configuration
+      modelBuilder.Entity<CustomerMeasurement>(entity =>
+ {
+            entity.ToTable("CustomerMeasurements");
+   entity.HasKey(e => e.Id).HasName("PK_CustomerMeasurements");
+    
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.GarmentType).HasMaxLength(50);
+       entity.Property(e => e.CustomMeasurementsJson).HasMaxLength(2000);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+        entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            
+            // Decimal precision for measurements
+          entity.Property(e => e.Chest).HasColumnType("decimal(5,2)");
+         entity.Property(e => e.Waist).HasColumnType("decimal(5,2)");
+     entity.Property(e => e.Hips).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.ShoulderWidth).HasColumnType("decimal(5,2)");
+  entity.Property(e => e.SleeveLength).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.InseamLength).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.OutseamLength).HasColumnType("decimal(5,2)");
+   entity.Property(e => e.NeckCircumference).HasColumnType("decimal(5,2)");
+entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
+            entity.Property(e => e.ThighCircumference).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.ThobeLength).HasColumnType("decimal(5,2)");
+        entity.Property(e => e.AbayaLength).HasColumnType("decimal(5,2)");
+         
+   entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerMeasurements_CustomerId");
+    
+      entity.HasOne(m => m.Customer)
+     .WithMany(c => c.SavedMeasurements)
+      .HasForeignKey(m => m.CustomerId)
+     .OnDelete(DeleteBehavior.NoAction);
+        });
+      
+        // ✅ NEW: Complaint Entity Configuration
+      modelBuilder.Entity<Complaint>(entity =>
+        {
+            entity.ToTable("Complaints");
+      entity.HasKey(e => e.Id).HasName("PK_Complaints");
+        
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.Subject).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
+     entity.Property(e => e.ComplaintType).HasMaxLength(50).HasDefaultValue("Other");
+            entity.Property(e => e.DesiredResolution).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
+        entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Medium");
+            entity.Property(e => e.AdminResponse).HasMaxLength(2000);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+        
+            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Complaints_OrderId");
+            entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Complaints_CustomerId");
+   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Complaints_TailorId");
+         entity.HasIndex(e => e.Status).HasDatabaseName("IX_Complaints_Status");
+            
+            entity.HasOne(c => c.Order)
+      .WithMany(o => o.Complaints)
+.HasForeignKey(c => c.OrderId)
+     .OnDelete(DeleteBehavior.NoAction);
+           
+            entity.HasOne(c => c.Customer)
+       .WithMany(cp => cp.Complaints)
+  .HasForeignKey(c => c.CustomerId)
+         .OnDelete(DeleteBehavior.NoAction);
+      
+            entity.HasOne(c => c.Tailor)
+           .WithMany()
+          .HasForeignKey(c => c.TailorId)
+    .OnDelete(DeleteBehavior.NoAction);
+        });
+        
+        // ✅ NEW: ComplaintAttachment Entity Configuration
+        modelBuilder.Entity<ComplaintAttachment>(entity =>
+        {
+entity.ToTable("ComplaintAttachments");
+      entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+      entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
+  entity.Property(e => e.ContentType).HasMaxLength(100);
+       entity.Property(e => e.FileName).HasMaxLength(255);
+            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+            
+            entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
+            
+  entity.HasOne(a => a.Complaint)
+   .WithMany(c => c.Attachments)
+   .HasForeignKey(a => a.ComplaintId)
+    .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
+  foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+  {
+ foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
     }
 

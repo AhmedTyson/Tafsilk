@@ -16,6 +16,25 @@ namespace TafsilkPlatform.Web.Models
         public required string OrderType { get; set; }
         public OrderStatus Status { get; set; }
 
+        // ✅ NEW: Quote/pricing from tailor
+        public double? TailorQuote { get; set; }
+        public string? TailorQuoteNotes { get; set; }
+        public DateTimeOffset? QuoteProvidedAt { get; set; }
+        
+        // ✅ NEW: Deposit payment tracking
+        public bool RequiresDeposit { get; set; } = false;
+        public double? DepositAmount { get; set; }
+        public bool DepositPaid { get; set; } = false;
+        public DateTimeOffset? DepositPaidAt { get; set; }
+        
+        // ✅ NEW: Measurements stored with order
+        public string? MeasurementsJson { get; set; }
+        
+        // ✅ NEW: Pickup/delivery preferences
+        [MaxLength(20)]
+        public string? FulfillmentMethod { get; set; } // "Pickup", "Delivery"
+        public string? DeliveryAddress { get; set; }
+
         [ForeignKey("Customer")]
         public Guid CustomerId { get; set; }
         public required CustomerProfile Customer { get; set; }
@@ -26,5 +45,8 @@ namespace TafsilkPlatform.Web.Models
         public ICollection<OrderImages> orderImages { get; set; } = new List<OrderImages>();
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        
+        // ✅ NEW: Complaints
+        public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
     }
 }

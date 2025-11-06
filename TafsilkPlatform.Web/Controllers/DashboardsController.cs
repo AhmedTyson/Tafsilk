@@ -26,33 +26,45 @@ public class DashboardsController : Controller
         _logger = logger;
     }
 
-    [Authorize(Roles = "Customer")]
+    [Authorize(Roles = "Customer,Admin")]
     public IActionResult Customer()
     {
         ViewData["Title"] = "لوحة العميل";
         return View();
     }
 
-    [Authorize(Roles = "Tailor")]
+    [Authorize(Roles = "Tailor,Admin")]
     public async Task<IActionResult> Tailor()
     {
         try
         {
             var userId = User.GetUserId();
 
-            // CRITICAL: Check if tailor has completed verification
+            // ✅ ADMIN/TESTER: Check if admin is testing
+            var isAdmin = User.IsInRole("Admin");
+   
+     // CRITICAL: Check if tailor has completed verification
             var tailor = await _context.TailorProfiles
                 .Include(t => t.User)
                 .Include(t => t.TailorServices)
                 .Include(t => t.PortfolioImages)
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
-            if (tailor == null)
+            if (tailor == null && !isAdmin)
             {
                 // Tailor has not provided evidence - MANDATORY redirect
+                // ✅ Skip redirect for admins (they can see all pages)
                 _logger.LogWarning("Tailor profile not found for user {UserId}. Redirecting to evidence submission.", userId);
                 TempData["ErrorMessage"] = "يجب تقديم الأوراق الثبوتية وإكمال ملفك الشخصي أولاً. هذه الخطوة إلزامية للخياطين.";
                 return RedirectToAction("ProvideTailorEvidence", "Account", new { incomplete = true });
+            }
+            
+            // ✅ ADMIN/TESTER: Show demo data if no profile exists
+            if (tailor == null && isAdmin)
+            {
+                ViewData["TestingMode"] = true;
+                ViewData["TestingMessage"] = "🧪 Testing Mode: No tailor profile found. Showing demo dashboard.";
+                return View(GetDemoTailorDashboard());
             }
 
             // Check if pending admin approval
@@ -251,5 +263,63 @@ public class DashboardsController : Controller
         }
 
         return alerts;
+    }
+    
+    /// <summary>
+    /// Generate demo dashboard for admin/tester when no profile exists
+    /// </summary>
+    private TailorDashboardViewModel GetDemoTailorDashboard()
+    {
+    return new TailorDashboardViewModel
+ {
+            TailorId = Guid.NewGuid(),
+         FullName = "Tester Tailor",
+    ShopName = "Test Tailor Shop",
+         IsVerified = true,
+         City = "Test City",
+ TotalOrdersCount = 0,
+        NewOrdersCount = 0,
+    ActiveOrdersCount = 0,
+            CompletedOrdersCount = 0,
+         TotalRevenue = 0,
+   MonthlyRevenue = 0,
+            WalletBalance = 0,
+     PendingPayments = 0,
+    TotalServices = 0,
+          ActiveServices = 0,
+       PortfolioImagesCount = 0,
+        RecentOrders = new List<RecentOrderDto>(),
+       TotalReviews = 0,
+ AverageRating = 0,
+          RatingBreakdown = new RatingBreakdown
+         {
+   FiveStars = 0,
+                FourStars = 0,
+     ThreeStars = 0,
+ TwoStars = 0,
+         OneStar = 0
+     },
+    Performance = new PerformanceMetrics
+    {
+     OrderGrowthPercentage = 0,
+       RevenueGrowthPercentage = 0,
+        AverageOrderValue = 0,
+AverageCompletionTime = 0,
+      CustomerSatisfactionRate = 0,
+       RepeatCustomersCount = 0
+    },
+     Alerts = new List<DashboardAlert>
+          {
+         new DashboardAlert
+         {
+      Type = "info",
+    Icon = "fa-flask",
+                  Title = "Testing Mode",
+   Message = "You are viewing a demo dashboard. Create a tailor profile to see real data.",
+       ActionUrl = "/Account/CompleteTailorProfile",
+           ActionText = "Create Profile"
+  }
+  }
+        };
     }
 }

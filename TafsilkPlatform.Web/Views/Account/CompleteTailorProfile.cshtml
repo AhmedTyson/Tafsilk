@@ -383,7 +383,7 @@ font-size: var(--font-size-lg);
 
         .file-size {
             font-size: var(--font-size-sm);
-            color: var(--text-secondary);
+            color: var,--text-secondary);
         }
 
         .remove-file {
@@ -675,16 +675,12 @@ cursor: pointer;
      <!-- Progress Steps -->
         <div class="progress-steps">
        <div class="progress-bar" id="progressBar"></div>
-        <div class="step active" data-step="1">
-          <div class="step-circle">1</div>
+   <div class="step active" data-step="1">
+       <div class="step-circle">1</div>
       <div class="step-label">المعلومات الأساسية</div>
-              </div>
-         <div class="step" data-step="2">
-        <div class="step-circle">2</div>
-          <div class="step-label">الوثائق والمستندات</div>
-         </div>
-              <div class="step" data-step="3">
-     <div class="step-circle">3</div>
+           </div>
+            <div class="step" data-step="2">
+     <div class="step-circle">2</div>
          <div class="step-label">التحقق والمراجعة</div>
        </div>
    </div>
@@ -699,245 +695,152 @@ cursor: pointer;
      <!-- Step 1: Basic Information -->
                <div class="form-step active" id="step1">
   <h2 class="step-title">المعلومات الأساسية</h2>
-         <div class="form-grid">
+
+    @* Workshop Information *@
+    <div class="form-grid">
      <div class="form-group">
-          <label asp-for="WorkshopName" class="form-label">اسم الورشة</label>
+     <label asp-for="WorkshopName" class="form-label">اسم الورشة *</label>
     <input asp-for="WorkshopName" class="form-control" id="workshopName" required />
-        <span asp-validation-for="WorkshopName" class="error-message show"></span>
+   <span asp-validation-for="WorkshopName" class="error-message show"></span>
        </div>
-              <div class="form-group">
-            <label asp-for="WorkshopType" class="form-label">نوع الورشة</label>
-       <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
-           <option value="">اختر نوع الورشة</option>
+  <div class="form-group">
+  <label asp-for="WorkshopType" class="form-label">نوع الورشة *</label>
+  <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
+   <option value="">اختر نوع الورشة</option>
         <option value="tailoring">تفصيل وخياطة</option>
      <option value="design">تصميم أزياء</option>
     <option value="embroidery">تطريز وزخرفة</option>
        <option value="repair">تصليح وتعديل الملابس</option>
-          <option value="other">أخرى</option>
+ <option value="other">أخرى</option>
        </select>
   <span asp-validation-for="WorkshopType" class="error-message show"></span>
-      </div>
+</div>
+      
+      @* Optional Business Registration *@
+   <div class="form-group">
+     <label asp-for="CommercialRegistrationNumber" class="form-label">رقم السجل التجاري (اختياري)</label>
+ <input asp-for="CommercialRegistrationNumber" class="form-control" />
+      <span asp-validation-for="CommercialRegistrationNumber" class="error-message show"></span>
+   </div>
          <div class="form-group">
+        <label asp-for="ProfessionalLicenseNumber" class="form-label">رقم الرخصة المهنية (اختياري)</label>
+ <input asp-for="ProfessionalLicenseNumber" class="form-control" />
+     <span asp-validation-for="ProfessionalLicenseNumber" class="error-message show"></span>
+  </div>
+
+       <div class="form-group">
     <label class="form-label">اسم صاحب الورشة</label>
-                <input type="text" class="form-control" value="@Model?.FullName" readonly />
-             </div>
+      <input type="text" class="form-control" value="@Model?.FullName" readonly />
+ </div>
         <div class="form-group">
-      <label asp-for="PhoneNumber" class="form-label">رقم الهاتف</label>
-      <input asp-for="PhoneNumber" class="form-control" id="phone" required />
-               <span asp-validation-for="PhoneNumber" class="error-message show"></span>
-          </div>
+   <label asp-for="PhoneNumber" class="form-label">رقم الهاتف *</label>
+   <input asp-for="PhoneNumber" class="form-control" id="phone" required />
+   <span asp-validation-for="PhoneNumber" class="error-message show"></span>
+   </div>
           <div class="form-group">
       <label class="form-label">البريد الإلكتروني</label>
-        <input type="email" class="form-control" value="@Model?.Email" readonly />
-         </div>
+   <input type="email" class="form-control" value="@Model?.Email" readonly />
+  </div>
          <div class="form-group">
-               <label asp-for="City" class="form-label">المدينة</label>
-      <select asp-for="City" class="form-control">
+             <label asp-for="City" class="form-label">المدينة</label>
+  <select asp-for="City" class="form-control">
      <option value="">اختر المدينة</option>
           <option value="Cairo">القاهرة</option>
-            <option value="Alexandria">الإسكندرية</option>
+       <option value="Alexandria">الإسكندرية</option>
       <option value="Giza">الجيزة</option>
-                <option value="Shubra El-Kheima">شبرا الخيمة</option>
+         <option value="Shubra El-Kheima">شبرا الخيمة</option>
  <option value="Port Said">بورسعيد</option>
-        <option value="Suez">السويس</option>
-                <option value="Luxor">الأقصر</option>
+   <option value="Suez">السويس</option>
+ <option value="Luxor">الأقصر</option>
         <option value="Mansoura">المنصورة</option>
-           <option value="El-Mahalla El-Kubra">المحلة الكبرى</option>
-           <option value="Tanta">طنطا</option>
+        <option value="El-Mahalla El-Kubra">المحلة الكبرى</option>
+ <option value="Tanta">طنطا</option>
       <option value="Asyut">أسيوط</option>
-         <option value="Ismailia">الإسماعيلية</option>
-               <option value="Faiyum">الفيوم</option>
+       <option value="Ismailia">الإسماعيلية</option>
+      <option value="Faiyum">الفيوم</option>
       <option value="Zagazig">الزقازيق</option>
          <option value="Aswan">أسوان</option>
-          <option value="Damietta">دمياط</option>
+    <option value="Damietta">دمياط</option>
   <option value="Damanhur">دمنهور</option>
      <option value="Minya">المنيا</option>
   <option value="Beni Suef">بني سويف</option>
-            <option value="Qena">قنا</option>
+    <option value="Qena">قنا</option>
      <option value="Sohag">سوهاج</option>
  <option value="Hurghada">الغردقة</option>
-     <option value="6th of October City">مدينة 6 أكتوبر</option>
+ <option value="6th of October City">مدينة 6 أكتوبر</option>
    <option value="Shibin El Kom">شبين الكوم</option>
-           <option value="Banha">بنها</option>
-      <option value="Kafr el-Sheikh">كفر الشيخ</option>
+        <option value="Banha">بنها</option>
+ <option value="Kafr el-Sheikh">كفر الشيخ</option>
      <option value="Arish">العريش</option>
        <option value="Mallawi">ملوي</option>
      </select>
-                <span asp-validation-for="City" class="error-message show"></span>
+       <span asp-validation-for="City" class="error-message show"></span>
       </div>
-                 <div class="form-group full-width">
-             <label asp-for="Address" class="form-label">عنوان الورشة</label>
-        <textarea asp-for="Address" class="form-control" id="address" rows="3" required></textarea>
+      <div class="form-group full-width">
+         <label asp-for="Address" class="form-label">عنوان الورشة *</label>
+      <textarea asp-for="Address" class="form-control" id="address" rows="3" required></textarea>
            <span asp-validation-for="Address" class="error-message show"></span>
            </div>
-           <div class="form-group full-width">
-  <label asp-for="Description" class="form-label">وصف الورشة والخدمات المقدمة</label>
+       <div class="form-group full-width">
+  <label asp-for="Description" class="form-label">وصف الورشة والخدمات المقدمة *</label>
               <textarea asp-for="Description" class="form-control" id="description" rows="4" required></textarea>
-          <span asp-validation-for="Description" class="error-message show"></span>
-                 </div>
-                <div class="form-group">
+  <span asp-validation-for="Description" class="error-message show"></span>
+ </div>
+         <div class="form-group">
           <label asp-for="ExperienceYears" class="form-label">سنوات الخبرة (اختياري)</label>
       <input asp-for="ExperienceYears" type="number" class="form-control" min="0" max="100" />
       <span asp-validation-for="ExperienceYears" class="error-message show"></span>
   </div>
-               </div>
+   </div>
           <div class="form-navigation">
         <div></div>
      <button type="button" class="btn btn-primary" id="nextToStep2">التالي</button>
-         </div>
-         </div>
-
-       <!-- Step 2: Documents and Uploads -->
-   <div class="form-step" id="step2">
-   <h2 class="step-title">الوثائق والمستندات</h2>
-
-           <div class="verification-section">
-        <h3 class="verification-title">
-    <i class="fas fa-shield-alt"></i>
-             عملية التحقق من الهوية
-         </h3>
-  <div class="verification-steps">
-  <div class="verification-step">
-           <div class="step-number">1</div>
-         <div class="step-content">
-             <h4>صورة الهوية الشخصية</h4>
-     <p class="step-description">صورة واضحة للهوية الشخصية أو جواز السفر</p>
-              </div>
-         </div>
-             <div class="verification-step">
-    <div class="step-number">2</div>
- <div class="step-content">
-         <h4>صور من معرض الأعمال</h4>
-   <p class="step-description">صور توضح جودة العمل والخبرة في المجال (3 على الأقل)</p>
-  </div>
- </div>
-       <div class="verification-step">
- <div class="step-number">3</div>
-    <div class="step-content">
-  <h4>وثيقة السجل التجاري (اختياري)</h4>
-    <p class="step-description">لتحسين فرص الموثوقية والثقة</p>
-    </div>
-  </div>
-    <div class="verification-step">
-       <div class="step-number">4</div>
-        <div class="step-content">
-                <h4>شهادات الخبرة (اختياري)</h4>
-      <p class="step-description">شهادات تدريب أو خبرة في مجال الخياطة</p>
-          </div>
-    </div>
-   </div>
-            </div>
-
-      <div class="form-group">
-                  <label asp-for="IdDocument" class="form-label">رفع صورة الهوية الشخصية</label>
-           <div class="upload-area" id="idUploadArea">
-        <div class="upload-icon">
-<i class="fas fa-cloud-upload-alt"></i>
-        </div>
-      <div class="upload-text">
-          <p>اسحب وأفلت الصورة هنا أو</p>
-      </div>
-                <div class="upload-btn">
- <i class="fas fa-plus"></i>
-         <span>اختر الصورة</span>
-    <input asp-for="IdDocument" accept="image/*" style="display: none;" id="idUpload" />
-    </div>
-                 </div>
- <div class="uploaded-files" id="idUploadedFiles"></div>
-           <span asp-validation-for="IdDocument" class="error-message show"></span>
+       </div>
       </div>
 
-                 <div class="form-group">
-   <label asp-for="PortfolioImages" class="form-label">رفع صور من معرض الأعمال (3 صور على الأقل)</label>
-      <div class="upload-area" id="portfolioUploadArea">
-            <div class="upload-icon">
-                <i class="fas fa-cloud-upload-alt"></i>
-  </div>
-       <div class="upload-text">
-             <p>اسحب وأفلت الصور هنا أو</p>
-      </div>
-           <div class="upload-btn">
-    <i class="fas fa-plus"></i>
-        <span>اختر الصور</span>
-            <input asp-for="PortfolioImages" accept="image/*" multiple style="display: none;" id="portfolioUpload" />
-              </div>
-              </div>
-   <div class="uploaded-files" id="portfolioUploadedFiles"></div>
-        <span asp-validation-for="PortfolioImages" class="error-message show"></span>
-  </div>
-
-  <div class="form-group">
-       <label asp-for="AdditionalDocuments" class="form-label">رفع وثائق إضافية (اختياري)</label>
-          <div class="upload-area" id="docsUploadArea">
-           <div class="upload-icon">
-    <i class="fas fa-cloud-upload-alt"></i>
-   </div>
-  <div class="upload-text">
-  <p>اسحب وأفلت الملفات هنا أو</p>
-             </div>
-         <div class="upload-btn">
-           <i class="fas fa-plus"></i>
-                    <span>اختر الملفات</span>
-        <input asp-for="AdditionalDocuments" accept=".pdf,.doc,.docx,image/*" multiple style="display: none;" id="docsUpload" />
-        </div>
-           </div>
-    <div class="uploaded-files" id="docsUploadedFiles"></div>
-           <span asp-validation-for="AdditionalDocuments" class="error-message show"></span>
-            </div>
-
-             <div class="form-navigation">
-      <button type="button" class="btn btn-outline" id="backToStep1">السابق</button>
-             <button type="button" class="btn btn-primary" id="nextToStep3">التالي</button>
-    </div>
-  </div>
-
-         <!-- Step 3: Review and Submit -->
- <div class="form-step" id="step3">
-            <h2 class="step-title">التحقق والمراجعة</h2>
+       <!-- Step 2: Review and Submit (formerly Step 3) -->
+ <div class="form-step" id="step2">
+       <h2 class="step-title">التحقق والمراجعة</h2>
 
     <div class="summary-section">
             <h3 class="summary-title">
-             <i class="fas fa-check-circle"></i>
+         <i class="fas fa-check-circle"></i>
    ملخص المعلومات
        </h3>
          <div class="summary-item">
-       <span class="summary-label">اسم الورشة:</span>
+    <span class="summary-label">اسم الورشة:</span>
   <span class="summary-value" id="summaryWorkshopName">-</span>
-              </div>
+       </div>
        <div class="summary-item">
      <span class="summary-label">نوع الورشة:</span>
    <span class="summary-value" id="summaryWorkshopType">-</span>
-          </div>
+       </div>
       <div class="summary-item">
-              <span class="summary-label">صاحب الورشة:</span>
-             <span class="summary-value" id="summaryOwnerName">@Model?.FullName</span>
-            </div>
+         <span class="summary-label">صاحب الورشة:</span>
+<span class="summary-value" id="summaryOwnerName">@Model?.FullName</span>
+         </div>
  <div class="summary-item">
-           <span class="summary-label">الهاتف:</span>
+   <span class="summary-label">الهاتف:</span>
         <span class="summary-value" id="summaryPhone">-</span>
     </div>
      <div class="summary-item">
-         <span class="summary-label">البريد الإلكتروني:</span>
-           <span class="summary-value" id="summaryEmail">@Model?.Email</span>
-        </div>
+      <span class="summary-label">البريد الإلكتروني:</span>
+  <span class="summary-value" id="summaryEmail">@Model?.Email</span>
+ </div>
      <div class="summary-item">
        <span class="summary-label">المدينة:</span>
    <span class="summary-value" id="summaryCity">-</span>
-                </div>
+  </div>
           <div class="summary-item">
        <span class="summary-label">العنوان:</span>
-           <span class="summary-value" id="summaryAddress">-</span>
-           </div>
-        <div class="summary-item">
- <span class="summary-label">الوثائق المرفوعة:</span>
-     <span class="summary-value" id="summaryDocuments">0 ملفات</span>
-  </div>
-           </div>
+    <span class="summary-value" id="summaryAddress">-</span>
+</div>
+        </div>
 
       <div class="form-group">
      <div class="form-check">
-           <input asp-for="AgreeToTerms" class="form-check-input" id="agreeTerms" />
-          <label asp-for="AgreeToTerms" class="form-check-label">
+     <input asp-for="AgreeToTerms" class="form-check-input" id="agreeTerms" />
+   <label asp-for="AgreeToTerms" class="form-check-label">
      أوافق على <a href="@Url.Action("Privacy", "Home")" target="_blank">شروط الخدمة</a> و <a href="@Url.Action("Privacy", "Home")" target="_blank">سياسة الخصوصية</a> لمنصة تفصيلك
         </label>
           </div>
@@ -945,13 +848,13 @@ cursor: pointer;
       </div>
 
         <div class="form-navigation">
-    <button type="button" class="btn btn-outline" id="backToStep2">السابق</button>
+<button type="button" class="btn btn-outline" id="backToStep1">السابق</button>
        <button type="submit" class="btn btn-success" id="submitRegistration">
        <i class="fas fa-check"></i>
-               تسجيل الورشة
+            تسجيل الورشة
    </button>
-        </div>
-             </div>
+     </div>
+      </div>
 </form>
  </div>
         </div>
@@ -969,320 +872,152 @@ cursor: pointer;
     
  <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Maintain all the original JavaScript from Workshop Registration.html
-            // DOM Elements
+      // DOM Elements
             const steps = document.querySelectorAll('.step');
-            const formSteps = document.querySelectorAll('.form-step');
-            const progressBar = document.getElementById('progressBar');
-            const nextToStep2Btn = document.getElementById('nextToStep2');
-    const nextToStep3Btn = document.getElementById('nextToStep3');
-            const backToStep1Btn = document.getElementById('backToStep1');
-            const backToStep2Btn = document.getElementById('backToStep2');
-            const submitRegistrationBtn = document.getElementById('submitRegistration');
+       const formSteps = document.querySelectorAll('.form-step');
+         const progressBar = document.getElementById('progressBar');
+   const nextToStep2Btn = document.getElementById('nextToStep2');
+  const backToStep1Btn = document.getElementById('backToStep1');
+        const submitRegistrationBtn = document.getElementById('submitRegistration');
        const registrationForm = document.getElementById('registrationForm');
    const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
 
-            // Upload areas
-      const idUploadArea = document.getElementById('idUploadArea');
-const idUpload = document.getElementById('idUpload');
-const idUploadedFiles = document.getElementById('idUploadedFiles');
-
-  const portfolioUploadArea = document.getElementById('portfolioUploadArea');
-    const portfolioUpload = document.getElementById('portfolioUpload');
-         const portfolioUploadedFiles = document.getElementById('portfolioUploadedFiles');
-
-     const docsUploadArea = document.getElementById('docsUploadArea');
-    const docsUpload = document.getElementById('docsUpload');
-         const docsUploadedFiles = document.getElementById('docsUploadedFiles');
-
  // State
    let currentStep = 1;
-  let uploadedFiles = {
-        id: [],
-                portfolio: [],
-     documents: []
-    };
 
-            // Initialize Page
-            function initializePage() {
+       // Initialize Page
+  function initializePage() {
       updateProgressBar();
-                setupEventListeners();
-            }
+ setupEventListeners();
+         }
 
-     // Setup Event Listeners
+   // Setup Event Listeners
       function setupEventListeners() {
         // Navigation buttons
        nextToStep2Btn.addEventListener('click', validateStep1);
-                nextToStep3Btn.addEventListener('click', validateStep2);
      backToStep1Btn.addEventListener('click', () => navigateToStep(1));
-             backToStep2Btn.addEventListener('click', () => navigateToStep(2));
-
-// Upload functionality
- setupUploadArea(idUploadArea, idUpload, idUploadedFiles, 'id', false);
-     setupUploadArea(portfolioUploadArea, portfolioUpload, portfolioUploadedFiles, 'portfolio', true);
-    setupUploadArea(docsUploadArea, docsUpload, docsUploadedFiles, 'documents', true);
      }
 
-    // Setup Upload Area
-  function setupUploadArea(uploadArea, fileInput, uploadedFilesContainer, type, multiple) {
-      // Click to upload
-     uploadArea.addEventListener('click', function () {
-    fileInput.click();
-           });
-
-        // Handle file selection
-        fileInput.addEventListener('change', function () {
-     handleFileUpload(this.files, type);
-         updateFileListDisplay(type, uploadedFilesContainer);
-        });
-
-    // Drag and drop functionality
-   uploadArea.addEventListener('dragover', function (e) {
-     e.preventDefault();
-  uploadArea.classList.add('dragover');
-                });
-
-     uploadArea.addEventListener('dragleave', function () {
-   uploadArea.classList.remove('dragover');
-     });
-
-       uploadArea.addEventListener('drop', function (e) {
-           e.preventDefault();
-        uploadArea.classList.remove('dragover');
-
-             if (e.dataTransfer.files.length) {
-       handleFileUpload(e.dataTransfer.files, type);
-         updateFileListDisplay(type, uploadedFilesContainer);
-          }
-    });
-            }
-
-          // Handle File Upload
-        function handleFileUpload(files, type) {
-     Array.from(files).forEach(file => {
-     // Check file type
-           if (type === 'id' || type === 'portfolio') {
-        if (!file.type.startsWith('image/')) {
-       showToast('يرجى رفع ملفات صور فقط', 'error');
-      return;
-     }
-       }
-
-            // Create file object
-    const fileObj = {
-  name: file.name,
-    size: formatFileSize(file.size),
- type: file.type,
-          file: file
-         };
-
-       // Add to uploaded files
-  uploadedFiles[type].push(fileObj);
-         });
-
-    // Update summary
-      updateSummary();
-            }
-
-          // Update File List Display
-            function updateFileListDisplay(type, container) {
-  container.innerHTML = '';
-
-  uploadedFiles[type].forEach((file, index) => {
-      const fileElement = document.createElement('div');
-          fileElement.className = 'uploaded-file';
-          fileElement.innerHTML = `
-        <div class="file-icon">
-   <i class="fas fa-file"></i>
-        </div>
-          <div class="file-info">
-   <div class="file-name">${file.name}</div>
-        <div class="file-size">${file.size}</div>
-       </div>
-    <button type="button" class="remove-file" data-type="${type}" data-index="${index}">
-     <i class="fas fa-times"></i>
-            </button>
-         `;
-               container.appendChild(fileElement);
-      });
-
-    // Add event listeners to remove buttons
-          container.querySelectorAll('.remove-file').forEach(button => {
-        button.addEventListener('click', function () {
-             const fileType = this.getAttribute('data-type');
-              const fileIndex = parseInt(this.getAttribute('data-index'));
-             removeFile(fileType, fileIndex, container);
-        });
-      });
-            }
-
-            // Remove File
- function removeFile(type, index, container) {
-    uploadedFiles[type].splice(index, 1);
-        
-       // Update the actual file input
-     const fileInput = document.getElementById(type === 'id' ? 'idUpload' : (type === 'portfolio' ? 'portfolioUpload' : 'docsUpload'));
-     const dataTransfer = new DataTransfer();
-                
-  uploadedFiles[type].forEach(fileObj => {
-          dataTransfer.items.add(fileObj.file);
- });
-     
-                fileInput.files = dataTransfer.files;
-         
-  updateFileListDisplay(type, container);
-          updateSummary();
-   }
-
-    // Format File Size
-         function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
- const i = Math.floor(Math.log(bytes) / Math.log(k));
- return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-            // Navigate To Step
+// Navigate To Step
             function navigateToStep(step) {
-      // Hide all steps
+    // Hide all steps
       formSteps.forEach(formStep => {
     formStep.classList.remove('active');
     });
 
   // Update steps
-                steps.forEach(stepElement => {
-             const stepNumber = parseInt(stepElement.getAttribute('data-step'));
+      steps.forEach(stepElement => {
+       const stepNumber = parseInt(stepElement.getAttribute('data-step'));
     stepElement.classList.remove('active', 'completed');
 
   if (stepNumber < step) {
-          stepElement.classList.add('completed');
+      stepElement.classList.add('completed');
        } else if (stepNumber === step) {
          stepElement.classList.add('active');
     }
       });
 
   // Show target step
-           document.getElementById(`step${step}`).classList.add('active');
+    document.getElementById(`step${step}`).classList.add('active');
 
        // Update current step and progress bar
-                currentStep = step;
-      updateProgressBar();
+       currentStep = step;
+   updateProgressBar();
 
-                // Update summary if going to step 3
-     if (step === 3) {
-         updateSummary();
-         }
+   // Update summary if going to step 2
+     if (step === 2) {
+       updateSummary();
+       }
 
-        // Scroll to top
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+ // Scroll to top
+     window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
       // Update Progress Bar
-          function updateProgressBar() {
+     function updateProgressBar() {
        const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
   progressBar.style.width = `${progressPercentage}%`;
     }
 
             // Validate Step 1
         function validateStep1() {
-                let isValid = true;
+        let isValid = true;
 
-      // Validate workshop name
-                const workshopName = document.getElementById('workshopName').value.trim();
+    // Validate workshop name
+           const workshopName = document.getElementById('workshopName').value.trim();
        if (!workshopName) {
-         isValid = false;
+   isValid = false;
      }
 
      // Validate workshop type
-           const workshopType = document.getElementById('workshopType').value;
-            if (!workshopType) {
+      const workshopType = document.getElementById('workshopType').value;
+        if (!workshopType) {
   isValid = false;
        }
 
        // Validate phone
  const phone = document.getElementById('phone').value.trim();
    if (!phone) {
-             isValid = false;
-      }
+     isValid = false;
+  }
 
  // Validate address
            const address = document.getElementById('address').value.trim();
       if (!address) {
-                isValid = false;
+           isValid = false;
    }
 
      // Validate description
    const description = document.getElementById('description').value.trim();
        if (!description) {
-          isValid = false;
+  isValid = false;
    }
 
-         if (isValid) {
+       if (isValid) {
          navigateToStep(2);
-      } else {
-        showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+    } else {
+  showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
         }
-            }
+      }
 
- // Validate Step 2
-  function validateStep2() {
-  // Check if ID is uploaded
-     if (uploadedFiles.id.length === 0) {
-        showToast('يرجى رفع صورة الهوية الشخصية', 'error');
-  return;
-    }
-
-    // Check if at least 3 portfolio images are uploaded
-      if (uploadedFiles.portfolio.length < 3) {
-   showToast('يرجى رفع 3 صور على الأقل من معرض الأعمال', 'error');
-                    return;
-     }
-
-        navigateToStep(3);
-    }
-
-            // Update Summary
-   function updateSummary() {
+      // Update Summary
+function updateSummary() {
          document.getElementById('summaryWorkshopName').textContent = document.getElementById('workshopName').value || '-';
       const workshopTypeSelect = document.getElementById('workshopType');
     document.getElementById('summaryWorkshopType').textContent = workshopTypeSelect.options[workshopTypeSelect.selectedIndex].text || '-';
-          document.getElementById('summaryPhone').textContent = document.getElementById('phone').value || '-';
+   document.getElementById('summaryPhone').textContent = document.getElementById('phone').value || '-';
   
-                const citySelect = document.querySelector('[name="City"]');
+     const citySelect = document.querySelector('[name="City"]');
        if (citySelect && citySelect.value) {
-          document.getElementById('summaryCity').textContent = citySelect.options[citySelect.selectedIndex].text;
+ document.getElementById('summaryCity').textContent = citySelect.options[citySelect.selectedIndex].text;
       } else {
    document.getElementById('summaryCity').textContent = '-';
-                }
-              
+           }
+         
      document.getElementById('summaryAddress').textContent = document.getElementById('address').value || '-';
-
-         const totalFiles = uploadedFiles.id.length + uploadedFiles.portfolio.length + uploadedFiles.documents.length;
-      document.getElementById('summaryDocuments').textContent = `${totalFiles} ملفات`;
-            }
+  }
 
      // Show Toast Notification
      function showToast(message, type = 'success') {
-      toastMessage.textContent = message;
-           toast.className = 'toast';
+   toastMessage.textContent = message;
+ toast.className = 'toast';
 
-                if (type === 'error') {
-      toast.classList.add('error');
-            } else if (type === 'warning') {
-          toast.classList.add('warning');
-                }
+         if (type === 'error') {
+ toast.classList.add('error');
+         } else if (type === 'warning') {
+       toast.classList.add('warning');
+     }
 
-           toast.classList.add('show');
+       toast.classList.add('show');
 
     setTimeout(() => {
-              toast.classList.remove('show');
+         toast.classList.remove('show');
         }, 3000);
   }
 
        // Initialize the page
-     initializePage();
+  initializePage();
     });
     </script>
 }

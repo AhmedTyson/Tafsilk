@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Extensions;
 using TafsilkPlatform.Web.Interfaces;
@@ -40,8 +43,8 @@ builder.Services.AddSwaggerGen(options =>
     Description = "Tafsilk - منصة الخياطين والتفصيل - API Documentation",
         Contact = new OpenApiContact
         {
-         Name = "Tafsilk Platform",
-    Email = "support@tafsilk.com",
+    Name = "Tafsilk Platform",
+ Email = "support@tafsilk.com",
     Url = new Uri("https://tafsilk.com")
         },
         License = new OpenApiLicense
@@ -58,7 +61,7 @@ builder.Services.AddSwaggerGen(options =>
         Type = SecuritySchemeType.Http,
     Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = ParameterLocation.Header,
+   In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
     });
 
@@ -66,23 +69,23 @@ builder.Services.AddSwaggerGen(options =>
     options.AddSecurityDefinition("Cookie", new OpenApiSecurityScheme
     {
         Name = ".Tafsilk.Auth",
-        Type = SecuritySchemeType.ApiKey,
+      Type = SecuritySchemeType.ApiKey,
       In = ParameterLocation.Cookie,
    Description = "Cookie-based authentication"
   });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
+    {
     new OpenApiSecurityScheme
-            {
-              Reference = new OpenApiReference
-        {
+     {
+     Reference = new OpenApiReference
+   {
      Type = ReferenceType.SecurityScheme,
-           Id = "Bearer"
+       Id = "Bearer"
           }
-            },
-      Array.Empty<string>()
+     },
+Array.Empty<string>()
       }
     });
 
@@ -111,7 +114,7 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddDataProtection();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+  options.IdleTimeout = TimeSpan.FromMinutes(30);
  options.Cookie.Name = ".Tafsilk.Session";
  options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
@@ -161,11 +164,11 @@ authBuilder.AddJwtBearer("Jwt", options =>
       ValidIssuer = jwtIssuer,
    ValidateAudience = true,
     ValidAudience = jwtAudience,
-        ValidateIssuerSigningKey = true,
+    ValidateIssuerSigningKey = true,
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-     ValidateLifetime = true,
+   ValidateLifetime = true,
         ClockSkew = TimeSpan.FromMinutes(5)
-    };
+ };
 });
 
 // ✅ GOOGLE OAUTH (if enabled)
@@ -178,15 +181,15 @@ if (enableGoogleOAuth)
     if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
     {
       authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-           {
+    {
      options.ClientId = googleClientId;
   options.ClientSecret = googleClientSecret;
-           options.CallbackPath = "/signin-google";
-        options.SaveTokens = true;
+         options.CallbackPath = "/signin-google";
+    options.SaveTokens = true;
 
         // Request additional scopes
         options.Scope.Add("profile");
-         options.Scope.Add("email");
+    options.Scope.Add("email");
     });
 
         builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Information);
@@ -197,6 +200,42 @@ if (enableGoogleOAuth)
     {
         var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
         logger.LogWarning("⚠️ Google OAuth enabled but credentials not configured. Add ClientId and ClientSecret to appsettings.json");
+    }
+}
+
+// ✅ NEW: FACEBOOK OAUTH (if enabled)
+var enableFacebookOAuth = builder.Configuration.GetValue<bool>("Features:EnableFacebookOAuth");
+if (enableFacebookOAuth)
+{
+    var facebookAppId = builder.Configuration["Authentication:Facebook:AppId"];
+    var facebookAppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+
+    if (!string.IsNullOrEmpty(facebookAppId) && !string.IsNullOrEmpty(facebookAppSecret))
+ {
+    authBuilder.AddFacebook(FacebookDefaults.AuthenticationScheme, options =>
+   {
+        options.AppId = facebookAppId;
+options.AppSecret = facebookAppSecret;
+        options.CallbackPath = "/signin-facebook";
+ options.SaveTokens = true;
+
+      // Request additional permissions
+         options.Scope.Add("email");
+     options.Scope.Add("public_profile");
+     
+    // Map claims
+       options.Fields.Add("name");
+         options.Fields.Add("email");
+            options.Fields.Add("picture");
+      });
+
+        var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
+        logger.LogInformation("✅ Facebook OAuth configured successfully");
+    }
+    else
+    {
+        var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
+        logger.LogWarning("⚠️ Facebook OAuth enabled but credentials not configured. Add AppId and AppSecret to appsettings.json");
     }
 }
 
@@ -251,6 +290,22 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITailorRegistrationService, TailorRegistrationService>();
+// ✅ PHASE 3: Register ReviewService for Task 2 (Reviews System)
+builder.Services.AddScoped<IReviewService, ReviewService>();
+// ⚠️ PHASE 4: PaymentService DISABLED - Model mismatch with existing Payment entity
+// TODO: Refactor PaymentService to align with Enums.PaymentType/PaymentStatus before re-enabling
+// See: Docs/BUILD_ERROR_ANALYSIS.md for details
+// builder.Services.AddScoped<IPaymentService, PaymentService>();
+// ✅ IDEMPOTENCY: Register IdempotencyStore for preventing duplicate requests
+builder.Services.AddScoped<IIdempotencyStore, EfCoreIdempotencyStore>();
+// Register background service for cleaning up expired idempotency keys
+builder.Services.AddHostedService<IdempotencyCleanupService>();
+// ✅ PHASE 5: Register NotificationService for cross-cutting enhancements
+builder.Services.AddScoped<INotificationService, NotificationService>();
+// Register CacheService (using in-memory cache for single-instance deployments)
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
 
 // Register DateTime Service
 builder.Services.AddSingleton<IDateTimeService, DateTimeService>();

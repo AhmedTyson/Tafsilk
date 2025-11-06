@@ -133,6 +133,7 @@ namespace TafsilkPlatform.Web.Models
         public ICollection<TailorService> TailorServices { get; set; } = new List<TailorService>();
         public ICollection<PortfolioImage> PortfolioImages { get; set; } = new List<PortfolioImage>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        public virtual TailorVerification? Verification { get; set; }
 
         // Computed properties
         [NotMapped]

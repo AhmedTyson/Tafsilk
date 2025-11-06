@@ -1,0 +1,313 @@
+@{
+    ViewData["Title"] = "دليل الأنماط | Style Guide";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .style-guide-page {
+       padding: 40px 0;
+        }
+
+        .guide-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+.component-section {
+  background: white;
+   border-radius: 12px;
+  padding: 30px;
+   margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+.section-title {
+       font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+  padding-bottom: 10px;
+     border-bottom: 3px solid #667eea;
+    }
+
+   .color-palette {
+  display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+  }
+
+        .color-swatch {
+   height: 120px;
+     border-radius: 8px;
+          display: flex;
+   flex-direction: column;
+         justify-content: flex-end;
+  padding: 15px;
+       color: white;
+            font-weight: 600;
+   }
+
+        .typography-example {
+ margin: 20px 0;
+        }
+
+   .button-grid {
+            display: grid;
+   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+       gap: 15px;
+    }
+
+     .sample-button {
+      padding: 12px 25px;
+   border: none;
+     border-radius: 8px;
+   font-weight: 600;
+   cursor: pointer;
+text-align: center;
+        }
+
+        .icon-grid {
+  display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 20px;
+        }
+
+        .icon-item {
+  text-align: center;
+        padding: 20px;
+      background: #f8f9fa;
+    border-radius: 8px;
+        }
+
+        .icon-item i {
+       font-size: 2rem;
+color: #667eea;
+  margin-bottom: 10px;
+        }
+
+  .form-example {
+   max-width: 500px;
+   margin: 20px 0;
+        }
+
+  .form-example input,
+ .form-example textarea,
+      .form-example select {
+         width: 100%;
+    padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+            border-radius: 8px;
+    margin-bottom: 15px;
+        }
+
+        .card-example {
+       background: white;
+    padding: 20px;
+   border-radius: 12px;
+     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+}
+
+<div class="style-guide-page">
+    <div class="guide-header">
+        <div class="container">
+    <h1>🎨 دليل الأنماط</h1>
+<p>مكونات التصميم والأنماط المستخدمة في منصة تفصيلك</p>
+        </div>
+    </div>
+
+    <div class="container">
+   <!-- Colors -->
+        <div class="component-section">
+     <h2 class="section-title">الألوان</h2>
+          <div class="color-palette">
+  <div class="color-swatch" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+       Primary Gradient
+     </div>
+        <div class="color-swatch" style="background: #667eea;">
+           Primary Blue (#667eea)
+  </div>
+      <div class="color-swatch" style="background: #764ba2;">
+  Primary Purple (#764ba2)
+     </div>
+      <div class="color-swatch" style="background: #27ae60;">
+   Success Green (#27ae60)
+      </div>
+  <div class="color-swatch" style="background: #e74c3c;">
+       Danger Red (#e74c3c)
+   </div>
+           <div class="color-swatch" style="background: #f39c12;">
+       Warning Orange (#f39c12)
+        </div>
+          <div class="color-swatch" style="background: #3498db;">
+      Info Blue (#3498db)
+ </div>
+   <div class="color-swatch" style="background: #2c3e50;">
+         Dark Text (#2c3e50)
+                </div>
+            </div>
+        </div>
+
+<!-- Typography -->
+   <div class="component-section">
+ <h2 class="section-title">الطباعة</h2>
+   <div class="typography-example">
+     <h1 style="color: #2c3e50;">عنوان رئيسي H1</h1>
+    <h2 style="color: #2c3e50;">عنوان ثانوي H2</h2>
+         <h3 style="color: #2c3e50;">عنوان فرعي H3</h3>
+     <p style="font-size: 1.2rem; color: #555;">نص كبير - يستخدم للمقدمات والنصوص المهمة</p>
+      <p style="color: #555;">نص عادي - يستخدم للمحتوى الأساسي في الصفحات</p>
+      <p style="font-size: 0.9rem; color: #7f8c8d;">نص صغير - يستخدم للملاحظات والتفاصيل الثانوية</p>
+  </div>
+    </div>
+
+<!-- Buttons -->
+        <div class="component-section">
+     <h2 class="section-title">الأزرار</h2>
+     <div class="button-grid">
+    <button class="sample-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  Primary Button
+   </button>
+          <button class="sample-button" style="background: #27ae60; color: white;">
+    Success Button
+     </button>
+         <button class="sample-button" style="background: #e74c3c; color: white;">
+     Danger Button
+      </button>
+    <button class="sample-button" style="background: #f39c12; color: white;">
+        Warning Button
+      </button>
+        <button class="sample-button" style="background: #3498db; color: white;">
+   Info Button
+</button>
+             <button class="sample-button" style="background: #6c757d; color: white;">
+   Secondary Button
+  </button>
+   <button class="sample-button" style="background: white; border: 2px solid #667eea; color: #667eea;">
+   Outline Button
+  </button>
+        <button class="sample-button" style="background: transparent; border: none; color: #667eea;">
+  Link Button
+</button>
+    </div>
+        </div>
+
+        <!-- Icons -->
+    <div class="component-section">
+     <h2 class="section-title">الأيقونات</h2>
+      <div class="icon-grid">
+       <div class="icon-item">
+        <i class="fas fa-user"></i>
+<div>مستخدم</div>
+      </div>
+         <div class="icon-item">
+       <i class="fas fa-cut"></i>
+         <div>خياط</div>
+         </div>
+  <div class="icon-item">
+         <i class="fas fa-shopping-cart"></i>
+      <div>طلب</div>
+          </div>
+    <div class="icon-item">
+      <i class="fas fa-star"></i>
+           <div>تقييم</div>
+            </div>
+        <div class="icon-item">
+          <i class="fas fa-bell"></i>
+   <div>إشعار</div>
+       </div>
+     <div class="icon-item">
+    <i class="fas fa-check-circle"></i>
+  <div>موثق</div>
+ </div>
+      <div class="icon-item">
+ <i class="fas fa-map-marker-alt"></i>
+     <div>موقع</div>
+          </div>
+    <div class="icon-item">
+    <i class="fas fa-phone"></i>
+ <div>هاتف</div>
+        </div>
+        </div>
+        </div>
+
+        <!-- Form Elements -->
+ <div class="component-section">
+      <h2 class="section-title">عناصر النماذج</h2>
+    <div class="form-example">
+    <label style="display: block; margin-bottom: 8px; font-weight: 600;">حقل نصي</label>
+<input type="text" placeholder="أدخل النص هنا">
+   
+         <label style="display: block; margin-bottom: 8px; font-weight: 600;">بريد إلكتروني</label>
+ <input type="email" placeholder="example@domain.com">
+                
+     <label style="display: block; margin-bottom: 8px; font-weight: 600;">قائمة منسدلة</label>
+    <select>
+           <option>اختر خياراً</option>
+   <option>الخيار 1</option>
+<option>الخيار 2</option>
+  <option>الخيار 3</option>
+      </select>
+         
+    <label style="display: block; margin-bottom: 8px; font-weight: 600;">منطقة نص</label>
+          <textarea placeholder="اكتب رسالتك هنا..." rows="4"></textarea>
+ </div>
+  </div>
+
+<!-- Cards -->
+   <div class="component-section">
+      <h2 class="section-title">البطاقات</h2>
+       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+    <div class="card-example">
+   <h3 style="color: #2c3e50; margin-bottom: 10px;">عنوان البطاقة</h3>
+  <p style="color: #555;">محتوى البطاقة يأتي هنا. يمكن أن يحتوي على نصوص وصور وأزرار.</p>
+   <button class="sample-button" style="background: #667eea; color: white; width: 100%; margin-top: 15px;">
+إجراء
+    </button>
+            </div>
+     <div class="card-example" style="border-right: 4px solid #27ae60;">
+      <h3 style="color: #27ae60; margin-bottom: 10px;">بطاقة ناجحة</h3>
+    <p style="color: #555;">بطاقة مع مؤشر نجاح على الجانب الأيمن.</p>
+      </div>
+         <div class="card-example" style="border-right: 4px solid #e74c3c;">
+             <h3 style="color: #e74c3c; margin-bottom: 10px;">بطاقة خطأ</h3>
+         <p style="color: #555;">بطاقة مع مؤشر خطأ على الجانب الأيمن.</p>
+             </div>
+    </div>
+        </div>
+
+<!-- Badges -->
+        <div class="component-section">
+    <h2 class="section-title">الشارات</h2>
+   <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <span style="padding: 5px 15px; background: #d4edda; color: #155724; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+    Success Badge
+    </span>
+         <span style="padding: 5px 15px; background: #f8d7da; color: #721c24; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+       Danger Badge
+ </span>
+      <span style="padding: 5px 15px; background: #fff3cd; color: #856404; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+   Warning Badge
+  </span>
+   <span style="padding: 5px 15px; background: #d1ecf1; color: #0c5460; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+  Info Badge
+     </span>
+   <span style="padding: 5px 15px; background: #e2e3e5; color: #383d41; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
+        Secondary Badge
+    </span>
+            </div>
+ </div>
+
+   <!-- Back Button -->
+   <div style="text-align: center; margin-top: 40px;">
+    <a href="@Url.Action("Index", "Testing")" class="sample-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;">
+   <i class="fas fa-arrow-right"></i>
+ <span>العودة إلى مركز الاختبار</span>
+      </a>
+</div>
+    </div>
+</div>

@@ -56,6 +56,16 @@ namespace TafsilkPlatform.Web.Models
         public List<Order> orders { get; set; } = new();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
+        
+        // ✅ NEW: Loyalty and rewards
+        public virtual CustomerLoyalty? Loyalty { get; set; }
+        
+        // ✅ NEW: Saved measurements for faster rebooking
+        public virtual ICollection<CustomerMeasurement> SavedMeasurements { get; set; } = new List<CustomerMeasurement>();
+ 
+        // ✅ NEW: Complaints and support
+        public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
+        
         // Custom validation method
         public static ValidationResult? ValidateDateOfBirth(DateOnly? dateOfBirth, ValidationContext context)
         {
