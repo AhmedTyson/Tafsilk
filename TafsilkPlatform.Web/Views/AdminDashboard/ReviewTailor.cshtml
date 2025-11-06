@@ -31,7 +31,7 @@
     <div class="row">
         <!-- Main Content -->
      <div class="col-lg-8">
-       <!-- Basic Information -->
+            <!-- Basic Information -->
     <div class="card mb-4">
         <div class="card-header bg-primary text-white">
         <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
@@ -39,55 +39,207 @@
          <div class="card-body">
           <div class="row">
     <div class="col-md-6 mb-3">
-             <strong>Shop Name:</strong>
+  <strong>Shop Name:</strong>
       <p class="text-muted">@Model.ShopName</p>
-           </div>
+         </div>
    
-            @if (!string.IsNullOrEmpty(Model.FullName))
+ @if (!string.IsNullOrEmpty(Model.FullName))
    {
-             <div class="col-md-6 mb-3">
+ <div class="col-md-6 mb-3">
     <strong>Owner Name:</strong>
         <p class="text-muted">@Model.FullName</p>
  </div>
-                 }
+    }
 
     <div class="col-md-6 mb-3">
-         <strong>Email:</strong>
-     <p class="text-muted">@Model.User?.Email</p>
+   <strong>Email:</strong>
+ <p class="text-muted">@Model.User?.Email</p>
    </div>
 
          <div class="col-md-6 mb-3">
               <strong>Registration Date:</strong>
-        <p class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy")</p>
-           </div>
+      <p class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+    </div>
 
       <div class="col-md-6 mb-3">
-      <strong>Experience Years:</strong>
-           <p class="text-muted">@(Model.ExperienceYears?.ToString() ?? "Not specified")</p>
+   <strong>Experience Years:</strong>
+   <p class="text-muted">@(Model.ExperienceYears?.ToString() ?? "Not specified")</p>
   </div>
 
-               <div class="col-md-6 mb-3">
+        <div class="col-md-6 mb-3">
           <strong>Pricing Range:</strong>
-           <p class="text-muted">@(Model.PricingRange ?? "Not specified")</p>
+     <p class="text-muted">@(Model.PricingRange ?? "Not specified")</p>
         </div>
 
       <div class="col-12 mb-3">
           <strong>Address:</strong>
   <p class="text-muted">@Model.Address, @Model.City</p>
-              </div>
+        </div>
 
           @if (!string.IsNullOrEmpty(Model.Bio))
   {
             <div class="col-12">
-                <strong>Bio:</strong>
+    <strong>Bio:</strong>
        <p class="text-muted">@Model.Bio</p>
              </div>
-          }
+ }
         </div>
     </div>
  </div>
 
-  <!-- Services Offered -->
+        @* ✅ NEW: Identity Verification Documents Section *@
+            @if (Model.Verification != null)
+     {
+     <div class="card mb-4 border-warning">
+            <div class="card-header bg-warning text-dark">
+    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Identity Verification Documents</h5>
+   </div>
+     <div class="card-body">
+      <div class="row">
+             <div class="col-md-6 mb-3">
+     <strong>National ID Number:</strong>
+     <p class="text-muted">@Model.Verification.NationalIdNumber</p>
+    </div>
+           <div class="col-md-6 mb-3">
+     <strong>Full Legal Name:</strong>
+      <p class="text-muted">@Model.Verification.FullLegalName</p>
+    </div>
+         
+  @if (!string.IsNullOrEmpty(Model.Verification.Nationality))
+     {
+        <div class="col-md-6 mb-3">
+   <strong>Nationality:</strong>
+         <p class="text-muted">@Model.Verification.Nationality</p>
+       </div>
+      }
+
+     @if (Model.Verification.DateOfBirth.HasValue)
+      {
+<div class="col-md-6 mb-3">
+          <strong>Date of Birth:</strong>
+   <p class="text-muted">@Model.Verification.DateOfBirth.Value.ToString("dd/MM/yyyy")</p>
+     </div>
+  }
+
+           @if (!string.IsNullOrEmpty(Model.Verification.CommercialRegistrationNumber))
+ {
+         <div class="col-md-6 mb-3">
+       <strong>Commercial Registration:</strong>
+      <p class="text-muted">@Model.Verification.CommercialRegistrationNumber</p>
+   </div>
+  }
+
+        @if (!string.IsNullOrEmpty(Model.Verification.ProfessionalLicenseNumber))
+  {
+     <div class="col-md-6 mb-3">
+   <strong>Professional License:</strong>
+      <p class="text-muted">@Model.Verification.ProfessionalLicenseNumber</p>
+         </div>
+   }
+
+                <div class="col-12 mb-3">
+ <strong>Submission Date:</strong>
+         <p class="text-muted">@Model.Verification.SubmittedAt.ToString("dd/MM/yyyy HH:mm")</p>
+   </div>
+
+      @if (!string.IsNullOrEmpty(Model.Verification.AdditionalNotes))
+     {
+   <div class="col-12 mb-3">
+   <strong>Additional Notes:</strong>
+            <p class="text-muted">@Model.Verification.AdditionalNotes</p>
+     </div>
+    }
+
+ <div class="col-12">
+     <h6 class="border-top pt-3 mb-3">Uploaded Documents:</h6>
+   <div class="row g-2">
+     @* ID Front *@
+       @if (Model.Verification.IdDocumentFrontData != null)
+     {
+  <div class="col-md-6">
+    <div class="card">
+         <div class="card-body text-center">
+ <i class="fas fa-id-card fa-3x text-primary mb-2"></i>
+        <p class="mb-2"><strong>ID Card - Front</strong></p>
+<a asp-action="ViewVerificationDocument" 
+     asp-route-tailorId="@Model.Id" 
+     asp-route-documentType="idfront" 
+       class="btn btn-sm btn-outline-primary" 
+             target="_blank">
+ <i class="fas fa-eye me-1"></i>View Document
+     </a>
+      </div>
+     </div>
+    </div>
+  }
+
+    @* ID Back *@
+      @if (Model.Verification.IdDocumentBackData != null)
+            {
+    <div class="col-md-6">
+     <div class="card">
+ <div class="card-body text-center">
+            <i class="fas fa-id-card fa-3x text-info mb-2"></i>
+         <p class="mb-2"><strong>ID Card - Back</strong></p>
+    <a asp-action="ViewVerificationDocument" 
+      asp-route-tailorId="@Model.Id" 
+        asp-route-documentType="idback" 
+ class="btn btn-sm btn-outline-info" 
+  target="_blank">
+        <i class="fas fa-eye me-1"></i>View Document
+   </a>
+       </div>
+        </div>
+        </div>
+          }
+
+    @* Commercial Registration *@
+          @if (Model.Verification.CommercialRegistrationData != null)
+          {
+         <div class="col-md-6">
+    <div class="card">
+       <div class="card-body text-center">
+        <i class="fas fa-file-contract fa-3x text-success mb-2"></i>
+     <p class="mb-2"><strong>Commercial Registration</strong></p>
+      <a asp-action="ViewVerificationDocument" 
+     asp-route-tailorId="@Model.Id" 
+        asp-route-documentType="commercial" 
+      class="btn btn-sm btn-outline-success" 
+        target="_blank">
+     <i class="fas fa-eye me-1"></i>View Document
+        </a>
+        </div>
+ </div>
+  </div>
+      }
+
+       @* Professional License *@
+   @if (Model.Verification.ProfessionalLicenseData != null)
+      {
+    <div class="col-md-6">
+            <div class="card">
+  <div class="card-body text-center">
+           <i class="fas fa-certificate fa-3x text-warning mb-2"></i>
+    <p class="mb-2"><strong>Professional License</strong></p>
+         <a asp-action="ViewVerificationDocument" 
+    asp-route-tailorId="@Model.Id" 
+    asp-route-documentType="license" 
+       class="btn btn-sm btn-outline-warning" 
+     target="_blank">
+    <i class="fas fa-eye me-1"></i>View Document
+   </a>
+      </div>
+        </div>
+           </div>
+  }
+              </div>
+     </div>
+      </div>
+        </div>
+ </div>
+         }
+
+   <!-- Services Offered -->
        @if (Model.TailorServices.Any())
       {
     <div class="card mb-4">
@@ -229,128 +381,3 @@
      }
 
  <hr />
-
-    <!-- Back Button -->
-        <a asp-action="TailorVerification" class="btn btn-outline-secondary w-100">
-         <i class="fas fa-arrow-left me-2"></i>Back to Queue
-           </a>
-
-<!-- View Public Profile -->
-           <a asp-controller="Profiles" asp-action="ViewPublicTailorProfile" asp-route-id="@Model.Id" 
-          class="btn btn-outline-primary w-100 mt-2" target="_blank">
- <i class="fas fa-external-link-alt me-2"></i>View Public Profile
-           </a>
-           </div>
-   </div>
-
-       <!-- Statistics Card -->
-          <div class="card mb-4">
-  <div class="card-header bg-secondary text-white">
-           <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistics</h5>
-    </div>
-       <div class="card-body">
-     <div class="stat-item mb-3">
-  <i class="fas fa-concierge-bell text-primary me-2"></i>
-         <strong>Services:</strong>
-     <span class="float-end">@Model.TailorServices.Count(s => !s.IsDeleted)</span>
-         </div>
-        <div class="stat-item mb-3">
-       <i class="fas fa-images text-info me-2"></i>
-  <strong>Portfolio:</strong>
-  <span class="float-end">@Model.PortfolioImages.Count(p => !p.IsDeleted)</span>
-              </div>
-       <div class="stat-item mb-3">
-               <i class="fas fa-star text-warning me-2"></i>
-     <strong>Reviews:</strong>
-        <span class="float-end">@Model.Reviews.Count</span>
-        </div>
-         <div class="stat-item">
-      <i class="fas fa-calendar text-success me-2"></i>
-     <strong>Account Age:</strong>
-  <span class="float-end">@((DateTime.UtcNow - Model.CreatedAt).Days) days</span>
-  </div>
-       </div>
-          </div>
-
-      <!-- Verification Checklist -->
-      <div class="card">
-        <div class="card-header bg-warning">
-    <h5 class="mb-0"><i class="fas fa-clipboard-check me-2"></i>Verification Checklist</h5>
-             </div>
-  <div class="card-body">
-       <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="check1" 
-          @(Model.TailorServices.Any() ? "checked" : "") disabled>
-           <label class="form-check-label" for="check1">
-       Has services listed
-    </label>
-    </div>
-         <div class="form-check mb-2">
-        <input class="form-check-input" type="checkbox" id="check2" 
-       @(Model.PortfolioImages.Any() ? "checked" : "") disabled>
-       <label class="form-check-label" for="check2">
-            Has portfolio images
-             </label>
-         </div>
-         <div class="form-check mb-2">
- <input class="form-check-input" type="checkbox" id="check3" 
-               @(!string.IsNullOrEmpty(Model.Bio) ? "checked" : "") disabled>
-        <label class="form-check-label" for="check3">
-                 Has bio/description
-       </label>
-             </div>
-      <div class="form-check mb-2">
-       <input class="form-check-input" type="checkbox" id="check4" 
-  @(Model.ExperienceYears.HasValue ? "checked" : "") disabled>
-      <label class="form-check-label" for="check4">
-       Experience specified
-             </label>
- </div>
-  <div class="form-check">
-          <input class="form-check-input" type="checkbox" id="check5" 
-    @(!string.IsNullOrEmpty(Model.Address) ? "checked" : "") disabled>
-          <label class="form-check-label" for="check5">
-      Address provided
-      </label>
-       </div>
-          </div>
-         </div>
-   </div>
-    </div>
-</div>
-
-@section Styles {
-<style>
-    .portfolio-image {
-        position: relative;
-        overflow: hidden;
-        border-radius: 8px;
-    }
-
-    .portfolio-image img {
-        height: 200px;
-        object-fit: cover;
-   width: 100%;
- }
-
-    .stat-item {
-     padding-bottom: 0.75rem;
-  border-bottom: 1px solid #dee2e6;
-    }
-
-    .stat-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .card {
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .sticky-top {
-    position: sticky;
-  top: 20px;
-        z-index: 10;
-    }
-</style>
-}

@@ -1,0 +1,318 @@
+@model TafsilkPlatform.Web.ViewModels.CompleteCustomerProfileRequest
+
+@{
+    ViewData["Title"] = "إكمال الملف الشخصي | تفصيلك";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+  .complete-profile-page {
+max-width: 800px;
+         margin: 40px auto;
+         padding: 20px;
+    }
+
+.profile-header {
+     text-align: center;
+   margin-bottom: 40px;
+        }
+
+        .profile-header h2 {
+  font-size: 2rem;
+   color: #2c3e50;
+ margin-bottom: 10px;
+  }
+
+        .profile-header p {
+ color: #7f8c8d;
+    font-size: 1.1rem;
+      }
+
+  .profile-form {
+ background: #fff;
+            padding: 40px;
+   border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+     .form-group {
+        margin-bottom: 25px;
+      }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+         margin-bottom: 8px;
+     color: #2c3e50;
+        }
+
+      .form-group label .required {
+         color: #e74c3c;
+            margin-left: 4px;
+      }
+
+        .form-control {
+       width: 100%;
+    padding: 12px 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+        font-size: 1rem;
+ transition: border-color 0.3s;
+        }
+
+    .form-control:focus {
+   outline: none;
+      border-color: #3498db;
+  }
+
+     .form-control.error {
+  border-color: #e74c3c;
+ }
+
+        .text-danger {
+            color: #e74c3c;
+         font-size: 0.875rem;
+            margin-top: 5px;
+         display: block;
+   }
+
+.btn-submit {
+            width: 100%;
+     padding: 15px;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+ color: white;
+   border: none;
+      border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+         cursor: pointer;
+transition: transform 0.2s;
+        }
+
+        .btn-submit:hover {
+  transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+opacity: 0.6;
+         cursor: not-allowed;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+     overflow: hidden;
+display: inline-block;
+            width: 100%;
+        }
+
+   .file-input-wrapper input[type=file] {
+        position: absolute;
+   left: -9999px;
+     }
+
+  .file-input-label {
+            display: flex;
+        align-items: center;
+            justify-content: center;
+   padding: 12px;
+      border: 2px dashed #e0e0e0;
+        border-radius: 8px;
+         cursor: pointer;
+      transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            border-color: #3498db;
+            background: #f8f9fa;
+        }
+
+        .file-input-label i {
+            margin-left: 8px;
+            font-size: 1.2rem;
+        }
+
+      .profile-completion-notice {
+       background: #e8f4f8;
+            border-right: 4px solid #3498db;
+     padding: 15px;
+         border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+ .profile-completion-notice i {
+          color: #3498db;
+            margin-left: 10px;
+        }
+    </style>
+}
+
+<main class="complete-profile-page">
+    <div class="profile-header">
+        <h2>أهلاً بك في تفصيلك! 👋</h2>
+  <p>يرجى إكمال معلوماتك الشخصية لتتمكن من استخدام المنصة بشكل كامل</p>
+    </div>
+
+    <div class="profile-completion-notice">
+        <i class="fas fa-info-circle"></i>
+        <strong>لماذا نحتاج هذه المعلومات؟</strong>
+        <p style="margin: 5px 0 0 0;">تساعدنا هذه المعلومات في تقديم تجربة مخصصة لك وتسهيل التواصل مع الخياطين</p>
+    </div>
+
+    @using (Html.BeginForm("CompleteCustomerProfile", "Profiles", FormMethod.Post, new { @class = "profile-form", enctype = "multipart/form-data" }))
+    {
+  @Html.AntiForgeryToken()
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+        <div class="alert alert-danger" role="alert">
+   <i class="fas fa-exclamation-circle"></i>
+  <strong>يرجى تصحيح الأخطاء التالية:</strong>
+ @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+            </div>
+        }
+
+     <div class="form-group">
+            <label asp-for="FullName">
+        الاسم الكامل
+      <span class="required">*</span>
+            </label>
+   @Html.TextBoxFor(m => m.FullName, new { 
+          @class = "form-control", 
+       placeholder = "أدخل اسمك الكامل (مثال: أحمد محمد العلي)",
+             required = "required"
+            })
+   @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+       <label asp-for="City">
+          المدينة
+    <span class="required">*</span>
+          </label>
+     @Html.DropDownListFor(m => m.City,
+   new SelectList(new[] { 
+        "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام", 
+     "الخبر", "الطائف", "تبوك", "أبها", "القطيف", "الأحساء", "بريدة", 
+        "خميس مشيط", "حائل", "نجران", "ينبع", "الجبيل", "الخرج", "عرعر", "سكاكا"
+  }),
+ "اختر مدينتك",
+    new { @class = "form-control", required = "required" })
+            @Html.ValidationMessageFor(m => m.City, "", new { @class = "text-danger" })
+      </div>
+
+     <div class="form-group">
+            <label asp-for="PhoneNumber">
+          رقم الهاتف (اختياري)
+            </label>
+         @Html.TextBoxFor(m => m.PhoneNumber, new { 
+    @class = "form-control", 
+                placeholder = "+966501234567",
+  type = "tel"
+     })
+            @Html.ValidationMessageFor(m => m.PhoneNumber, "", new { @class = "text-danger" })
+       <small class="form-text text-muted">سيتم استخدامه للتواصل معك بخصوص الطلبات</small>
+        </div>
+
+        <div class="form-group">
+         <label asp-for="Gender">
+            الجنس (اختياري)
+    </label>
+        @Html.DropDownListFor(m => m.Gender, 
+        new SelectList(new[] { 
+             new { Value = "Male", Text = "ذكر" },
+               new { Value = "Female", Text = "أنثى" }
+   }, "Value", "Text"),
+   "اختر الجنس",
+         new { @class = "form-control" })
+  @Html.ValidationMessageFor(m => m.Gender, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+          <label>
+   الصورة الشخصية (اختياري)
+     </label>
+       <div class="file-input-wrapper">
+  <input type="file" 
+       name="ProfilePicture" 
+         id="profilePicture" 
+      accept="image/*" />
+       <label for="profilePicture" class="file-input-label">
+    <i class="fas fa-cloud-upload-alt"></i>
+       <span>انقر لاختيار صورة أو اسحبها هنا</span>
+         </label>
+            </div>
+            <small class="form-text text-muted">الحد الأقصى للحجم: 5MB | الصيغ المدعومة: JPG, PNG</small>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+     <i class="fas fa-check-circle" style="margin-left: 8px;"></i>
+            <span>إكمال الملف الشخصي</span>
+        </button>
+    }
+</main>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.querySelector('.profile-form');
+            const submitBtn = document.getElementById('submitBtn');
+    const fileInput = document.getElementById('profilePicture');
+            const fileLabel = document.querySelector('.file-input-label span');
+
+     // File input handling
+  if (fileInput) {
+    fileInput.addEventListener('change', function (e) {
+           if (this.files && this.files[0]) {
+      const fileName = this.files[0].name;
+  const fileSize = (this.files[0].size / 1024 / 1024).toFixed(2); // MB
+        
+             if (fileSize > 5) {
+          alert('حجم الملف كبير جداً. الحد الأقصى: 5MB');
+               this.value = '';
+        fileLabel.textContent = 'انقر لاختيار صورة أو اسحبها هنا';
+   return;
+ }
+
+                fileLabel.textContent = `تم اختيار: ${fileName} (${fileSize} MB)`;
+    }
+     });
+     }
+
+       // Form validation
+     form.addEventListener('submit', function (e) {
+    const fullName = document.querySelector('input[name="FullName"]').value.trim();
+                const city = document.querySelector('select[name="City"]').value;
+
+        if (!fullName || fullName.length < 3) {
+         e.preventDefault();
+      alert('يرجى إدخال الاسم الكامل (3 أحرف على الأقل)');
+       return false;
+ }
+
+             if (!city) {
+        e.preventDefault();
+            alert('يرجى اختيار المدينة');
+       return false;
+     }
+
+              // Show loading state
+         submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-left: 8px;"></i> جاري الحفظ...';
+});
+
+            // Real-time validation
+        document.querySelector('input[name="FullName"]').addEventListener('blur', function () {
+                if (this.value.trim().length > 0 && this.value.trim().length < 3) {
+  this.classList.add('error');
+ const errorSpan = this.parentElement.querySelector('.text-danger');
+                    if (!errorSpan.textContent) {
+      errorSpan.textContent = 'الاسم يجب أن يكون 3 أحرف على الأقل';
+         }
+        } else {
+ this.classList.remove('error');
+              }
+    });
+ });
+    </script>
+}

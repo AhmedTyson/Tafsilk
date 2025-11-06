@@ -23,6 +23,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<TailorProfile> TailorProfiles { get; set; }
+    public virtual DbSet<TailorVerification> TailorVerifications { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
@@ -35,6 +36,8 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<TailorService> TailorServices { get; set; }
     public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<AppSetting> AppSettings { get; set; }
+    // ✅ IDEMPOTENCY: Idempotency keys for preventing duplicate requests
+    public virtual DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -153,6 +156,45 @@ public partial class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.NoAction)
                   .HasConstraintName("FK_TailorProfiles_Users");
         });
+
+        // TailorVerification Entity
+        modelBuilder.Entity<TailorVerification>(entity =>
+        {
+            entity.ToTable("TailorVerifications");
+         entity.HasKey(e => e.Id).HasName("PK_TailorVerifications");
+
+          entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.NationalIdNumber).IsRequired().HasMaxLength(50);
+      entity.Property(e => e.FullLegalName).IsRequired().HasMaxLength(200);
+ entity.Property(e => e.Nationality).HasMaxLength(100);
+     entity.Property(e => e.CommercialRegistrationNumber).HasMaxLength(100);
+            entity.Property(e => e.ProfessionalLicenseNumber).HasMaxLength(100);
+         entity.Property(e => e.IdDocumentFrontContentType).HasMaxLength(100);
+        entity.Property(e => e.IdDocumentBackContentType).HasMaxLength(100);
+    entity.Property(e => e.CommercialRegistrationContentType).HasMaxLength(100);
+            entity.Property(e => e.ProfessionalLicenseContentType).HasMaxLength(100);
+            entity.Property(e => e.ReviewNotes).HasMaxLength(1000);
+            entity.Property(e => e.RejectionReason).HasMaxLength(1000);
+            entity.Property(e => e.AdditionalNotes).HasMaxLength(500);
+    entity.Property(e => e.Status).HasDefaultValue(VerificationStatus.Pending);
+   entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.TailorProfileId).HasDatabaseName("IX_TailorVerifications_TailorProfileId");
+     entity.HasIndex(e => e.Status).HasDatabaseName("IX_TailorVerifications_Status");
+
+            entity.HasOne(v => v.TailorProfile)
+           .WithOne(t => t.Verification)
+   .HasForeignKey<TailorVerification>(v => v.TailorProfileId)
+    .HasPrincipalKey<TailorProfile>(t => t.Id)
+            .OnDelete(DeleteBehavior.NoAction);
+
+         entity.HasOne(v => v.ReviewedByAdmin)
+            .WithMany()
+    .HasForeignKey(v => v.ReviewedByAdminId)
+                .HasPrincipalKey(u => u.Id)
+            .OnDelete(DeleteBehavior.NoAction)
+     .IsRequired(false);
+  });
 
         // UserAddress Entity
         modelBuilder.Entity<UserAddress>(entity =>
@@ -382,11 +424,31 @@ public partial class AppDbContext : DbContext
           .OnDelete(DeleteBehavior.NoAction);
           });
 
-        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
-        foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        // ✅ IDEMPOTENCY: IdempotencyKey Entity Configuration
+    modelBuilder.Entity<IdempotencyKey>(entity =>
         {
+       entity.ToTable("IdempotencyKeys");
+    entity.HasKey(e => e.Key).HasName("PK_IdempotencyKeys");
+
+            entity.Property(e => e.Key).IsRequired().HasMaxLength(128);
+entity.Property(e => e.Status).HasDefaultValue(IdempotencyStatus.InProgress);
+    entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.ContentType).HasMaxLength(100);
+      entity.Property(e => e.Endpoint).HasMaxLength(500);
+            entity.Property(e => e.Method).HasMaxLength(10);
+
+  // Indexes for performance
+     entity.HasIndex(e => e.Status).HasDatabaseName("IX_IdempotencyKeys_Status");
+            entity.HasIndex(e => e.ExpiresAtUtc).HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
+        entity.HasIndex(e => e.UserId).HasDatabaseName("IX_IdempotencyKeys_UserId");
+     });
+
+        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
+  foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+  {
             foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

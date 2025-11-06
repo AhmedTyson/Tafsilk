@@ -36,6 +36,141 @@ public class ProfilesController : Controller
     #region Customer Profile Actions
 
     /// <summary>
+    /// Complete customer profile form
+    /// GET: /profile/complete-customer
+    /// </summary>
+    [HttpGet("complete-customer")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CompleteCustomerProfile()
+    {
+      try
+        {
+ var userId = GetCurrentUserId();
+   if (userId == Guid.Empty) return Unauthorized();
+
+      // Check if profile already completed
+   var hasProfile = await _db.CustomerProfiles.AnyAsync(c => c.UserId == userId);
+            if (hasProfile)
+      {
+      TempData["Info"] = "تم إكمال ملفك الشخصي مسبقاً";
+return RedirectToAction(nameof(CustomerProfile));
+     }
+
+        var model = new TafsilkPlatform.Web.ViewModels.CompleteCustomerProfileRequest
+         {
+    // Pre-fill from user data if available
+       };
+
+       return View(model);
+      }
+      catch (Exception ex)
+    {
+ _logger.LogError(ex, "Error loading customer profile completion form");
+      TempData["Error"] = "حدث خطأ أثناء تحميل النموذج";
+         return RedirectToAction("Index", "Home");
+  }
+    }
+
+    /// <summary>
+    /// Save completed customer profile
+    /// POST: /profile/complete-customer
+    /// </summary>
+    [HttpPost("complete-customer")]
+    [ValidateAntiForgeryToken]
+ [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CompleteCustomerProfile(TafsilkPlatform.Web.ViewModels.CompleteCustomerProfileRequest model)
+    {
+ try
+ {
+  var userId = GetCurrentUserId();
+            if (userId == Guid.Empty) return Unauthorized();
+
+       if (!ModelState.IsValid)
+    return View(model);
+
+            // Check if profile already exists
+     var existingProfile = await _db.CustomerProfiles
+     .FirstOrDefaultAsync(c => c.UserId == userId);
+
+if (existingProfile != null)
+  {
+       TempData["Info"] = "تم إكمال الملف الشخصي مسبقاً";
+   return RedirectToAction(nameof(CustomerProfile));
+ }
+
+  // Create customer profile
+    var profile = new CustomerProfile
+       {
+       Id = Guid.NewGuid(),
+  UserId = userId,
+   FullName = model.FullName,
+           City = model.City,
+            Gender = model.Gender,
+      Bio = model.Bio,
+       CreatedAt = DateTime.UtcNow
+      };
+
+        // Update user phone number if provided
+         var user = await _db.Users.FindAsync(userId);
+            if (user != null && !string.IsNullOrEmpty(model.PhoneNumber))
+{
+       // Check if phone already exists
+       var phoneExists = await _db.Users
+     .AnyAsync(u => u.PhoneNumber == model.PhoneNumber && u.Id != userId);
+
+     if (phoneExists)
+       {
+     ModelState.AddModelError(nameof(model.PhoneNumber), "رقم الهاتف مستخدم بالفعل");
+     return View(model);
+     }
+
+   user.PhoneNumber = model.PhoneNumber;
+  }
+
+            // Handle profile picture upload
+            if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
+    {
+   if (_fileUploadService.IsValidImage(model.ProfilePicture))
+      {
+              if (model.ProfilePicture.Length <= _fileUploadService.GetMaxFileSizeInBytes())
+        {
+    using (var memoryStream = new MemoryStream())
+          {
+        await model.ProfilePicture.CopyToAsync(memoryStream);
+           profile.ProfilePictureData = memoryStream.ToArray();
+   profile.ProfilePictureContentType = model.ProfilePicture.ContentType;
+     }
+}
+         else
+    {
+ ModelState.AddModelError(nameof(model.ProfilePicture), "حجم الملف كبير جداً");
+    return View(model);
+    }
+    }
+     else
+         {
+    ModelState.AddModelError(nameof(model.ProfilePicture), "نوع الملف غير صالح");
+         return View(model);
+      }
+   }
+
+  _db.CustomerProfiles.Add(profile);
+       await _db.SaveChangesAsync();
+
+    _logger.LogInformation("Customer profile completed for user {UserId}", userId);
+      TempData["Success"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن تصفح الخياطين وطلب الخدمات";
+
+     return RedirectToAction("Index", "Tailors");
+   }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error completing customer profile");
+  ModelState.AddModelError("", "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى");
+     return View(model);
+}
+    }
+
+    /// <summary>
     /// View customer profile with addresses and saved tailors
     /// GET: /profile/customer
     /// </summary>

@@ -1,0 +1,452 @@
+@model TafsilkPlatform.Web.ViewModels.Orders.TailorOrdersViewModel
+@{
+    ViewData["Title"] = "إدارة الطلبات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <!-- Page Header -->
+    <div class="row mb-4">
+   <div class="col-12">
+  <nav aria-label="breadcrumb">
+       <ol class="breadcrumb">
+           <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+          <li class="breadcrumb-item"><a asp-action="Tailor" asp-controller="Dashboards">لوحة التحكم</a></li>
+   <li class="breadcrumb-item active">الطلبات</li>
+  </ol>
+  </nav>
+    <div class="d-flex justify-content-between align-items-center">
+   <div>
+   <h2 class="display-6 fw-bold mb-2">
+     <i class="fas fa-clipboard-list text-primary me-2"></i>
+     إدارة الطلبات
+        </h2>
+        <p class="text-muted">إدارة وتتبع جميع طلبات العملاء</p>
+ </div>
+        <div>
+   <button class="btn btn-outline-secondary" onclick="window.location.reload()">
+   <i class="fas fa-sync-alt me-2"></i>
+           تحديث
+    </button>
+    </div>
+   </div>
+</div>
+  </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="row g-3 mb-4">
+<div class="col-lg-3 col-md-6">
+ <div class="card shadow-sm border-0 h-100">
+  <div class="card-body">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+     <h6 class="text-muted mb-0">إجمالي الطلبات</h6>
+ </div>
+     <div class="p-2 bg-primary bg-opacity-10 rounded">
+    <i class="fas fa-shopping-cart text-primary fs-4"></i>
+  </div>
+ </div>
+     <h2 class="mb-2 fw-bold">@Model.TotalOrders</h2>
+           <div class="d-flex align-items-center text-success small">
+     <i class="fas fa-arrow-up me-1"></i>
+    <span>نشط</span>
+    </div>
+ </div>
+     </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+   <div class="card shadow-sm border-0 h-100 border-start border-warning border-4">
+   <div class="card-body">
+         <div class="d-flex justify-content-between align-items-start mb-3">
+       <div>
+         <h6 class="text-muted mb-0">طلبات جديدة</h6>
+     </div>
+         <div class="p-2 bg-warning bg-opacity-10 rounded">
+     <i class="fas fa-bell text-warning fs-4"></i>
+    </div>
+ </div>
+   <h2 class="mb-2 fw-bold text-warning">@Model.PendingOrders</h2>
+       <div class="text-muted small">تحتاج إلى مراجعة</div>
+     </div>
+        </div>
+ </div>
+
+        <div class="col-lg-3 col-md-6">
+   <div class="card shadow-sm border-0 h-100 border-start border-info border-4">
+     <div class="card-body">
+         <div class="d-flex justify-content-between align-items-start mb-3">
+     <div>
+ <h6 class="text-muted mb-0">قيد التنفيذ</h6>
+      </div>
+    <div class="p-2 bg-info bg-opacity-10 rounded">
+      <i class="fas fa-cog text-info fs-4"></i>
+          </div>
+         </div>
+     <h2 class="mb-2 fw-bold text-info">@Model.ProcessingOrders</h2>
+         <div class="text-muted small">جاري العمل عليها</div>
+    </div>
+     </div>
+ </div>
+
+        <div class="col-lg-3 col-md-6">
+     <div class="card shadow-sm border-0 h-100 border-start border-success border-4">
+        <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+    <h6 class="text-muted mb-0">الإيرادات</h6>
+        </div>
+  <div class="p-2 bg-success bg-opacity-10 rounded">
+    <i class="fas fa-money-bill-wave text-success fs-4"></i>
+      </div>
+    </div>
+    <h2 class="mb-2 fw-bold text-success">@Model.TotalRevenue.ToString("C") EGP</h2>
+ <div class="text-muted small">من @Model.CompletedOrders طلب مكتمل</div>
+    </div>
+       </div>
+        </div>
+  </div>
+
+    <!-- Orders Table -->
+ @if (Model.Orders.Any())
+  {
+        <div class="card shadow-sm">
+   <div class="card-header bg-white border-bottom">
+         <div class="row align-items-center">
+    <div class="col">
+       <h5 class="mb-0">
+              <i class="fas fa-list me-2"></i>
+        قائمة الطلبات
+        </h5>
+  </div>
+     <div class="col-auto">
+       <div class="btn-group" role="group">
+     <button type="button" class="btn btn-sm btn-outline-secondary active" data-filter="all">
+     الكل
+        </button>
+            <button type="button" class="btn btn-sm btn-outline-warning" data-filter="pending">
+   جديد
+    </button>
+      <button type="button" class="btn btn-sm btn-outline-info" data-filter="processing">
+    قيد التنفيذ
+  </button>
+        <button type="button" class="btn btn-sm btn-outline-success" data-filter="completed">
+   مكتمل
+    </button>
+   </div>
+    </div>
+  </div>
+    </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+   <table class="table table-hover align-middle mb-0" id="ordersTable">
+       <thead class="table-light">
+ <tr>
+     <th style="width: 5%;">
+      <input type="checkbox" class="form-check-input" id="selectAll" />
+   </th>
+  <th style="width: 10%;">رقم الطلب</th>
+     <th style="width: 20%;">العميل</th>
+        <th style="width: 15%;">الخدمة</th>
+      <th style="width: 12%;">الحالة</th>
+      <th style="width: 12%;">التاريخ</th>
+        <th style="width: 12%;">التسليم</th>
+    <th style="width: 10%;">المبلغ</th>
+   <th style="width: 14%;" class="text-center">الإجراءات</th>
+      </tr>
+    </thead>
+   <tbody>
+         @foreach (var order in Model.Orders.OrderByDescending(o => o.CreatedAt))
+     {
+       var statusClass = order.Status switch
+    {
+  OrderStatus.Pending => "warning",
+   OrderStatus.Processing => "info",
+         OrderStatus.Shipped => "primary",
+        OrderStatus.Delivered => "success",
+         OrderStatus.Cancelled => "danger",
+  _ => "secondary"
+    };
+
+       var statusIcon = order.Status switch
+       {
+ OrderStatus.Pending => "fa-clock",
+        OrderStatus.Processing => "fa-cog fa-spin",
+    OrderStatus.Shipped => "fa-truck",
+    OrderStatus.Delivered => "fa-check-circle",
+  OrderStatus.Cancelled => "fa-times-circle",
+        _ => "fa-question"
+          };
+
+          <tr data-status="@order.Status.ToString().ToLower()">
+   <td>
+      <input type="checkbox" class="form-check-input order-checkbox" value="@order.OrderId" />
+     </td>
+       <td>
+      <a asp-action="OrderDetails" asp-controller="Orders" asp-route-id="@order.OrderId" 
+    class="text-decoration-none fw-bold text-primary">
+ #@order.OrderId.ToString().Substring(0, 8).ToUpper()
+        </a>
+    </td>
+       <td>
+<div class="d-flex align-items-center">
+      <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2"
+    style="width: 35px; height: 35px;">
+ <i class="fas fa-user"></i>
+        </div>
+    <div>
+     <div class="fw-semibold">@order.CustomerName</div>
+           <div class="text-muted small">عميل</div>
+      </div>
+      </div>
+     </td>
+       <td>
+       <span class="badge bg-light text-dark">
+     <i class="fas fa-cut me-1"></i>
+          @order.ServiceType
+     </span>
+    </td>
+     <td>
+     <span class="badge bg-@statusClass">
+  <i class="fas @statusIcon me-1"></i>
+        @order.StatusDisplay
+     </span>
+      </td>
+         <td>
+           <div class="small">
+        <div class="fw-semibold">@order.CreatedAt.ToString("dd MMM yyyy")</div>
+      <div class="text-muted">@order.CreatedAt.ToString("hh:mm tt")</div>
+   </div>
+   </td>
+       <td>
+      @if (order.DueDate.HasValue)
+           {
+ <div class="small">
+      <div class="fw-semibold">@order.DueDate.Value.ToString("dd MMM yyyy")</div>
+ @{
+  var daysUntilDue = (order.DueDate.Value - DateTimeOffset.Now).Days;
+   var dueClass = daysUntilDue < 2 ? "text-danger" : daysUntilDue < 5 ? "text-warning" : "text-muted";
+      }
+   <div class="@dueClass">متبقي @daysUntilDue يوم</div>
+     </div>
+        }
+           else
+       {
+           <span class="text-muted small">غير محدد</span>
+         }
+  </td>
+     <td>
+      <strong class="text-primary">@order.TotalPrice.ToString("N0") EGP</strong>
+    @if (order.IsPaid)
+      {
+        <div>
+       <span class="badge bg-success small">
+       <i class="fas fa-check"></i> مدفوع
+      </span>
+    </div>
+      }
+   </td>
+     <td>
+  <div class="d-flex gap-1 justify-content-center">
+ <a asp-action="OrderDetails" asp-controller="Orders" asp-route-id="@order.OrderId" 
+     class="btn btn-sm btn-outline-primary" 
+       title="عرض التفاصيل">
+   <i class="fas fa-eye"></i>
+       </a>
+       @if (order.Status == OrderStatus.Pending || order.Status == OrderStatus.Processing)
+      {
+       <button type="button" class="btn btn-sm btn-outline-success" 
+  title="تحديث الحالة"
+     data-bs-toggle="modal" 
+          data-bs-target="#updateStatusModal"
+    data-order-id="@order.OrderId"
+            data-order-number="#@order.OrderId.ToString().Substring(0, 8)"
+ data-current-status="@order.Status">
+       <i class="fas fa-edit"></i>
+      </button>
+         }
+   <button type="button" class="btn btn-sm btn-outline-info" title="رسالة للعميل">
+    <i class="fas fa-comment"></i>
+       </button>
+           </div>
+  </td>
+         </tr>
+     }
+        </tbody>
+       </table>
+       </div>
+          </div>
+     </div>
+    }
+    else
+    {
+<!-- Empty State -->
+      <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+<div class="mb-4">
+  <i class="fas fa-inbox text-muted" style="font-size: 5rem; opacity: 0.2;"></i>
+      </div>
+       <h4 class="mb-3">لا توجد طلبات حتى الآن</h4>
+ <p class="text-muted mb-4">سيظهر هنا جميع الطلبات من العملاء</p>
+        <a asp-action="EditTailorProfile" asp-controller="Profiles" class="btn btn-primary">
+     <i class="fas fa-user-edit me-2"></i>
+  أكمل ملفك الشخصي
+  </a>
+   </div>
+     </div>
+    }
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" dir="rtl">
+  <div class="modal-dialog">
+  <div class="modal-content">
+        <form asp-action="UpdateOrderStatus" asp-controller="Orders" method="post">
+    @Html.AntiForgeryToken()
+        <div class="modal-header bg-primary text-white">
+   <h5 class="modal-title">
+             <i class="fas fa-edit me-2"></i>
+      تحديث حالة الطلب
+   </h5>
+   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+        <div class="modal-body">
+    <input type="hidden" name="id" id="modalOrderId" />
+         
+        <div class="alert alert-info">
+     <strong>طلب: </strong><span id="modalOrderNumber"></span>
+        </div>
+
+       <div class="mb-3">
+   <label class="form-label fw-bold">الحالة الجديدة <span class="text-danger">*</span></label>
+<select name="newStatus" class="form-select" required id="newStatusSelect">
+     <option value="">-- اختر الحالة --</option>
+           </select>
+      </div>
+
+       <div class="mb-3">
+   <label class="form-label fw-bold">ملاحظات (اختياري)</label>
+         <textarea name="notes" class="form-control" rows="3" 
+  placeholder="أضف أي ملاحظات للعميل حول تحديث الحالة..."></textarea>
+      </div>
+     </div>
+     <div class="modal-footer">
+           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+     <i class="fas fa-times me-2"></i>
+  إلغاء
+        </button>
+        <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save me-2"></i>
+   حفظ التحديث
+   </button>
+     </div>
+   </form>
+     </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Filter orders by status
+  document.querySelectorAll('[data-filter]').forEach(btn => {
+   btn.addEventListener('click', function() {
+       document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+         this.classList.add('active');
+             
+   const filter = this.getAttribute('data-filter');
+ const rows = document.querySelectorAll('#ordersTable tbody tr');
+            
+    rows.forEach(row => {
+     if (filter === 'all' || row.getAttribute('data-status') === filter) {
+   row.style.display = '';
+       } else {
+ row.style.display = 'none';
+         }
+     });
+   });
+        });
+
+        // Select all checkboxes
+     document.getElementById('selectAll')?.addEventListener('change', function() {
+      document.querySelectorAll('.order-checkbox').forEach(cb => {
+ cb.checked = this.checked;
+       });
+        });
+
+        // Update Status Modal
+   const updateModal = document.getElementById('updateStatusModal');
+        if (updateModal) {
+            updateModal.addEventListener('show.bs.modal', function(event) {
+       const button = event.relatedTarget;
+     const orderId = button.getAttribute('data-order-id');
+    const orderNumber = button.getAttribute('data-order-number');
+        const currentStatus = button.getAttribute('data-current-status');
+ 
+    document.getElementById('modalOrderId').value = orderId;
+      document.getElementById('modalOrderNumber').textContent = orderNumber;
+        
+     // Populate status options based on current status
+    const select = document.getElementById('newStatusSelect');
+    select.innerHTML = '<option value="">-- اختر الحالة --</option>';
+   
+   const statusOptions = {
+      'Pending': [
+           { value: '@((int)OrderStatus.Processing)', text: 'بدء التنفيذ' },
+         { value: '@((int)OrderStatus.Cancelled)', text: 'إلغاء الطلب' }
+ ],
+   'Processing': [
+      { value: '@((int)OrderStatus.Shipped)', text: 'جاهز للشحن' },
+          { value: '@((int)OrderStatus.Cancelled)', text: 'إلغاء الطلب' }
+     ],
+      'Shipped': [
+       { value: '@((int)OrderStatus.Delivered)', text: 'تم التسليم' }
+      ]
+        };
+    
+          const options = statusOptions[currentStatus] || [];
+           options.forEach(opt => {
+    const option = document.createElement('option');
+      option.value = opt.value;
+    option.textContent = opt.text;
+     select.appendChild(option);
+});
+      });
+        }
+
+  // Auto refresh every 30 seconds for new orders
+        setInterval(() => {
+     const pendingCount = @Model.PendingOrders;
+     if (pendingCount > 0) {
+// Could trigger a notification or badge update
+   console.log('Checking for new orders...');
+   }
+ }, 30000);
+    </script>
+}
+
+<style>
+    .avatar-sm {
+  font-size: 0.75rem;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+   background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .btn-group .btn {
+        border-radius: 0.25rem;
+    }
+
+.card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+     transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>

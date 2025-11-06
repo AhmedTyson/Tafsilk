@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TafsilkPlatform.Web.Data;
 
@@ -11,9 +12,11 @@ using TafsilkPlatform.Web.Data;
 namespace TafsilkPlatform.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251106105417_AddTailorVerificationTable")]
+    partial class AddTailorVerificationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -102,67 +105,6 @@ namespace TafsilkPlatform.Web.Migrations
                         .IsUnique();
 
                     b.ToTable("CustomerProfiles");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.IdempotencyKey", b =>
-                {
-                    b.Property<string>("Key")
-                        .HasMaxLength(128)
-                        .HasColumnType("nvarchar(128)");
-
-                    b.Property<string>("ContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Endpoint")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ExpiresAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastAccessedAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Method")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("ResponseJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.Property<int?>("StatusCode")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Key")
-                        .HasName("PK_IdempotencyKeys");
-
-                    b.HasIndex("ExpiresAtUtc")
-                        .HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
-
-                    b.HasIndex("Status")
-                        .HasDatabaseName("IX_IdempotencyKeys_Status");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_IdempotencyKeys_UserId");
-
-                    b.ToTable("IdempotencyKeys", (string)null);
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
