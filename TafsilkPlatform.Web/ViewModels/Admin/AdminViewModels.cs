@@ -47,8 +47,7 @@ public class DashboardHomeViewModel
     
     // Recent Records
     public List<OrderSummaryDto> RecentOrders { get; set; } = new();
-  public List<ReviewSummaryDto> RecentReviews { get; set; } = new();
-    public List<UserSummaryDto> RecentSignups { get; set; } = new();
+  public List<UserSummaryDto> RecentSignups { get; set; } = new();
     
     // System Health
     public SystemHealthDto SystemHealth { get; set; } = new();
@@ -132,17 +131,6 @@ public class OrderSummaryDto
     public DateTime? DueDate { get; set; }
 }
 
-// DTO for Recent Reviews
-public class ReviewSummaryDto
-{
-    public Guid ReviewId { get; set; }
-    public string CustomerName { get; set; } = string.Empty;
-    public string TailorName { get; set; } = string.Empty;
-    public decimal Rating { get; set; }
-    public string? Comment { get; set; }
-    public DateTime CreatedAt { get; set; }
-}
-
 // DTO for Recent Signups
 public class UserSummaryDto
 {
@@ -151,7 +139,7 @@ public class UserSummaryDto
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public DateTime SignedUpAt { get; set; }
-    public string? PhoneNumber { get; set; }
+ public string? PhoneNumber { get; set; }
 }
 
 // DTO for System Health Monitoring
@@ -209,17 +197,6 @@ public class OrderManagementViewModel
     public int CurrentPage { get; set; }
     public int TotalPages { get; set; }
     public string? SelectedStatus { get; set; }
-}
-
-// ============================================
-// REVIEW MODERATION
-// ============================================
-public class ReviewModerationViewModel
-{
-    public List<Review> Reviews { get; set; } = new();
-    public int CurrentPage { get; set; }
-    public int TotalPages { get; set; }
-    public string? Filter { get; set; }
 }
 
 // ============================================

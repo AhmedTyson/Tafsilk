@@ -34,9 +34,7 @@ public class TailorPortfolioController : Controller
     .Include(t => t.User)
           .Include(t => t.TailorServices.Where(s => !s.IsDeleted))
            .Include(t => t.PortfolioImages.Where(p => !p.IsDeleted))
-          .Include(t => t.Reviews)
-    .ThenInclude(r => r.Customer)
-               .FirstOrDefaultAsync(t => t.Id == id);
+          .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tailor == null)
             {
@@ -48,7 +46,7 @@ public class TailorPortfolioController : Controller
             // Calculate statistics
             ViewBag.ServiceCount = tailor.TailorServices.Count;
             ViewBag.PortfolioCount = tailor.PortfolioImages.Count;
-            ViewBag.ReviewCount = tailor.Reviews.Count;
+            ViewBag.ReviewCount = 0; // Simplified - no reviews
             ViewBag.AverageRating = tailor.AverageRating;
             ViewBag.CompletedOrders = await _db.Orders.CountAsync(o =>
            o.TailorId == id &&

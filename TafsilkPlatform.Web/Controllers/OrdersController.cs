@@ -51,10 +51,9 @@ public class OrdersController : Controller
 
             // Get tailor information
             var tailor = await _db.TailorProfiles
-        .Include(t => t.User)
-  .Include(t => t.TailorServices.Where(s => !s.IsDeleted))
-     .Include(t => t.Reviews)
-         .FirstOrDefaultAsync(t => t.Id == tailorId);
+                .Include(t => t.User)
+                .Include(t => t.TailorServices.Where(s => !s.IsDeleted))
+                .FirstOrDefaultAsync(t => t.Id == tailorId);
 
             if (tailor == null)
             {
@@ -71,7 +70,7 @@ public class OrdersController : Controller
 
             // Get customer profile
             var customer = await _db.CustomerProfiles
-     .FirstOrDefaultAsync(c => c.UserId == userId);
+                .FirstOrDefaultAsync(c => c.UserId == userId);
 
             if (customer == null)
             {
@@ -87,20 +86,20 @@ public class OrdersController : Controller
                 TailorCity = tailor.City,
                 TailorDistrict = tailor.District,
                 TailorAverageRating = tailor.AverageRating,
-                TailorReviewCount = tailor.Reviews?.Count ?? 0,
+                TailorReviewCount = 0, // Simplified - no reviews
                 TailorProfilePictureData = tailor.ProfilePictureData,
                 TailorProfilePictureContentType = tailor.ProfilePictureContentType,
                 AvailableServices = tailor.TailorServices
-             .Where(s => !s.IsDeleted)
-                   .Select(s => new ServiceOptionViewModel
-                   {
-                       ServiceId = s.TailorServiceId,
-                       ServiceName = s.ServiceName,
-                       ServiceDescription = s.Description,
-                       ServicePrice = s.BasePrice,
-                       ServiceIcon = GetServiceIcon(s.ServiceName)
-                   })
-                             .ToList(),
+                    .Where(s => !s.IsDeleted)
+                    .Select(s => new ServiceOptionViewModel
+                    {
+                        ServiceId = s.TailorServiceId,
+                        ServiceName = s.ServiceName,
+                        ServiceDescription = s.Description,
+                        ServicePrice = s.BasePrice,
+                        ServiceIcon = GetServiceIcon(s.ServiceName)
+                    })
+                    .ToList(),
                 CustomerId = customer.Id
             };
 

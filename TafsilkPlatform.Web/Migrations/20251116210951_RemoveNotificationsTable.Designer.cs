@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TafsilkPlatform.Web.Data;
 
@@ -11,9 +12,11 @@ using TafsilkPlatform.Web.Data;
 namespace TafsilkPlatform.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251116210951_RemoveNotificationsTable")]
+    partial class RemoveNotificationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -713,6 +716,124 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("PortfolioImages", (string)null);
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
+                {
+                    b.Property<Guid>("RatingDimensionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DimensionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ReviewId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.HasKey("RatingDimensionId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("RatingDimensions");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("(newid())");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK__RefreshT__3214EC07E9DA722D");
+
+                    b.HasIndex(new[] { "ExpiresAt" }, "IX_RefreshTokens_ExpiresAt");
+
+                    b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
+                {
+                    b.Property<Guid>("ReviewId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CustomerProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("TailorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("TailorProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReviewId")
+                        .HasName("PK_Reviews");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("IX_Reviews_CustomerId");
+
+                    b.HasIndex("CustomerProfileId");
+
+                    b.HasIndex("OrderId")
+                        .HasDatabaseName("IX_Reviews_OrderId");
+
+                    b.HasIndex("TailorId")
+                        .HasDatabaseName("IX_Reviews_TailorId");
+
+                    b.HasIndex("TailorProfileId");
+
+                    b.ToTable("Reviews", (string)null);
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
                 {
                     b.Property<Guid>("Id")
@@ -905,6 +1026,112 @@ namespace TafsilkPlatform.Web.Migrations
                     b.ToTable("TailorServices", (string)null);
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorVerification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AdditionalNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("CommercialRegistrationContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("CommercialRegistrationData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("CommercialRegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullLegalName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("IdDocumentBackContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("IdDocumentBackData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("IdDocumentFrontContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("IdDocumentFrontData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("NationalIdNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Nationality")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProfessionalLicenseContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfessionalLicenseData")
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("ProfessionalLicenseNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("ReviewNotes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReviewedByAdminId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("(getutcdate())");
+
+                    b.Property<Guid>("TailorProfileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id")
+                        .HasName("PK_TailorVerifications");
+
+                    b.HasIndex("ReviewedByAdminId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_TailorVerifications_Status");
+
+                    b.HasIndex("TailorProfileId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_TailorVerifications_TailorProfileId");
+
+                    b.ToTable("TailorVerifications", (string)null);
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -931,6 +1158,11 @@ namespace TafsilkPlatform.Web.Migrations
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<bool>("EmailNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("EmailVerificationToken")
                         .HasMaxLength(64)
@@ -973,8 +1205,18 @@ namespace TafsilkPlatform.Web.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<bool>("PromotionalNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("SmsNotifications")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1203,6 +1445,66 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("Tailor");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.Review", "Review")
+                        .WithMany("RatingDimensions")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired()
+                        .HasConstraintName("FK_RefreshTokens_Users");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("CustomerProfileId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
+                        .WithMany()
+                        .HasForeignKey("TailorId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
+                        .WithMany("Reviews")
+                        .HasForeignKey("TailorProfileId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Tailor");
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
                 {
                     b.HasOne("TafsilkPlatform.Web.Models.User", "User")
@@ -1224,6 +1526,24 @@ namespace TafsilkPlatform.Web.Migrations
                         .IsRequired();
 
                     b.Navigation("Tailor");
+                });
+
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorVerification", b =>
+                {
+                    b.HasOne("TafsilkPlatform.Web.Models.User", "ReviewedByAdmin")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByAdminId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "TailorProfile")
+                        .WithOne("Verification")
+                        .HasForeignKey("TafsilkPlatform.Web.Models.TailorVerification", "TailorProfileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ReviewedByAdmin");
+
+                    b.Navigation("TailorProfile");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
@@ -1268,6 +1588,8 @@ namespace TafsilkPlatform.Web.Migrations
 
                     b.Navigation("Payments");
 
+                    b.Navigation("Reviews");
+
                     b.Navigation("SavedMeasurements");
 
                     b.Navigation("orders");
@@ -1284,6 +1606,11 @@ namespace TafsilkPlatform.Web.Migrations
                     b.Navigation("orderImages");
                 });
 
+            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
+                {
+                    b.Navigation("RatingDimensions");
+                });
+
             modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
                 {
                     b.Navigation("Users");
@@ -1295,12 +1622,18 @@ namespace TafsilkPlatform.Web.Migrations
 
                     b.Navigation("PortfolioImages");
 
+                    b.Navigation("Reviews");
+
                     b.Navigation("TailorServices");
+
+                    b.Navigation("Verification");
                 });
 
             modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
                 {
                     b.Navigation("CustomerProfile");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("TailorProfile");
 

@@ -268,12 +268,9 @@ builder.Services.AddScoped<ITailorRepository, TailorRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<ITailorServiceRepository, TailorServiceRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
-builder.Services.AddScoped<IRatingDimensionRepository, RatingDimensionRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 
 
@@ -290,18 +287,10 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<ITailorRegistrationService, TailorRegistrationService>();
-// ✅ PHASE 3: Register ReviewService for Task 2 (Reviews System)
-builder.Services.AddScoped<IReviewService, ReviewService>();
-// ⚠️ PHASE 4: PaymentService DISABLED - Model mismatch with existing Payment entity
-// TODO: Refactor PaymentService to align with Enums.PaymentType/PaymentStatus before re-enabling
-// See: Docs/BUILD_ERROR_ANALYSIS.md for details
-// builder.Services.AddScoped<IPaymentService, PaymentService>();
 // ✅ IDEMPOTENCY: Register IdempotencyStore for preventing duplicate requests
 builder.Services.AddScoped<IIdempotencyStore, EfCoreIdempotencyStore>();
 // Register background service for cleaning up expired idempotency keys
 builder.Services.AddHostedService<IdempotencyCleanupService>();
-// ✅ PHASE 5: Register NotificationService for cross-cutting enhancements
-builder.Services.AddScoped<INotificationService, NotificationService>();
 // Register CacheService (using in-memory cache for single-instance deployments)
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();

@@ -46,15 +46,10 @@ public class TestingController : Controller
       TotalUsers = await _db.Users.CountAsync(),
        Customers = await _db.CustomerProfiles.CountAsync(),
     Tailors = await _db.TailorProfiles.CountAsync(),
-         VerifiedTailors = await _db.TailorProfiles.CountAsync(t => t.IsVerified),
-   PendingVerifications = await _db.TailorVerifications
-      .CountAsync(v => v.Status == VerificationStatus.Pending),
-                TotalOrders = await _db.Orders.CountAsync(),
+         TotalOrders = await _db.Orders.CountAsync(),
      PendingOrders = await _db.Orders.CountAsync(o => o.Status == OrderStatus.Pending),
    CompletedOrders = await _db.Orders.CountAsync(o => o.Status == OrderStatus.Delivered),
-  TotalReviews = await _db.Reviews.CountAsync(),
-   Notifications = await _db.Notifications.CountAsync(),
-         IdempotencyKeys = await _db.IdempotencyKeys.CountAsync()
+  IdempotencyKeys = await _db.IdempotencyKeys.CountAsync()
         };
 
             ViewBag.Stats = stats;
@@ -145,8 +140,7 @@ t.IsVerified,
           UsersTable = await _db.Users.CountAsync() > 0 ? "✅ OK" : "⚠️ Empty",
           OrdersTable = "✅ OK",
 ReviewsTable = "✅ OK",
-                NotificationsTable = "✅ OK",
-    IdempotencyTable = "✅ OK"
+                IdempotencyTable = "✅ OK"
     }
             };
 

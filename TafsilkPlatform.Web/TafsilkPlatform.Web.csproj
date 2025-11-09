@@ -60,5 +60,9 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Remove="appsettings.Development.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ViewModels\Reviews\" />
+    <Folder Include="Views\Reviews\" />
+  </ItemGroup>
 
 </Project>

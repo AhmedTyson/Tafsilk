@@ -1,12 +1,11 @@
 @model TafsilkPlatform.Web.Models.TailorProfile
 
 @{
-    ViewData["Title"] = $"{Model.ShopName} | تفصيلك";
+    ViewData["Title"] = "تفاصيل الخياط - " + Model.ShopName;
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var reviews = ViewBag.Reviews as List<TafsilkPlatform.Web.Models.Review> ?? new List<TafsilkPlatform.Web.Models.Review>();
+    // Reviews simplified - removed
     var reviewCount = ViewBag.ReviewCount as int? ?? 0;
     var totalOrders = ViewBag.TotalOrders as int? ?? 0;
-    var completedOrders = ViewBag.CompletedOrders as int? ?? 0;
 }
 
 @section Styles {
@@ -383,9 +382,9 @@ margin-bottom: 10px;
    </div>
      }
          <div class="stat-card">
-             <div class="stat-value">@completedOrders</div>
-     <div class="stat-label">طلب مكتمل</div>
-             </div>
+    <div class="stat-value">@ViewBag.CompletedOrders</div>
+    <div class="stat-label">طلب مكتمل</div>
+</div>
          <div class="stat-card">
 <div class="stat-value">@reviewCount</div>
          <div class="stat-label">تقييم</div>
@@ -509,49 +508,13 @@ margin-bottom: 10px;
 
         <!-- Reviews Section -->
         <div class="content-section">
-       <h2 class="section-title">آراء العملاء (@reviewCount)</h2>
-     @if (reviews.Any())
-   {
-           <div>
-        @foreach (var review in reviews.Take(10))
-              {
- <div class="review-item">
-         <div class="review-header">
-            <span class="reviewer-name">
-        @(review.Customer?.FullName ?? "عميل")
-       </span>
-     <span class="review-date">
-           @review.CreatedAt.ToString("dd/MM/yyyy")
-    </span>
-      </div>
-       <div class="review-rating">
-    @for (int i = 0; i < 5; i++)
-          {
-         if (i < review.Rating)
-     {
-     <i class="fas fa-star"></i>
-            }
-              else
-       {
-         <i class="far fa-star"></i>
-           }
- }
-         </div>
- @if (!string.IsNullOrEmpty(review.Comment))
- {
-            <div class="review-comment">@review.Comment</div>
-     }
-      </div>
-   }
-                </div>
-            }
-    else
-         {
-            <div class="no-data">
-  <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px; color: #bdc3c7;"></i>
-         <p>لا توجد تقييمات بعد</p>
-        </div>
-            }
+       <h2 class="section-title">التقييم (@reviewCount)</h2>
+     <!-- Reviews simplified - showing average rating only -->
+    <div class="alert alert-info">
+        <i class="fas fa-star text-warning"></i>
+  <strong>التقييم: @Model.AverageRating.ToString("F1") من 5</strong>
+      <p class="mt-2">نظام التقييمات تم تبسيطه - التقييم الإجمالي فقط معروض</p>
+    </div>
         </div>
     </div>
 </main>

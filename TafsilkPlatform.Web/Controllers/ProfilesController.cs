@@ -523,8 +523,7 @@ if (existingProfile != null)
             var tailor = await _db.TailorProfiles
                 .Include(t => t.User)
                     .Include(t => t.TailorServices)
-                 .Include(t => t.PortfolioImages)
-                .Include(t => t.Reviews)
+                .Include(t => t.PortfolioImages)
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
@@ -535,7 +534,7 @@ if (existingProfile != null)
 
             ViewBag.ServiceCount = tailor.TailorServices.Count(s => !s.IsDeleted);
             ViewBag.PortfolioCount = tailor.PortfolioImages.Count(p => !p.IsDeleted);
-            ViewBag.ReviewCount = tailor.Reviews.Count();
+            ViewBag.ReviewCount = 0; // Simplified - no reviews
 
             // Get profile completion
             var completion = await _profileCompletionService.GetTailorCompletionAsync(userId);
@@ -568,8 +567,7 @@ if (existingProfile != null)
      .Include(t => t.User)
    .Include(t => t.TailorServices)
           .Include(t => t.PortfolioImages)
-.Include(t => t.Reviews)
-   .FirstOrDefaultAsync(t => t.UserId == userId);
+                .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
                 return NotFound("الملف الشخصي غير موجود");
@@ -603,7 +601,7 @@ if (existingProfile != null)
                 TotalOrders = await _db.Orders.CountAsync(o => o.TailorId == tailor.Id),
                 CompletedOrders = await _db.Orders.CountAsync(o => o.TailorId == tailor.Id && o.Status == OrderStatus.Delivered),
                 AverageRating = tailor.AverageRating,
-                ReviewCount = tailor.Reviews?.Count ?? 0,
+                ReviewCount = 0, // Simplified - no reviews
                 PortfolioCount = tailor.PortfolioImages?.Count(p => !p.IsDeleted) ?? 0,
                 ServiceCount = tailor.TailorServices?.Count(s => !s.IsDeleted) ?? 0,
                 IsVerified = tailor.IsVerified,

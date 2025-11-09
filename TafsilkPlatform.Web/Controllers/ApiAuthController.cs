@@ -258,21 +258,6 @@ public class ApiAuthController : ControllerBase
     }
 
     /// <summary>
-    /// Refresh JWT token (future implementation with refresh tokens)
-    /// </summary>
-    [HttpPost("refresh")]
-    [AllowAnonymous]
-    public IActionResult RefreshToken([FromBody] RefreshTokenRequest request)
-    {
-        // TODO: Implement refresh token logic
-        return BadRequest(new
-        {
-            success = false,
-            message = "تحديث الرمز غير مدعوم حالياً" // Token refresh not currently supported
-        });
-    }
-
-    /// <summary>
     /// Logout (invalidate token - client-side mostly)
     /// </summary>
     [HttpPost("logout")]
@@ -364,12 +349,4 @@ public class ApiAuthController : ControllerBase
     }
 
     #endregion
-}
-
-/// <summary>
-/// Request model for token refresh (future use)
-/// </summary>
-public class RefreshTokenRequest
-{
-    public string RefreshToken { get; set; } = string.Empty;
 }

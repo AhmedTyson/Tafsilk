@@ -93,17 +93,17 @@
         </h5>
 
      <div class="mb-3">
-        <div class="d-flex align-items-center mb-2">
-      <i class="fas fa-star text-warning me-2"></i>
-    <span class="fw-bold">@(tailor.Reviews.Any() ? tailor.Reviews.Average(r => r.Rating).ToString("F1") : "جديد")</span>
-     <span class="text-muted ms-2">(@tailor.Reviews.Count تقييم)</span>
-          </div>
-       
- <div class="text-muted small">
-  <i class="fas fa-map-marker-alt me-2"></i>
+    <div class="d-flex align-items-center mb-2">
+        <i class="fas fa-star text-warning me-2"></i>
+   <span class="fw-bold">@tailor.AverageRating.ToString("F1")</span>
+        <span class="text-muted ms-2">(مبسط)</span>
+    </div>
+    
+    <div class="text-muted small">
+        <i class="fas fa-map-marker-alt me-2"></i>
         @tailor.City
-  </div>
-   </div>
+ </div>
+</div>
 
   @if (tailor.ExperienceYears.HasValue)
      {

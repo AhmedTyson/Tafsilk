@@ -65,11 +65,6 @@ namespace TafsilkPlatform.Web.Models
         [DataType(DataType.DateTime)]
         public DateTime? PasswordResetTokenExpires { get; set; }
 
-        // New notification preferences
-        public bool EmailNotifications { get; set; } = true;
-        public bool SmsNotifications { get; set; } = true;
-        public bool PromotionalNotifications { get; set; } = true;
-
         // Ban management (replaces BannedUser table)
         [Display(Name = "Ban Date")]
         [DataType(DataType.DateTime)]
@@ -94,7 +89,6 @@ namespace TafsilkPlatform.Web.Models
         public virtual Role Role { get; set; } = null!;
         public virtual TailorProfile? TailorProfile { get; set; }
         public virtual CustomerProfile? CustomerProfile { get; set; }
-        public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
         public virtual ICollection<UserAddress> UserAddresses { get; set; } = new List<UserAddress>();
 
         // Validation method

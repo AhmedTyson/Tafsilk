@@ -20,21 +20,16 @@ public partial class AppDbContext : DbContext
 
     // DbSet Properties - Essential entities only
     public virtual DbSet<CustomerProfile> CustomerProfiles { get; set; }
-    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<TailorProfile> TailorProfiles { get; set; }
-    public virtual DbSet<TailorVerification> TailorVerifications { get; set; }
     public virtual DbSet<User> Users { get; set; }
     public virtual DbSet<UserAddress> UserAddresses { get; set; }
     public virtual DbSet<Order> Orders { get; set; }
     public virtual DbSet<OrderImages> OrderImages { get; set; }
     public virtual DbSet<OrderItem> OrderItems { get; set; }
     public virtual DbSet<Payment> Payment { get; set; }
-    public virtual DbSet<Review> Reviews { get; set; }
-    public virtual DbSet<RatingDimension> RatingDimensions { get; set; }
     public virtual DbSet<PortfolioImage> PortfolioImages { get; set; }
     public virtual DbSet<TailorService> TailorServices { get; set; }
-    public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<AppSetting> AppSettings { get; set; }
     // ✅ IDEMPOTENCY: Idempotency keys for preventing duplicate requests
     public virtual DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
@@ -85,9 +80,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             entity.Property(e => e.PhoneNumber).HasMaxLength(20);
-            entity.Property(e => e.EmailNotifications).HasDefaultValue(true);
-            entity.Property(e => e.SmsNotifications).HasDefaultValue(true);
-            entity.Property(e => e.PromotionalNotifications).HasDefaultValue(true);
 
             entity.HasOne(d => d.Role)
                          .WithMany(p => p.Users)
@@ -162,52 +154,13 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
 
             entity.HasOne(d => d.User)
-             .WithOne(p => p.TailorProfile)
-                        .HasForeignKey<TailorProfile>(d => d.UserId)
-            .OnDelete(DeleteBehavior.NoAction)
-                  .HasConstraintName("FK_TailorProfiles_Users");
-        });
+        .WithOne(p => p.TailorProfile)
+   .HasForeignKey<TailorProfile>(d => d.UserId)
+        .OnDelete(DeleteBehavior.NoAction)
+        .HasConstraintName("FK_TailorProfiles_Users");
+});
 
-        // TailorVerification Entity
-        modelBuilder.Entity<TailorVerification>(entity =>
-        {
-            entity.ToTable("TailorVerifications");
-         entity.HasKey(e => e.Id).HasName("PK_TailorVerifications");
-
-          entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.NationalIdNumber).IsRequired().HasMaxLength(50);
-      entity.Property(e => e.FullLegalName).IsRequired().HasMaxLength(200);
- entity.Property(e => e.Nationality).HasMaxLength(100);
-     entity.Property(e => e.CommercialRegistrationNumber).HasMaxLength(100);
-            entity.Property(e => e.ProfessionalLicenseNumber).HasMaxLength(100);
-         entity.Property(e => e.IdDocumentFrontContentType).HasMaxLength(100);
-        entity.Property(e => e.IdDocumentBackContentType).HasMaxLength(100);
-    entity.Property(e => e.CommercialRegistrationContentType).HasMaxLength(100);
-            entity.Property(e => e.ProfessionalLicenseContentType).HasMaxLength(100);
-            entity.Property(e => e.ReviewNotes).HasMaxLength(1000);
-            entity.Property(e => e.RejectionReason).HasMaxLength(1000);
-            entity.Property(e => e.AdditionalNotes).HasMaxLength(500);
-    entity.Property(e => e.Status).HasDefaultValue(VerificationStatus.Pending);
-   entity.Property(e => e.SubmittedAt).HasDefaultValueSql("(getutcdate())");
-
-            entity.HasIndex(e => e.TailorProfileId).HasDatabaseName("IX_TailorVerifications_TailorProfileId");
-     entity.HasIndex(e => e.Status).HasDatabaseName("IX_TailorVerifications_Status");
-
-            entity.HasOne(v => v.TailorProfile)
-           .WithOne(t => t.Verification)
-   .HasForeignKey<TailorVerification>(v => v.TailorProfileId)
-    .HasPrincipalKey<TailorProfile>(t => t.Id)
-            .OnDelete(DeleteBehavior.NoAction);
-
-         entity.HasOne(v => v.ReviewedByAdmin)
-            .WithMany()
-    .HasForeignKey(v => v.ReviewedByAdminId)
-                .HasPrincipalKey(u => u.Id)
-            .OnDelete(DeleteBehavior.NoAction)
-     .IsRequired(false);
-  });
-
-        // UserAddress Entity
+// UserAddress Entity
         modelBuilder.Entity<UserAddress>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__UserAddr__3214EC07DDE0E48B");
@@ -228,24 +181,6 @@ public partial class AppDbContext : DbContext
         .HasForeignKey(d => d.UserId)
         .OnDelete(DeleteBehavior.NoAction)
                     .HasConstraintName("FK_UserAddresses_Users");
-        });
-
-        // RefreshToken Entity
-        modelBuilder.Entity<RefreshToken>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK__RefreshT__3214EC07E9DA722D");
-
-            entity.HasIndex(e => e.ExpiresAt, "IX_RefreshTokens_ExpiresAt");
-            entity.HasIndex(e => e.UserId, "IX_RefreshTokens_UserId");
-
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-
-            entity.HasOne(d => d.User)
-           .WithMany(p => p.RefreshTokens)
-     .HasForeignKey(d => d.UserId)
-         .OnDelete(DeleteBehavior.NoAction)
-        .HasConstraintName("FK_RefreshTokens_Users");
         });
 
         // Order Entity + relations
@@ -313,33 +248,6 @@ public partial class AppDbContext : DbContext
         .OnDelete(DeleteBehavior.NoAction);
            });
 
-        // Notification Entity - Fix shadow property warning
-        modelBuilder.Entity<Notification>(entity =>
-        {
-            entity.ToTable("Notifications");
-            entity.HasKey(e => e.NotificationId).HasName("PK_Notifications");
-
-            entity.Property(e => e.NotificationId).ValueGeneratedOnAdd();
-            entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
-            entity.Property(e => e.Message).IsRequired().HasMaxLength(2000);
-            entity.Property(e => e.Type).IsRequired().HasMaxLength(50);
-            entity.Property(e => e.UserId).IsRequired(false); // NULL for system messages
-            entity.Property(e => e.AudienceType).HasMaxLength(50); // "All", "Customers", "Tailors"
-            entity.Property(e => e.IsRead).HasDefaultValue(false);
-            entity.Property(e => e.SentAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-
-            entity.HasIndex(e => e.UserId).HasDatabaseName("IX_Notifications_UserId");
-            entity.HasIndex(e => e.AudienceType).HasDatabaseName("IX_Notifications_AudienceType");
-
-            entity.HasOne(n => n.User)
-   .WithMany()
-        .HasForeignKey(n => n.UserId)
-     .HasPrincipalKey(u => u.Id)
-        .OnDelete(DeleteBehavior.NoAction)
-    .IsRequired(false);
-        });
-
         // PortfolioImage Entity - Fix shadow property warning and decimal precision
         modelBuilder.Entity<PortfolioImage>(entity =>
         {
@@ -383,45 +291,6 @@ public partial class AppDbContext : DbContext
           .HasPrincipalKey(t => t.Id)
                     .OnDelete(DeleteBehavior.NoAction);
                 });
-
-        // Review Entity - FIXED: Remove ambiguous relationships
-        modelBuilder.Entity<Review>(entity =>
-        {
-            entity.ToTable("Reviews");
-            entity.HasKey(e => e.ReviewId).HasName("PK_Reviews");
-
-            entity.Property(e => e.Comment).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.IsDeleted).HasDefaultValue(false);
-
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Reviews_OrderId");
-            entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Reviews_TailorId");
-            entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Reviews_CustomerId");
-
-            // FIXED: Use explicit HasForeignKey with proper principal keys
-            entity.HasOne(r => r.Order)
-                    .WithMany()
-                .HasForeignKey(r => r.OrderId)
-           .HasPrincipalKey(o => o.OrderId)
-          .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(r => r.Tailor)
-       .WithMany()
-        .HasForeignKey(r => r.TailorId)
- .HasPrincipalKey(t => t.Id)
- .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(r => r.Customer)
-           .WithMany()
-         .HasForeignKey(r => r.CustomerId)
-                .HasPrincipalKey(c => c.Id)
-           .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasMany(r => r.RatingDimensions)
-                .WithOne(rd => rd.Review)
-                   .HasForeignKey(rd => rd.ReviewId)
-                           .OnDelete(DeleteBehavior.NoAction);
-        });
 
         // OrderImages Entity - Fix shadow property warning
         modelBuilder.Entity<OrderImages>(entity =>
@@ -591,6 +460,7 @@ entity.ToTable("ComplaintAttachments");
   {
  foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

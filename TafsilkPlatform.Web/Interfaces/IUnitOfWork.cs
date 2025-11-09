@@ -13,11 +13,8 @@ namespace TafsilkPlatform.Web.Interfaces
         IOrderRepository Orders { get; }
         IOrderItemRepository OrderItems { get; }
         IPaymentRepository Payments { get; }
-        IReviewRepository Reviews { get; }
-        IRatingDimensionRepository RatingDimensions { get; }
         IPortfolioRepository PortfolioImages { get; }
         ITailorServiceRepository TailorServices { get; }
-        INotificationRepository Notifications { get; }
         IAddressRepository Addresses { get; }
 
         Task<int> SaveChangesAsync();

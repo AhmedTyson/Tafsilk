@@ -142,26 +142,17 @@ public class DashboardsController : Controller
                 DeliveryDate = o.DueDate.HasValue ? o.DueDate.Value.DateTime : (DateTime?)null
             }).ToList();
 
-            // Get reviews and rating breakdown
-            var reviews = await _context.Reviews
-     .Where(r => r.TailorId == tailor.Id && !r.IsDeleted)
-               .ToListAsync();
-
-            model.TotalReviews = reviews.Count;
-
-            if (reviews.Any())
+            // Get reviews and rating breakdown - SIMPLIFIED (no reviews)
+            model.TotalReviews = 0;
+            model.AverageRating = tailor.AverageRating;
+            model.RatingBreakdown = new RatingBreakdown
             {
-                model.AverageRating = (decimal)reviews.Average(r => r.Rating);
-
-                model.RatingBreakdown = new RatingBreakdown
-                {
-                    FiveStars = reviews.Count(r => r.Rating == 5),
-                    FourStars = reviews.Count(r => r.Rating == 4),
-                    ThreeStars = reviews.Count(r => r.Rating == 3),
-                    TwoStars = reviews.Count(r => r.Rating == 2),
-                    OneStar = reviews.Count(r => r.Rating == 1)
-                };
-            }
+              FiveStars = 0,
+                FourStars = 0,
+                ThreeStars = 0,
+                TwoStars = 0,
+                OneStar = 0
+            };
 
             // Calculate performance metrics
             var lastMonthOrders = orders.Where(o => o.CreatedAt >= DateTimeOffset.UtcNow.AddMonths(-1)).Count();
@@ -179,9 +170,7 @@ public class DashboardsController : Controller
              ? (decimal)completedOrders.Average(o => o.TotalPrice)
                         : 0,
                 AverageCompletionTime = 0, // Can calculate if needed
-                CustomerSatisfactionRate = reviews.Any()
-                ? (decimal)(reviews.Average(r => r.Rating) * 20)
-               : 0,
+                CustomerSatisfactionRate = tailor.AverageRating * 20, // Simplified
                 RepeatCustomersCount = 0 // Can calculate if needed
             };
 

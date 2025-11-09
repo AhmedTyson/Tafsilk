@@ -341,10 +341,10 @@ color: #2c3e50;
       }
        }
             </div>
-             <span class="rating-text">
-    @tailor.AverageRating.ToString("F1") (@tailor.TotalReviews تقييم)
-             </span>
-  </div>
+            <span class="rating-text">
+    @tailor.AverageRating.ToString("F1") ⭐
+</span>
+</div>
 
            <div class="tailor-location">
            <i class="fas fa-map-marker-alt"></i>
@@ -359,9 +359,9 @@ color: #2c3e50;
          <div class="stat-label">سنوات خبرة</div>
  </div>
    <div class="stat">
-      <div class="stat-value">@tailor.TotalReviews</div>
-     <div class="stat-label">تقييم</div>
-  </div>
+    <div class="stat-value">@tailor.AverageRating.ToString("F1")</div>
+    <div class="stat-label">تقييم</div>
+</div>
     </div>
             }
  </div>

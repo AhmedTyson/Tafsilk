@@ -55,7 +55,6 @@ namespace TafsilkPlatform.Web.Models
 
         public List<Order> orders { get; set; } = new();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
         
         // ✅ NEW: Loyalty and rewards
         public virtual CustomerLoyalty? Loyalty { get; set; }

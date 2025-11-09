@@ -132,13 +132,8 @@ namespace TafsilkPlatform.Web.Models
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<TailorService> TailorServices { get; set; } = new List<TailorService>();
         public ICollection<PortfolioImage> PortfolioImages { get; set; } = new List<PortfolioImage>();
-        public ICollection<Review> Reviews { get; set; } = new List<Review>();
-        public virtual TailorVerification? Verification { get; set; }
 
         // Computed properties
-        [NotMapped]
-        public int TotalReviews => Reviews?.Count ?? 0;
-
         [NotMapped]
         public bool HasLocation => Latitude.HasValue && Longitude.HasValue;
 

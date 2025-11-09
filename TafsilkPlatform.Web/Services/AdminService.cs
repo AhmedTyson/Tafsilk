@@ -22,28 +22,6 @@ namespace TafsilkPlatform.Web.Services
         // ==================== PRIVATE HELPER METHODS ====================
 
         /// <summary>
-        /// Creates and sends a notification to a user.
-        /// </summary>
-        private async Task SendNotificationAsync(
-            Guid userId,
- string title,
-            string message,
-            string type)
-        {
-            var notification = new Notification
-            {
-                UserId = userId,
-                Title = title,
-                Message = message,
-                Type = type,
-                SentAt = DateTime.UtcNow
-            };
-
-            await _unitOfWork.Notifications.AddAsync(notification);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        /// <summary>
         /// Logs an admin action to the activity log
         /// </summary>
         private async Task LogAdminActionAsync(Guid adminUserId, string action, string details, string entityType = "System")
@@ -93,13 +71,8 @@ namespace TafsilkPlatform.Web.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // Create notification for tailor using helper method
-                await SendNotificationAsync(
-                tailor.UserId,
-                 "تم التحقق من حسابك",
-          "تهانينا! تم التحقق من حسابك بنجاح. يمكنك الآن استقبال الطلبات.",
-        "Success"
-             );
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] Tailor {TailorId} verified successfully", tailorId);
 
                 await LogAdminActionAsync(adminId, "VerifyTailor", $"تم التحقق من الخياط {tailorId}", "Tailor");
 
@@ -134,13 +107,8 @@ namespace TafsilkPlatform.Web.Services
                 tailor.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Create notification for tailor using helper method
-                await SendNotificationAsync(
-        tailor.UserId,
-       "تم رفض طلب التحقق",
-  $"عذراً، تم رفض طلب التحقق من حسابك. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
- "Warning"
-  );
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] Tailor {TailorId} rejection recorded", tailorId);
 
                 await LogAdminActionAsync(adminId, "RejectTailor", $"تم رفض تحقق الخياط {tailorId}. السبب: {reason}", "Tailor");
 
@@ -178,13 +146,8 @@ namespace TafsilkPlatform.Web.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // Create notification using helper method
-                await SendNotificationAsync(
-       userId,
-     "تم إيقاف حسابك مؤقتاً",
-       $"تم إيقاف حسابك مؤقتاً. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
-        "Warning"
-     );
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] User {UserId} suspended", userId);
 
                 await LogAdminActionAsync(userId, "SuspendUser", $"تم إيقاف حساب المستخدم {userId}. السبب: {reason}", "User");
 
@@ -218,13 +181,8 @@ namespace TafsilkPlatform.Web.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // Create notification using helper method
-                await SendNotificationAsync(
-                       userId,
-                "تم تفعيل حسابك",
-                    "تم تفعيل حسابك بنجاح. يمكنك الآن الدخول واستخدام المنصة.",
-                    "Success"
-                );
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] User {UserId} activated", userId);
 
                 await LogAdminActionAsync(userId, "ActivateUser", $"تم تفعيل حساب المستخدم {userId}", "User");
 
@@ -266,13 +224,8 @@ namespace TafsilkPlatform.Web.Services
 
                 await _unitOfWork.SaveChangesAsync();
 
-                // Create notification using helper method
-                await SendNotificationAsync(
-               userId,
-                   "تم حظر حسابك",
-              $"تم حظر حسابك نهائياً. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
-            "Error"
-            );
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] User {UserId} banned", userId);
 
                 await LogAdminActionAsync(userId, "BanUser", $"تم حظر الحساب {userId} نهائياً. السبب: {reason}", "User");
 
@@ -374,17 +327,8 @@ namespace TafsilkPlatform.Web.Services
                 image.IsDeleted = true;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify tailor using helper method
-                var tailor = await _unitOfWork.Tailors.GetByIdAsync(image.TailorId);
-                if (tailor != null)
-                {
-                    await SendNotificationAsync(
-            tailor.UserId,
-     "تم رفض صورة من معرض أعمالك",
-                    $"تم رفض إحدى الصور من معرض أعمالك. {(string.IsNullOrEmpty(reason) ? "" : $"السبب: {reason}")}",
-            "Warning"
-                     );
-                }
+                // Notification removed - simplified
+                _logger.LogInformation("[AdminService] Portfolio image {ImageId} rejected", imageId);
 
                 _logger.LogInformation("[AdminService] Portfolio image rejected successfully");
                 return (true, null);

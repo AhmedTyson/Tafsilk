@@ -53,8 +53,7 @@ public TailorsController(AppDbContext db, ILogger<TailorsController> logger)
       // Get tailors with pagination
      var tailors = await query
       .OrderByDescending(t => t.AverageRating)
-              .ThenByDescending(t => t.TotalReviews)
-   .ThenBy(t => t.ShopName)
+              .ThenBy(t => t.ShopName)
      .Skip((page - 1) * pageSize)
        .Take(pageSize)
          .ToListAsync();
@@ -121,18 +120,9 @@ public TailorsController(AppDbContext db, ILogger<TailorsController> logger)
   return NotFound("الخياط غير موجود");
             }
 
-// Get reviews with customer info
-            var reviews = await _db.Reviews
-          .Include(r => r.Customer)
-           .ThenInclude(c => c.User)
-        .Include(r => r.RatingDimensions)
-   .Where(r => r.TailorId == id && !r.IsDeleted)
-       .OrderByDescending(r => r.CreatedAt)
- .Take(20)
-          .ToListAsync();
-
-       ViewBag.Reviews = reviews;
-            ViewBag.ReviewCount = reviews.Count;
+            // Reviews simplified - no database
+            ViewBag.Reviews = new List<object>();
+            ViewBag.ReviewCount = 0;
 
             // Calculate statistics
      ViewBag.TotalOrders = await _db.Orders.CountAsync(o => o.TailorId == id);

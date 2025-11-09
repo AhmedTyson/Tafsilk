@@ -748,16 +748,14 @@ namespace TafsilkPlatform.Web.Services
             {
                 Id = Guid.NewGuid(),
                 Email = request.Email,
-                PhoneNumber = request.PhoneNumber,
-                PasswordHash = PasswordHasher.Hash(request.Password),
-                CreatedAt = _dateTime.Now,
+     PhoneNumber = request.PhoneNumber,
+     PasswordHash = PasswordHasher.Hash(request.Password),
+    CreatedAt = _dateTime.Now,
                 // Tailors: inactive until evidence provided
                 IsActive = request.Role == RegistrationRole.Tailor ? false : true,
                 IsDeleted = false,
-                EmailNotifications = true,
-                SmsNotifications = false,
-                PromotionalNotifications = false,
-                EmailVerified = false,
+                // Notification preferences removed - system simplified
+ EmailVerified = false,
                 RoleId = EnsureRoleAsync(request.Role).Result
             };
         }

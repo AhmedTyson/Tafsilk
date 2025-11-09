@@ -1016,68 +1016,27 @@ color: var(--text-primary);
 
  <!-- Reviews Tab -->
             <div class="tab-content" id="reviews-tab">
-              <h2 class="section-title">تقييمات العملاء</h2>
-
-    @if (Model.Reviews != null && Model.Reviews.Any())
-     {
-   <div class="reviews-summary">
- <div class="rating-overview">
-    <div class="rating-score">@Model.AverageRating.ToString("F1")</div>
+              <h2 class="section-title">التقييم</h2>
+              
+              <!-- Reviews simplified - showing average only -->
+    <div class="reviews-summary">
+     <div class="rating-overview">
+   <div class="average-rating">@Model.AverageRating.ToString("F1")</div>
          <div class="rating-stars">
-     @for (int i = 1; i <= 5; i++)
-  {
-     if (i <= Math.Floor((double)Model.AverageRating))
-   {
-       <i class="fas fa-star"></i>
-  }
-               else if (i - 0.5 <= (double)Model.AverageRating)
-      {
-      <i class="fas fa-star-half-alt"></i>
-      }
-     else
+                @for (int i = 1; i <= 5; i++)
  {
-       <i class="far fa-star"></i>
-    }
-     }
-       </div>
-    <div class="rating-count">بناءً على @ViewBag.ReviewCount تقييم</div>
-       </div>
-</div>
-
-       <div class="reviews-list">
-                   @foreach (var review in Model.Reviews.OrderByDescending(r => r.CreatedAt).Take(6))
-    {
-   <div class="review-card">
-      <div class="review-header">
-       <div class="reviewer">
-     <img src="https://placehold.co/40x40/e3f2fd/2c5aa0?text=@review.Customer.FullName.Substring(0, 1)"
-       alt="@review.Customer.FullName"
-        class="reviewer-avatar" />
-         <div class="reviewer-info">
-         <h4>@review.Customer.FullName</h4>
-<p>عميل منذ @((DateTime.UtcNow - review.Customer.CreatedAt).TotalDays / 30) شهر</p>
-            </div>
-    </div>
-           <div class="review-stars">
-    @for (int i = 1; i <= review.Rating; i++)
-          {
-    <i class="fas fa-star"></i>
-        }
-              </div>
-          </div>
-     <div class="review-content">
-            <p>@review.Comment</p>
+  <i class="fas fa-star @(i <= Model.AverageRating ? "text-warning" : "text-muted")"></i>
+ }
   </div>
-                     <div class="review-date">منذ @((DateTime.UtcNow - review.CreatedAt).TotalDays) يوم</div>
-   </div>
-       }
-         </div>
-          }
-        else
-          {
-      <p class="text-muted text-center">لا توجد تقييمات بعد</p>
-    }
-   </div>
+    <p class="text-muted mt-2">التقييم الإجمالي</p>
+        </div>
+    </div>
+ 
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle me-2"></i>
+   نظام التقييمات تم تبسيطه - التقييم الإجمالي فقط معروض
+    </div>
+            </div>
 
           <!-- Services Tab -->
       <div class="tab-content" id="services-tab">

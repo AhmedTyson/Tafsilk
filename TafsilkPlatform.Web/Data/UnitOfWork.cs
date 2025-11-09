@@ -15,11 +15,8 @@ public sealed class UnitOfWork : IUnitOfWork
         IOrderRepository orders,
         IOrderItemRepository orderItems,
         IPaymentRepository payments,
-        IReviewRepository reviews,
-        IRatingDimensionRepository ratingDimensions,
         IPortfolioRepository portfolioImages,
         ITailorServiceRepository tailorServices,
-        INotificationRepository notifications,
         IAddressRepository addresses)
     {
         _db = db;
@@ -29,11 +26,8 @@ public sealed class UnitOfWork : IUnitOfWork
         Orders = orders;
         OrderItems = orderItems;
         Payments = payments;
-        Reviews = reviews;
-        RatingDimensions = ratingDimensions;
         PortfolioImages = portfolioImages;
         TailorServices = tailorServices;
-        Notifications = notifications;
         Addresses = addresses;
     }
 
@@ -43,11 +37,8 @@ public sealed class UnitOfWork : IUnitOfWork
     public IOrderRepository Orders { get; }
     public IOrderItemRepository OrderItems { get; }
     public IPaymentRepository Payments { get; }
-    public IReviewRepository Reviews { get; }
-    public IRatingDimensionRepository RatingDimensions { get; }
     public IPortfolioRepository PortfolioImages { get; }
     public ITailorServiceRepository TailorServices { get; }
-    public INotificationRepository Notifications { get; }
     public IAddressRepository Addresses { get; }
 
     public Task<int> SaveChangesAsync() => _db.SaveChangesAsync();
