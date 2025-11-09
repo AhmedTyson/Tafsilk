@@ -591,6 +591,7 @@ entity.ToTable("ComplaintAttachments");
   {
  foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
+
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

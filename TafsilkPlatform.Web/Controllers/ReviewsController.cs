@@ -40,20 +40,20 @@ public class ReviewsController : BaseController
     [Route("Reviews/SubmitReview/{orderId:guid}")]
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> Create(Guid orderId)
- {
+    {
         try
         {
             var customerId = GetUserId();
 
  // Check if customer can review this order
-   var canReview = await _reviewService.CanCustomerReviewOrderAsync(orderId, customerId);
+            var canReview = await _reviewService.CanCustomerReviewOrderAsync(orderId, customerId);
    if (!canReview)
 {
-    TempData["Error"] = "لا يمكنك تقييم هذا الطلب. يجب أن يكون الطلب مكتملاً ولم يتم تقييمه بعد.";
+                TempData["Error"] = "لا يمكنك تقييم هذا الطلب. يجب أن يكون الطلب مكتملاً ولم يتم تقييمه بعد.";
       return RedirectToAction("MyOrders", "Orders");
        }
 
-       // Fetch order details
+            // Fetch order details
    var order = await _db.Orders
       .Include(o => o.Tailor)
    .ThenInclude(t => t.User)
@@ -62,13 +62,13 @@ public class ReviewsController : BaseController
   if (order == null)
   {
       return NotFound("Order not found");
-     }
+       }
 
     var viewModel = new SubmitReviewRequest
          {
     OrderId = orderId,
         TailorId = order.TailorId
- };
+    };
 
          // Pass order and tailor info via ViewBag for display
             ViewBag.Order = order;
@@ -80,7 +80,7 @@ public class ReviewsController : BaseController
         {
          _logger.LogError(ex, "Error loading review form for order {OrderId}", orderId);
  TempData["Error"] = "حدث خطأ أثناء تحميل صفحة التقييم";
-    return RedirectToAction("MyOrders", "Orders");
+      return RedirectToAction("MyOrders", "Orders");
         }
     }
 
@@ -99,11 +99,11 @@ public async Task<IActionResult> SubmitReview(SubmitReviewRequest request)
     {
    if (!ModelState.IsValid)
 {
- TempData["Error"] = "يرجى تصحيح الأخطاء في النموذج";
+   TempData["Error"] = "يرجى تصحيح الأخطاء في النموذج";
     return RedirectToAction(nameof(Create), new { orderId = request.OrderId });
  }
 
-    var customerId = GetUserId();
+        var customerId = GetUserId();
 
  // Check if customer can review
       var canReview = await _reviewService.CanCustomerReviewOrderAsync(request.OrderId, customerId);
@@ -139,13 +139,13 @@ public async Task<IActionResult> SubmitReview(SubmitReviewRequest request)
    _logger.LogInformation("Review submitted successfully for order {OrderId} by customer {CustomerId}", 
      request.OrderId, customerId);
 
-      TempData["Success"] = "شكراً لتقييمك! تم إرسال تقييمك بنجاح.";
+          TempData["Success"] = "شكراً لتقييمك! تم إرسال تقييمك بنجاح.";
  return RedirectToAction("MyOrders", "Orders");
  }
- catch (Exception ex)
+     catch (Exception ex)
      {
 _logger.LogError(ex, "Error submitting review for order {OrderId}", request.OrderId);
-    TempData["Error"] = "حدث خطأ أثناء إرسال التقييم";
+      TempData["Error"] = "حدث خطأ أثناء إرسال التقييم";
     return RedirectToAction(nameof(Create), new { orderId = request.OrderId });
   }
     }
