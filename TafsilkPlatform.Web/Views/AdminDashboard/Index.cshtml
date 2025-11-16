@@ -55,16 +55,6 @@
          <span class="nav-text">إدارة المستخدمين</span>
      </a>
        </li>
-            <li class="nav-item">
-  <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="nav-link">
- <i class="fas fa-user-check"></i>
-      <span class="nav-text">التحقق من الخياطين</span>
-      @if (Model.PendingTailorVerifications > 0)
-           {
-       <span class="badge">@Model.PendingTailorVerifications</span>
-        }
-    </a>
-            </li>
          <li class="nav-item">
    <a href="@Url.Action("PortfolioReview", "AdminDashboard")" class="nav-link">
             <i class="fas fa-images"></i>
@@ -247,22 +237,7 @@
 
       <div class="stat-card">
      <div class="stat-card-header">
-             <div class="stat-icon warning">
-     <i class="fas fa-user-clock"></i>
-    </div>
-            </div>
- <div class="stat-card-body">
-<h3 class="stat-value">@Model.PendingTailorVerifications.ToString("N0")</h3>
-    <p class="stat-label">طلبات تحقق معلقة</p>
-    </div>
-         <div class="stat-card-footer">
-           <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="stat-info">عرض الطلبات →</a>
-            </div>
- </div>
-
-        <div class="stat-card">
-      <div class="stat-card-header">
-          <div class="stat-icon success">
+             <div class="stat-icon success">
 <i class="fas fa-shopping-cart"></i>
        </div>
           </div>
