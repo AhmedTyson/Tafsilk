@@ -1,0 +1,65 @@
+@model List<TafsilkPlatform.MVC.Models.TailorService>
+@{
+  ViewData["Title"] = "الخدمات المتوفرة";
+    var tailorName = ViewBag.TailorName as string ?? "الخياط";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+   <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+    <li class="breadcrumb-item"><a asp-action="Index">الخياطين</a></li>
+   <li class="breadcrumb-item active">خدمات @tailorName</li>
+ </ol>
+</nav>
+
+    <h1 class="mb-4">خدمات @tailorName</h1>
+
+    @if (Model != null && Model.Any())
+    {
+ <div class="row">
+   @foreach (var service in Model)
+    {
+     <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 shadow-sm">
+       <div class="card-header bg-primary text-white">
+       <h5 class="mb-0">@service.ServiceName</h5>
+      </div>
+      <div class="card-body">
+       <p class="card-text">@service.Description</p>
+      
+    <ul class="list-unstyled">
+        <li class="mb-2">
+       <i class="bi bi-tag-fill text-primary"></i>
+   <strong>الفئة:</strong> @service.Category
+     </li>
+       <li class="mb-2">
+   <i class="bi bi-clock-fill text-primary"></i>
+       <strong>المدة:</strong> @service.EstimatedDays أيام
+      </li>
+     <li class="mb-3">
+   <i class="bi bi-cash-coin text-success"></i>
+    <strong>السعر:</strong> 
+       <span class="h4 text-success">@service.BasePrice.ToString("N0") جنيه</span>
+   </li>
+       </ul>
+    </div>
+        <div class="card-footer">
+       <div class="d-grid">
+        <button class="btn btn-success">
+    <i class="bi bi-cart-plus"></i> اطلب الخدمة
+      </button>
+ </div>
+    </div>
+     </div>
+   </div>
+  }
+   </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center">
+     <i class="bi bi-info-circle"></i> لا توجد خدمات متاحة حالياً
+ </div>
+    }
+</div>

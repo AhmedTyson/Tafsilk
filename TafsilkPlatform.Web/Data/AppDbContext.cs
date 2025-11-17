@@ -44,6 +44,12 @@ public partial class AppDbContext : DbContext
     // ✅ NEW: Complaints and support system
     public virtual DbSet<Complaint> Complaints { get; set; }
     public virtual DbSet<ComplaintAttachment> ComplaintAttachments { get; set; }
+    
+    // ✅ ECOMMERCE: Products and shopping cart
+    public virtual DbSet<Product> Products { get; set; }
+    public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
+    public virtual DbSet<CartItem> CartItems { get; set; }
+    public virtual DbSet<ProductReview> ProductReviews { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -438,24 +444,98 @@ entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
         // ✅ NEW: ComplaintAttachment Entity Configuration
         modelBuilder.Entity<ComplaintAttachment>(entity =>
         {
-entity.ToTable("ComplaintAttachments");
-      entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
+            entity.ToTable("ComplaintAttachments");
+            entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-      entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
-  entity.Property(e => e.ContentType).HasMaxLength(100);
-       entity.Property(e => e.FileName).HasMaxLength(255);
-            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+  entity.Property(e => e.Id).ValueGeneratedOnAdd();
+         entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
+            entity.Property(e => e.ContentType).HasMaxLength(100);
+          entity.Property(e => e.FileName).HasMaxLength(255);
+  entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+     
+  entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
             
-            entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
-            
-  entity.HasOne(a => a.Complaint)
-   .WithMany(c => c.Attachments)
+            entity.HasOne(a => a.Complaint)
+       .WithMany(c => c.Attachments)
    .HasForeignKey(a => a.ComplaintId)
-    .OnDelete(DeleteBehavior.NoAction);
+      .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
+        // ✅ ECOMMERCE: Product Entity
+      modelBuilder.Entity<Product>(entity =>
+        {
+            entity.HasKey(e => e.ProductId);
+ entity.Property(e => e.Price).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+        entity.Property(e => e.DiscountedPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+          
+            entity.HasIndex(e => e.Category);
+   entity.HasIndex(e => e.Slug).IsUnique();
+    entity.HasIndex(e => e.IsAvailable);
+    entity.HasIndex(e => e.IsFeatured);
+
+            entity.HasOne(p => p.Tailor)
+.WithMany()
+       .HasForeignKey(p => p.TailorId)
+  .OnDelete(DeleteBehavior.NoAction);
+  });
+
+        // ✅ ECOMMERCE: ShoppingCart Entity
+        modelBuilder.Entity<ShoppingCart>(entity =>
+        {
+            entity.HasKey(e => e.CartId);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            
+    entity.HasIndex(e => e.CustomerId).IsUnique();
+ 
+   entity.HasOne(c => c.Customer)
+       .WithOne(cp => cp.ShoppingCart)
+                .HasForeignKey<ShoppingCart>(c => c.CustomerId)
+          .OnDelete(DeleteBehavior.NoAction);
+      });
+
+        // ✅ ECOMMERCE: CartItem Entity
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+   entity.HasKey(e => e.CartItemId);
+    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+entity.Property(e => e.AddedAt).HasDefaultValueSql("(getutcdate())");
+    
+       entity.HasIndex(e => e.CartId);
+      entity.HasIndex(e => e.ProductId);
+     
+       entity.HasOne(ci => ci.Cart)
+      .WithMany(c => c.Items)
+    .HasForeignKey(ci => ci.CartId)
+     .OnDelete(DeleteBehavior.NoAction);
+   
+    entity.HasOne(ci => ci.Product)
+                .WithMany(p => p.CartItems)
+            .HasForeignKey(ci => ci.ProductId)
+              .OnDelete(DeleteBehavior.NoAction);
+        });
+
+ // ✅ ECOMMERCE: ProductReview Entity
+        modelBuilder.Entity<ProductReview>(entity =>
+        {
+ entity.HasKey(e => e.ReviewId);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+    
+ entity.HasIndex(e => e.ProductId);
+            entity.HasIndex(e => e.CustomerId);
+            
+     entity.HasOne(r => r.Product)
+          .WithMany(p => p.Reviews)
+    .HasForeignKey(r => r.ProductId)
+ .OnDelete(DeleteBehavior.NoAction);
+  
+            entity.HasOne(r => r.Customer)
+     .WithMany(c => c.ProductReviews)
+          .HasForeignKey(r => r.CustomerId)
+     .OnDelete(DeleteBehavior.NoAction);
+        });
+
+// Ensure all foreign keys use NoAction to prevent multiple cascade path errors
   foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
   {
  foreignKey.DeleteBehavior = DeleteBehavior.NoAction;

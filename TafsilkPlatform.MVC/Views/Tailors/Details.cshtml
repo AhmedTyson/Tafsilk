@@ -1,0 +1,135 @@
+@model TafsilkPlatform.MVC.Models.TailorProfile
+@{
+    ViewData["Title"] = Model.ShopName;
+    var services = ViewBag.Services as List<TafsilkPlatform.MVC.Models.TailorService> ?? new List<TafsilkPlatform.MVC.Models.TailorService>();
+}
+
+<div class="container mt-4">
+ <nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+   <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
+    <li class="breadcrumb-item"><a asp-action="Index">الخياطين</a></li>
+      <li class="breadcrumb-item active">@Model.ShopName</li>
+     </ol>
+    </nav>
+
+    <div class="row">
+ <div class="col-md-8">
+   <div class="card shadow-sm mb-4">
+       <div class="card-body">
+     <h1 class="card-title mb-3">@Model.ShopName</h1>
+
+     <div class="row mb-3">
+     <div class="col-md-6">
+   <p class="mb-2">
+     <i class="bi bi-person-fill text-primary"></i>
+    <strong>المالك:</strong> @Model.FullName
+         </p>
+       <p class="mb-2">
+    <i class="bi bi-geo-alt-fill text-primary"></i>
+  <strong>العنوان:</strong> @Model.Address, @Model.City
+    </p>
+     </div>
+     <div class="col-md-6">
+    <p class="mb-2">
+      <i class="bi bi-clock-history text-primary"></i>
+      <strong>سنوات الخبرة:</strong> @Model.ExperienceYears سنة
+       </p>
+      <p class="mb-2">
+       <i class="bi bi-star-fill text-warning"></i>
+   <strong>التقييم:</strong> @Model.Rating / 5.0
+      <span class="text-muted">(@Model.ReviewCount تقييم)</span>
+  </p>
+       </div>
+  </div>
+
+    <hr />
+
+      <h5 class="mb-3">نبذة عن الخياط</h5>
+   <p class="text-muted">@Model.Bio</p>
+
+    @if (Model.Specialties != null && Model.Specialties.Any())
+     {
+     <h5 class="mt-4 mb-3">التخصصات</h5>
+   <div>
+       @foreach (var specialty in Model.Specialties)
+       {
+   <span class="badge bg-primary me-2 mb-2">@specialty</span>
+       }
+    </div>
+  }
+   </div>
+ </div>
+
+   <div class="card shadow-sm">
+     <div class="card-header bg-primary text-white">
+   <h4 class="mb-0">الخدمات المتوفرة</h4>
+     </div>
+   <div class="card-body">
+      @if (services.Any())
+     {
+        <div class="list-group list-group-flush">
+     @foreach (var service in services)
+  {
+      <div class="list-group-item">
+       <div class="d-flex justify-content-between align-items-start">
+       <div class="flex-grow-1">
+      <h5 class="mb-1">@service.ServiceName</h5>
+     <p class="mb-1 text-muted">@service.Description</p>
+      <small class="text-muted">
+   <i class="bi bi-clock"></i> @service.EstimatedDays أيام
+       <span class="mx-2">•</span>
+     <i class="bi bi-tag"></i> @service.Category
+         </small>
+    </div>
+        <div class="text-end">
+<h4 class="text-primary mb-0">@service.BasePrice.ToString("N0") جنيه</h4>
+         <button class="btn btn-sm btn-success mt-2">اطلب الآن</button>
+   </div>
+  </div>
+        </div>
+      }
+     </div>
+   }
+        else
+     {
+     <p class="text-muted text-center">لا توجد خدمات متاحة حالياً</p>
+      }
+   </div>
+   </div>
+ </div>
+
+    <div class="col-md-4">
+   <div class="card shadow-sm mb-4">
+       <div class="card-header bg-success text-white">
+      <h5 class="mb-0">معلومات الاتصال</h5>
+     </div>
+      <div class="card-body">
+       <p><i class="bi bi-telephone-fill"></i> 01012345678</p>
+       <p><i class="bi bi-envelope-fill"></i> info@example.com</p>
+     <hr />
+    <div class="d-grid gap-2">
+    <button class="btn btn-primary">
+      <i class="bi bi-whatsapp"></i> تواصل عبر واتساب
+        </button>
+      <button class="btn btn-outline-primary">
+       <i class="bi bi-telephone"></i> اتصل الآن
+     </button>
+   </div>
+     </div>
+      </div>
+
+   <div class="card shadow-sm">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0">ساعات العمل</h5>
+    </div>
+     <div class="card-body">
+   <p class="mb-1"><strong>السبت - الخميس:</strong></p>
+    <p class="text-muted">9:00 ص - 9:00 م</p>
+       <p class="mb-1 mt-3"><strong>الجمعة:</strong></p>
+ <p class="text-muted">مغلق</p>
+  </div>
+ </div>
+</div>
+  </div>
+</div>

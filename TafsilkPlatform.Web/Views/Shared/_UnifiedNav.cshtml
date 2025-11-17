@@ -55,12 +55,25 @@
     <li><a href="@Url.Action("Index", "Home")#home" class="taf-link">الرئيسية</a></li>
            <li><a href="@Url.Action("Index", "Home")#how-it-works" class="taf-link">كيف تعمل</a></li>
      <li><a href="@Url.Action("Index", "Home")#tailors" class="taf-link">الخياطين</a></li>
-           <li><a href="@Url.Action("Index", "Home")#contact" class="taf-link">اتصل بنا</a></li>
-          </ul>
+    <!-- ✅ NEW: Store Link -->
+           <li><a href="@Url.Action("Index", "Store")" class="taf-link">
+           <i class="fas fa-store"></i> المتجر
+        </a></li>
+    <li><a href="@Url.Action("Index", "Home")#contact" class="taf-link">اتصل بنا</a></li>
+       </ul>
 
-            <!-- Right Actions -->
-            <div class="taf-actions">
-     
+   <!-- Right Actions -->
+   <div class="taf-actions">
+    
+     <!-- ✅ NEW: Shopping Cart (for Customers only) -->
+            @if (isAuthenticated && userRole == "Customer")
+{
+       <a href="@Url.Action("Cart", "Store")" class="taf-icon-btn" id="cartButton" title="سلة التسوق">
+       <i class="fas fa-shopping-cart"></i>
+      <span class="taf-badge" id="cart-badge" style="display: none;">0</span>
+     </a>
+  }
+
      @if (isAuthenticated)
     {
  <!-- Dashboard Button (Desktop Only) -->
@@ -745,9 +758,36 @@ padding: 2rem 1.5rem;
     const navLinks = document.querySelectorAll('.taf-link');
         navLinks.forEach(function(link) {
         link.addEventListener('click', function() {
-    body.classList.remove('taf-nav-open');
-   });
-        });
+          body.classList.remove('taf-nav-open');
+});
+ });
+        
+        // ✅ NEW: Update cart count for customers
+        @if (isAuthenticated && userRole == "Customer")
+        {
+            <text>
+function updateCartCount() {
+ fetch('@Url.Action("GetCartCount", "Store", new { area = "" })')
+        .then(response => response.json())
+    .then(data => {
+       const badge = document.getElementById('cart-badge');
+         if (badge && data.count > 0) {
+   badge.textContent = data.count;
+     badge.style.display = 'inline-block';
+       } else if (badge) {
+     badge.style.display = 'none';
+          }
+     })
+    .catch(error => console.error('Error fetching cart count:', error));
+            }
+    
+     // Update on page load
+  updateCartCount();
+   
+ // Update every 30 seconds
+      setInterval(updateCartCount, 30000);
+        </text>
+        }
     });
 })();
 </script>

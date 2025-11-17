@@ -7,19 +7,23 @@ namespace TafsilkPlatform.Web.Models
     {
         /// <summary>
         /// Customer submitted order, awaiting tailor quote/confirmation
+        /// For custom tailor orders: awaiting quote
+        /// For store orders: order placed, payment pending
         /// </summary>
-        QuotePending = 0,
+        Pending = 0,
         
         /// <summary>
-        /// Tailor confirmed order and provided quote
+        /// Tailor confirmed order and provided quote (custom orders)
+        /// OR Order payment confirmed (store orders)
         /// </summary>
         Confirmed = 1,
    
         /// <summary>
         /// Order is being worked on by the tailor
+        /// Applies to both custom and store orders
         /// </summary>
-        InProgress = 2,
-        
+        Processing = 2,
+    
         /// <summary>
         /// Order completed and ready for customer pickup or delivery
         /// </summary>
@@ -27,25 +31,18 @@ namespace TafsilkPlatform.Web.Models
         
         /// <summary>
         /// Customer received and accepted the order
+        /// Final successful state
         /// </summary>
-        Completed = 4,
+        Delivered = 4,
      
         /// <summary>
         /// Order cancelled by customer or tailor
         /// </summary>
         Cancelled = 5,
- 
-        // Legacy statuses (maintain for backward compatibility)
-        [Obsolete("Use QuotePending instead")]
-        Pending = 0,
-        
-        [Obsolete("Use InProgress instead")]
-        Processing = 2,
-        
-        [Obsolete("Use ReadyForPickup instead")]
-        Shipped = 3,
    
-        [Obsolete("Use Completed instead")]
-        Delivered = 4
+        /// <summary>
+        /// Order is being shipped/in transit (for delivery orders)
+        /// </summary>
+        Shipped = 6
     }
 }

@@ -1,0 +1,80 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* RTL Support */
+body[dir="rtl"] {
+    text-align: right;
+}
+
+/* Bootstrap RTL fixes */
+.navbar-nav {
+    flex-direction: row-reverse;
+}
+
+.dropdown-menu-end {
+    left: 0 !important;
+    right: auto !important;
+}
+
+/* Custom styles for Arabic content */
+.card {
+    border-radius: 8px;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+ transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Tailors card styling */
+.tailor-card {
+    transition: all 0.3s ease;
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5em 0.8em;
+    font-size: 0.85rem;
+}

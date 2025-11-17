@@ -272,7 +272,10 @@ builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
 builder.Services.AddScoped<ITailorServiceRepository, TailorServiceRepository>();
 builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-
+// ✅ ECOMMERCE: Register product and cart repositories
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 
 // Register Unit of Work
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -294,6 +297,8 @@ builder.Services.AddHostedService<IdempotencyCleanupService>();
 // Register CacheService (using in-memory cache for single-instance deployments)
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+// ✅ ECOMMERCE: Register store service
+builder.Services.AddScoped<IStoreService, StoreService>();
 
 
 // Register DateTime Service

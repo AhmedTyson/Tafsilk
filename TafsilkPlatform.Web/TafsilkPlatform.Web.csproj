@@ -27,9 +27,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Views\Reviews\**" />
     <Compile Remove="wwwroot\Tafsilk-v3-\**" />
+    <Content Remove="Views\Reviews\**" />
     <Content Remove="wwwroot\Tafsilk-v3-\**" />
+    <EmbeddedResource Remove="Views\Reviews\**" />
     <EmbeddedResource Remove="wwwroot\Tafsilk-v3-\**" />
+    <None Remove="Views\Reviews\**" />
     <None Remove="wwwroot\Tafsilk-v3-\**" />
   </ItemGroup>
 
@@ -62,7 +66,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ViewModels\Reviews\" />
-    <Folder Include="Views\Reviews\" />
   </ItemGroup>
 
 </Project>

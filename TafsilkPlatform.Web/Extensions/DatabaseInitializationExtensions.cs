@@ -30,6 +30,9 @@ public static class DatabaseInitializationExtensions
             TafsilkPlatform.Web.Data.Seed.AdminSeeder.Seed(db, configuration, logger);
             logger.LogInformation("✓ Initial data seeded successfully");
 
+            // ✅ ECOMMERCE: Seed products
+            await TafsilkPlatform.Web.Data.Seed.ProductSeeder.SeedProductsAsync(db);
+
             // TODO: Fix DatabaseSeeder property names to match actual models
             // Temporarily commented out until models are fixed
             // await TafsilkPlatform.Web.Data.Seed.DatabaseSeeder.SeedTestDataAsync(db, logger);

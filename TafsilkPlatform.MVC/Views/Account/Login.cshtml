@@ -1,0 +1,63 @@
+@model TafsilkPlatform.MVC.Models.LoginViewModel
+@{
+    ViewData["Title"] = "تسجيل الدخول";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+     <div class="card shadow">
+           <div class="card-body p-5">
+       <h2 class="text-center mb-4">تسجيل الدخول</h2>
+       
+     @if (TempData["SuccessMessage"] != null)
+        {
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+       @TempData["SuccessMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+         </div>
+         }
+
+      <div class="alert alert-info" role="alert">
+    <strong>حسابات تجريبية:</strong><br>
+        عميل: customer@test.com / 123456<br>
+ خياط: tailor@test.com / 123456<br>
+      مدير: admin@test.com / admin123
+  </div>
+
+                    <form asp-action="Login" method="post">
+  <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+       
+      <div class="mb-3">
+                <label asp-for="Email" class="form-label">البريد الإلكتروني</label>
+            <input asp-for="Email" class="form-control" placeholder="example@email.com" />
+    <span asp-validation-for="Email" class="text-danger"></span>
+     </div>
+
+     <div class="mb-3">
+     <label asp-for="Password" class="form-label">كلمة المرور</label>
+   <input asp-for="Password" class="form-control" type="password" />
+ <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+   <div class="mb-3 form-check">
+       <input asp-for="RememberMe" class="form-check-input" type="checkbox" />
+         <label asp-for="RememberMe" class="form-check-label">تذكرني</label>
+       </div>
+
+      <button type="submit" class="btn btn-primary w-100 mb-3">دخول</button>
+  
+    <div class="text-center">
+             <span>ليس لديك حساب؟</span>
+    <a asp-action="Register" class="text-decoration-none">سجل الآن</a>
+     </div>
+         </form>
+             </div>
+ </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<partial name="_ValidationScriptsPartial" />
+}

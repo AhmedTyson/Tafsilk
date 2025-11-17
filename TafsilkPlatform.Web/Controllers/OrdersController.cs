@@ -205,19 +205,19 @@ public class OrdersController : Controller
             }
 
             // Save measurements as order items (if provided)
-            if (!string.IsNullOrEmpty(model.Measurements))
-            {
-                var orderItem = new OrderItem
+   if (!string.IsNullOrEmpty(model.Measurements))
+  {
+     var orderItem = new OrderItem
                 {
-                    OrderItemId = Guid.NewGuid(),
-                    OrderId = order.OrderId,
-                    ItemName = model.ServiceType ?? "خدمة عامة",
-                    Quantity = 1,
-                    UnitPrice = model.EstimatedPrice,
-                    Total = model.EstimatedPrice,
-                    Order = order
-                };
-                _db.OrderItems.Add(orderItem);
+          OrderItemId = Guid.NewGuid(),
+             OrderId = order.OrderId,
+            Description = model.ServiceType ?? "خدمة عامة",
+        Quantity = 1,
+         UnitPrice = model.EstimatedPrice,
+     Total = model.EstimatedPrice,
+    Order = order
+      };
+   _db.OrderItems.Add(orderItem);
             }
 
             await _db.SaveChangesAsync();
@@ -360,7 +360,7 @@ public class OrdersController : Controller
                 Items = order.Items.Select(i => new OrderItemViewModel
                 {
                     ItemId = i.OrderItemId,
-                    ServiceName = i.ItemName,
+                    ServiceName = i.Description,
                     Quantity = i.Quantity,
                     Price = i.UnitPrice,
                     Notes = $"المقاسات والملاحظات" // Can be extended
@@ -671,28 +671,32 @@ public class OrdersController : Controller
     {
         return status switch
         {
-            OrderStatus.Pending => "قيد الانتظار",
-            OrderStatus.Processing => "قيد التنفيذ",
-            OrderStatus.Shipped => "قيد الشحن",
-            OrderStatus.Delivered => "تم التسليم",
-            OrderStatus.Cancelled => "ملغي",
-            _ => "غير محدد"
-        };
+ OrderStatus.Pending => "قيد الانتظار",
+   OrderStatus.Confirmed => "تم التأكيد",
+   OrderStatus.Processing => "قيد التنفيذ",
+     OrderStatus.Shipped => "قيد الشحن",
+   OrderStatus.ReadyForPickup => "جاهز للاستلام",
+   OrderStatus.Delivered => "تم التسليم",
+  OrderStatus.Cancelled => "ملغي",
+  _ => "غير محدد"
+     };
     }
 
     private bool IsValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus)
     {
         // Define valid status transitions
         var validTransitions = new Dictionary<OrderStatus, List<OrderStatus>>
-        {
-            { OrderStatus.Pending, new List<OrderStatus> { OrderStatus.Processing, OrderStatus.Cancelled } },
-            { OrderStatus.Processing, new List<OrderStatus> { OrderStatus.Shipped, OrderStatus.Cancelled } },
-{ OrderStatus.Shipped, new List<OrderStatus> { OrderStatus.Delivered } },
+ {
+      { OrderStatus.Pending, new List<OrderStatus> { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.Cancelled } },
+       { OrderStatus.Confirmed, new List<OrderStatus> { OrderStatus.Processing, OrderStatus.Cancelled } },
+            { OrderStatus.Processing, new List<OrderStatus> { OrderStatus.Shipped, OrderStatus.ReadyForPickup, OrderStatus.Cancelled } },
+       { OrderStatus.Shipped, new List<OrderStatus> { OrderStatus.Delivered, OrderStatus.ReadyForPickup } },
+   { OrderStatus.ReadyForPickup, new List<OrderStatus> { OrderStatus.Delivered } },
             { OrderStatus.Delivered, new List<OrderStatus>() },
             { OrderStatus.Cancelled, new List<OrderStatus>() }
-        };
+   };
 
-        return validTransitions.ContainsKey(currentStatus) &&
+  return validTransitions.ContainsKey(currentStatus) &&
           validTransitions[currentStatus].Contains(newStatus);
     }
 

@@ -1,0 +1,92 @@
+﻿@model List<TafsilkPlatform.MVC.Models.TailorProfile>
+@{
+    ViewData["Title"] = "الصفحة الرئيسية";
+}
+
+<div class="text-center">
+    <h1 class="display-4 mb-4">مرحباً بك في منصة تفصيلك</h1>
+    <p class="lead mb-5">منصة تربط العملاء بأفضل الخياطين في مصر والوطن العربي</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+   @TempData["SuccessMessage"]
+   <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="row mb-5">
+    <div class="col-md-4 text-center mb-4">
+        <div class="card h-100 shadow-sm">
+   <div class="card-body">
+    <i class="bi bi-scissors" style="font-size: 3rem; color: #0d6efd;"></i>
+       <h4 class="mt-3">خياطون محترفون</h4>
+  <p class="text-muted">نخبة من أفضل الخياطين ذوي الخبرة العالية</p>
+ </div>
+ </div>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="card h-100 shadow-sm">
+ <div class="card-body">
+    <i class="bi bi-star-fill" style="font-size: 3rem; color: #ffc107;"></i>
+  <h4 class="mt-3">جودة عالية</h4>
+ <p class="text-muted">تفصيل دقيق وجودة لا مثيل لها</p>
+  </div>
+     </div>
+ </div>
+    <div class="col-md-4 text-center mb-4">
+ <div class="card h-100 shadow-sm">
+    <div class="card-body">
+    <i class="bi bi-clock-history" style="font-size: 3rem; color: #198754;"></i>
+  <h4 class="mt-3">توصيل سريع</h4>
+  <p class="text-muted">التزام بالمواعيد وتسليم في الوقت المحدد</p>
+   </div>
+ </div>
+    </div>
+</div>
+
+<h2 class="mb-4">خياطون مميزون</h2>
+<div class="row">
+ @if (Model != null && Model.Any())
+{
+   @foreach (var tailor in Model)
+ {
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+     <div class="card-body">
+       <h5 class="card-title">@tailor.ShopName</h5>
+    <p class="text-muted mb-2">
+     <i class="bi bi-person"></i> @tailor.FullName
+       </p>
+      <p class="text-muted mb-2">
+      <i class="bi bi-geo-alt"></i> @tailor.City
+       </p>
+     <p class="text-muted mb-2">
+    <i class="bi bi-clock"></i> @tailor.ExperienceYears سنوات خبرة
+</p>
+     <p class="mb-3">
+         <i class="bi bi-star-fill text-warning"></i> @tailor.Rating
+    <span class="text-muted">(@tailor.ReviewCount تقييم)</span>
+   </p>
+    <p class="card-text">@tailor.Bio</p>
+     <a asp-controller="Tailors" asp-action="Details" asp-route-id="@tailor.Id" 
+   class="btn btn-primary">عرض التفاصيل</a>
+    </div>
+       </div>
+   </div>
+ }
+ }
+  else
+ {
+  <div class="col-12">
+            <p class="text-center text-muted">لا توجد بيانات متاحة حالياً</p>
+   </div>
+    }
+</div>
+
+<div class="text-center mt-5">
+    <a asp-controller="Tailors" asp-action="Index" class="btn btn-lg btn-outline-primary">
+   عرض جميع الخياطين
+ </a>
+</div>

@@ -263,61 +263,61 @@ new User
       // Create test orders (covering all statuses)
        var orders = new List<Order>
  {
-   // QuotePending
-       new Order
+   // Pending (awaiting quote)
+     new Order
    {
              OrderId = Guid.NewGuid(),
       CustomerId = customerProfiles[0].Id,
    TailorId = tailorProfiles[0].Id,
          Description = "Custom business suit for job interview",
         OrderType = "Custom Business Suit",
-      Status = OrderStatus.QuotePending,
+      Status = OrderStatus.Pending,
    TotalPrice = 2500.00,
   CreatedAt = DateTimeOffset.UtcNow,
   DueDate = DateTimeOffset.UtcNow.AddDays(14),
-            RequiresDeposit = true,
-           FulfillmentMethod = "Pickup",
-             MeasurementsJson = "{\"chest\":42,\"waist\":34}",
-           Customer = customerProfiles[0],
+ RequiresDeposit = true,
+      FulfillmentMethod = "Pickup",
+          MeasurementsJson = "{\"chest\":42,\"waist\":34}",
+       Customer = customerProfiles[0],
           Tailor = tailorProfiles[0]
   },
  // Confirmed
    new Order
            {
-            OrderId = Guid.NewGuid(),
-              CustomerId = customerProfiles[1].Id,
-            TailorId = tailorProfiles[1].Id,
+   OrderId = Guid.NewGuid(),
+CustomerId = customerProfiles[1].Id,
+    TailorId = tailorProfiles[1].Id,
   Description = "Wedding dress with lace details",
-             OrderType = "Wedding Dress",
+     OrderType = "Wedding Dress",
      Status = OrderStatus.Confirmed,
     TotalPrice = 8500.00,
-                TailorQuote = 8500.00,
+        TailorQuote = 8500.00,
   TailorQuoteNotes = "Includes premium French lace",
-                    QuoteProvidedAt = DateTimeOffset.UtcNow.AddHours(-2),
+    QuoteProvidedAt = DateTimeOffset.UtcNow.AddHours(-2),
      RequiresDeposit = true,
-        DepositAmount = 4250.00,
+     DepositAmount = 4250.00,
         DepositPaid = true,
           DepositPaidAt = DateTimeOffset.UtcNow.AddHours(-1),
    CreatedAt = DateTimeOffset.UtcNow.AddDays(-2),
-     DueDate = DateTimeOffset.UtcNow.AddDays(28),
+   DueDate = DateTimeOffset.UtcNow.AddDays(28),
  FulfillmentMethod = "Delivery",
            Customer = customerProfiles[1],
     Tailor = tailorProfiles[1]
-              },
-  // Completed
+         },
+  // Delivered (completed)
          new Order
                 {
    OrderId = Guid.NewGuid(),
   CustomerId = customerProfiles[2].Id,
-            TailorId = tailorProfiles[0].Id,
+    TailorId = tailorProfiles[0].Id,
              Description = "Traditional white thobe",
 OrderType = "Traditional Thobe",
-          Status = OrderStatus.Completed,
+          Status = OrderStatus.Delivered,
 TotalPrice = 800.00,
   CreatedAt = DateTimeOffset.UtcNow.AddDays(-20),
   DueDate = DateTimeOffset.UtcNow.AddDays(-5),
 FulfillmentMethod = "Pickup",
-             Customer = customerProfiles[2],
+    Customer = customerProfiles[2],
      Tailor = tailorProfiles[0]
                 }
     };

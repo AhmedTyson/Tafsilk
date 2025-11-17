@@ -1,0 +1,131 @@
+@model TafsilkPlatform.MVC.Models.DashboardStats
+@{
+    ViewData["Title"] = "لوحة التحكم";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">لوحة التحكم - إحصائيات المنصة</h1>
+
+ <div class="row mb-4">
+   <div class="col-md-3 mb-3">
+   <div class="card text-white bg-primary shadow">
+    <div class="card-body">
+       <div class="d-flex justify-content-between align-items-center">
+ <div>
+       <h6 class="card-title">إجمالي الطلبات</h6>
+      <h2 class="mb-0">@Model.TotalOrders</h2>
+     </div>
+    <i class="bi bi-cart4" style="font-size: 3rem; opacity: 0.5;"></i>
+       </div>
+   </div>
+     </div>
+   </div>
+
+  <div class="col-md-3 mb-3">
+       <div class="card text-white bg-warning shadow">
+     <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+   <div>
+      <h6 class="card-title">طلبات قيد التنفيذ</h6>
+    <h2 class="mb-0">@Model.PendingOrders</h2>
+       </div>
+   <i class="bi bi-hourglass-split" style="font-size: 3rem; opacity: 0.5;"></i>
+   </div>
+   </div>
+ </div>
+ </div>
+
+ <div class="col-md-3 mb-3">
+   <div class="card text-white bg-success shadow">
+      <div class="card-body">
+     <div class="d-flex justify-content-between align-items-center">
+       <div>
+    <h6 class="card-title">طلبات مكتملة</h6>
+      <h2 class="mb-0">@Model.CompletedOrders</h2>
+       </div>
+    <i class="bi bi-check-circle" style="font-size: 3rem; opacity: 0.5;"></i>
+     </div>
+      </div>
+   </div>
+        </div>
+
+ <div class="col-md-3 mb-3">
+   <div class="card text-white bg-info shadow">
+       <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+     <div>
+       <h6 class="card-title">الإيرادات</h6>
+       <h2 class="mb-0">@Model.TotalRevenue.ToString("N0")</h2>
+     </div>
+      <i class="bi bi-currency-dollar" style="font-size: 3rem; opacity: 0.5;"></i>
+   </div>
+      </div>
+     </div>
+   </div>
+    </div>
+
+    <div class="row mb-4">
+  <div class="col-md-6 mb-3">
+   <div class="card shadow">
+       <div class="card-body">
+     <div class="d-flex justify-content-between align-items-center">
+       <div>
+    <h5 class="card-title">إجمالي العملاء</h5>
+       <h3 class="text-primary">@Model.TotalCustomers</h3>
+     </div>
+       <i class="bi bi-people-fill text-primary" style="font-size: 3rem; opacity: 0.3;"></i>
+      </div>
+       <a asp-action="Customers" class="btn btn-outline-primary btn-sm mt-2">
+    <i class="bi bi-eye"></i> عرض العملاء
+  </a>
+   </div>
+     </div>
+ </div>
+
+   <div class="col-md-6 mb-3">
+     <div class="card shadow">
+     <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+       <div>
+       <h5 class="card-title">إجمالي الخياطين</h5>
+  <h3 class="text-success">@Model.TotalTailors</h3>
+       </div>
+       <i class="bi bi-scissors text-success" style="font-size: 3rem; opacity: 0.3;"></i>
+   </div>
+     <a asp-action="Tailors" class="btn btn-outline-success btn-sm mt-2">
+    <i class="bi bi-eye"></i> عرض الخياطين
+     </a>
+   </div>
+ </div>
+ </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+   <div class="card shadow">
+    <div class="card-header bg-dark text-white">
+  <h4 class="mb-0">روابط سريعة</h4>
+    </div>
+    <div class="card-body">
+ <div class="row">
+      <div class="col-md-4 mb-2">
+       <a asp-action="Orders" class="btn btn-outline-primary w-100">
+        <i class="bi bi-list-check"></i> إدارة الطلبات
+      </a>
+     </div>
+        <div class="col-md-4 mb-2">
+ <a asp-action="Customers" class="btn btn-outline-success w-100">
+  <i class="bi bi-people"></i> إدارة العملاء
+     </a>
+    </div>
+       <div class="col-md-4 mb-2">
+     <a asp-action="Tailors" class="btn btn-outline-info w-100">
+       <i class="bi bi-scissors"></i> إدارة الخياطين
+     </a>
+     </div>
+       </div>
+    </div>
+   </div>
+ </div>
+    </div>
+</div>
