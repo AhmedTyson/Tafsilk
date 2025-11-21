@@ -58,6 +58,7 @@ public class OrderImageViewModel
 {
     public Guid ImageId { get; set; }
     public string? ContentType { get; set; }
+    public string? ImgUrl { get; set; }
 }
 
 public class OrderStatusHistoryViewModel

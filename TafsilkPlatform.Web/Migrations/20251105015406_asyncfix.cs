@@ -5,7 +5,7 @@
 namespace TafsilkPlatform.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class asyncfix : Migration
+    public partial class AsyncFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

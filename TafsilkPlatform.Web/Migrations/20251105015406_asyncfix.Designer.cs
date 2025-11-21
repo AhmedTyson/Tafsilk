@@ -13,7 +13,7 @@ namespace TafsilkPlatform.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20251105015406_asyncfix")]
-    partial class asyncfix
+    partial class AsyncFix
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

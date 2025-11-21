@@ -21,6 +21,7 @@ using TafsilkPlatform.Web.Repositories;
 using TafsilkPlatform.Web.Security;
 using TafsilkPlatform.Web.Services;
 using System.Net;
+using Microsoft.AspNetCore.Http;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -335,6 +336,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserProfileHelper, UserProfileHelper>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<ImageUploadService>(); // Best practices image upload service
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IProfileCompletionService, ProfileCompletionService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -348,8 +350,15 @@ builder.Services.AddHostedService<IdempotencyCleanupService>();
 // Register CacheService (using in-memory cache for single-instance deployments)
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
+
+// ✅ GLOBAL EXCEPTION HANDLER - Catches all unhandled exceptions
+builder.Services.AddGlobalExceptionHandler();
+
 // ✅ ECOMMERCE: Register store service
 builder.Services.AddScoped<IStoreService, StoreService>();
+// Register product and portfolio management services
+builder.Services.AddScoped<TafsilkPlatform.Web.Services.IProductManagementService, TafsilkPlatform.Web.Services.ProductManagementService>();
+builder.Services.AddScoped<TafsilkPlatform.Web.Services.IPortfolioService, TafsilkPlatform.Web.Services.PortfolioService>();
 // ✅ PAYMENT: Register payment processor service (supports Cash + Stripe when configured)
 builder.Services.AddScoped<TafsilkPlatform.Web.Services.Payment.IPaymentProcessorService, TafsilkPlatform.Web.Services.Payment.PaymentProcessorService>();
 
@@ -461,7 +470,41 @@ builder.Services.AddAuthorization(options =>
       });
 });
 
+// Configure maximum upload sizes (Kestrel + FormOptions)
+// Default max upload size: 50 MB (can be overridden via configuration: Uploads:MaxRequestBodySizeBytes)
+var defaultMaxUploadBytes = builder.Configuration.GetValue<long?>("Uploads:MaxRequestBodySizeBytes") ?? 50 * 1024 * 1024;
+
+// Kestrel server limit
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Limits.MaxRequestBodySize = 20 * 1024 * 1024; // 20MB
+});
+
+// Multipart form options (for model binding IFormFile)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = defaultMaxUploadBytes; // bytes
+    options.MultipartHeadersLengthLimit = 16384; // header size limit
+    options.ValueLengthLimit = int.MaxValue;
+    options.MemoryBufferThreshold = 1024 * 1024; // 1MB before buffering to disk
+});
+
 var app = builder.Build();
+
+// Fallback error-handling middleware (last in pipeline)
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next();
+    }
+    catch (Exception ex)
+    {
+        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Unhandled exception in fallback middleware");
+        context.Response.Redirect("/Error?message=حدث خطأ غير متوقع");
+    }
+});
 
 // Initialize database in development
 if (app.Environment.IsDevelopment())
@@ -473,11 +516,14 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<SecurityHeadersMiddleware>();
 
 // ✅ GLOBAL EXCEPTION HANDLER (must be early in pipeline)
-app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+app.UseExceptionHandler("/Error");
+
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
+    // In development, use detailed error page for better debugging
     app.UseDeveloperExceptionPage();
     
     // ✅ SWAGGER MIDDLEWARE
@@ -506,9 +552,14 @@ app.UseCors();
 
 // ✅ RESPONSE COMPRESSION (must be before UseStaticFiles and UseRouting)
 var enableResponseCompressionMiddleware = app.Configuration.GetValue<bool>("Performance:EnableResponseCompression", true);
-if (enableResponseCompressionMiddleware)
+if (enableResponseCompressionMiddleware && !app.Environment.IsDevelopment())
 {
     app.UseResponseCompression();
+    Log.Information("✅ Response compression enabled (Production mode)");
+}
+else if (app.Environment.IsDevelopment())
+{
+    Log.Information("ℹ️ Response compression disabled in Development mode for better debugging");
 }
 
 // ✅ HTTPS Redirection (only if not already added in production)

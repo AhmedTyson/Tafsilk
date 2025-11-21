@@ -15,6 +15,11 @@ public interface IFileUploadService
     /// <summary>
     /// Validates if the file is an image
     /// </summary>
+    Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile? file);
+
+    /// <summary>
+    /// Checks if the image is valid
+    /// </summary>
     bool IsValidImage(IFormFile file);
 
     /// <summary>

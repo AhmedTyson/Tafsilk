@@ -6,7 +6,6 @@ using TafsilkPlatform.Web.Extensions;
 using TafsilkPlatform.Web.Models;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
-using System.Text.Json;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -20,15 +19,21 @@ public class TailorManagementController : Controller
     private readonly AppDbContext _context;
     private readonly ILogger<TailorManagementController> _logger;
     private readonly IFileUploadService _fileUploadService;
+    private readonly ImageUploadService _imageUploadService;
+    private readonly IWebHostEnvironment _environment;
 
     public TailorManagementController(
         AppDbContext context,
         ILogger<TailorManagementController> logger,
-        IFileUploadService fileUploadService)
+        IFileUploadService fileUploadService,
+        ImageUploadService imageUploadService,
+        IWebHostEnvironment environment)
     {
-        _context = context;
-        _logger = logger;
-        _fileUploadService = fileUploadService;
+        _context = context ?? throw new ArgumentNullException(nameof(context));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
+        _imageUploadService = imageUploadService ?? throw new ArgumentNullException(nameof(imageUploadService));
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
     #region Portfolio Management (معرض الأعمال)
@@ -115,100 +120,304 @@ public class TailorManagementController : Controller
     /// </summary>
     [HttpPost("portfolio/add")]
     [ValidateAntiForgeryToken]
+    [RequestSizeLimit(10 * 1024 * 1024)] // 10MB limit for the entire request
+    [RequestFormLimits(MultipartBodyLengthLimit = 10 * 1024 * 1024, ValueLengthLimit = int.MaxValue)]
     public async Task<IActionResult> AddPortfolioImage(AddPortfolioImageViewModel model)
     {
+        _logger.LogInformation("[UPLOAD] AddPortfolioImage POST called. Model null: {IsNull}, File present: {HasFile}, FileName: {FileName}, Length: {Length}",
+            model == null, model?.ImageFile != null, model?.ImageFile?.FileName, model?.ImageFile?.Length ?? 0);
         try
         {
+            // Step 0: Validate model is not null (model binding might have failed)
+            if (model == null)
+            {
+                _logger.LogWarning("Model binding failed - model is null");
+                ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "فشل تحميل البيانات. يرجى المحاولة مرة أخرى";
+                return View(new AddPortfolioImageViewModel());
+            }
+
+            _logger.LogInformation("AddPortfolioImage POST called for tailor {TailorId}", model.TailorId);
+
+            // Step 1: Validate user and tailor
             var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
 
-            if (tailor == null || tailor.Id != model.TailorId)
-                return Unauthorized();
+            if (tailor == null)
+            {
+                _logger.LogWarning("Tailor not found for user {UserId}", userId);
+                TempData["Error"] = "الملف الشخصي غير موجود";
+                return RedirectToAction("Tailor", "Dashboards");
+            }
 
+            if (tailor.Id != model.TailorId)
+            {
+                _logger.LogWarning("Unauthorized access attempt. UserId: {UserId}, TailorId: {TailorId}", userId, model.TailorId);
+                TempData["Error"] = "غير مصرح لك بإضافة الصور";
+                return RedirectToAction("Tailor", "Dashboards");
+            }
+
+            // Step 2: Validate model state
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Model state invalid for AddPortfolioImage");
                 ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "يرجى التحقق من البيانات المدخلة وإصلاح الأخطاء";
                 return View(model);
             }
 
-            // Validate image file
+            // Step 3: Validate image file
             if (model.ImageFile == null || model.ImageFile.Length == 0)
             {
+                _logger.LogWarning("Image file is null or empty");
                 ModelState.AddModelError(nameof(model.ImageFile), "يرجى اختيار صورة");
                 ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "يرجى اختيار صورة";
                 return View(model);
             }
 
-            if (!_fileUploadService.IsValidImage(model.ImageFile))
+            // Use best practices validation (extension + MIME + file signature)
+            var (isValid, validationError) = await _imageUploadService.ValidateImageAsync(model.ImageFile);
+            if (!isValid)
             {
-                ModelState.AddModelError(nameof(model.ImageFile), "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF)");
+                _logger.LogWarning("Image validation failed: {FileName}, Error: {Error}",
+                    model.ImageFile.FileName, validationError);
+                ModelState.AddModelError(nameof(model.ImageFile), validationError ?? "نوع الملف غير صالح");
                 ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = validationError ?? "نوع الملف غير صالح";
                 return View(model);
             }
 
-            if (model.ImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
+            var maxFileSize = _fileUploadService.GetMaxFileSizeInBytes();
+            if (model.ImageFile.Length > maxFileSize)
             {
-                ModelState.AddModelError(nameof(model.ImageFile), $"حجم الصورة يجب أن يكون أقل من {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
+                _logger.LogWarning("Image file too large: {Size} bytes, Max: {MaxSize} bytes",
+                    model.ImageFile.Length, maxFileSize);
+                ModelState.AddModelError(nameof(model.ImageFile),
+                    $"حجم الصورة يجب أن يكون أقل من {maxFileSize / 1024 / 1024} ميجابايت");
                 ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "حجم الصورة كبير جداً";
                 return View(model);
             }
 
-            // Check image count limit
+            // Step 4: Check image count limit
             var currentImageCount = await _context.PortfolioImages
-         .CountAsync(p => p.TailorId == tailor.Id && !p.IsDeleted);
+                .CountAsync(p => p.TailorId == tailor.Id && !p.IsDeleted);
 
-            if (currentImageCount >= 50) // Configure as needed
+            if (currentImageCount >= 50)
             {
+                _logger.LogWarning("Image limit reached for tailor {TailorId}. Current count: {Count}", tailor.Id, currentImageCount);
                 TempData["Error"] = "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)";
                 return RedirectToAction(nameof(ManagePortfolio));
             }
 
-            // Read image data
+            // Step 5: Read image data using best practices service
             byte[] imageData;
-            using (var memoryStream = new MemoryStream())
+            try
             {
-                await model.ImageFile.CopyToAsync(memoryStream);
-                imageData = memoryStream.ToArray();
+                _logger.LogInformation("Processing image using best practices. File size: {Size} bytes", model.ImageFile.Length);
+
+                // Use the best practices image processing service
+                // This uses memory-efficient buffered streaming and validates during processing
+                imageData = await _imageUploadService.ProcessImageAsync(model.ImageFile);
+
+                if (imageData == null || imageData.Length == 0)
+                {
+                    throw new InvalidOperationException("فشل قراءة بيانات الصورة. الملف فارغ أو تالف");
+                }
+
+                _logger.LogInformation("Image processed successfully. Size: {Size} bytes", imageData.Length);
+            }
+            catch (OutOfMemoryException oomEx)
+            {
+                _logger.LogError(oomEx, "Out of memory while reading image. File size: {Size} bytes", model.ImageFile.Length);
+                ModelState.AddModelError(nameof(model.ImageFile), "الصورة كبيرة جداً. يرجى اختيار صورة أصغر (أقل من 5 ميجابايت)");
+                ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر (أقل من 5 ميجابايت)";
+                return View(model);
+            }
+            catch (InvalidOperationException ioEx)
+            {
+                _logger.LogError(ioEx, "Invalid operation while reading image. File size: {Size} bytes", model.ImageFile.Length);
+                ModelState.AddModelError(nameof(model.ImageFile), ioEx.Message);
+                ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = ioEx.Message;
+                return View(model);
+            }
+            catch (IOException ioEx)
+            {
+                _logger.LogError(ioEx, "IO error while reading image. File size: {Size} bytes", model.ImageFile.Length);
+                ModelState.AddModelError(nameof(model.ImageFile), "حدث خطأ أثناء قراءة الملف. يرجى المحاولة مرة أخرى");
+                ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "حدث خطأ أثناء قراءة الملف";
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error reading image data. File size: {Size} bytes, Error: {Error}",
+                    model.ImageFile.Length, ex.Message);
+                ModelState.AddModelError(nameof(model.ImageFile), "حدث خطأ غير متوقع أثناء قراءة الصورة. يرجى المحاولة مرة أخرى");
+                ViewBag.Categories = GetPortfolioCategories();
+                TempData["Error"] = "حدث خطأ غير متوقع أثناء قراءة الصورة";
+                return View(model);
             }
 
-            // Get next display order
+            // Step 6: Get next display order
             var maxOrder = await _context.PortfolioImages
-     .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
-        .MaxAsync(p => (int?)p.DisplayOrder) ?? 0;
+                .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
+                .MaxAsync(p => (int?)p.DisplayOrder) ?? 0;
 
-            // Create portfolio image
+            // Step 7: Create portfolio image entity
             var portfolioImage = new PortfolioImage
             {
                 PortfolioImageId = Guid.NewGuid(),
                 TailorId = tailor.Id,
-                Title = model.Title,
+                Title = model.Title?.Trim(),
                 Category = model.Category,
-                Description = model.Description,
+                Description = model.Description?.Trim(),
                 EstimatedPrice = model.EstimatedPrice,
                 IsFeatured = model.IsFeatured,
                 IsBeforeAfter = model.IsBeforeAfter,
                 DisplayOrder = maxOrder + 1,
                 ImageData = imageData,
-                ContentType = model.ImageFile.ContentType,
+                ContentType = model.ImageFile.ContentType ?? "image/jpeg",
                 UploadedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
 
-            _context.PortfolioImages.Add(portfolioImage);
-            await _context.SaveChangesAsync();
+            _logger.LogInformation("Portfolio image entity created. ImageId: {ImageId}, TailorId: {TailorId}, ImageSize: {Size} bytes",
+                portfolioImage.PortfolioImageId, tailor.Id, imageData.Length);
 
-            _logger.LogInformation("Portfolio image added for tailor {TailorId}", tailor.Id);
-            TempData["Success"] = "تم إضافة الصورة بنجاح إلى معرض الأعمال";
+            // Step 8: Save to database with transaction using execution strategy
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    _context.PortfolioImages.Add(portfolioImage);
+                    _logger.LogInformation("Portfolio image added to context. Starting database save...");
 
-            return RedirectToAction(nameof(ManagePortfolio));
+                    var saveResult = await _context.SaveChangesAsync();
+                    _logger.LogInformation("SaveChangesAsync completed. Result: {SaveResult} entities saved", saveResult);
+
+                    if (saveResult == 0)
+                    {
+                        _logger.LogError("CRITICAL: Failed to save portfolio image - SaveChangesAsync returned 0");
+                        await transaction.RollbackAsync();
+                        throw new InvalidOperationException("فشل حفظ الصورة في قاعدة البيانات. لم يتم حفظ أي بيانات.");
+                    }
+
+                    await transaction.CommitAsync();
+                    _logger.LogInformation("Transaction committed successfully. ImageId: {ImageId}", portfolioImage.PortfolioImageId);
+
+                    // Step 9: Verify the portfolio image was actually saved
+                    var savedImage = await _context.PortfolioImages
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(p => p.PortfolioImageId == portfolioImage.PortfolioImageId && !p.IsDeleted);
+
+                    if (savedImage == null)
+                    {
+                        _logger.LogError("CRITICAL: Portfolio image was not found in database after commit. ImageId: {ImageId}",
+                            portfolioImage.PortfolioImageId);
+                        throw new InvalidOperationException("فشل التحقق من حفظ الصورة في قاعدة البيانات");
+                    }
+
+                    _logger.LogInformation("✅ Portfolio image {ImageId} added and verified successfully for tailor {TailorId}. ImageSize: {Size} bytes",
+                        portfolioImage.PortfolioImageId, tailor.Id, savedImage.ImageData?.Length ?? 0);
+
+                    TempData["Success"] = "تم إضافة الصورة بنجاح إلى معرض الأعمال";
+                    return (IActionResult)RedirectToAction("Tailor", "Dashboards");
+                }
+                catch (DbUpdateException dbEx)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(rollbackEx, "Error during transaction rollback");
+                    }
+
+                    _logger.LogError(dbEx, "Database update exception during portfolio image save");
+
+                    ViewBag.Categories = GetPortfolioCategories();
+                    ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
+                    TempData["Error"] = "حدث خطأ في قاعدة البيانات. يرجى التحقق من البيانات والمحاولة مرة أخرى.";
+                    return (IActionResult)View(model);
+                }
+                catch (InvalidOperationException ioEx)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(rollbackEx, "Error during transaction rollback");
+                    }
+
+                    _logger.LogError(ioEx, "Invalid operation during portfolio image save");
+
+                    ViewBag.Categories = GetPortfolioCategories();
+                    ModelState.AddModelError("", ioEx.Message);
+                    TempData["Error"] = ioEx.Message;
+                    return (IActionResult)View(model);
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        await transaction.RollbackAsync();
+                    }
+                    catch (Exception rollbackEx)
+                    {
+                        _logger.LogError(rollbackEx, "Error during transaction rollback");
+                    }
+
+                    _logger.LogError(ex, "Unexpected error during portfolio image save transaction");
+
+                    ViewBag.Categories = GetPortfolioCategories();
+                    ModelState.AddModelError("", "حدث خطأ غير متوقع أثناء حفظ الصورة. يرجى المحاولة مرة أخرى.");
+                    TempData["Error"] = $"حدث خطأ: {ex.Message}";
+                    return (IActionResult)View(model);
+                }
+            });
+        }
+        catch (OutOfMemoryException oomEx)
+        {
+            _logger.LogError(oomEx, "Out of memory exception while adding portfolio image");
+            ViewBag.Categories = GetPortfolioCategories();
+            ModelState.AddModelError("", "الصورة كبيرة جداً. يرجى اختيار صورة أصغر");
+            TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر";
+            return View(model ?? new AddPortfolioImageViewModel());
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "Database error while adding portfolio image");
+            ViewBag.Categories = GetPortfolioCategories();
+            ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
+            TempData["Error"] = "حدث خطأ في قاعدة البيانات";
+            return View(model ?? new AddPortfolioImageViewModel());
+        }
+        catch (Microsoft.AspNetCore.Http.BadHttpRequestException badReqEx)
+        {
+            _logger.LogError(badReqEx, "[UPLOAD] BadHttpRequestException during image upload (likely request too large)");
+            ViewBag.Categories = GetPortfolioCategories();
+            ModelState.AddModelError("", "حجم الملف أو الطلب كبير جداً. يرجى اختيار صورة أصغر أو تقليل عدد الملفات.");
+            TempData["Error"] = "حجم الملف أو الطلب كبير جداً. يرجى اختيار صورة أصغر أو تقليل عدد الملفات.";
+            return View(model ?? new AddPortfolioImageViewModel());
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding portfolio image");
-            ModelState.AddModelError("", "حدث خطأ أثناء إضافة الصورة");
+            _logger.LogError(ex, "[UPLOAD] Unexpected error while adding portfolio image. Exception type: {ExceptionType}, Message: {Message}, StackTrace: {StackTrace}",
+                ex.GetType().Name, ex.Message, ex.StackTrace);
             ViewBag.Categories = GetPortfolioCategories();
-            return View(model);
+            ModelState.AddModelError("", "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.");
+            TempData["Error"] = $"حدث خطأ: {ex.Message}";
+            return View(model ?? new AddPortfolioImageViewModel());
         }
     }
 
@@ -305,21 +514,51 @@ public class TailorManagementController : Controller
                 {
                     ModelState.AddModelError(nameof(model.NewImageFile), "نوع الملف غير صالح");
                     ViewBag.Categories = GetPortfolioCategories();
+                    TempData["Error"] = "نوع الملف غير صالح";
                     return View(model);
                 }
 
-                if (model.NewImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
+                var maxFileSize = _fileUploadService.GetMaxFileSizeInBytes();
+                if (model.NewImageFile.Length > maxFileSize)
                 {
-                    ModelState.AddModelError(nameof(model.NewImageFile), "حجم الملف كبير جداً");
+                    ModelState.AddModelError(nameof(model.NewImageFile), $"حجم الملف كبير جداً. الحد الأقصى {maxFileSize / 1024 / 1024} ميجابايت");
                     ViewBag.Categories = GetPortfolioCategories();
+                    TempData["Error"] = "حجم الملف كبير جداً";
                     return View(model);
                 }
 
-                using (var memoryStream = new MemoryStream())
+                // Read image data with proper error handling
+                try
                 {
-                    await model.NewImageFile.CopyToAsync(memoryStream);
-                    image.ImageData = memoryStream.ToArray();
-                    image.ContentType = model.NewImageFile.ContentType;
+                    _logger.LogInformation("Reading new image data for portfolio image {ImageId}. File size: {Size} bytes",
+                        id, model.NewImageFile.Length);
+
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.NewImageFile.CopyToAsync(memoryStream);
+                        image.ImageData = memoryStream.ToArray();
+                    }
+
+                    image.ContentType = model.NewImageFile.ContentType ?? "image/jpeg";
+                    _logger.LogInformation("New image data read successfully. Size: {Size} bytes", image.ImageData.Length);
+                }
+                catch (OutOfMemoryException oomEx)
+                {
+                    _logger.LogError(oomEx, "Out of memory while reading image for portfolio image {ImageId}. File size: {Size} bytes",
+                        id, model.NewImageFile.Length);
+                    ModelState.AddModelError(nameof(model.NewImageFile), "الصورة كبيرة جداً. يرجى اختيار صورة أصغر");
+                    ViewBag.Categories = GetPortfolioCategories();
+                    TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر";
+                    return View(model);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error reading image data for portfolio image {ImageId}. File size: {Size} bytes",
+                        id, model.NewImageFile.Length);
+                    ModelState.AddModelError(nameof(model.NewImageFile), "حدث خطأ أثناء قراءة الصورة. يرجى المحاولة مرة أخرى");
+                    ViewBag.Categories = GetPortfolioCategories();
+                    TempData["Error"] = "حدث خطأ أثناء قراءة الصورة";
+                    return View(model);
                 }
             }
 
@@ -391,10 +630,41 @@ public class TailorManagementController : Controller
             var image = await _context.PortfolioImages
       .FirstOrDefaultAsync(p => p.PortfolioImageId == id && !p.IsDeleted);
 
-            if (image == null || image.ImageData == null)
+            if (image == null)
                 return NotFound();
 
-            return File(image.ImageData, image.ContentType ?? "image/jpeg");
+            // Prefer binary data if available
+            if (image.ImageData != null && image.ImageData.Length > 0)
+            {
+                return File(image.ImageData, image.ContentType ?? "image/jpeg");
+            }
+
+            // Fallback to ImageUrl if present
+            if (!string.IsNullOrWhiteSpace(image.ImageUrl))
+            {
+                // Absolute URL -> redirect
+                if (Uri.IsWellFormedUriString(image.ImageUrl, UriKind.Absolute))
+                {
+                    return Redirect(image.ImageUrl);
+                }
+
+                // Relative URL (starts with '/') -> serve physical file from wwwroot
+                if (image.ImageUrl.StartsWith('/'))
+                {
+                    var relativePath = image.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    var physicalPath = Path.Combine(_environment.WebRootPath ?? string.Empty, relativePath);
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        var contentType = image.ContentType ?? "image/jpeg";
+                        return PhysicalFile(physicalPath, contentType);
+                    }
+                }
+
+                // As a last resort, try to return redirect to whatever value was stored
+                return Redirect(image.ImageUrl);
+            }
+
+            return NotFound();
         }
         catch (Exception ex)
         {
@@ -892,12 +1162,7 @@ public class TailorManagementController : Controller
             StockQuantity = 1
         };
 
-        ViewBag.Categories = GetProductCategories();
-        ViewBag.SubCategories = GetProductSubCategories();
-        ViewBag.Sizes = GetProductSizes();
-        ViewBag.Materials = GetProductMaterials();
-        
-        ViewData["Title"] = "إضافة منتج جديد";
+        PopulateProductFormViewBag();
         return View(model);
     }
 
@@ -907,207 +1172,98 @@ public class TailorManagementController : Controller
     /// </summary>
     [HttpPost("products/add")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddProduct(AddProductViewModel model)
+    [RequestSizeLimit(12 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 12 * 1024 * 1024, ValueLengthLimit = int.MaxValue)]
+    public async Task<IActionResult> AddProduct(AddProductViewModel? model)
     {
         try
         {
-            _logger.LogInformation("AddProduct POST called for tailor {TailorId}", model.TailorId);
-            
+            if (model == null)
+            {
+                PopulateProductFormViewBag();
+                TempData["Error"] = "فشل تحميل البيانات. يرجى المحاولة مرة أخرى";
+                return View(new AddProductViewModel());
+            }
             var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
-
             if (tailor == null)
             {
-                _logger.LogWarning("Tailor not found for user {UserId}", userId);
                 TempData["Error"] = "الملف الشخصي غير موجود";
                 return RedirectToAction("Tailor", "Dashboards");
             }
-
             if (tailor.Id != model.TailorId)
             {
-                _logger.LogWarning("Tailor ID mismatch: {ExpectedId} vs {ProvidedId}", tailor.Id, model.TailorId);
                 return Unauthorized();
             }
-
             if (!ModelState.IsValid)
             {
-                _logger.LogWarning("Model state invalid for AddProduct. Errors: {Errors}", 
-                    string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
-                
-                // Re-populate ViewBag data
-                ViewBag.Categories = GetProductCategories();
-                ViewBag.SubCategories = GetProductSubCategories();
-                ViewBag.Sizes = GetProductSizes();
-                ViewBag.Materials = GetProductMaterials();
-                
-                ViewData["Title"] = "إضافة منتج جديد";
-                
-                // Add a general error message
+                PopulateProductFormViewBag();
                 TempData["Error"] = "يرجى التحقق من البيانات المدخلة وإصلاح الأخطاء";
                 return View(model);
             }
-
-            // Validate primary image
-            if (model.PrimaryImage == null || model.PrimaryImage.Length == 0)
+            int validImageCount = 0;
+            var (isImageValid, imageError) = await _imageUploadService.ValidateImageAsync(model.PrimaryImage);
+            if (!isImageValid)
             {
-                _logger.LogWarning("Primary image is null or empty");
-                ModelState.AddModelError(nameof(model.PrimaryImage), "الصورة الأساسية مطلوبة");
-                ViewBag.Categories = GetProductCategories();
-                ViewBag.SubCategories = GetProductSubCategories();
-                ViewBag.Sizes = GetProductSizes();
-                ViewBag.Materials = GetProductMaterials();
-                ViewData["Title"] = "إضافة منتج جديد";
-                TempData["Error"] = "الصورة الأساسية مطلوبة";
+                ModelState.AddModelError(nameof(model.PrimaryImage), imageError!);
+                PopulateProductFormViewBag();
+                TempData["Error"] = imageError;
                 return View(model);
             }
-
-            if (!_fileUploadService.IsValidImage(model.PrimaryImage))
+            byte[] primaryImageData = Array.Empty<byte>();
+            try
             {
-                _logger.LogWarning("Invalid primary image format");
-                ModelState.AddModelError(nameof(model.PrimaryImage), "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)");
-                ViewBag.Categories = GetProductCategories();
-                ViewBag.SubCategories = GetProductSubCategories();
-                ViewBag.Sizes = GetProductSizes();
-                ViewBag.Materials = GetProductMaterials();
-                ViewData["Title"] = "إضافة منتج جديد";
-                TempData["Error"] = "نوع الصورة غير صالح";
+                primaryImageData = await _imageUploadService.ProcessImageWithSizeCheckAsync(model.PrimaryImage!);
+                validImageCount++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing primary image");
+                ModelState.AddModelError(nameof(model.PrimaryImage), "حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى");
+                PopulateProductFormViewBag();
+                TempData["Error"] = "حدث خطأ أثناء معالجة الصورة";
                 return View(model);
             }
-
-            // Check file size
-            if (model.PrimaryImage.Length > _fileUploadService.GetMaxFileSizeInBytes())
+            var additionalImagesJson = await ProcessAdditionalImagesAsync(model.AdditionalImages);
+            if (validImageCount == 0)
             {
-                _logger.LogWarning("Primary image file size too large: {Size} bytes", model.PrimaryImage.Length);
-                ModelState.AddModelError(nameof(model.PrimaryImage), $"حجم الصورة كبير جداً. الحد الأقصى {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
-                ViewBag.Categories = GetProductCategories();
-                ViewBag.SubCategories = GetProductSubCategories();
-                ViewBag.Sizes = GetProductSizes();
-                ViewBag.Materials = GetProductMaterials();
-                ViewData["Title"] = "إضافة منتج جديد";
-                TempData["Error"] = "حجم الصورة كبير جداً";
-                return View(model);
+                TempData["Warning"] = "لم يتم قبول أي صورة من الصور المرفوعة. يرجى التأكد من نوع وحجم الصور.";
             }
-
-            _logger.LogInformation("Reading primary image data for product");
-            
-            // Read primary image data
-            byte[] primaryImageData;
-            using (var memoryStream = new MemoryStream())
+            var product = await CreateProductEntityAsync(model, tailor, primaryImageData, additionalImagesJson);
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                await model.PrimaryImage.CopyToAsync(memoryStream);
-                primaryImageData = memoryStream.ToArray();
-            }
-
-            _logger.LogInformation("Primary image read successfully, size: {Size} bytes", primaryImageData.Length);
-
-            // Process additional images
-            string? additionalImagesJson = null;
-            if (model.AdditionalImages != null && model.AdditionalImages.Any())
-            {
-                _logger.LogInformation("Processing {Count} additional images", model.AdditionalImages.Count);
-                
-                var additionalImagesBase64 = new List<string>();
-                foreach (var image in model.AdditionalImages.Take(5)) // Max 5 additional images
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    if (_fileUploadService.IsValidImage(image))
+                    _context.Products.Add(product);
+                    var saveResult = await _context.SaveChangesAsync();
+                    if (saveResult == 0)
                     {
-                        using var ms = new MemoryStream();
-                        await image.CopyToAsync(ms);
-                        var base64 = Convert.ToBase64String(ms.ToArray());
-                        additionalImagesBase64.Add($"{image.ContentType}|{base64}");
+                        await transaction.RollbackAsync();
+                        throw new InvalidOperationException("فشل حفظ المنتج في قاعدة البيانات. لم يتم حفظ أي بيانات.");
                     }
+                    await transaction.CommitAsync();
+                    TempData["Success"] = $"تم إضافة المنتج '{product.Name}' بنجاح وهو الآن متاح في المتجر";
+                    return (IActionResult)RedirectToAction("Tailor", "Dashboards");
                 }
-                
-                if (additionalImagesBase64.Any())
+                catch (Exception ex)
                 {
-                    additionalImagesJson = string.Join(";;", additionalImagesBase64);
+                    try { await transaction.RollbackAsync(); } catch { }
+                    _logger.LogError(ex, "Error during product save transaction");
+                    PopulateProductFormViewBag();
+                    ModelState.AddModelError("", "حدث خطأ غير متوقع أثناء حفظ المنتج. يرجى المحاولة مرة أخرى.");
+                    TempData["Error"] = $"حدث خطأ: {ex.Message}";
+                    return (IActionResult)View(model);
                 }
-                
-                _logger.LogInformation("Processed {Count} additional images successfully", additionalImagesBase64.Count);
-            }
-
-            // Generate slug from name
-            var slug = GenerateSlug(model.Name);
-            
-            // Ensure unique slug
-            var existingSlug = await _context.Products.AnyAsync(p => p.Slug == slug && !p.IsDeleted);
-            if (existingSlug)
-            {
-                slug = $"{slug}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
-                _logger.LogInformation("Slug already exists, using unique slug: {Slug}", slug);
-            }
-
-            var productId = Guid.NewGuid();
-            
-            _logger.LogInformation("Creating new product with ID {ProductId}", productId);
-
-            // Create product
-            var product = new Product
-            {
-                ProductId = productId,
-                Name = model.Name,
-                Description = model.Description,
-                Price = model.Price,
-                DiscountedPrice = model.DiscountedPrice,
-                Category = model.Category,
-                SubCategory = model.SubCategory,
-                Size = model.Size,
-                Color = model.Color,
-                Material = model.Material,
-                Brand = model.Brand,
-                StockQuantity = model.StockQuantity,
-                IsAvailable = model.IsAvailable,
-                IsFeatured = model.IsFeatured,
-                PrimaryImageData = primaryImageData,
-                PrimaryImageContentType = model.PrimaryImage.ContentType,
-                AdditionalImagesJson = additionalImagesJson,
-                MetaTitle = model.MetaTitle ?? model.Name,
-                MetaDescription = model.MetaDescription ?? model.Description.Substring(0, Math.Min(model.Description.Length, 160)),
-                Slug = slug,
-                TailorId = tailor.Id,
-                CreatedAt = DateTimeOffset.UtcNow,
-                IsDeleted = false,
-                ViewCount = 0,
-                SalesCount = 0,
-                AverageRating = 0,
-                ReviewCount = 0
-            };
-
-            _context.Products.Add(product);
-            
-            _logger.LogInformation("Saving product to database");
-            
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Product {ProductId} created successfully by tailor {TailorId}", product.ProductId, tailor.Id);
-            TempData["Success"] = "تم إضافة المنتج بنجاح وهو الآن متاح في المتجر";
-
-            // ✅ UPDATED: Redirect to Tailor Dashboard instead of ManageProducts
-            return RedirectToAction("Tailor", "Dashboards");
-        }
-        catch (DbUpdateException dbEx)
-        {
-            _logger.LogError(dbEx, "Database error while adding product");
-            ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
-            ViewBag.Categories = GetProductCategories();
-            ViewBag.SubCategories = GetProductSubCategories();
-            ViewBag.Sizes = GetProductSizes();
-            ViewBag.Materials = GetProductMaterials();
-            ViewData["Title"] = "إضافة منتج جديد";
-            TempData["Error"] = "حدث خطأ في قاعدة البيانات";
-            return View(model);
+            });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error while adding product");
-            ModelState.AddModelError("", "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.");
-            ViewBag.Categories = GetProductCategories();
-            ViewBag.SubCategories = GetProductSubCategories();
-            ViewBag.Sizes = GetProductSizes();
-            ViewBag.Materials = GetProductMaterials();
-            ViewData["Title"] = "إضافة منتج جديد";
-            TempData["Error"] = $"حدث خطأ: {ex.Message}";
-            return View(model);
+            _logger.LogError(ex, "Fatal error during product image upload");
+            TempData["Error"] = "حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى أو اختيار صورة أصغر.";
+            PopulateProductFormViewBag();
+            return View(model ?? new AddProductViewModel());
         }
     }
 
@@ -1161,12 +1317,7 @@ public class TailorManagementController : Controller
                 CurrentAdditionalImagesCount = additionalImagesCount
             };
 
-            ViewBag.Categories = GetProductCategories();
-            ViewBag.SubCategories = GetProductSubCategories();
-            ViewBag.Sizes = GetProductSizes();
-            ViewBag.Materials = GetProductMaterials();
-            
-            ViewData["Title"] = "تعديل المنتج";
+            PopulateProductFormViewBag("تعديل المنتج");
             return View(model);
         }
         catch (Exception ex)
@@ -1204,10 +1355,7 @@ public class TailorManagementController : Controller
 
             if (!ModelState.IsValid)
             {
-                ViewBag.Categories = GetProductCategories();
-                ViewBag.SubCategories = GetProductSubCategories();
-                ViewBag.Sizes = GetProductSizes();
-                ViewBag.Materials = GetProductMaterials();
+                PopulateProductFormViewBag("تعديل المنتج");
                 return View(model);
             }
 
@@ -1217,12 +1365,12 @@ public class TailorManagementController : Controller
             product.Price = model.Price;
             product.DiscountedPrice = model.DiscountedPrice;
             product.Category = model.Category;
-            product.SubCategory = model.SubCategory;
-            product.Size = model.Size;
-            product.Color = model.Color;
-            product.Material = model.Material;
-            product.Brand = model.Brand;
-            product.StockQuantity = model.StockQuantity;
+            product.SubCategory = model.SubCategory?.Trim();
+            product.Size = model.Size?.Trim();
+            product.Color = model.Color?.Trim();
+            product.Material = model.Material?.Trim();
+            product.Brand = model.Brand?.Trim();
+            product.StockQuantity = model.StockQuantity >= 0 ? model.StockQuantity : 0;
             product.IsAvailable = model.IsAvailable;
             product.IsFeatured = model.IsFeatured;
             product.MetaTitle = model.MetaTitle ?? model.Name;
@@ -1235,10 +1383,7 @@ public class TailorManagementController : Controller
                 if (!_fileUploadService.IsValidImage(model.NewPrimaryImage))
                 {
                     ModelState.AddModelError(nameof(model.NewPrimaryImage), "نوع الملف غير صالح");
-                    ViewBag.Categories = GetProductCategories();
-                    ViewBag.SubCategories = GetProductSubCategories();
-                    ViewBag.Sizes = GetProductSizes();
-                    ViewBag.Materials = GetProductMaterials();
+                    PopulateProductFormViewBag("تعديل المنتج");
                     return View(model);
                 }
 
@@ -1284,10 +1429,7 @@ public class TailorManagementController : Controller
         {
             _logger.LogError(ex, "Error updating product");
             ModelState.AddModelError("", "حدث خطأ أثناء تحديث المنتج");
-            ViewBag.Categories = GetProductCategories();
-            ViewBag.SubCategories = GetProductSubCategories();
-            ViewBag.Sizes = GetProductSizes();
-            ViewBag.Materials = GetProductMaterials();
+            PopulateProductFormViewBag("تعديل المنتج");
             return View(model);
         }
     }
@@ -1316,8 +1458,8 @@ public class TailorManagementController : Controller
 
             // Check if product has active orders
             var hasActiveOrders = await _context.OrderItems
-                .AnyAsync(oi => oi.ProductId == id && 
-                    oi.Order.Status != OrderStatus.Cancelled && 
+                .AnyAsync(oi => oi.ProductId == id &&
+                    oi.Order.Status != OrderStatus.Cancelled &&
                     oi.Order.Status != OrderStatus.Delivered);
 
             if (hasActiveOrders)
@@ -1407,7 +1549,7 @@ public class TailorManagementController : Controller
 
             product.StockQuantity = newStock;
             product.UpdatedAt = DateTimeOffset.UtcNow;
-            
+
             // Auto-update availability based on stock
             if (newStock == 0 && product.IsAvailable)
             {
@@ -1586,18 +1728,235 @@ public class TailorManagementController : Controller
 
         // Remove diacritics and convert to lowercase
         text = text.Trim().ToLowerInvariant();
-        
+
         // Replace spaces and special characters with hyphens
         text = System.Text.RegularExpressions.Regex.Replace(text, @"[^a-z0-9\u0600-\u06FF]+", "-");
-        
+
         // Remove leading/trailing hyphens
         text = text.Trim('-');
-        
+
         // Limit length
         if (text.Length > 50)
             text = text.Substring(0, 50).TrimEnd('-');
 
         return string.IsNullOrEmpty(text) ? Guid.NewGuid().ToString("N").Substring(0, 8) : text;
+    }
+
+    /// <summary>
+    /// Populates ViewBag with product form data (categories, sizes, materials, etc.)
+    /// </summary>
+    private void PopulateProductFormViewBag(string? title = null)
+    {
+        ViewBag.Categories = GetProductCategories();
+        ViewBag.SubCategories = GetProductSubCategories();
+        ViewBag.Sizes = GetProductSizes();
+        ViewBag.Materials = GetProductMaterials();
+        ViewData["Title"] = title ?? "إضافة منتج جديد";
+    }
+
+    /// <summary>
+    /// Validates primary image file
+    /// </summary>
+    private async Task<(bool IsValid, string? ErrorMessage)> ValidatePrimaryImageAsync(IFormFile? image)
+    {
+        if (image == null || image.Length == 0)
+        {
+            return (false, "الصورة الأساسية مطلوبة");
+        }
+
+        // Use ImageUploadService for thorough validation (mime + signature)
+        var (isValid, error) = await _imageUploadService.ValidateImageAsync(image)
+            .ConfigureAwait(false);
+        if (!isValid)
+            return (false, error ?? "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)");
+
+        var maxSize = _fileUploadService.GetMaxFileSizeInBytes();
+        if (image.Length > maxSize)
+        {
+            var maxSizeMB = maxSize / 1024 / 1024;
+            return (false, $"حجم الصورة كبير جداً. الحد الأقصى {maxSizeMB} ميجابايت");
+        }
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// Processes and reads primary image data using best practices
+    /// Uses memory-efficient streaming with size validation
+    /// </summary>
+    private async Task<byte[]> ProcessPrimaryImageAsync(IFormFile image)
+    {
+        if (image == null || image.Length == 0)
+        {
+            throw new ArgumentException("Image file is null or empty");
+        }
+
+        // Stream with size check to avoid OOM
+        var maxSize = _fileUploadService.GetMaxFileSizeInBytes();
+        const int bufferSize = 81920; // 80KB
+        long totalRead = 0;
+
+        using var memoryStream = new MemoryStream();
+        using var fileStream = image.OpenReadStream();
+        var buffer = new byte[bufferSize];
+        int read;
+        while ((read = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        {
+            totalRead += read;
+            if (totalRead > maxSize)
+            {
+                throw new ArgumentException($"حجم الصورة كبير جداً. الحد الأقصى {maxSize / 1024 / 1024} ميجابايت");
+            }
+            await memoryStream.WriteAsync(buffer, 0, read);
+        }
+
+        var imageData = memoryStream.ToArray();
+        if (imageData == null || imageData.Length == 0)
+            throw new InvalidOperationException("فشل قراءة بيانات الصورة. الملف قد يكون تالفاً");
+
+        return imageData;
+    }
+
+    /// <summary>
+    /// Processes additional images and returns JSON string
+    /// </summary>
+    private async Task<string?> ProcessAdditionalImagesAsync(List<IFormFile>? images)
+    {
+        if (images == null || !images.Any())
+            return null;
+
+        _logger.LogInformation("Processing {Count} additional images", images.Count);
+
+        var additionalImagesBase64 = new List<string>();
+        foreach (var image in images.Take(5)) // Max 5 additional images
+        {
+            try
+            {
+                var (isValid, validationError) = await _imageUploadService.ValidateImageAsync(image);
+                if (!isValid)
+                {
+                    _logger.LogWarning("Skipping additional image due to validation: {FileName}, Error: {Error}", image.FileName, validationError);
+                    continue;
+                }
+
+                if (image.Length > _fileUploadService.GetMaxFileSizeInBytes())
+                {
+                    _logger.LogWarning("Skipping additional image due to size: {FileName}, Size: {Size}", image.FileName, image.Length);
+                    continue;
+                }
+
+                using var ms = new MemoryStream();
+                await image.CopyToAsync(ms);
+                var base64 = Convert.ToBase64String(ms.ToArray());
+                additionalImagesBase64.Add($"{image.ContentType}|{base64}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error processing additional image {FileName} - skipping", image?.FileName);
+            }
+        }
+
+        if (additionalImagesBase64.Any())
+        {
+            _logger.LogInformation("Processed {Count} additional images successfully", additionalImagesBase64.Count);
+            return string.Join(";;", additionalImagesBase64);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Creates a Product entity from the view model
+    /// </summary>
+    private async Task<Product> CreateProductEntityAsync(AddProductViewModel model, TailorProfile tailor,
+        byte[] primaryImageData, string? additionalImagesJson)
+    {
+        // Generate unique slug
+        var slug = GenerateSlug(model.Name);
+        var existingSlug = await _context.Products.AnyAsync(p => p.Slug == slug && !p.IsDeleted);
+        if (existingSlug)
+        {
+            slug = $"{slug}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+            _logger.LogInformation("Slug already exists, using unique slug: {Slug}", slug);
+        }
+
+        // Auto-generate SEO fields if not provided
+        var metaTitle = !string.IsNullOrWhiteSpace(model.MetaTitle)
+            ? model.MetaTitle.Trim()
+            : model.Name.Trim();
+
+        var metaDescription = !string.IsNullOrWhiteSpace(model.MetaDescription)
+            ? model.MetaDescription.Trim()
+            : (model.Description.Length > 160
+                ? model.Description.Substring(0, 160).Trim()
+                : model.Description.Trim());
+
+        var productId = Guid.NewGuid();
+
+        return new Product
+        {
+            ProductId = productId,
+            Name = model.Name.Trim(),
+            Description = model.Description.Trim(),
+            Price = model.Price,
+            DiscountedPrice = model.DiscountedPrice,
+            Category = model.Category,
+            SubCategory = model.SubCategory?.Trim(),
+            Size = model.Size?.Trim(),
+            Color = model.Color?.Trim(),
+            Material = model.Material?.Trim(),
+            Brand = model.Brand?.Trim(),
+            StockQuantity = model.StockQuantity >= 0 ? model.StockQuantity : 0,
+            IsAvailable = model.IsAvailable,
+            IsFeatured = model.IsFeatured,
+            PrimaryImageData = primaryImageData,
+            PrimaryImageContentType = model.PrimaryImage!.ContentType ?? "image/jpeg",
+            AdditionalImagesJson = additionalImagesJson,
+            MetaTitle = metaTitle,
+            MetaDescription = metaDescription,
+            Slug = slug,
+            TailorId = tailor.Id,
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = null,
+            IsDeleted = false,
+            ViewCount = 0,
+            SalesCount = 0,
+            AverageRating = 0.0,
+            ReviewCount = 0
+        };
+    }
+
+    /// <summary>
+    /// Verifies that the product was saved correctly to the database
+    /// </summary>
+    private async Task<(bool IsValid, Product? SavedProduct)> VerifyProductSavedAsync(Guid productId, Product originalProduct)
+    {
+        var savedProduct = await _context.Products
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.ProductId == productId && !p.IsDeleted);
+
+        if (savedProduct == null)
+        {
+            _logger.LogError("CRITICAL: Product was not found in database after commit. ProductId: {ProductId}", productId);
+            return (false, null);
+        }
+
+        // Verify critical fields
+        var verificationPassed = savedProduct.Name == originalProduct.Name &&
+                               savedProduct.Description == originalProduct.Description &&
+                               savedProduct.Price == originalProduct.Price &&
+                               savedProduct.TailorId == originalProduct.TailorId &&
+                               savedProduct.Category == originalProduct.Category &&
+                               savedProduct.PrimaryImageData != null &&
+                               savedProduct.PrimaryImageData.Length > 0;
+
+        if (!verificationPassed)
+        {
+            _logger.LogError("CRITICAL: Product verification failed. Some fields may not have been saved correctly. ProductId: {ProductId}", productId);
+            return (false, savedProduct);
+        }
+
+        return (true, savedProduct);
     }
 
     #endregion

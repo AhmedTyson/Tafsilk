@@ -180,8 +180,7 @@
   id="imageUpload" 
            class="d-none" 
      accept="image/*" 
-            multiple 
-     onchange="previewImages(this)" />
+            multiple />
            </div>
   <div id="imagePreview" class="row g-2"></div>
           </div>
@@ -283,53 +282,274 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Image Preview
-function previewImages(input) {
-   const preview = document.getElementById('imagePreview');
-  preview.innerHTML = '';
+        // CRITICAL: Prevent app crashes from image upload errors
+        // This must be at the top to catch all errors
+        (function() {
+            'use strict';
+            
+            // Global error handler - PREVENTS APP CRASHES
+            window.addEventListener('error', function(e) {
+                var errorMsg = e.message || '';
+                var errorSource = e.filename || '';
+                
+                console.error('Global error caught:', {
+                    message: errorMsg,
+                    filename: errorSource,
+                    lineno: e.lineno,
+                    colno: e.colno,
+                    error: e.error
+                });
+                
+                // Prevent crashes from image upload related errors
+                if (errorMsg.includes('previewImages') || 
+                    errorMsg.includes('imageUpload') ||
+                    errorMsg.includes('ReferenceImages') ||
+                    errorMsg.includes('FileReader') ||
+                    errorMsg.includes('Cannot read') ||
+                    errorMsg.includes('null') ||
+                    errorMsg.includes('undefined') ||
+                    errorSource.includes('CreateOrder')) {
+                    console.error('Image upload error detected - preventing crash');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return true; // Indicate error was handled
+                }
+            }, true); // Use capture phase
 
-         if (input.files) {
-      Array.from(input.files).forEach((file, index) => {
-       const reader = new FileReader();
-     reader.onload = function(e) {
-      const col = document.createElement('div');
-           col.className = 'col-4';
-      col.innerHTML = `
-          <div class="position-relative">
-                  <img src="${e.target.result}" class="img-fluid rounded shadow-sm" style="height: 100px; object-fit: cover; width: 100%;" />
-      <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" onclick="removeImage(${index})">
-              <i class="fas fa-times"></i>
-           </button>
-          </div>
-                `;
-                  preview.appendChild(col);
-          };
-        reader.readAsDataURL(file);
+            // Handle unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(e) {
+                console.error('Unhandled promise rejection:', e.reason);
+                var reason = e.reason ? (e.reason.message || String(e.reason)) : '';
+                if (reason.includes('previewImages') || 
+                    reason.includes('imageUpload') ||
+                    reason.includes('ReferenceImages') ||
+                    reason.includes('FileReader')) {
+                    console.error('Image upload promise rejection - preventing crash');
+                    e.preventDefault();
+                }
             });
+        })();
+        
+        // Image Preview with error handling
+        function previewImages(input) {
+            try {
+                if (!input || !input.files) {
+                    console.warn('No files selected');
+                    return;
+                }
+
+                const preview = document.getElementById('imagePreview');
+                if (!preview) {
+                    console.error('Preview container not found');
+                    return;
+                }
+
+                preview.innerHTML = '';
+
+                const files = Array.from(input.files);
+                if (files.length === 0) {
+                    return;
+                }
+
+                // Limit to 5 images
+                if (files.length > 5) {
+                    alert('يمكنك رفع 5 صور كحد أقصى. سيتم عرض أول 5 صور فقط.');
+                    files.splice(5);
+                }
+
+                files.forEach((file, index) => {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        console.warn('Invalid file type:', file.name);
+                        return;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`الصورة "${file.name}" كبيرة جداً. الحد الأقصى 5 ميجابايت`);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        try {
+                            const col = document.createElement('div');
+                            col.className = 'col-4 mb-2';
+                            col.innerHTML = `
+                                <div class="position-relative">
+                                    <img src="${e.target.result}" class="img-fluid rounded shadow-sm" style="height: 100px; object-fit: cover; width: 100%;" />
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" data-image-index="${index}" onclick="removeImageByIndex(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `;
+                            preview.appendChild(col);
+                        } catch (error) {
+                            console.error('Error creating preview element:', error);
+                        }
+                    };
+                    
+                    reader.onerror = function(error) {
+                        console.error('Error reading file:', file.name, error);
+                        alert(`حدث خطأ أثناء قراءة الصورة "${file.name}"`);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            } catch (error) {
+                console.error('Error in previewImages:', error);
+                alert('حدث خطأ أثناء معاينة الصور. يرجى المحاولة مرة أخرى.');
+            }
+        }
+
+        // Remove image function - SAFE VERSION
+        function removeImageByIndex(button) {
+            try {
+                if (!button) {
+                    console.warn('Remove button not provided');
+                    return;
+                }
+
+                const index = parseInt(button.getAttribute('data-image-index') || button.dataset.imageIndex || '0');
+                if (isNaN(index)) {
+                    console.warn('Invalid image index');
+                    return;
+                }
+
+                const input = document.getElementById('imageUpload') || 
+                              document.querySelector('input[type="file"][name="ReferenceImages"]');
+                if (!input) {
+                    console.warn('File input not found');
+                    return;
+                }
+
+                // Remove the preview element
+                const previewContainer = button.closest('.col-4');
+                if (previewContainer) {
+                    previewContainer.remove();
+                }
+
+                // Update file list
+                try {
+                    const dt = new DataTransfer();
+                    const files = Array.from(input.files || []);
+                    
+                    files.forEach((file, i) => {
+                        if (i !== index) {
+                            dt.items.add(file);
+                        }
+                    });
+                    
+                    input.files = dt.files;
+                } catch (dtError) {
+                    // DataTransfer might not be supported in all browsers
+                    console.warn('DataTransfer not supported, removing preview only');
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+                alert('حدث خطأ أثناء حذف الصورة');
+            }
+        }
+
+        // Legacy function for backward compatibility
+        function removeImage(index) {
+            try {
+                const buttons = document.querySelectorAll('button[data-image-index]');
+                if (buttons[index]) {
+                    removeImageByIndex(buttons[index]);
+                }
+            } catch (error) {
+                console.error('Error in removeImage:', error);
             }
         }
 
         // Service Selection Update
-      document.querySelectorAll('.service-radio').forEach(radio => {
-radio.addEventListener('change', function() {
-     const price = this.getAttribute('data-price');
-            const name = this.getAttribute('data-name');
-       document.getElementById('selectedServiceName').textContent = name;
-       document.getElementById('estimatedPrice').textContent = parseFloat(price).toFixed(2) + ' EGP';
- });
+        document.querySelectorAll('.service-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                try {
+                    const price = this.getAttribute('data-price');
+                    const name = this.getAttribute('data-name');
+                    const nameElement = document.getElementById('selectedServiceName');
+                    const priceElement = document.getElementById('estimatedPrice');
+                    
+                    if (nameElement && name) {
+                        nameElement.textContent = name;
+                    }
+                    
+                    if (priceElement && price) {
+                        priceElement.textContent = parseFloat(price).toFixed(2) + ' EGP';
+                    }
+                } catch (error) {
+                    console.error('Error updating service selection:', error);
+                }
+            });
         });
 
         // Express Service Toggle
-        document.getElementById('expressService')?.addEventListener('change', function() {
-     const priceElement = document.getElementById('estimatedPrice');
-   let currentPrice = parseFloat(priceElement.textContent.replace(' EGP', ''));
-      if (this.checked) {
-    currentPrice += 50;
-        } else {
-                currentPrice -= 50;
-         }
-    priceElement.textContent = currentPrice.toFixed(2) + ' EGP';
+        const expressServiceCheckbox = document.getElementById('expressService');
+        if (expressServiceCheckbox) {
+            expressServiceCheckbox.addEventListener('change', function() {
+                try {
+                    const priceElement = document.getElementById('estimatedPrice');
+                    if (!priceElement) return;
+                    
+                    let currentPrice = parseFloat(priceElement.textContent.replace(' EGP', '')) || 0;
+                    if (this.checked) {
+                        currentPrice += 50;
+                    } else {
+                        currentPrice -= 50;
+                    }
+                    priceElement.textContent = currentPrice.toFixed(2) + ' EGP';
+                } catch (error) {
+                    console.error('Error updating express service:', error);
+                }
+            });
+        }
+
+        // Ensure file input has proper event handler with error handling
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const fileInput = document.getElementById('imageUpload') || 
+                                  document.querySelector('input[type="file"][name="ReferenceImages"]');
+                
+                if (!fileInput) {
+                    console.warn('File input not found for ReferenceImages');
+                    return;
+                }
+
+                // Add safe change handler
+                fileInput.addEventListener('change', function(e) {
+                    try {
+                        if (e.target && e.target.files) {
+                            previewImages(e.target);
+                        }
+                    } catch (error) {
+                        console.error('Error in file input change handler:', error);
+                        alert('حدث خطأ أثناء معاينة الصور. يرجى المحاولة مرة أخرى.');
+                    }
+                });
+
+                // Make the label clickable safely
+                const label = document.querySelector('label[for="imageUpload"]');
+                if (label) {
+                    label.addEventListener('click', function(e) {
+                        try {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (fileInput) {
+                                fileInput.click();
+                            }
+                        } catch (error) {
+                            console.error('Error clicking file input:', error);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error setting up file input:', error);
+            }
         });
+
     </script>
 }
 

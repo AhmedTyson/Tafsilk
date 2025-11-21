@@ -33,49 +33,97 @@ public class GlobalExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}", context.Request.Path);
-            await HandleExceptionAsync(context, ex);
+            _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}, Method: {Method}", 
+                context.Request.Path, context.Request.Method);
+            
+            // Check if response has already started
+            if (context.Response.HasStarted)
+            {
+                _logger.LogWarning("Response has already started, cannot modify response. Exception: {Exception}", ex.Message);
+                // If response has started, we can't modify it, so we need to rethrow
+                // But we'll log it first
+                throw;
+            }
+            
+            try
+            {
+                await HandleExceptionAsync(context, ex);
+            }
+            catch (Exception handlerEx)
+            {
+                _logger.LogCritical(handlerEx, "CRITICAL: Error in exception handler itself! Original exception: {OriginalException}", ex.Message);
+                // If we can't handle the exception, we must rethrow it
+                throw;
+            }
         }
     }
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-        object response;
-        
-        if (_environment.IsDevelopment())
+        try
         {
-            response = new
+            // Clear any existing response
+            if (!context.Response.HasStarted)
             {
-                error = new
+                context.Response.Clear();
+                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                
+                // Check if this is an API request or MVC request
+                var isApiRequest = context.Request.Path.StartsWithSegments("/api") || 
+                                   context.Request.Headers["Accept"].ToString().Contains("application/json");
+                
+                if (isApiRequest)
                 {
-                    message = exception.Message,
-                    stackTrace = exception.StackTrace,
-                    innerException = exception.InnerException?.Message,
-                    requestId = context.TraceIdentifier
+                    context.Response.ContentType = "application/json";
+                    
+                    object response;
+                    
+                    if (_environment.IsDevelopment())
+                    {
+                        response = new
+                        {
+                            error = new
+                            {
+                                message = exception.Message,
+                                stackTrace = exception.StackTrace,
+                                innerException = exception.InnerException?.Message,
+                                requestId = context.TraceIdentifier
+                            }
+                        };
+                    }
+                    else
+                    {
+                        response = new
+                        {
+                            error = new
+                            {
+                                message = "An error occurred while processing your request. Please try again later.",
+                                requestId = context.TraceIdentifier
+                            }
+                        };
+                    }
+
+                    var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+                    {
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+
+                    await context.Response.WriteAsync(jsonResponse);
                 }
-            };
-        }
-        else
-        {
-            response = new
-            {
-                error = new
+                else
                 {
-                    message = "An error occurred while processing your request. Please try again later.",
-                    requestId = context.TraceIdentifier
+                    // For MVC requests, redirect to error page
+                    context.Response.ContentType = "text/html; charset=utf-8";
+                    context.Response.Redirect($"/Home/Error?statusCode=500&requestId={context.TraceIdentifier}");
                 }
-            };
+            }
         }
-
-        var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
+        catch (Exception ex)
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
-
-        await context.Response.WriteAsync(jsonResponse);
+            _logger.LogCritical(ex, "CRITICAL: Failed to handle exception. Original exception: {OriginalException}", exception.Message);
+            // If we can't handle it, we must rethrow
+            throw;
+        }
     }
 }
 

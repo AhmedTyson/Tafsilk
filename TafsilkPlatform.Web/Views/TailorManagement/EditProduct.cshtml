@@ -2,7 +2,15 @@
 @{
     ViewData["Title"] = "تعديل المنتج";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var breadcrumbs = new List<(string Text, string Url)>
+    {
+        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
+        ("إدارة المنتجات", Url.Action("ManageProducts", "TailorManagement")),
+        ("تعديل المنتج", "")
+    };
 }
+
+@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
 
 <div class="container py-4" dir="rtl">
     <div class="row justify-content-center">
@@ -14,6 +22,43 @@
                 </h1>
                 <p class="text-muted">تحديث معلومات وصور المنتج</p>
             </div>
+
+            <!-- Success/Error Messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <!-- Validation Summary -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle"></i> يرجى إصلاح الأخطاء التالية:
+                    </h5>
+                    <ul class="mb-0">
+                        @foreach (var state in ViewData.ModelState)
+                        {
+                            foreach (var error in state.Value.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
 
             <form asp-action="EditProduct" asp-route-id="@Model.ProductId" method="post" enctype="multipart/form-data" id="productForm">
                 @Html.AntiForgeryToken()
@@ -259,6 +304,19 @@
     
     <script>
         $(document).ready(function() {
+            // Configure Toastr for RTL
+            if (typeof toastr !== 'undefined') {
+                toastr.options = {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-left",
+                    "timeOut": "5000",
+                    "extendedTimeOut": "2000",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut",
+                    "rtl": true
+                };
+            }
             // Primary image preview
             $('#primaryImageInput').change(function(e) {
                 const file = e.target.files[0];

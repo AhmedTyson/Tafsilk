@@ -13,1749 +13,1034 @@ namespace TafsilkPlatform.Web.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20251103160056_dbnew")]
-    partial class dbnew
+    public partial class DbNew : Migration
     {
         /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void Up(MigrationBuilder migrationBuilder)
         {
-#pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("AppSetting", b =>
+            migrationBuilder.CreateTable(
+                name: "AppSettings",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Key")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AppSettings");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Key = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApplicationSettings", x => x.Id);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ActivityLog", b =>
+            migrationBuilder.CreateTable(
+                name: "ActivityLogs",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Details")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("nvarchar(21)");
-
-                    b.Property<Guid?>("EntityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("IpAddress")
-                        .HasMaxLength(45)
-                        .HasColumnType("nvarchar(45)");
-
-                    b.Property<bool>("IsAdminAction")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK_ActivityLogs");
-
-                    b.HasIndex("IsAdminAction")
-                        .HasDatabaseName("IX_ActivityLogs_IsAdminAction");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_ActivityLogs_UserId");
-
-                    b.ToTable("ActivityLogs", (string)null);
-
-                    b.HasDiscriminator().HasValue("ActivityLog");
-
-                    b.UseTphMappingStrategy();
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Details = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    IpAddress = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
+                    IsAdminAction = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityLogs_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
+            migrationBuilder.CreateTable(
+                name: "Contracts",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContractStatus")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RFQId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("TotalAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RFQId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Contracts");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RFQId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ContractStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Contracts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Contracts_RFQs_RFQId",
+                        column: x => x.RFQId,
+                        principalTable: "RFQs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Contracts_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
+            migrationBuilder.CreateTable(
+                name: "CorporateAccounts",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("CompanyName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("ContactPerson")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Industry")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsApproved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("ProfilePictureContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePictureData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("TaxNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Corporat__3214EC07AC002547");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_CorporateAccounts_UserId");
-
-                    b.HasIndex(new[] { "UserId" }, "UQ__Corporat__1788CC4D39440DF8")
-                        .IsUnique();
-
-                    b.ToTable("CorporateAccounts");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CompanyName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContactPerson = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Bio = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Industry = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    TaxNumber = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ProfilePictureContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ProfilePictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CorporateAccounts", x => x.Id);
+                    table.UniqueConstraint("UQ__Corporat__1788CC4D39440DF8", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_CorporateAccounts_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
+            migrationBuilder.CreateTable(
+                name: "CustomerProfiles",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<DateOnly?>("DateOfBirth")
-                        .HasColumnType("date");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Gender")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ProfilePictureContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePictureData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Customer__3214EC07880E7F94");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_CustomerProfiles_UserId");
-
-                    b.HasIndex(new[] { "UserId" }, "UQ__Customer__1788CC4D90808B91")
-                        .IsUnique();
-
-                    b.ToTable("CustomerProfiles");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Bio = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: true),
+                    Gender = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    ProfilePictureContentType = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ProfilePictureData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    ProfilePictureUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerProfiles", x => x.Id);
+                    table.UniqueConstraint("UQ__Customer__1788CC4D90808B91", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_CustomerProfiles_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
+            migrationBuilder.CreateTable(
+                name: "DeviceTokens",
+                columns: table => new
                 {
-                    b.Property<Guid>("DeviceTokenId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Devicetoken")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Platform")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime>("RegisteredAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("DeviceTokenId")
-                        .HasName("PK_DeviceTokens");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_DeviceTokens_UserId");
-
-                    b.ToTable("DeviceTokens", (string)null);
+                    DeviceTokenId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Devicetoken = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Platform = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    RegisteredAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DeviceTokens", x => x.DeviceTokenId);
+                    table.ForeignKey(
+                        name: "FK_DeviceTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
+            migrationBuilder.CreateTable(
+                name: "Disputes",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OpenedByUserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ResolutionDetails")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ResolvedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResolvedByAdminId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OpenedByUserId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("ResolvedByAdminId");
-
-                    b.ToTable("Disputes");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OpenedByUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResolvedByAdminId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ResolutionDetails = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Disputes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Disputes_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Disputes_Users_OpenedByUserId",
+                        column: x => x.OpenedByUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Disputes_Users_ResolvedByAdminId",
+                        column: x => x.ResolvedByAdminId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ErrorLog", b =>
+            migrationBuilder.CreateTable(
+                name: "ErrorLogs",
+                columns: table => new
                 {
-                    b.Property<Guid>("ErrorLogId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Severity")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("StackTrace")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ErrorLogId");
-
-                    b.ToTable("ErrorLogs");
+                    ErrorLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    Severity = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    StackTrace = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ErrorLogs", x => x.ErrorLogId);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
                 {
-                    b.Property<Guid>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AudienceType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<DateTime>("SentAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("NotificationId")
-                        .HasName("PK_Notifications");
-
-                    b.HasIndex("AudienceType")
-                        .HasDatabaseName("IX_Notifications_AudienceType");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Notifications_UserId");
-
-                    b.ToTable("Notifications", (string)null);
+                    NotificationId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    AudienceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.NotificationId);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
+            migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
                 {
-                    b.Property<Guid>("OrderId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Discription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("DueDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("OrderType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("TotalPrice")
-                        .HasColumnType("float");
-
-                    b.HasKey("OrderId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Orders");
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrderType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    DueDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    TotalPrice = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
+                    table.ForeignKey(
+                        name: "FK_Orders_CustomerProfiles_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "CustomerProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Orders_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderImages", b =>
+            migrationBuilder.CreateTable(
+                name: "OrderImages",
+                columns: table => new
                 {
-                    b.Property<Guid>("OrderImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ContentType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<byte[]>("ImageData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ImgUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("UploadedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("UploadedId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("OrderImageId");
-
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("IX_OrderImages_OrderId");
-
-                    b.ToTable("OrderImages");
+                    OrderImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ImageData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UploadedId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderImages", x => x.OrderImageId);
+                    table.ForeignKey(
+                        name: "FK_OrderImages_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderItem", b =>
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
                 {
-                    b.Property<Guid>("OrderItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ItemName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Total")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("OrderItemId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("OrderItems");
+                    OrderItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.OrderItemId);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Payment", b =>
+            migrationBuilder.CreateTable(
+                name: "Payments",
+                columns: table => new
                 {
-                    b.Property<Guid>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("PaidAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("PaymentStatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PaymentType")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("TransactionType")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Payment");
+                    PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    PaidAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    PaymentStatus = table.Column<int>(type: "int", nullable: false),
+                    PaymentType = table.Column<int>(type: "int", nullable: false),
+                    TransactionType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Payment", x => x.PaymentId);
+                    table.ForeignKey(
+                        name: "FK_Payment_CustomerProfiles_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "CustomerProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Payment_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Payment_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.PortfolioImage", b =>
+            migrationBuilder.CreateTable(
+                name: "PortfolioImages",
+                columns: table => new
                 {
-                    b.Property<Guid>("PortfolioImageId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Category")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("ContentType")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("EstimatedPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<byte[]>("ImageData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsBeforeAfter")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsFeatured")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("UploadedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.HasKey("PortfolioImageId")
-                        .HasName("PK_PortfolioImages");
-
-                    b.HasIndex("TailorId")
-                        .HasDatabaseName("IX_PortfolioImages_TailorId");
-
-                    b.ToTable("PortfolioImages", (string)null);
+                    PortfolioImageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ImageData = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
+                    ContentType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsBeforeAfter = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsFeatured = table.Column<bool>(type: "bit", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Category = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    EstimatedPrice = table.Column<decimal>(type: "decimal(18, 2)", nullable: true),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PortfolioImages", x => x.PortfolioImageId);
+                    table.ForeignKey(
+                        name: "FK_PortfolioImages_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
+            migrationBuilder.CreateTable(
+                name: "Quotes",
+                columns: table => new
                 {
-                    b.Property<Guid>("QuoteId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("EstimatedDays")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("ProposedPrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("QuoteId");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("Quotes");
+                    QuoteId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProposedPrice = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    EstimatedDays = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Quotes", x => x.QuoteId);
+                    table.ForeignKey(
+                        name: "FK_Quotes_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Quotes_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
+            migrationBuilder.CreateTable(
+                name: "RFQs",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Budget")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<Guid>("CorporateAccountId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("Deadline")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CorporateAccountId");
-
-                    b.ToTable("RFQs");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CorporateAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Budget = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Deadline = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RFQs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RFQs_CorporateAccounts_CorporateAccountId",
+                        column: x => x.CorporateAccountId,
+                        principalTable: "CorporateAccounts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
+            migrationBuilder.CreateTable(
+                name: "RFQBids",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("BidAmount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EstimatedDelivery")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RFQId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RFQId");
-
-                    b.HasIndex("TailorId");
-
-                    b.ToTable("RFQBids");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RFQId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BidAmount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    EstimatedDelivery = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RFQBids", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RFQBids_RFQs_RQFId",
+                        column: x => x.RFQId,
+                        principalTable: "RFQs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_RFQBids_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
+            migrationBuilder.CreateTable(
+                name: "RatingDimensions",
+                columns: table => new
                 {
-                    b.Property<Guid>("RatingDimensionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DimensionName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("ReviewId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.HasKey("RatingDimensionId");
-
-                    b.HasIndex("ReviewId");
-
-                    b.ToTable("RatingDimensions");
+                    RatingDimensionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReviewId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DimensionName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RatingDimensions", x => x.RatingDimensionId);
+                    table.ForeignKey(
+                        name: "FK_RatingDimensions_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "ReviewId",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__RefreshT__3214EC07E9DA722D");
-
-                    b.HasIndex(new[] { "ExpiresAt" }, "IX_RefreshTokens_ExpiresAt");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_RefreshTokens_UserId");
-
-                    b.ToTable("RefreshTokens");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Token = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    RevokedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__RefreshT__3214EC07E9DA722D", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
+            migrationBuilder.CreateTable(
+                name: "RefundRequests",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("RequestedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.HasIndex("RequestedBy");
-
-                    b.ToTable("RefundRequests");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequestedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ProcessedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefundRequests", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefundRequests_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_RefundRequests_Users_RequestedBy",
+                        column: x => x.RequestedBy,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
                 {
-                    b.Property<Guid>("ReviewId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CustomerProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("TailorProfileId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ReviewId")
-                        .HasName("PK_Reviews");
-
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("IX_Reviews_CustomerId");
-
-                    b.HasIndex("CustomerProfileId");
-
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("IX_Reviews_OrderId");
-
-                    b.HasIndex("TailorId")
-                        .HasDatabaseName("IX_Reviews_TailorId");
-
-                    b.HasIndex("TailorProfileId");
-
-                    b.ToTable("Reviews", (string)null);
+                    ReviewId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.ReviewId);
+                    table.ForeignKey(
+                        name: "FK_Reviews_CustomerProfiles_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "CustomerProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Reviews_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Permissions")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<int>("Priority")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
-
-                    b.HasKey("Id")
-                        .HasName("PK__Roles__3214EC07CB85E41E");
-
-                    b.ToTable("Roles");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Permissions = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
+                    Priority = table.Column<int>(type: "int", nullable: false, defaultValue: 0),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Roles__3214EC07CB85E41E", x => x.Id);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorBadge", b =>
+            migrationBuilder.CreateTable(
+                name: "TailorBadges",
+                columns: table => new
                 {
-                    b.Property<Guid>("TailorBadgeId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BadgeName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EarnedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TailorBadgeId");
-
-                    b.ToTable("TailorBadges");
+                    TailorBadgeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BadgeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EarnedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TailorBadges", x => x.TailorBadgeId);
+                    table.ForeignKey(
+                        name: "FK_TailorBadges_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
+            migrationBuilder.CreateTable(
+                name: "TailorServices",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<decimal>("AverageRating")
-                        .HasColumnType("decimal(3, 2)");
-
-                    b.Property<string>("Bio")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("BusinessHours")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("City")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("District")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("ExperienceYears")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FacebookUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("FullName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("InstagramUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("IsVerified")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("decimal(10, 8)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("decimal(11, 8)");
-
-                    b.Property<string>("PricingRange")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ProfilePictureContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePictureData")
-                        .HasColumnType("varbinary(max)");
-
-                    b.Property<string>("ProfilePictureUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ShopDescription")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("ShopName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Specialization")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("TwitterUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("WebsiteUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.HasKey("Id")
-                        .HasName("PK__TailorPr__3214EC07A3FCF42C");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_TailorProfiles_UserId");
-
-                    b.HasIndex(new[] { "UserId" }, "UQ__TailorPr__1788CC4D37A4BF4A")
-                        .IsUnique();
-
-                    b.ToTable("TailorProfiles");
+                    TailorServiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TailorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ServiceName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    BasePrice = table.Column<decimal>(type: "decimal(18, 2)", nullable: false),
+                    EstimatedDuration = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TailorServices", x => x.TailorServiceId);
+                    table.ForeignKey(
+                        name: "FK_TailorServices_TailorProfiles_TailorId",
+                        column: x => x.TailorId,
+                        principalTable: "TailorProfiles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorService", b =>
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
                 {
-                    b.Property<Guid>("TailorServiceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("BasePrice")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("EstimatedDuration")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ServiceName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid>("TailorId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("TailorServiceId")
-                        .HasName("PK_TailorServices");
-
-                    b.HasIndex("TailorId")
-                        .HasDatabaseName("IX_TailorServices_TailorId");
-
-                    b.ToTable("TailorServices", (string)null);
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BanExpiresAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BannedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    BanReason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    EmailVerified = table.Column<bool>(type: "bit", nullable: false),
+                    EmailVerifiedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    EmailVerificationToken = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    EmailVerificationTokenExpires = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SmsNotifications = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    EmailNotifications = table.Column<bool>(type: "bit", nullable: false, defaultValue: true),
+                    PromotionalNotifications = table.Column<bool>(type: "bit", nullable: false, defaultValue: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__Users__3214EC07AA820590", x => x.Id);
+                    table.UniqueConstraint("UQ__Users__A9D10534975288F0", x => x.Email);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
+            migrationBuilder.CreateTable(
+                name: "UserAddresses",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<DateTime?>("BanExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("BanReason")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTime?>("BannedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<bool>("EmailNotifications")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("EmailVerificationToken")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("EmailVerificationTokenExpires")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("EmailVerified")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("EmailVerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordResetToken")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("PasswordResetTokenExpires")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<bool>("PromotionalNotifications")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("SmsNotifications")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id")
-                        .HasName("PK__Users__3214EC07AA820590");
-
-                    b.HasIndex(new[] { "Email" }, "IX_Users_Email");
-
-                    b.HasIndex(new[] { "RoleId" }, "IX_Users_RoleId");
-
-                    b.HasIndex(new[] { "Email" }, "UQ__Users__A9D10534975288F0")
-                        .IsUnique();
-
-                    b.ToTable("Users");
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Label = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    City = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Street = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Latitude = table.Column<decimal>(type: "decimal(10, 8)", nullable: true),
+                    Longitude = table.Column<decimal>(type: "decimal(11, 8)", nullable: true),
+                    IsDefault = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK__UserAddr__3214EC07DDE0E48B", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAddresses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserAddress", b =>
+            migrationBuilder.CreateTable(
+                name: "Wallet",
+                columns: table => new
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("(getutcdate())");
-
-                    b.Property<bool>("IsDefault")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal?>("Latitude")
-                        .HasColumnType("decimal(10, 8)");
-
-                    b.Property<decimal?>("Longitude")
-                        .HasColumnType("decimal(11, 8)");
-
-                    b.Property<string>("Street")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id")
-                        .HasName("PK__UserAddr__3214EC07DDE0E48B");
-
-                    b.HasIndex(new[] { "UserId" }, "IX_UserAddresses_UserId");
-
-                    b.ToTable("UserAddresses");
+                    WalletId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18, 2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wallet", x => x.WalletId);
+                    table.ForeignKey(
+                        name: "FK_Wallet_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
+            migrationBuilder.CreateTable(
+                name: "UserActivityLog",
+                columns: table => new
                 {
-                    b.Property<int>("WalletId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WalletId"));
-
-                    b.Property<decimal>("Balance")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("WalletId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Wallet");
+                    UserActivityLogId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    EntityType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Details = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    IpAddress = table.Column<string>(type: "nvarchar(45)", maxLength: 45, nullable: true),
+                    IsAdminAction = table.Column<bool>(type: "bit", nullable: false, defaultValue: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false, defaultValueSql: "(getutcdate())"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActivityLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActivityLogs_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserActivityLog", b =>
-                {
-                    b.HasBaseType("TafsilkPlatform.Web.Models.ActivityLog");
-
-                    b.Property<Guid>("UserActivityLogId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.ToTable("ActivityLogs", (string)null);
-
-                    b.HasDiscriminator().HasValue("UserActivityLog");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.ActivityLog", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Contract", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
-                        .WithMany()
-                        .HasForeignKey("RFQId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RFQ");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CorporateAccount", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("CorporateAccount")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.CorporateAccount", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_CorporateAccounts_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("CustomerProfile")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.CustomerProfile", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_CustomerProfiles_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.DeviceToken", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Dispute", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "OpenedByUser")
-                        .WithMany()
-                        .HasForeignKey("OpenedByUserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "ResolvedByAdmin")
-                        .WithMany()
-                        .HasForeignKey("ResolvedByAdminId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("OpenedByUser");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("ResolvedByAdmin");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Notification", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
-                        .WithMany("orders")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderImages", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany("orderImages")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.OrderItem", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany("Items")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Payment", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
-                        .WithMany("Payments")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany("Payments")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("Payments")
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.PortfolioImage", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("PortfolioImages")
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Quote", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "order")
-                        .WithMany("quote")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Tailor");
-
-                    b.Navigation("order");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.CorporateAccount", "CorporateAccount")
-                        .WithMany()
-                        .HasForeignKey("CorporateAccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("CorporateAccount");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQBid", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.RFQ", "RFQ")
-                        .WithMany("Bids")
-                        .HasForeignKey("RFQId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("RFQ");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RatingDimension", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Review", "Review")
-                        .WithMany("RatingDimensions")
-                        .HasForeignKey("ReviewId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Review");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefreshToken", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_RefreshTokens_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RefundRequest", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "RequestedByUser")
-                        .WithMany()
-                        .HasForeignKey("RequestedBy")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Order");
-
-                    b.Navigation("RequestedByUser");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", "Customer")
-                        .WithMany()
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.CustomerProfile", null)
-                        .WithMany("Reviews")
-                        .HasForeignKey("CustomerProfileId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("TafsilkPlatform.Web.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany()
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", null)
-                        .WithMany("Reviews")
-                        .HasForeignKey("TailorProfileId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Order");
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("TailorProfile")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.TailorProfile", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_TailorProfiles_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorService", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.TailorProfile", "Tailor")
-                        .WithMany("TailorServices")
-                        .HasForeignKey("TailorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Tailor");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_Users_Roles");
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.UserAddress", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithMany("UserAddresses")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_UserAddresses_Users");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Wallet", b =>
-                {
-                    b.HasOne("TafsilkPlatform.Web.Models.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("TafsilkPlatform.Web.Models.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.CustomerProfile", b =>
-                {
-                    b.Navigation("Payments");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("orders");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Order", b =>
-                {
-                    b.Navigation("Items");
-
-                    b.Navigation("Payments");
-
-                    b.Navigation("orderImages");
-
-                    b.Navigation("quote");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.RFQ", b =>
-                {
-                    b.Navigation("Bids");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Review", b =>
-                {
-                    b.Navigation("RatingDimensions");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.Role", b =>
-                {
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.TailorProfile", b =>
-                {
-                    b.Navigation("Payments");
-
-                    b.Navigation("PortfolioImages");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("TailorServices");
-                });
-
-            modelBuilder.Entity("TafsilkPlatform.Web.Models.User", b =>
-                {
-                    b.Navigation("CorporateAccount");
-
-                    b.Navigation("CustomerProfile");
-
-                    b.Navigation("RefreshTokens");
-
-                    b.Navigation("TailorProfile");
-
-                    b.Navigation("UserAddresses");
-
-                    b.Navigation("Wallet");
-                });
-#pragma warning restore 612, 618
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityLogs_UserId",
+                table: "ActivityLogs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityLogs_IsAdminAction",
+                table: "ActivityLogs",
+                column: "IsAdminAction");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contracts_RFQId",
+                table: "Contracts",
+                column: "RFQId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contracts_TailorId",
+                table: "Contracts",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CorporateAccounts_UserId",
+                table: "CorporateAccounts",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "UQ__Corporat__1788CC4D39440DF8",
+                table: "CorporateAccounts",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustomerProfiles_UserId",
+                table: "CustomerProfiles",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "UQ__Customer__1788CC4D90808B91",
+                table: "CustomerProfiles",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DeviceTokens_UserId",
+                table: "DeviceTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Disputes_OpenedByUserId",
+                table: "Disputes",
+                column: "OpenedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Disputes_OrderId",
+                table: "Disputes",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Disputes_ResolvedByAdminId",
+                table: "Disputes",
+                column: "ResolvedByAdminId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_AudienceType",
+                table: "Notifications",
+                column: "AudienceType");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_CustomerId",
+                table: "Orders",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_TailorId",
+                table: "Orders",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderImages_OrderId",
+                table: "OrderImages",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_CustomerId",
+                table: "Payment",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_OrderId",
+                table: "Payment",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payment_TailorId",
+                table: "Payment",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PortfolioImages_TailorId",
+                table: "PortfolioImages",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Quotes_OrderId",
+                table: "Quotes",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Quotes_TailorId",
+                table: "Quotes",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RFQs_CorporateAccountId",
+                table: "RFQs",
+                column: "CorporateAccountId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RFQBids_RFQId",
+                table: "RFQBids",
+                column: "RFQId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RFQBids_TailorId",
+                table: "RFQBids",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RatingDimensions_ReviewId",
+                table: "RatingDimensions",
+                column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_ExpiresAt",
+                table: "RefreshTokens",
+                column: "ExpiresAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId",
+                table: "RefreshTokens",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefundRequests_OrderId",
+                table: "RefundRequests",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefundRequests_RequestedBy",
+                table: "RefundRequests",
+                column: "RequestedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CustomerId",
+                table: "Reviews",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_OrderId",
+                table: "Reviews",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_TailorId",
+                table: "Reviews",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TailorProfiles_UserId",
+                table: "TailorProfiles",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "UQ__TailorPr__1788CC4D37A4BF4A",
+                table: "TailorProfiles",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TailorServices_TailorId",
+                table: "TailorServices",
+                column: "TailorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAddresses_UserId",
+                table: "UserAddresses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wallet_UserId",
+                table: "Wallet",
+                column: "UserId",
+                unique: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "AppSettings");
+
+            migrationBuilder.DropTable(
+                name: "ActivityLogs");
+
+            migrationBuilder.DropTable(
+                name: "Contracts");
+
+            migrationBuilder.DropTable(
+                name: "CorporateAccounts");
+
+            migrationBuilder.DropTable(
+                name: "CustomerProfiles");
+
+            migrationBuilder.DropTable(
+                name: "DeviceTokens");
+
+            migrationBuilder.DropTable(
+                name: "Disputes");
+
+            migrationBuilder.DropTable(
+                name: "ErrorLogs");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "OrderImages");
+
+            migrationBuilder.DropTable(
+                name: "OrderItems");
+
+            migrationBuilder.DropTable(
+                name: "Payment");
+
+            migrationBuilder.DropTable(
+                name: "PortfolioImages");
+
+            migrationBuilder.DropTable(
+                name: "Quotes");
+
+            migrationBuilder.DropTable(
+                name: "RFQs");
+
+            migrationBuilder.DropTable(
+                name: "RFQBids");
+
+            migrationBuilder.DropTable(
+                name: "RatingDimensions");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "RefundRequests");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "TailorBadges");
+
+            migrationBuilder.DropTable(
+                name: "TailorServices");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "UserAddresses");
+
+            migrationBuilder.DropTable(
+                name: "Wallet");
         }
     }
 }

@@ -69,11 +69,33 @@ public async Task<IActionResult> Index(
         [HttpGet("Product/{id}")]
         public async Task<IActionResult> ProductDetails(Guid id)
         {
-  var product = await _storeService.GetProductDetailsAsync(id);
-       if (product == null) return NotFound();
-          
-   return View(product);
-   }
+            var product = await _storeService.GetProductDetailsAsync(id);
+            if (product == null)
+            {
+                _logger.LogWarning("Product {ProductId} not found, returning fallback view", id);
+                TempData["Error"] = "المنتج غير موجود أو لم يعد متوفراً";
+
+                // Return fallback model to avoid view NREs
+                var fallback = new ViewModels.Store.ProductViewModel
+                {
+                    ProductId = id,
+                    Name = "منتج غير متوفر",
+                    Description = "لا توجد تفاصيل لهذا المنتج حالياً.",
+                    Price = 0,
+                    DiscountedPrice = null,
+                    Category = string.Empty,
+                    StockQuantity = 0,
+                    IsAvailable = false,
+                    PrimaryImageBase64 = null,
+                    TailorName = null,
+                    TailorId = Guid.Empty
+                };
+
+                return View(fallback);
+            }
+
+            return View(product);
+        }
 
   // GET: /Store/Cart
      [Authorize(Policy = "CustomerPolicy")]
@@ -167,8 +189,19 @@ await _storeService.RemoveFromCartAsync(customerId, cartItemId);
 
    if (checkoutData == null || !checkoutData.Cart.Items.Any())
        {
-    TempData["Error"] = "Your cart is empty";
-return RedirectToAction(nameof(Cart));
+    _logger.LogWarning("Checkout requested but cart is empty for customer {CustomerId}", customerId);
+    TempData["Error"] = "سلة التسوق فارغة أو حدث خطأ أثناء تحميل بيانات السلة";
+
+    // Return a safe fallback CheckoutViewModel so the view can render and show friendly message
+    var fallbackCheckout = new ViewModels.Store.CheckoutViewModel
+    {
+        Cart = new ViewModels.Store.CartViewModel(),
+        ShippingAddress = new ViewModels.Store.CheckoutAddressViewModel(),
+        UseSameAddressForBilling = true,
+        PaymentMethod = "CashOnDelivery"
+    };
+
+return View(fallbackCheckout);
  }
 
       return View(checkoutData);

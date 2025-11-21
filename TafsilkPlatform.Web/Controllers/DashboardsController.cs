@@ -33,6 +33,17 @@ public class DashboardsController : Controller
         return View();
     }
 
+    /// <summary>
+    /// Redirect route for /Dashboards/Tailor/Add to correct product add route
+    /// GET: /Dashboards/Tailor/Add
+    /// </summary>
+    [HttpGet("Tailor/Add")]
+    [Authorize(Roles = "Tailor,Admin")]
+    public IActionResult TailorAdd()
+    {
+        return RedirectToAction("AddProduct", "TailorManagement");
+    }
+
     [Authorize(Roles = "Tailor,Admin")]
     public async Task<IActionResult> Tailor()
     {
@@ -44,10 +55,12 @@ public class DashboardsController : Controller
             var isAdmin = User.IsInRole("Admin");
    
      // CRITICAL: Check if tailor has completed verification
+            // ✅ Use split query to avoid cartesian explosion with multiple collections
             var tailor = await _context.TailorProfiles
                 .Include(t => t.User)
                 .Include(t => t.TailorServices)
                 .Include(t => t.PortfolioImages)
+                .AsSplitQuery()
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null && !isAdmin)
@@ -122,12 +135,14 @@ public class DashboardsController : Controller
             model.PortfolioImagesCount = tailor.PortfolioImages?.Count(p => !p.IsDeleted) ?? 0;
 
             // Get recent orders (last 5)
+            // ✅ Use split query to avoid cartesian explosion with multiple collections
             var recentOrders = await _context.Orders
                  .Where(o => o.TailorId == tailor.Id)
                 .OrderByDescending(o => o.CreatedAt)
         .Take(5)
                .Include(o => o.Customer)
               .ThenInclude(c => c.User)
+         .AsSplitQuery()
          .ToListAsync();
 
             model.RecentOrders = recentOrders.Select(o => new RecentOrderDto

@@ -16,6 +16,10 @@ public static class ServiceCollectionExtensions
 
         // Specialized services
         services.AddScoped<ITailorRegistrationService, TailorRegistrationService>();
+        
+        // ✅ NEW: Product and Portfolio management services
+        services.AddScoped<IProductManagementService, ProductManagementService>();
+        services.AddScoped<IPortfolioService, PortfolioService>();
 
         return services;
     }

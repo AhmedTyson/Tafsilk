@@ -1,7 +1,8 @@
 @model TafsilkPlatform.Web.Models.TailorProfile
 
 @{
-    ViewData["Title"] = $"تفصيلك — {Model.ShopName ?? Model.FullName}";
+    var safeModel = Model ?? new TafsilkPlatform.Web.Models.TailorProfile();
+    ViewData["Title"] = $"تفصيلك — {safeModel.ShopName ?? safeModel.FullName}";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -773,22 +774,22 @@ color: var(--text-primary);
          <div class="profile-banner"></div>
             <div class="profile-content">
             <div class="profile-image">
-         @if (Model.ProfilePictureData != null)
+         @if (safeModel.ProfilePictureData != null)
       {
-       <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })"
-          alt="@Model.FullName"
+       <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = safeModel.Id })"
+          alt="@safeModel.FullName"
     class="profile-img" />
        }
        else
          {
     <img src="https://placehold.co/400x400/e3f2fd/2c5aa0?text=خياط+محترف"
-     alt="@Model.FullName"
+     alt="@safeModel.FullName"
            class="profile-img" />
        }
   </div>
  <div class="profile-info">
-      <h1 class="profile-name">@(Model.ShopName ?? Model.FullName)</h1>
-           @if (Model.IsVerified)
+      <h1 class="profile-name">@(safeModel.ShopName ?? safeModel.FullName)</h1>
+           @if (safeModel.IsVerified)
       {
        <div class="profile-badge">
          <i class="fas fa-check-circle"></i>
@@ -798,42 +799,42 @@ color: var(--text-primary);
 
    <div class="profile-stats">
     <div class="stat">
-      <span class="stat-value">@Model.AverageRating.ToString("F1")</span>
+      <span class="stat-value">@safeModel.AverageRating.ToString("F1")</span>
      <span class="stat-label">التقييم</span>
     </div>
      <div class="stat">
      <span class="stat-value">@ViewBag.ReviewCount</span>
       <span class="stat-label">تقييم</span>
             </div>
-@if (Model.YearsOfExperience.HasValue)
+@if (safeModel.YearsOfExperience.HasValue)
   {
      <div class="stat">
-           <span class="stat-value">@Model.YearsOfExperience</span>
+           <span class="stat-value">@safeModel.YearsOfExperience</span>
       <span class="stat-label">سنوات خبرة</span>
      </div>
                  }
     </div>
 
                 <div class="profile-details">
-    @if (!string.IsNullOrEmpty(Model.City))
+    @if (!string.IsNullOrEmpty(safeModel.City))
              {
            <div class="detail-item">
         <i class="fas fa-map-marker-alt"></i>
-  <span>@Model.City@(!string.IsNullOrEmpty(Model.District) ? ", " + Model.District : "")</span>
+  <span>@safeModel.City@(!string.IsNullOrEmpty(safeModel.District) ? ", " + safeModel.District : "")</span>
       </div>
     }
-     @if (!string.IsNullOrEmpty(Model.Specialization))
+     @if (!string.IsNullOrEmpty(safeModel.Specialization))
             {
       <div class="detail-item">
                <i class="fas fa-tshirt"></i>
-       <span>@Model.Specialization</span>
+       <span>@safeModel.Specialization</span>
             </div>
    }
-         @if (!string.IsNullOrEmpty(Model.BusinessHours))
+         @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
    {
             <div class="detail-item">
      <i class="fas fa-clock"></i>
-               <span>@Model.BusinessHours</span>
+               <span>@safeModel.BusinessHours</span>
      </div>
        }
              <div class="detail-item">
@@ -842,22 +843,22 @@ color: var(--text-primary);
              </div>
           </div>
 
-       @if (!string.IsNullOrEmpty(Model.Bio))
+       @if (!string.IsNullOrEmpty(safeModel.Bio))
  {
     <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
-            @Model.Bio
+            @safeModel.Bio
      </p>
     }
-          else if (!string.IsNullOrEmpty(Model.ShopDescription))
+          else if (!string.IsNullOrEmpty(safeModel.ShopDescription))
     {
       <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
-           @Model.ShopDescription
+           @safeModel.ShopDescription
       </p>
      }
 
    <div class="profile-actions">
   <div class="action-buttons">
-           <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = Model.Id })" class="btn btn-primary">
+           <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = safeModel.Id })" class="btn btn-primary">
                 <i class="fas fa-shopping-bag"></i>
    إنشاء طلب
               </a>
@@ -865,7 +866,7 @@ color: var(--text-primary);
         <i class="far fa-heart"></i>
           إضافة إلى المفضلة
     </button>
-        <a href="@Url.Action("Index", "Messages", new { recipientId = Model.UserId })" class="btn btn-outline">
+        <a href="@Url.Action("Index", "Messages", new { recipientId = safeModel.UserId })" class="btn btn-outline">
                      <i class="fas fa-envelope"></i>
        مراسلة
              </a>
@@ -902,30 +903,30 @@ color: var(--text-primary);
               <ul class="info-list">
  <li>
          <span class="info-label">الاسم:</span>
-      <span class="info-value">@(Model.ShopName ?? Model.FullName)</span>
+      <span class="info-value">@(safeModel.ShopName ?? safeModel.FullName)</span>
          </li>
-       @if (!string.IsNullOrEmpty(Model.Specialization))
+       @if (!string.IsNullOrEmpty(safeModel.Specialization))
     {
        <li>
         <span class="info-label">التخصص:</span>
-        <span class="info-value">@Model.Specialization</span>
+        <span class="info-value">@safeModel.Specialization</span>
       </li>
    }
-         @if (Model.YearsOfExperience.HasValue)
+         @if (safeModel.YearsOfExperience.HasValue)
        {
     <li>
      <span class="info-label">سنوات الخبرة:</span>
-   <span class="info-value">@Model.YearsOfExperience سنوات</span>
+   <span class="info-value">@safeModel.YearsOfExperience سنوات</span>
               </li>
          }
     <li>
    <span class="info-label">تاريخ الانضمام:</span>
-         <span class="info-value">@Model.CreatedAt.ToString("MMMM yyyy")</span>
+         <span class="info-value">@safeModel.CreatedAt.ToString("MMMM yyyy")</span>
     </li>
       </ul>
     </div>
 
-      @if (!string.IsNullOrEmpty(Model.BusinessHours))
+      @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
           {
    <div class="info-card">
      <h3 class="info-card-title">
@@ -935,7 +936,7 @@ color: var(--text-primary);
           <ul class="info-list">
               <li>
   <span class="info-label">ساعات العمل:</span>
-         <span class="info-value">@Model.BusinessHours</span>
+         <span class="info-value">@safeModel.BusinessHours</span>
         </li>
          </ul>
   </div>
@@ -947,41 +948,41 @@ color: var(--text-primary);
            معلومات الاتصال
     </h3>
                <ul class="info-list">
-  @if (!string.IsNullOrEmpty(Model.Address))
+  @if (!string.IsNullOrEmpty(safeModel.Address))
                {
             <li>
         <span class="info-label">العنوان:</span>
-  <span class="info-value">@Model.Address</span>
+  <span class="info-value">@safeModel.Address</span>
        </li>
          }
-      else if (!string.IsNullOrEmpty(Model.City))
+      else if (!string.IsNullOrEmpty(safeModel.City))
          {
      <li>
 <span class="info-label">المدينة:</span>
- <span class="info-value">@Model.City</span>
+ <span class="info-value">@safeModel.City</span>
       </li>
         }
-     @if (Model.User?.PhoneNumber != null)
+     @if (safeModel.User?.PhoneNumber != null)
             {
       <li>
   <span class="info-label">الهاتف:</span>
-        <span class="info-value">@Model.User.PhoneNumber</span>
+        <span class="info-value">@safeModel.User.PhoneNumber</span>
        </li>
        }
-          @if (!string.IsNullOrEmpty(Model.FacebookUrl) || !string.IsNullOrEmpty(Model.InstagramUrl))
+          @if (!string.IsNullOrEmpty(safeModel.FacebookUrl) || !string.IsNullOrEmpty(safeModel.InstagramUrl))
      {
          <li>
    <span class="info-label">وسائل التواصل:</span>
     <span class="info-value">
-     @if (!string.IsNullOrEmpty(Model.FacebookUrl))
+     @if (!string.IsNullOrEmpty(safeModel.FacebookUrl))
           {
-               <a href="@Model.FacebookUrl" target="_blank" style="color: #1877F2; margin-left: 8px;">
+               <a href="@safeModel.FacebookUrl" target="_blank" style="color: #1877F2; margin-left: 8px;">
            <i class="fab fa-facebook"></i>
            </a>
         }
-          @if (!string.IsNullOrEmpty(Model.InstagramUrl))
+          @if (!string.IsNullOrEmpty(safeModel.InstagramUrl))
      {
-  <a href="@Model.InstagramUrl" target="_blank" style="color: #E4405F; margin-left: 8px;">
+  <a href="@safeModel.InstagramUrl" target="_blank" style="color: #E4405F; margin-left: 8px;">
        <i class="fab fa-instagram"></i>
      </a>
            }

@@ -55,7 +55,7 @@
        <img id="preview" class="image-preview" src="#" alt="معاينة">
           </div>
               
-           <label for="ImageFile" class="image-upload-label">
+           <label for="ImageFile" class="image-upload-label" style="cursor: pointer; display: block; padding: 2rem; border: 2px dashed #dee2e6; border-radius: 0.5rem; text-align: center; transition: all 0.3s;">
           <i class="fas fa-cloud-upload-alt"></i>
         اختر صورة أو اسحبها هنا
             </label>
@@ -65,7 +65,6 @@
            class="form-control" 
              type="file" 
    accept="image/*"
-  onchange="previewImage(this)"
                   style="display: none;">
    </div>
       
@@ -172,35 +171,203 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     
     <script>
-        function previewImage(input) {
- if (input.files && input.files[0]) {
-           var reader = new FileReader();
-       
-     reader.onload = function (e) {
-      document.getElementById('preview').src = e.target.result;
-        document.getElementById('imagePreview').style.display = 'block';
-   
-    // Update upload label
-    var label = input.parentElement.querySelector('.image-upload-label');
-         if (label) {
-    label.innerHTML = '<i class="fas fa-check-circle"></i> تم اختيار الصورة - انقر لتغييرها';
-           }
-  }
-                
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+        (function () {
+            'use strict';
 
-     // Make the entire preview container clickable
-      document.addEventListener('DOMContentLoaded', function() {
-            var container = document.querySelector('.image-preview-container');
-            var fileInput = document.getElementById('ImageFile');
-      
-            if (container && fileInput) {
-                container.addEventListener('click', function() {
-         fileInput.click();
-      });
+            var MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+            var MAX_DIMENSION = 2000; // max width/height to downscale large images
+
+            function logSafe() {
+                if (window.console && console.log) console.log.apply(console, arguments);
             }
-        });
+
+            function showError(message) {
+                try {
+                    // Prefer non-blocking UI feedback; fallback to alert if no toast
+                    var el = document.querySelector('.alert.alert-danger');
+                    if (el) {
+                        el.textContent = message;
+                        el.style.display = 'block';
+                    } else {
+                        alert(message);
+                    }
+                } catch (e) {
+                    try { alert(message); } catch (e) { logSafe('Failed to show error:', e); }
+                }
+            }
+
+            function clearErrors() {
+                try {
+                    var el = document.querySelector('.alert.alert-danger');
+                    if (el) { el.textContent = ''; el.style.display = 'none'; }
+                } catch (e) { /* ignore */ }
+            }
+
+            function validateFile(file) {
+                if (!file) return { ok: false, reason: 'No file' };
+                if (!file.type || !file.type.startsWith('image/')) return { ok: false, reason: 'الملف المحدد ليس صورة. اختر ملف صورة صالحًا.' };
+                if (file.size > MAX_FILE_SIZE) return { ok: false, reason: 'حجم الملف أكبر من 5 ميجابايت.' };
+                return { ok: true };
+            }
+
+            function downscaleDataUrl(dataUrl, callback) {
+                try {
+                    var img = new Image();
+                    img.onload = function () {
+                        try {
+                            var w = img.width, h = img.height;
+                            var max = Math.max(w, h);
+                            if (max <= MAX_DIMENSION) return callback(null, dataUrl);
+
+                            var scale = MAX_DIMENSION / max;
+                            var nw = Math.round(w * scale);
+                            var nh = Math.round(h * scale);
+
+                            var canvas = document.createElement('canvas');
+                            canvas.width = nw; canvas.height = nh;
+                            var ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, nw, nh);
+                            var newData = canvas.toDataURL('image/jpeg', 0.92);
+                            callback(null, newData);
+                        } catch (err) { callback(err); }
+                    };
+                    img.onerror = function (err) { callback(new Error('Failed to load image for downscale')); };
+                    img.src = dataUrl;
+                } catch (err) { callback(err); }
+            }
+
+            function setPreviewDataUrl(dataUrl) {
+                try {
+                    var preview = document.getElementById('preview');
+                    var imagePreview = document.getElementById('imagePreview');
+                    if (preview && imagePreview) {
+                        preview.src = dataUrl;
+                        imagePreview.style.display = 'block';
+                    }
+
+                    var label = document.querySelector('.image-upload-label');
+                    if (label) label.innerHTML = '<i class="fas fa-check-circle"></i> تم اختيار الصورة - انقر لتغييرها';
+                    clearErrors();
+                } catch (err) {
+                    logSafe('setPreviewDataUrl error', err);
+                }
+            }
+
+            function previewImage(input) {
+                try {
+                    if (!input || !input.files || !input.files[0]) {
+                        logSafe('No file selected');
+                        return;
+                    }
+
+                    var file = input.files[0];
+                    var v = validateFile(file);
+                    if (!v.ok) {
+                        showError(v.reason);
+                        input.value = ''; // reset invalid file
+                        return;
+                    }
+
+                    if (typeof FileReader === 'undefined') {
+                        showError('المتصفح الحالي لا يدعم معاينة الصور. يمكنك المتابعة وسيتم رفع الصورة بدون معاينة.');
+                        return;
+                    }
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        try {
+                            var dataUrl = e && e.target ? e.target.result : null;
+                            if (!dataUrl) throw new Error('Empty image data');
+
+                            // Downscale very large images to avoid memory spikes
+                            downscaleDataUrl(dataUrl, function (err, finalDataUrl) {
+                                if (err) {
+                                    logSafe('Downscale failed, using original', err);
+                                    setPreviewDataUrl(dataUrl);
+                                } else {
+                                    setPreviewDataUrl(finalDataUrl);
+                                }
+                            });
+                        } catch (err) {
+                            logSafe('reader.onload error', err);
+                            showError('حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى.');
+                        }
+                    };
+
+                    reader.onerror = function (err) {
+                        logSafe('FileReader error', err);
+                        showError('حدث خطأ أثناء قراءة الملف. حاول اختيار ملف آخر.');
+                    };
+
+                    reader.readAsDataURL(file);
+                } catch (err) {
+                    logSafe('previewImage outer error', err);
+                    showError('حدث خطأ أثناء معاينة الصورة. يرجى المحاولة مرة أخرى.');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                try {
+                    var fileInput = document.getElementById('ImageFile');
+                    if (!fileInput) { logSafe('ImageFile input not found'); return; }
+
+                    fileInput.addEventListener('change', function (e) {
+                        try { previewImage(e.target); } catch (err) { logSafe('change handler error', err); }
+                    });
+
+                    var uploadLabel = document.querySelector('.image-upload-label');
+                    if (uploadLabel) uploadLabel.addEventListener('click', function (e) {
+                        try { e.preventDefault(); if (fileInput) fileInput.click(); } catch (err) { logSafe('uploadLabel click error', err); }
+                    });
+
+                    var container = document.querySelector('.image-preview-container');
+                    if (container) container.addEventListener('click', function (e) {
+                        try {
+                            if (!e.target || e.target.tagName === 'IMG' || e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+                            if (fileInput) fileInput.click();
+                        } catch (err) { logSafe('container click error', err); }
+                    });
+
+                    // Allow drag & drop on the custom label/container
+                    if (container) {
+                        container.addEventListener('dragover', function (e) { try { e.preventDefault(); container.classList.add('dragover'); } catch (err) { } });
+                        container.addEventListener('dragleave', function (e) { try { container.classList.remove('dragover'); } catch (err) { } });
+                        container.addEventListener('drop', function (e) {
+                            try {
+                                e.preventDefault(); container.classList.remove('dragover');
+                                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                                    // assign files to input if possible
+                                    var dtFiles = e.dataTransfer.files;
+                                    // Create a DataTransfer to set files (not supported in all browsers)
+                                    try {
+                                        var dataTransfer = new DataTransfer();
+                                        for (var i = 0; i < dtFiles.length; i++) dataTransfer.items.add(dtFiles[i]);
+                                        fileInput.files = dataTransfer.files;
+                                    } catch (ex) {
+                                        // fallback: just preview the first file
+                                    }
+                                    previewImage(fileInput);
+                                }
+                            } catch (err) { logSafe('drop handler error', err); }
+                        });
+                    }
+
+                } catch (err) { logSafe('DOMContentLoaded setup error', err); }
+            });
+
+            // Lightweight global error logging to avoid silent crashes
+            window.addEventListener('error', function (e) {
+                try {
+                    var msg = (e && e.message) ? e.message : String(e);
+                    // Only log; do not attempt to swallow all errors globally
+                    logSafe('Global error:', msg, e.filename || '', e.lineno || '', e.colno || '');
+                } catch (err) { /* ignore */ }
+            });
+
+            window.addEventListener('unhandledrejection', function (e) {
+                try { logSafe('Unhandled rejection:', e && e.reason ? e.reason : e); } catch (err) { /* ignore */ }
+            });
+
+        })();
     </script>
 }

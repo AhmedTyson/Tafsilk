@@ -7,6 +7,9 @@ using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.Orders;
+using Microsoft.AspNetCore.Hosting;
+using TafsilkPlatform.Web.Extensions;
+using System.IO;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -22,16 +25,22 @@ public class OrdersController : Controller
     private readonly ILogger<OrdersController> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IOrderService _orderService;
+    private readonly ImageUploadService _imageUploadService;
+    private readonly IWebHostEnvironment _environment;
     public OrdersController(
         AppDbContext db,
         ILogger<OrdersController> logger,
         IFileUploadService fileUploadService,
-        IOrderService orderService)
+        IOrderService orderService,
+        ImageUploadService imageUploadService,
+        IWebHostEnvironment environment)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
-        _orderService = orderService;
+        _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
+        _imageUploadService = imageUploadService ?? throw new ArgumentNullException(nameof(imageUploadService));
+        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
     #region Customer Order Actions
@@ -173,35 +182,117 @@ public class OrdersController : Controller
 
             _db.Orders.Add(order);
 
-            // Save order images if provided
+            // Robust image upload handling
+            int validImageCount = 0;
             if (model.ReferenceImages != null && model.ReferenceImages.Any())
             {
-                foreach (var image in model.ReferenceImages)
+                _logger.LogInformation("Processing {Count} reference images for order", model.ReferenceImages.Count);
+                foreach (var image in model.ReferenceImages.Take(5))
                 {
-                    if (image.Length > 0)
+                    try
                     {
-                        // Validate image
-                        if (!_fileUploadService.IsValidImage(image))
-                            continue;
-
-                        using (var memoryStream = new MemoryStream())
+                        if (image == null || image.Length == 0)
                         {
-                            await image.CopyToAsync(memoryStream);
-                            var orderImage = new OrderImages
-                            {
-                                OrderImageId = Guid.NewGuid(),
-                                OrderId = order.OrderId,
-                                ImageData = memoryStream.ToArray(),
-                                ContentType = image.ContentType,
-                                ImgUrl = string.Empty,
-                                UploadedId = userId.ToString(),
-                                Order = order,
-                                CreatedAt = DateTime.UtcNow
-                            };
-                            _db.OrderImages.Add(orderImage);
+                            _logger.LogWarning("Skipping null or empty image");
+                            continue;
                         }
+
+                        // Use ImageUploadService for validation (signature + mime + extension)
+                        var (isValid, validationError) = await _imageUploadService.ValidateImageAsync(image);
+                        if (!isValid)
+                        {
+                            _logger.LogWarning("Invalid image: {FileName} - {Error}", image.FileName, validationError);
+                            continue;
+                        }
+
+                        // Check file size limit
+                        var maxSize = _imageUploadService.GetMaxFileSizeInBytes();
+                        if (image.Length > maxSize)
+                        {
+                            try
+                            {
+                                var uploadsDir = Path.Combine(_environment.WebRootPath ?? "wwwroot", "uploads", "orders");
+                                if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
+
+                                var fileName = _imageUploadService.GenerateUniqueFileName(image.FileName);
+                                var physicalPath = Path.Combine(uploadsDir, fileName);
+
+                                await using var fs = new FileStream(physicalPath, FileMode.Create);
+                                await image.CopyToAsync(fs);
+
+                                var imgUrl = $"/uploads/orders/{fileName}";
+
+                                var orderImage = new OrderImages
+                                {
+                                    OrderImageId = Guid.NewGuid(),
+                                    OrderId = order.OrderId,
+                                    ImageData = null,
+                                    ContentType = image.ContentType ?? "application/octet-stream",
+                                    ImgUrl = imgUrl,
+                                    UploadedId = userId.ToString(),
+                                    Order = order,
+                                    CreatedAt = DateTime.UtcNow,
+                                    UploadedAt = DateTimeOffset.UtcNow
+                                };
+
+                                _db.OrderImages.Add(orderImage);
+                                _logger.LogInformation("Order image saved to disk and referenced by URL. ImageId: {ImageId}, Url: {Url}", orderImage.OrderImageId, imgUrl);
+                                validImageCount++;
+                                continue;
+                            }
+                            catch (Exception diskEx)
+                            {
+                                _logger.LogError(diskEx, "Failed to save large image to disk: {FileName}", image.FileName);
+                                continue;
+                            }
+                        }
+
+                        // Process image with memory-efficient streaming and size check
+                        byte[] imageData;
+                        try
+                        {
+                            imageData = await _imageUploadService.ProcessImageWithSizeCheckAsync(image, maxSize);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to process image: {FileName}", image.FileName);
+                            continue;
+                        }
+
+                        if (imageData == null || imageData.Length == 0)
+                        {
+                            _logger.LogWarning("Processed image data empty for: {FileName}", image.FileName);
+                            continue;
+                        }
+
+                        var orderImageDb = new OrderImages
+                        {
+                            OrderImageId = Guid.NewGuid(),
+                            OrderId = order.OrderId,
+                            ImageData = imageData,
+                            ContentType = image.ContentType ?? "image/jpeg",
+                            ImgUrl = string.Empty,
+                            UploadedId = userId.ToString(),
+                            Order = order,
+                            CreatedAt = DateTime.UtcNow,
+                            UploadedAt = DateTimeOffset.UtcNow
+                        };
+
+                        _db.OrderImages.Add(orderImageDb);
+                        _logger.LogInformation("Order image added successfully. ImageId: {ImageId}, Size: {Size} bytes", orderImageDb.OrderImageId, imageData.Length);
+                        validImageCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Unexpected error processing order image");
+                        continue;
                     }
                 }
+            }
+
+            if (validImageCount == 0 && model.ReferenceImages != null && model.ReferenceImages.Any())
+            {
+                TempData["Warning"] = "لم يتم قبول أي صورة من الصور المرفوعة. يرجى التأكد من نوع وحجم الصور.";
             }
 
             // Save measurements as order items (if provided)
@@ -229,10 +320,9 @@ public class OrdersController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating order");
-            ModelState.AddModelError("", "حدث خطأ أثناء إنشاء الطلب");
-            await ReloadOrderViewModel(model);
-            return View(model);
+            _logger.LogError(ex, "Error creating order (fatal)");
+            TempData["Error"] = "حدث خطأ غير متوقع أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني.";
+            return Redirect("/Error?message=حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.");
         }
     }
 
@@ -381,7 +471,8 @@ public class OrdersController : Controller
                 ReferenceImages = order.orderImages.Select(img => new OrderImageViewModel
                 {
                     ImageId = img.OrderImageId,
-                    ContentType = img.ContentType
+                    ContentType = img.ContentType,
+                    ImgUrl = string.IsNullOrWhiteSpace(img.ImgUrl) ? null : img.ImgUrl
                 }).ToList(),
 
                 // User role
@@ -588,7 +679,7 @@ public class OrdersController : Controller
                 .Include(i => i.Order)
              .FirstOrDefaultAsync(i => i.OrderImageId == imageId);
 
-            if (image == null || image.ImageData == null)
+            if (image == null)
                 return NotFound();
 
             // Check authorization
@@ -601,7 +692,35 @@ public class OrdersController : Controller
             if (!isAuthorized && !User.IsInRole("Admin"))
                 return Forbid();
 
-            return File(image.ImageData, image.ContentType ?? "image/jpeg");
+            // If stored in DB
+            if (image.ImageData != null && image.ImageData.Length > 0)
+            {
+                return File(image.ImageData, image.ContentType ?? "image/jpeg");
+            }
+
+            // If stored on disk (ImgUrl)
+            if (!string.IsNullOrWhiteSpace(image.ImgUrl))
+            {
+                if (Uri.IsWellFormedUriString(image.ImgUrl, UriKind.Absolute))
+                {
+                    return Redirect(image.ImgUrl);
+                }
+
+                if (image.ImgUrl.StartsWith('/'))
+                {
+                    var relativePath = image.ImgUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    var physicalPath = Path.Combine(_environment.WebRootPath ?? string.Empty, relativePath);
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        var contentType = image.ContentType ?? "image/jpeg";
+                        return PhysicalFile(physicalPath, contentType);
+                    }
+                }
+
+                return Redirect(image.ImgUrl);
+            }
+
+            return NotFound();
         }
         catch (Exception ex)
         {

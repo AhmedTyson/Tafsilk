@@ -5,18 +5,8 @@
 namespace TafsilkPlatform.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class dbnew : Migration
+    public partial class DbNew : Migration
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-
-        }
+        // Methods are defined in the Designer file. No need to duplicate here.
     }
 }
