@@ -170,125 +170,304 @@ Category = p.Category,
    }
 
         public async Task<CartViewModel?> GetCartAsync(Guid customerId)
-  {
-       var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
-    if (cart == null) return null;
+        {
+            var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
+            if (cart == null) return null;
 
-     var items = cart.Items.Select(i => new CartItemViewModel
-   {
-      CartItemId = i.CartItemId,
-            ProductId = i.ProductId,
-      ProductName = i.Product.Name,
-      ProductImageBase64 = i.Product.PrimaryImageData != null ? Convert.ToBase64String(i.Product.PrimaryImageData) : null,
-     UnitPrice = i.UnitPrice,
-      Quantity = i.Quantity,
-         TotalPrice = i.TotalPrice,
-     SelectedSize = i.SelectedSize,
-            SelectedColor = i.SelectedColor,
-                StockAvailable = i.Product.StockQuantity,
-    IsAvailable = i.Product.IsAvailable
-            }).ToList();
+            // ✅ Refresh cart items with latest product data (like Amazon)
+            var items = new List<CartItemViewModel>();
+            var itemsToRemove = new List<CartItem>();
 
-  var subtotal = items.Sum(i => i.TotalPrice);
-     var shippingCost = CalculateShipping(subtotal);
-     var tax = CalculateTax(subtotal);
-
-      return new CartViewModel
+            foreach (var cartItem in cart.Items)
             {
- CartId = cart.CartId,
-          Items = items,
-     SubTotal = subtotal,
-          ShippingCost = shippingCost,
+                // ✅ Reload product to get latest stock information
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId && !p.IsDeleted);
+
+                // ✅ Remove items for deleted/unavailable products
+                if (product == null || !product.IsAvailable)
+                {
+                    itemsToRemove.Add(cartItem);
+                    continue;
+                }
+
+                // ✅ Adjust quantity if stock is less than cart quantity (like Amazon)
+                var availableQuantity = Math.Min(cartItem.Quantity, product.StockQuantity);
+                if (availableQuantity < cartItem.Quantity)
+                {
+                    _logger.LogInformation(
+                        "Adjusting cart item {CartItemId} quantity from {OldQty} to {NewQty} due to stock limit",
+                        cartItem.CartItemId, cartItem.Quantity, availableQuantity);
+                    
+                    if (availableQuantity <= 0)
+                    {
+                        itemsToRemove.Add(cartItem);
+                        continue;
+                    }
+                    
+                    cartItem.Quantity = availableQuantity;
+                    cartItem.UpdatedAt = DateTimeOffset.UtcNow;
+                }
+
+                items.Add(new CartItemViewModel
+                {
+                    CartItemId = cartItem.CartItemId,
+                    ProductId = cartItem.ProductId,
+                    ProductName = product.Name,
+                    ProductImageBase64 = product.PrimaryImageData != null 
+                        ? Convert.ToBase64String(product.PrimaryImageData) 
+                        : null,
+                    UnitPrice = cartItem.UnitPrice,
+                    Quantity = cartItem.Quantity,
+                    TotalPrice = cartItem.TotalPrice,
+                    SelectedSize = cartItem.SelectedSize,
+                    SelectedColor = cartItem.SelectedColor,
+                    StockAvailable = product.StockQuantity,
+                    IsAvailable = product.IsAvailable
+                });
+            }
+
+            // ✅ Remove unavailable items
+            if (itemsToRemove.Any())
+            {
+                _context.CartItems.RemoveRange(itemsToRemove);
+                await _context.SaveChangesAsync();
+            }
+
+            if (!items.Any())
+            {
+                return null; // Cart is now empty
+            }
+
+            var subtotal = items.Sum(i => i.TotalPrice);
+            var shippingCost = CalculateShipping(subtotal);
+            var tax = CalculateTax(subtotal);
+
+            return new CartViewModel
+            {
+                CartId = cart.CartId,
+                Items = items,
+                SubTotal = subtotal,
+                ShippingCost = shippingCost,
                 Tax = tax,
-              Total = subtotal + shippingCost + tax,
-        TotalItems = items.Sum(i => i.Quantity)
-  };
+                Total = subtotal + shippingCost + tax,
+                TotalItems = items.Sum(i => i.Quantity)
+            };
         }
 
         public async Task<bool> AddToCartAsync(Guid customerId, AddToCartRequest request)
         {
-            try
-   {
-                // Get or create cart
- var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
-    if (cart == null)
-    {
-            var customer = await _customerRepository.GetByIdAsync(customerId);
-       if (customer == null) return false;
+            // ✅ FIXED: Use execution strategy instead of explicit transaction to work with retry logic
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    // ✅ Validate request
+                    if (request.Quantity <= 0 || request.Quantity > 100)
+                    {
+                        _logger.LogWarning("Invalid quantity {Quantity} for product {ProductId}", request.Quantity, request.ProductId);
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
 
-      cart = new ShoppingCart
-        {
-            CustomerId = customerId,
-            Customer = customer,
-          ExpiresAt = DateTimeOffset.UtcNow.AddDays(30)
-       };
-           await _cartRepository.AddAsync(cart);
-       }
+                    // ✅ Get product with lock to prevent race conditions (like Amazon)
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == request.ProductId && !p.IsDeleted);
+                
+                    if (product == null)
+                    {
+                        _logger.LogWarning("Product {ProductId} not found", request.ProductId);
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
 
-   // Check if item already exists
-       var existingItem = await _cartItemRepository.GetCartItemAsync(
-           cart.CartId, 
-    request.ProductId, 
-    request.SelectedSize, 
-    request.SelectedColor);
+                    // ✅ Validate product availability and stock (CRITICAL - like Amazon)
+                    if (!product.IsAvailable)
+                    {
+                        _logger.LogWarning("Product {ProductId} is not available", request.ProductId);
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
 
-    var product = await _productRepository.GetByIdAsync(request.ProductId);
-         if (product == null || !product.IsAvailable) return false;
+                // ✅ Get or create cart
+                var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
+                if (cart == null)
+                {
+                    var customer = await _customerRepository.GetByIdAsync(customerId);
+                    if (customer == null)
+                    {
+                        _logger.LogWarning("Customer {CustomerId} not found", customerId);
+                        return false;
+                    }
 
-          if (existingItem != null)
-          {
-         // Update quantity
-             existingItem.Quantity += request.Quantity;
-   existingItem.UpdatedAt = DateTimeOffset.UtcNow;
-       await _context.SaveChangesAsync();
-      }
-          else
-     {
-  // Add new item
-  var cartItem = new CartItem
-              {
-               CartId = cart.CartId,
-Cart = cart,
-   ProductId = request.ProductId,
-   Product = product,
-    Quantity = request.Quantity,
-       UnitPrice = product.DiscountedPrice ?? product.Price,
-           SelectedSize = request.SelectedSize,
-         SelectedColor = request.SelectedColor,
-   SpecialInstructions = request.SpecialInstructions
-       };
-    await _cartItemRepository.AddAsync(cartItem);
-      }
+                    cart = new ShoppingCart
+                    {
+                        CustomerId = customerId,
+                        Customer = customer,
+                        ExpiresAt = DateTimeOffset.UtcNow.AddDays(30)
+                    };
+                    await _cartRepository.AddAsync(cart);
+                    await _context.SaveChangesAsync(); // Save to get CartId
+                }
 
+                // ✅ Check if item already exists in cart
+                var existingItem = await _cartItemRepository.GetCartItemAsync(
+                    cart.CartId,
+                    request.ProductId,
+                    request.SelectedSize,
+                    request.SelectedColor);
+
+                // ✅ Calculate new total quantity
+                var newQuantity = existingItem != null 
+                    ? existingItem.Quantity + request.Quantity 
+                    : request.Quantity;
+
+                // ✅ Validate stock availability (CRITICAL - prevent overselling like Amazon)
+                if (product.StockQuantity < newQuantity)
+                {
+                    _logger.LogWarning(
+                        "Insufficient stock for product {ProductId}. Requested: {Requested}, Available: {Available}",
+                        request.ProductId, newQuantity, product.StockQuantity);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // ✅ Update or add cart item
+                if (existingItem != null)
+                {
+                    // Update quantity
+                    existingItem.Quantity = newQuantity;
+                    existingItem.UpdatedAt = DateTimeOffset.UtcNow;
+                    _logger.LogInformation(
+                        "Updated cart item {CartItemId} quantity to {Quantity}",
+                        existingItem.CartItemId, newQuantity);
+                }
+                else
+                {
+                    // Add new item
+                    var unitPrice = product.DiscountedPrice ?? product.Price;
+                    var cartItem = new CartItem
+                    {
+                        CartId = cart.CartId,
+                        Cart = cart,
+                        ProductId = request.ProductId,
+                        Product = product,
+                        Quantity = request.Quantity,
+                        UnitPrice = unitPrice,
+                        SelectedSize = request.SelectedSize,
+                        SelectedColor = request.SelectedColor,
+                        SpecialInstructions = request.SpecialInstructions,
+                        AddedAt = DateTimeOffset.UtcNow
+                    };
+                    await _cartItemRepository.AddAsync(cartItem);
+                    _logger.LogInformation(
+                        "Added new item to cart {CartId} for product {ProductId}",
+                        cart.CartId, request.ProductId);
+                }
+
+                // ✅ Update cart timestamp
                 cart.UpdatedAt = DateTimeOffset.UtcNow;
-        await _context.SaveChangesAsync();
-     return true;
-        }
-        catch (Exception ex)
-            {
-         _logger.LogError(ex, "Error adding item to cart for customer {CustomerId}", customerId);
-         return false;
-            }
+                
+                    // ✅ Save all changes in transaction
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    _logger.LogInformation(
+                        "Successfully added product {ProductId} to cart for customer {CustomerId}",
+                        request.ProductId, customerId);
+                    
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error adding item to cart for customer {CustomerId}", customerId);
+                    return false;
+                }
+            });
         }
 
-   public async Task<bool> UpdateCartItemAsync(Guid customerId, UpdateCartItemRequest request)
+        public async Task<bool> UpdateCartItemAsync(Guid customerId, UpdateCartItemRequest request)
         {
-   var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
-      if (cart == null) return false;
-
-            var cartItem = cart.Items.FirstOrDefault(i => i.CartItemId == request.CartItemId);
-  if (cartItem == null) return false;
-
-        if (request.Quantity <= 0)
+            // ✅ FIXED: Use execution strategy for transactions
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync<bool>(async () =>
             {
-    return await RemoveFromCartAsync(customerId, request.CartItemId);
-  }
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
+                if (cart == null)
+                {
+                    _logger.LogWarning("Cart not found for customer {CustomerId}", customerId);
+                    return false;
+                }
 
-     cartItem.Quantity = request.Quantity;
-   cartItem.UpdatedAt = DateTimeOffset.UtcNow;
-     cart.UpdatedAt = DateTimeOffset.UtcNow;
-       await _context.SaveChangesAsync();
-            return true;
+                var cartItem = cart.Items.FirstOrDefault(i => i.CartItemId == request.CartItemId);
+                if (cartItem == null)
+                {
+                    _logger.LogWarning("Cart item {CartItemId} not found", request.CartItemId);
+                    return false;
+                }
+
+                // ✅ If quantity is 0 or negative, remove item
+                if (request.Quantity <= 0)
+                {
+                    await transaction.RollbackAsync();
+                    return await RemoveFromCartAsync(customerId, request.CartItemId);
+                }
+
+                // ✅ Validate quantity limit
+                if (request.Quantity > 100)
+                {
+                    _logger.LogWarning("Quantity {Quantity} exceeds maximum allowed (100)", request.Quantity);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // ✅ Validate stock availability before updating
+                var product = await _context.Products
+                    .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
+
+                if (product == null || !product.IsAvailable)
+                {
+                    _logger.LogWarning("Product {ProductId} is not available", cartItem.ProductId);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                if (product.StockQuantity < request.Quantity)
+                {
+                    _logger.LogWarning(
+                        "Insufficient stock for product {ProductId}. Available: {Available}, Requested: {Requested}",
+                        product.ProductId, product.StockQuantity, request.Quantity);
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // ✅ Update quantity
+                cartItem.Quantity = request.Quantity;
+                cartItem.UpdatedAt = DateTimeOffset.UtcNow;
+                cart.UpdatedAt = DateTimeOffset.UtcNow;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation(
+                    "Updated cart item {CartItemId} quantity to {Quantity} for customer {CustomerId}",
+                    request.CartItemId, request.Quantity, customerId);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error updating cart item for customer {CustomerId}", customerId);
+                    return false;
+                }
+            });
         }
 
         public async Task<bool> RemoveFromCartAsync(Guid customerId, Guid cartItemId)
@@ -336,120 +515,215 @@ Cart = cart,
         }
 
         public async Task<(bool Success, Guid? OrderId, string? ErrorMessage)> ProcessCheckoutAsync(
-       Guid customerId, 
-     ProcessPaymentRequest request)
+            Guid customerId,
+            ProcessPaymentRequest request)
         {
-    using var transaction = await _context.Database.BeginTransactionAsync();
-        
-            try
-  {
-  // Get cart
-           var cart = await _cartRepository.GetActiveCartByCustomerIdAsync(customerId);
-        if (cart == null || !cart.Items.Any())
-   {
-   return (false, null, "Cart is empty");
-          }
-
-    // Validate stock
-         foreach (var item in cart.Items)
- {
-           if (item.Product.StockQuantity < item.Quantity)
-      {
-               return (false, null, $"Insufficient stock for {item.Product.Name}");
-               }
-          }
-
-           // Create order
-      var customer = await _customerRepository.GetByIdAsync(customerId);
-        if (customer == null) return (false, null, "Customer not found");
-
-    // For store orders, we need a default tailor or system user
-      var systemTailor = await _context.TailorProfiles.FirstOrDefaultAsync();
-      if (systemTailor == null) return (false, null, "System configuration error");
-
-      var subtotal = cart.Items.Sum(i => i.TotalPrice);
- var shipping = CalculateShipping(subtotal);
-                var tax = CalculateTax(subtotal);
-  var total = subtotal + shipping + tax;
-
-        var order = new Order
-    {
-     OrderId = Guid.NewGuid(),
-   CustomerId = customerId,
-   Customer = customer,
-      TailorId = systemTailor.Id,
-       Tailor = systemTailor,
- Description = "Store Purchase",
-        OrderType = "StoreOrder",
- TotalPrice = (double)total,
-        Status = OrderStatus.Confirmed, // ✅ FIXED: Store orders are auto-confirmed (no quote needed)
-   CreatedAt = DateTimeOffset.UtcNow,
-     DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
-     FulfillmentMethod = "Delivery"
- };
-
- await _orderRepository.AddAsync(order);
-
-  // Add order items and update stock
-             foreach (var cartItem in cart.Items)
-      {
-  var orderItem = new OrderItem
-        {
-          OrderItemId = Guid.NewGuid(),
- OrderId = order.OrderId,
-         Order = order,
-       ProductId = cartItem.ProductId,
-          Product = cartItem.Product,
-    Description = cartItem.Product.Name,
-               Quantity = cartItem.Quantity,
-         UnitPrice = cartItem.UnitPrice,
-              Total = cartItem.TotalPrice,
-SelectedSize = cartItem.SelectedSize,
-            SelectedColor = cartItem.SelectedColor,
-        SpecialInstructions = cartItem.SpecialInstructions
-           };
-
-            _context.OrderItems.Add(orderItem);
-
-            // Update stock
-             cartItem.Product.StockQuantity -= cartItem.Quantity;
-         cartItem.Product.SalesCount += cartItem.Quantity;
-   }
-
-       // Create payment record
-    var payment = new Payment
-         {
-        PaymentId = Guid.NewGuid(),
-         OrderId = order.OrderId,
-          Order = order,
-        CustomerId = customerId,
-      Customer = customer,
-          TailorId = systemTailor.Id,
-           Tailor = systemTailor,
-    Amount = total,
- PaymentType = request.PaymentMethod == "CreditCard" ? Enums.PaymentType.Card : Enums.PaymentType.Cash,
-   PaymentStatus = request.PaymentMethod == "CashOnDelivery" ? Enums.PaymentStatus.Pending : Enums.PaymentStatus.Completed,
-         TransactionType = Enums.TransactionType.Credit,
-    PaidAt = DateTimeOffset.UtcNow
-    };
-
-  _context.Payment.Add(payment);
-
-       // Clear cart
-await _cartRepository.ClearCartAsync(cart.CartId);
-
-  await _context.SaveChangesAsync();
-  await transaction.CommitAsync();
-
-      return (true, order.OrderId, null);
-    }
- catch (Exception ex)
+            // ✅ FIXED: Use execution strategy to work with retry logic
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync<(bool Success, Guid? OrderId, string? ErrorMessage)>(async () =>
             {
-                await transaction.RollbackAsync();
-    _logger.LogError(ex, "Error processing checkout for customer {CustomerId}", customerId);
-          return (false, null, "An error occurred during checkout");
-  }
-  }
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                _logger.LogInformation("Processing checkout for customer {CustomerId}", customerId);
+
+                // ✅ Get cart with fresh data (prevent stale data issues)
+                var cart = await _context.ShoppingCarts
+                    .Include(c => c.Items)
+                        .ThenInclude(i => i.Product)
+                    .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.IsActive);
+
+                if (cart == null || !cart.Items.Any())
+                {
+                    _logger.LogWarning("Empty cart for customer {CustomerId}", customerId);
+                    return (false, null, "Your cart is empty. Please add items before checkout.");
+                }
+
+                // ✅ Validate and lock stock (CRITICAL - like Amazon prevents overselling)
+                var stockValidationErrors = new List<string>();
+                foreach (var cartItem in cart.Items)
+                {
+                    // Reload product with lock to prevent race conditions
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
+
+                    if (product == null)
+                    {
+                        stockValidationErrors.Add($"{cartItem.Product?.Name ?? "Product"} is no longer available");
+                        continue;
+                    }
+
+                    if (!product.IsAvailable)
+                    {
+                        stockValidationErrors.Add($"{product.Name} is currently unavailable");
+                        continue;
+                    }
+
+                    // ✅ Check stock availability (CRITICAL)
+                    if (product.StockQuantity < cartItem.Quantity)
+                    {
+                        stockValidationErrors.Add(
+                            $"{product.Name}: Only {product.StockQuantity} available, but {cartItem.Quantity} requested");
+                    }
+                }
+
+                if (stockValidationErrors.Any())
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogWarning(
+                        "Stock validation failed for customer {CustomerId}. Errors: {Errors}",
+                        customerId, string.Join("; ", stockValidationErrors));
+                    return (false, null, $"Stock issues: {string.Join("; ", stockValidationErrors)}");
+                }
+
+                // ✅ Get customer
+                var customer = await _customerRepository.GetByIdAsync(customerId);
+                if (customer == null)
+                {
+                    await transaction.RollbackAsync();
+                    return (false, null, "Customer not found");
+                }
+
+                // ✅ Get system tailor for store orders
+                var systemTailor = await _context.TailorProfiles.FirstOrDefaultAsync();
+                if (systemTailor == null)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError("System tailor not configured");
+                    return (false, null, "System configuration error. Please contact support.");
+                }
+
+                // ✅ Calculate totals
+                var subtotal = cart.Items.Sum(i => i.TotalPrice);
+                var shipping = CalculateShipping(subtotal);
+                var tax = CalculateTax(subtotal);
+                var total = subtotal + shipping + tax;
+
+                // ✅ Create order
+                var order = new Order
+                {
+                    OrderId = Guid.NewGuid(),
+                    CustomerId = customerId,
+                    Customer = customer,
+                    TailorId = systemTailor.Id,
+                    Tailor = systemTailor,
+                    Description = "Store Purchase",
+                    OrderType = "StoreOrder",
+                    TotalPrice = (double)total,
+                    Status = OrderStatus.Confirmed, // Store orders are auto-confirmed
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
+                    FulfillmentMethod = "Delivery"
+                };
+
+                await _orderRepository.AddAsync(order);
+                await _context.SaveChangesAsync(); // Save to get OrderId
+
+                // ✅ Create order items and update stock atomically (CRITICAL)
+                foreach (var cartItem in cart.Items)
+                {
+                    // Reload product with lock
+                    var product = await _context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
+
+                    if (product == null) continue;
+
+                    // ✅ Double-check stock before updating (prevent race conditions)
+                    if (product.StockQuantity < cartItem.Quantity)
+                    {
+                        await transaction.RollbackAsync();
+                        _logger.LogError(
+                            "Stock check failed during order creation for product {ProductId}. Available: {Available}, Requested: {Requested}",
+                            product.ProductId, product.StockQuantity, cartItem.Quantity);
+                        return (false, null, $"Insufficient stock for {product.Name}");
+                    }
+
+                    // Create order item
+                    var orderItem = new OrderItem
+                    {
+                        OrderItemId = Guid.NewGuid(),
+                        OrderId = order.OrderId,
+                        Order = order,
+                        ProductId = cartItem.ProductId,
+                        Product = product,
+                        Description = product.Name,
+                        Quantity = cartItem.Quantity,
+                        UnitPrice = cartItem.UnitPrice,
+                        Total = cartItem.TotalPrice,
+                        SelectedSize = cartItem.SelectedSize,
+                        SelectedColor = cartItem.SelectedColor,
+                        SpecialInstructions = cartItem.SpecialInstructions
+                    };
+
+                    _context.OrderItems.Add(orderItem);
+
+                    // ✅ Update stock atomically (CRITICAL - like Amazon)
+                    product.StockQuantity -= cartItem.Quantity;
+                    product.SalesCount += cartItem.Quantity;
+                    product.UpdatedAt = DateTimeOffset.UtcNow;
+
+                    // ✅ Mark product as unavailable if stock reaches zero
+                    if (product.StockQuantity == 0)
+                    {
+                        product.IsAvailable = false;
+                    }
+                }
+
+                // ✅ Determine payment status based on payment method
+                var paymentStatus = request.PaymentMethod == "CashOnDelivery" 
+                    ? Enums.PaymentStatus.Pending 
+                    : Enums.PaymentStatus.Completed;
+
+                // ✅ Create payment record
+                var payment = new Payment
+                {
+                    PaymentId = Guid.NewGuid(),
+                    OrderId = order.OrderId,
+                    Order = order,
+                    CustomerId = customerId,
+                    Customer = customer,
+                    TailorId = systemTailor.Id,
+                    Tailor = systemTailor,
+                    Amount = total,
+                    PaymentType = request.PaymentMethod == "CreditCard" 
+                        ? Enums.PaymentType.Card 
+                        : Enums.PaymentType.Cash,
+                    PaymentStatus = paymentStatus,
+                    TransactionType = Enums.TransactionType.Credit,
+                    PaidAt = paymentStatus == Enums.PaymentStatus.Completed 
+                        ? DateTimeOffset.UtcNow 
+                        : default
+                };
+
+                _context.Payment.Add(payment);
+
+                // ✅ Clear cart ONLY after successful order creation (like Amazon)
+                await _cartRepository.ClearCartAsync(cart.CartId);
+
+                // ✅ Save all changes and commit transaction
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                _logger.LogInformation(
+                    "Checkout completed successfully for customer {CustomerId}. OrderId: {OrderId}",
+                    customerId, order.OrderId);
+
+                    return (true, order.OrderId, null);
+                }
+                catch (DbUpdateConcurrencyException ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Concurrency conflict during checkout for customer {CustomerId}", customerId);
+                    return (false, null, "The cart was modified by another process. Please refresh and try again.");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogError(ex, "Error processing checkout for customer {CustomerId}", customerId);
+                    return (false, null, $"An error occurred during checkout: {ex.Message}");
+                }
+            });
+        }
 
         private decimal CalculateShipping(decimal subtotal)
         {

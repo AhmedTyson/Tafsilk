@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+	<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>53d19473-2fd6-4a7c-906f-dda85cf58376</UserSecretsId>

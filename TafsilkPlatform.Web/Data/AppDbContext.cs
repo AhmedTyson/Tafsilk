@@ -12,10 +12,13 @@ public partial class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
-        // OPTIMIZATION: Configure default query behavior
-        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+        // ✅ FIXED: Removed NoTracking default - causes issues with updates/inserts
+        // Use AsNoTracking() explicitly in read-only queries instead
         ChangeTracker.AutoDetectChangesEnabled = true;
         ChangeTracker.LazyLoadingEnabled = false;
+        
+        // ✅ Enable sensitive data logging only in development (controlled by Program.cs)
+        // This prevents accidental logging of sensitive data in production
     }
 
     // DbSet Properties - Essential entities only

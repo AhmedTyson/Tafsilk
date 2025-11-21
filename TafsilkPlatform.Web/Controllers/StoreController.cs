@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TafsilkPlatform.Web.Helpers; // Simple helper methods
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.ViewModels.Store;
 using System.Security.Claims;
@@ -23,19 +24,23 @@ namespace TafsilkPlatform.Web.Controllers
   _logger = logger;
     }
 
+        // ✅ SIMPLIFIED: Use helper method for cleaner code
         private async Task<Guid> GetCustomerIdAsync()
-      {
-       var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim)) throw new UnauthorizedAccessException("User not authenticated");
-       
-    var userId = Guid.Parse(userIdClaim);
-    
-       // ✅ FIX: Get CustomerProfile.Id from User.Id
-            var customer = await _customerRepository.GetByUserIdAsync(userId);
-            if (customer == null) throw new UnauthorizedAccessException("Customer profile not found");
-            
-   return customer.Id; // Return CustomerProfile.Id, not User.Id
-}
+        {
+            var userId = this.GetUserId();
+            if (!userId.HasValue)
+            {
+                throw new UnauthorizedAccessException("User not authenticated");
+            }
+
+            var customer = await _customerRepository.GetByUserIdAsync(userId.Value);
+            if (customer == null)
+            {
+                throw new UnauthorizedAccessException("Customer profile not found");
+            }
+
+            return customer.Id; // Return CustomerProfile.Id, not User.Id
+        }
 
  private Guid GetCustomerId()
       {
@@ -81,30 +86,40 @@ public async Task<IActionResult> Index(
       return View(cart ?? new CartViewModel());
     }
 
-     // POST: /Store/AddToCart
- [Authorize(Policy = "CustomerPolicy")]
-   [HttpPost("AddToCart")]
+        // POST: /Store/AddToCart
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("AddToCart")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddToCart([FromForm] AddToCartRequest request)
-   {
-   if (!ModelState.IsValid)
- {
-     TempData["Error"] = "Invalid request";
-   return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
-     }
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Invalid request. Please check your input.";
+                return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+            }
 
-     var customerId = await GetCustomerIdAsync();
-  var success = await _storeService.AddToCartAsync(customerId, request);
+            try
+            {
+                var customerId = await GetCustomerIdAsync();
+                var success = await _storeService.AddToCartAsync(customerId, request);
 
-        if (success)
-{
-    TempData["Success"] = "Item added to cart";
-  return RedirectToAction(nameof(Cart));
-     }
+                if (success)
+                {
+                    TempData["Success"] = "تم إضافة المنتج إلى السلة بنجاح";
+                    return RedirectToAction(nameof(Cart));
+                }
 
-     TempData["Error"] = "Failed to add item to cart";
-     return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
-}
+                // ✅ Better error messages (like Amazon)
+                TempData["Error"] = "فشل إضافة المنتج إلى السلة. قد يكون المنتج غير متوفر أو الكمية المطلوبة غير متاحة.";
+                return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in AddToCart for product {ProductId}", request.ProductId);
+                TempData["Error"] = "حدث خطأ أثناء إضافة المنتج. يرجى المحاولة مرة أخرى.";
+                return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+            }
+        }
 
         // POST: /Store/UpdateCartItem
    [Authorize(Policy = "CustomerPolicy")]
@@ -159,30 +174,52 @@ return RedirectToAction(nameof(Cart));
       return View(checkoutData);
         }
 
-  // POST: /Store/ProcessCheckout
-     [Authorize(Policy = "CustomerPolicy")]
-    [HttpPost("ProcessCheckout")]
-[ValidateAntiForgeryToken]
-    public async Task<IActionResult> ProcessCheckout([FromForm] ProcessPaymentRequest request)
-    {
- if (!ModelState.IsValid)
-         {
-TempData["Error"] = "Please complete all required fields";
-   return RedirectToAction(nameof(Checkout));
-         }
+        // POST: /Store/ProcessCheckout
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("ProcessCheckout")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ProcessCheckout([FromForm] ProcessPaymentRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "يرجى إكمال جميع الحقول المطلوبة";
+                return RedirectToAction(nameof(Checkout));
+            }
 
-  var customerId = await GetCustomerIdAsync();
-         var (success, orderId, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
+            try
+            {
+                var customerId = await GetCustomerIdAsync();
+                
+                // ✅ Validate cart is not empty before processing
+                var cart = await _storeService.GetCartAsync(customerId);
+                if (cart == null || !cart.Items.Any())
+                {
+                    TempData["Error"] = "السلة فارغة. يرجى إضافة منتجات قبل إتمام الطلب";
+                    return RedirectToAction(nameof(Cart));
+                }
 
-if (success && orderId.HasValue)
-    {
-   TempData["Success"] = "Order placed successfully!";
-  return RedirectToAction("OrderDetails", "Orders", new { id = orderId.Value });
- }
+                var (success, orderId, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
 
-      TempData["Error"] = errorMessage ?? "Failed to process order";
-return RedirectToAction(nameof(Checkout));
-  }
+                if (success && orderId.HasValue)
+                {
+                    TempData["Success"] = $"تم إتمام الطلب بنجاح! رقم الطلب: {orderId.Value.ToString().Substring(0, 8).ToUpper()}";
+                    _logger.LogInformation("Order {OrderId} placed successfully for customer {CustomerId}", orderId.Value, customerId);
+                    return RedirectToAction("OrderDetails", "Orders", new { id = orderId.Value });
+                }
+
+                // ✅ Better error messages (like Amazon)
+                var errorMsg = errorMessage ?? "فشل إتمام الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
+                TempData["Error"] = errorMsg;
+                _logger.LogWarning("Checkout failed for customer {CustomerId}: {Error}", customerId, errorMsg);
+                return RedirectToAction(nameof(Checkout));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProcessCheckout for customer");
+                TempData["Error"] = "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
+                return RedirectToAction(nameof(Checkout));
+            }
+        }
 
   // API: Get cart item count
    [Authorize(Policy = "CustomerPolicy")]

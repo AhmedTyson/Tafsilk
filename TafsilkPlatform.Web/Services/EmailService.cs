@@ -45,12 +45,8 @@ public class EmailService : IEmailService
         _password = _configuration["Email:Password"] ?? "";
         _enableSsl = bool.Parse(_configuration["Email:EnableSsl"] ?? "true");
 
-        // Log configuration status
-        var isConfigured = !string.IsNullOrEmpty(_username) && !string.IsNullOrEmpty(_password);
-        if (!isConfigured)
-        {
-            _logger.LogWarning("Email service is not fully configured. Set Email:Username and Email:Password in user secrets.");
-        }
+        // ✅ FIXED: Only log email configuration warning once at startup (not on every request)
+        // This reduces log noise - the warning is logged in Program.cs during startup
     }
 
     /// <summary>

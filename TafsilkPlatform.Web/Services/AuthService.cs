@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Interfaces;
@@ -23,6 +24,7 @@ namespace TafsilkPlatform.Web.Services
         private readonly IDateTimeService _dateTime;
         private readonly IEmailService _emailService;
         private readonly IMemoryCache _cache;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
         // Weak passwords to reject during registration
         private static readonly string[] WeakPasswords = { "123456", "password", "qwerty", "111111", "123123" };
@@ -45,13 +47,15 @@ namespace TafsilkPlatform.Web.Services
  ILogger<AuthService> logger,
    IDateTimeService dateTime,
    IEmailService emailService,
-    IMemoryCache cache)
+    IMemoryCache cache,
+    IServiceScopeFactory serviceScopeFactory)
         {
             _db = db;
             _logger = logger;
             _dateTime = dateTime;
             _emailService = emailService;
             _cache = cache;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         #region Registration
@@ -292,8 +296,23 @@ namespace TafsilkPlatform.Web.Services
 
 
                 // Update last login timestamp (don't fail login if this fails)
-
-                _ = Task.Run(async () => await UpdateLastLoginAsync(user.Id));
+                // ✅ FIXED: Use IServiceScopeFactory to create new scope for background task
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        using var scope = _serviceScopeFactory.CreateScope();
+                        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        await db.Users
+                            .Where(u => u.Id == user.Id)
+                            .ExecuteUpdateAsync(setters => setters
+                                .SetProperty(u => u.LastLoginAt, _dateTime.Now));
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[AuthService] Failed to update last login: {UserId}", user.Id);
+                    }
+                });
 
 
 
@@ -865,21 +884,7 @@ namespace TafsilkPlatform.Web.Services
             return role.Id;
         }
 
-        private async Task UpdateLastLoginAsync(Guid userId)
-        {
-            try
-            {
-                // Optimized: Use ExecuteUpdateAsync to avoid loading entity
-                await _db.Users
-                   .Where(u => u.Id == userId)
-                        .ExecuteUpdateAsync(setters => setters
-                      .SetProperty(u => u.LastLoginAt, _dateTime.Now));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "[AuthService] Failed to update last login: {UserId}", userId);
-            }
-        }
+        // ✅ REMOVED: UpdateLastLoginAsync - now handled inline with proper scope
 
         /// <summary>
         /// Gets user full name from appropriate profile

@@ -7,22 +7,60 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
+using System.IO.Compression;
+using Microsoft.AspNetCore.ResponseCompression;
 using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
 using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Extensions;
+using TafsilkPlatform.Web.Helpers; // Simple helper methods for easy maintenance
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Middleware;
 using TafsilkPlatform.Web.Repositories;
 using TafsilkPlatform.Web.Security;
 using TafsilkPlatform.Web.Services;
+using System.Net;
 
-var builder = WebApplication.CreateBuilder(args);
+// Configure Serilog early
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(new ConfigurationBuilder()
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
+        .AddEnvironmentVariables()
+        .Build())
+    .Enrich.FromLogContext()
+    .CreateLogger();
 
-// Configure logging
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
-builder.Logging.AddDebug();
+try
+{
+    Log.Information("Starting Tafsilk Platform application");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // ✅ SIMPLE CONFIGURATION VALIDATION - Clear error messages if something is missing
+    try
+    {
+        TafsilkPlatform.Web.Helpers.ConfigurationHelper.ValidateRequiredConfiguration(
+            builder.Configuration, 
+            LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup"));
+    }
+    catch (InvalidOperationException ex)
+    {
+        Log.Fatal(ex, "Configuration validation failed. Please fix the issues above.");
+        throw;
+    }
+
+    // Use Serilog for logging
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+        .ReadFrom.Configuration(context.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
+
+    // Configure logging (fallback if Serilog fails)
+    builder.Logging.ClearProviders();
+    builder.Logging.AddConsole();
+    builder.Logging.AddDebug();
 
 // Add services to the container
 builder.Services.AddControllersWithViews()
@@ -149,8 +187,21 @@ authBuilder.AddCookie(options =>
     options.SlidingExpiration = true;
 });
 
-// JWT authentication for API
-var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured");
+// ✅ JWT authentication - SIMPLIFIED: Auto-detects from User Secrets or Environment
+var jwtKey = builder.Configuration["Jwt:Key"] 
+    ?? Environment.GetEnvironmentVariable("JWT_KEY")
+    ?? throw new InvalidOperationException(
+        "JWT Key is required. " +
+        "Quick fix: dotnet user-secrets set \"Jwt:Key\" \"YourKeyHere\" " +
+        "(must be at least 32 characters)");
+
+if (jwtKey.Length < 32)
+{
+    throw new InvalidOperationException(
+        $"JWT Key is too short ({jwtKey.Length} chars). " +
+        "Must be at least 32 characters for security.");
+}
+
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "TafsilkPlatform";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "TafsilkPlatformUsers";
 
@@ -311,6 +362,68 @@ builder.Services.AddSingleton<IAuthorizationHandler, ActiveUserHandler>();
 // Register TokenService
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
+// ✅ RESPONSE COMPRESSION (if enabled in config)
+var enableResponseCompression = builder.Configuration.GetValue<bool>("Performance:EnableResponseCompression", true);
+if (enableResponseCompression)
+{
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+        options.Providers.Add<BrotliCompressionProvider>();
+        options.Providers.Add<GzipCompressionProvider>();
+        options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+        {
+            "application/json",
+            "application/javascript",
+            "text/css",
+            "text/html",
+            "text/plain",
+            "text/xml",
+            "application/xml",
+            "image/svg+xml"
+        });
+    });
+
+    builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Optimal;
+    });
+
+    builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+    {
+        options.Level = CompressionLevel.Optimal;
+    });
+}
+
+// ✅ CORS Configuration (for API access)
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+    });
+});
+
+// ✅ HEALTH CHECKS
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>(
+        name: "database",
+        failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
+        tags: new[] { "db", "sql", "ready" })
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "self" });
+
 // Authorization policies
 builder.Services.AddAuthorization(options =>
 {
@@ -354,6 +467,12 @@ if (app.Environment.IsDevelopment())
     await app.Services.InitializeDatabaseAsync(builder.Configuration);
 }
 
+// ✅ SECURITY HEADERS MIDDLEWARE (must be early in pipeline)
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
+// ✅ GLOBAL EXCEPTION HANDLER (must be early in pipeline)
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -377,11 +496,59 @@ else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+    app.UseHttpsRedirection(); // Force HTTPS in production
 }
 
-app.UseHttpsRedirection();
+// ✅ CORS (must be before UseRouting)
+app.UseCors();
+
+// ✅ RESPONSE COMPRESSION (must be before UseStaticFiles and UseRouting)
+var enableResponseCompressionMiddleware = app.Configuration.GetValue<bool>("Performance:EnableResponseCompression", true);
+if (enableResponseCompressionMiddleware)
+{
+    app.UseResponseCompression();
+}
+
+// ✅ HTTPS Redirection (only if not already added in production)
+if (!app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 app.UseRouting();
+
+// ✅ HEALTH CHECKS ENDPOINT
+app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            })
+        });
+        await context.Response.WriteAsync(result);
+    }
+});
+
+app.MapHealthChecks("/health/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
+
+app.MapHealthChecks("/health/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("self")
+});
+
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -398,9 +565,9 @@ app.MapControllerRoute(
 
 
 var startupLogger = app.Services.GetRequiredService<ILogger<Program>>();
-startupLogger.LogInformation("=== Tafsilk Platform Started Successfully ===");
-startupLogger.LogInformation("Environment: {Environment}", app.Environment.EnvironmentName);
-startupLogger.LogInformation("Authentication Schemes: Cookies, JWT, Google");
+Log.Information("=== Tafsilk Platform Started Successfully ===");
+Log.Information("Environment: {Environment}", app.Environment.EnvironmentName);
+Log.Information("Authentication Schemes: Cookies, JWT, Google, Facebook");
 
 if (app.Environment.IsDevelopment())
 {
@@ -409,16 +576,51 @@ if (app.Environment.IsDevelopment())
     {
      foreach (var url in urls)
         {
- startupLogger.LogInformation("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
-  startupLogger.LogInformation("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
+ Log.Information("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
+  Log.Information("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
         }
     }
     else
   {
    // Fallback to common development URLs
-     startupLogger.LogInformation("🔷 Swagger UI available at: https://localhost:7186/swagger");
-        startupLogger.LogInformation("🔷 Swagger UI available at: http://localhost:5140/swagger");
+     Log.Information("🔷 Swagger UI available at: https://localhost:7186/swagger");
+        Log.Information("🔷 Swagger UI available at: http://localhost:5140/swagger");
     }
+    
+    Log.Information("🔷 Health Check available at: /health");
+    Log.Information("🔷 Health Check (Ready) available at: /health/ready");
+    Log.Information("🔷 Health Check (Live) available at: /health/live");
 }
 
-app.Run();
+    // ✅ Verify database connection before accepting requests
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var canConnect = await db.Database.CanConnectAsync();
+        if (canConnect)
+        {
+            Log.Information("✓ Database connection verified successfully");
+        }
+        else
+        {
+            Log.Warning("⚠ Database connection check returned false");
+        }
+    }
+    catch (Exception ex)
+    {
+        Log.Fatal(ex, "❌ Cannot connect to database. Please check connection string and ensure SQL Server is running.");
+        throw;
+    }
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}
