@@ -1,21 +1,21 @@
 using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.Web.Services.Base;
+using TafsilkPlatform.Web.Common;
 
 namespace TafsilkPlatform.Web.Services
 {
-    public class AdminService : IAdminService
+    public class AdminService : BaseService, IAdminService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<AdminService> _logger;
         private readonly IHttpContextAccessor? _httpContextAccessor;
 
         public AdminService(
-        IUnitOfWork unitOfWork,
+            IUnitOfWork unitOfWork,
             ILogger<AdminService> logger,
-   IHttpContextAccessor? httpContextAccessor = null)
+            IHttpContextAccessor? httpContextAccessor = null) : base(logger)
         {
-            _unitOfWork = unitOfWork;
-            _logger = logger;
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _httpContextAccessor = httpContextAccessor;
         }
 
@@ -26,23 +26,8 @@ namespace TafsilkPlatform.Web.Services
         /// </summary>
         private async Task LogAdminActionAsync(Guid adminUserId, string action, string details, string entityType = "System")
         {
-            // TODO: ActivityLog feature removed - implement alternative logging if needed
-            // var log = new ActivityLog
-            // {
-            //     UserId = adminUserId,
-            //     Action = action,
-            // EntityType = entityType,
-            //     Details = details,
-            //     IpAddress = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString(),
-            //     CreatedAt = DateTime.UtcNow,
-            //     IsAdminAction = true
-            // };
-
-            // await _unitOfWork.Context.ActivityLogs.AddAsync(log);
-
-            // Use standard logging instead
-            _logger.LogInformation("[AdminAction] Admin {AdminId} performed {Action} on {EntityType}. Details: {Details}",
-          adminUserId, action, entityType, details);
+            Logger.LogInformation("[AdminAction] Admin {AdminId} performed {Action} on {EntityType}. Details: {Details}",
+                adminUserId, action, entityType, details);
 
             await Task.CompletedTask;
         }
@@ -52,74 +37,64 @@ namespace TafsilkPlatform.Web.Services
         /// <summary>
         /// Approves tailor verification.
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage)> VerifyTailorAsync(
-   Guid tailorId,
-  Guid adminId)
+        public async Task<(bool Success, string? ErrorMessage)> VerifyTailorAsync(Guid tailorId, Guid adminId)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Verifying tailor: {TailorId} by admin: {AdminId}", tailorId, adminId);
+                ValidateGuid(tailorId, nameof(tailorId));
+                ValidateGuid(adminId, nameof(adminId));
 
-                var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
-                if (tailor == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "الخياط غير موجود");
-                }
+                    var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
+                    if (tailor == null)
+                    {
+                        throw new InvalidOperationException("الخياط غير موجود");
+                    }
 
-                tailor.IsVerified = true;
-                tailor.UpdatedAt = DateTime.UtcNow;
+                    tailor.IsVerified = true;
+                    tailor.UpdatedAt = DateTime.UtcNow;
 
-                await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
+                    await LogAdminActionAsync(adminId, "VerifyTailor", $"تم التحقق من الخياط {tailorId}", "Tailor");
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] Tailor {TailorId} verified successfully", tailorId);
+                    return true;
+                });
+            }, "VerifyTailor", adminId);
 
-                await LogAdminActionAsync(adminId, "VerifyTailor", $"تم التحقق من الخياط {tailorId}", "Tailor");
-
-                _logger.LogInformation("[AdminService] Tailor verified successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error verifying tailor");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         /// <summary>
         /// Rejects tailor verification.
         /// </summary>
         public async Task<(bool Success, string? ErrorMessage)> RejectTailorAsync(
-     Guid tailorId,
- Guid adminId,
+            Guid tailorId,
+            Guid adminId,
             string? reason = null)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Rejecting tailor: {TailorId} by admin: {AdminId}", tailorId, adminId);
+                ValidateGuid(tailorId, nameof(tailorId));
+                ValidateGuid(adminId, nameof(adminId));
 
-                var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
-                if (tailor == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "الخياط غير موجود");
-                }
+                    var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
+                    if (tailor == null)
+                    {
+                        throw new InvalidOperationException("الخياط غير موجود");
+                    }
 
-                tailor.UpdatedAt = DateTime.UtcNow;
-                await _unitOfWork.SaveChangesAsync();
+                    tailor.UpdatedAt = DateTime.UtcNow;
+                    await _unitOfWork.SaveChangesAsync();
+                    await LogAdminActionAsync(adminId, "RejectTailor", $"تم رفض تحقق الخياط {tailorId}. السبب: {reason}", "Tailor");
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] Tailor {TailorId} rejection recorded", tailorId);
+                    return true;
+                });
+            }, "RejectTailor", adminId);
 
-                await LogAdminActionAsync(adminId, "RejectTailor", $"تم رفض تحقق الخياط {tailorId}. السبب: {reason}", "Tailor");
-
-                _logger.LogInformation("[AdminService] Tailor rejected");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error rejecting tailor");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         // ==================== USER MANAGEMENT ====================
@@ -127,38 +102,31 @@ namespace TafsilkPlatform.Web.Services
         /// <summary>
         /// Suspends user account.
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage)> SuspendUserAsync(
-   Guid userId,
-        string? reason = null)
+        public async Task<(bool Success, string? ErrorMessage)> SuspendUserAsync(Guid userId, string? reason = null)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Suspending user: {UserId}", userId);
+                ValidateGuid(userId, nameof(userId));
 
-                var user = await _unitOfWork.Users.GetByIdAsync(userId);
-                if (user == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "المستخدم غير موجود");
-                }
+                    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                    if (user == null)
+                    {
+                        throw new InvalidOperationException("المستخدم غير موجود");
+                    }
 
-                user.IsActive = false;
-                user.UpdatedAt = DateTime.UtcNow;
+                    user.IsActive = false;
+                    user.UpdatedAt = DateTime.UtcNow;
 
-                await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
+                    await LogAdminActionAsync(userId, "SuspendUser", $"تم إيقاف حساب المستخدم {userId}. السبب: {reason}", "User");
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] User {UserId} suspended", userId);
+                    return true;
+                });
+            }, "SuspendUser", userId);
 
-                await LogAdminActionAsync(userId, "SuspendUser", $"تم إيقاف حساب المستخدم {userId}. السبب: {reason}", "User");
-
-                _logger.LogInformation("[AdminService] User suspended successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error suspending user");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         /// <summary>
@@ -166,110 +134,93 @@ namespace TafsilkPlatform.Web.Services
         /// </summary>
         public async Task<(bool Success, string? ErrorMessage)> ActivateUserAsync(Guid userId)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Activating user: {UserId}", userId);
+                ValidateGuid(userId, nameof(userId));
 
-                var user = await _unitOfWork.Users.GetByIdAsync(userId);
-                if (user == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "المستخدم غير موجود");
-                }
+                    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                    if (user == null)
+                    {
+                        throw new InvalidOperationException("المستخدم غير موجود");
+                    }
 
-                user.IsActive = true;
-                user.UpdatedAt = DateTime.UtcNow;
+                    user.IsActive = true;
+                    user.UpdatedAt = DateTime.UtcNow;
 
-                await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
+                    await LogAdminActionAsync(userId, "ActivateUser", $"تم تفعيل حساب المستخدم {userId}", "User");
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] User {UserId} activated", userId);
+                    return true;
+                });
+            }, "ActivateUser", userId);
 
-                await LogAdminActionAsync(userId, "ActivateUser", $"تم تفعيل حساب المستخدم {userId}", "User");
-
-                _logger.LogInformation("[AdminService] User activated successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error activating user");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         /// <summary>
         /// Permanently bans user account.
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage)> BanUserAsync(
-    Guid userId,
-       string? reason = null)
+        public async Task<(bool Success, string? ErrorMessage)> BanUserAsync(Guid userId, string? reason = null)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Banning user: {UserId}", userId);
+                ValidateGuid(userId, nameof(userId));
 
-                var user = await _unitOfWork.Users.GetByIdAsync(userId);
-                if (user == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "المستخدم غير موجود");
-                }
+                    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                    if (user == null)
+                    {
+                        throw new InvalidOperationException("المستخدم غير موجود");
+                    }
 
-                user.IsActive = false;
-                user.IsDeleted = true; // Mark as deleted/banned
-                user.UpdatedAt = DateTime.UtcNow;
+                    user.IsActive = false;
+                    user.IsDeleted = true;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    user.BannedAt = DateTime.UtcNow;
+                    user.BanReason = reason ?? "تم حظر الحساب من قبل الإدارة";
+                    user.BanExpiresAt = null; // Permanent ban
 
-                // Set ban fields (replaces BannedUser table)
-                user.BannedAt = DateTime.UtcNow;
-                user.BanReason = reason ?? "تم حظر الحساب من قبل الإدارة";
-                user.BanExpiresAt = null; // Permanent ban
+                    await _unitOfWork.SaveChangesAsync();
+                    await LogAdminActionAsync(userId, "BanUser", $"تم حظر الحساب {userId} نهائياً. السبب: {reason}", "User");
 
-                await _unitOfWork.SaveChangesAsync();
+                    return true;
+                });
+            }, "BanUser", userId);
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] User {UserId} banned", userId);
-
-                await LogAdminActionAsync(userId, "BanUser", $"تم حظر الحساب {userId} نهائياً. السبب: {reason}", "User");
-
-                _logger.LogInformation("[AdminService] User banned successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error banning user");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         /// <summary>
         /// Deletes user account (soft delete).
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage)> DeleteUserAsync(
-      Guid userId,
-                  string? reason = null)
+        public async Task<(bool Success, string? ErrorMessage)> DeleteUserAsync(Guid userId, string? reason = null)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Deleting user: {UserId}", userId);
+                ValidateGuid(userId, nameof(userId));
 
-                var user = await _unitOfWork.Users.GetByIdAsync(userId);
-                if (user == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "المستخدم غير موجود");
-                }
+                    var user = await _unitOfWork.Users.GetByIdAsync(userId);
+                    if (user == null)
+                    {
+                        throw new InvalidOperationException("المستخدم غير موجود");
+                    }
 
-                user.IsDeleted = true;
-                user.IsActive = false;
-                user.UpdatedAt = DateTime.UtcNow;
+                    user.IsDeleted = true;
+                    user.IsActive = false;
+                    user.UpdatedAt = DateTime.UtcNow;
 
-                await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
 
-                _logger.LogInformation("[AdminService] User deleted successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error deleting user");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+                    return true;
+                });
+            }, "DeleteUser", userId);
+
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         // ==================== PORTFOLIO REVIEW ====================
@@ -277,67 +228,55 @@ namespace TafsilkPlatform.Web.Services
         /// <summary>
         /// Approves portfolio image.
         /// </summary>
-        public async Task<(bool Success, string? ErrorMessage)> ApprovePortfolioImageAsync(
-            Guid imageId,
-      Guid adminId)
+        public async Task<(bool Success, string? ErrorMessage)> ApprovePortfolioImageAsync(Guid imageId, Guid adminId)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Approving portfolio image: {ImageId} by admin: {AdminId}", imageId, adminId);
+                ValidateGuid(imageId, nameof(imageId));
+                ValidateGuid(adminId, nameof(adminId));
 
                 var image = await _unitOfWork.PortfolioImages.GetByIdAsync(imageId);
                 if (image == null)
                 {
-                    return (false, "الصورة غير موجودة");
+                    throw new InvalidOperationException("الصورة غير موجودة");
                 }
 
-                // Images are approved by default when uploaded
-                // This method can be used to explicitly mark as reviewed
-
                 await _unitOfWork.SaveChangesAsync();
+                return true;
+            }, "ApprovePortfolioImage", adminId);
 
-                _logger.LogInformation("[AdminService] Portfolio image approved successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error approving portfolio image");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
 
         /// <summary>
         /// Rejects portfolio image (soft delete).
         /// </summary>
         public async Task<(bool Success, string? ErrorMessage)> RejectPortfolioImageAsync(
- Guid imageId,
+            Guid imageId,
             Guid adminId,
-      string? reason = null)
+            string? reason = null)
         {
-            try
+            var result = await ExecuteAsync(async () =>
             {
-                _logger.LogInformation("[AdminService] Rejecting portfolio image: {ImageId} by admin: {AdminId}", imageId, adminId);
+                ValidateGuid(imageId, nameof(imageId));
+                ValidateGuid(adminId, nameof(adminId));
 
-                var image = await _unitOfWork.PortfolioImages.GetByIdAsync(imageId);
-                if (image == null)
+                return await _unitOfWork.ExecuteInTransactionAsync(async () =>
                 {
-                    return (false, "الصورة غير موجودة");
-                }
+                    var image = await _unitOfWork.PortfolioImages.GetByIdAsync(imageId);
+                    if (image == null)
+                    {
+                        throw new InvalidOperationException("الصورة غير موجودة");
+                    }
 
-                image.IsDeleted = true;
-                await _unitOfWork.SaveChangesAsync();
+                    image.IsDeleted = true;
+                    await _unitOfWork.SaveChangesAsync();
 
-                // Notification removed - simplified
-                _logger.LogInformation("[AdminService] Portfolio image {ImageId} rejected", imageId);
+                    return true;
+                });
+            }, "RejectPortfolioImage", adminId);
 
-                _logger.LogInformation("[AdminService] Portfolio image rejected successfully");
-                return (true, null);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "[AdminService] Error rejecting portfolio image");
-                return (false, $"حدث خطأ: {ex.Message}");
-            }
+            return result.IsSuccess ? (true, null) : (false, result.Error);
         }
     }
 }

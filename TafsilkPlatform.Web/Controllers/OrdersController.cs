@@ -259,22 +259,23 @@ public class OrdersController : Controller
             }
 
             var orders = await _db.Orders
- .Include(o => o.Tailor)
-     .ThenInclude(t => t.User)
-     .Include(o => o.Items)
-    .Include(o => o.Payments)
-    .Where(o => o.CustomerId == customer.Id)
-    .OrderByDescending(o => o.CreatedAt)
-      .ToListAsync();
+                .Include(o => o.Tailor)
+                    .ThenInclude(t => t.User)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(o => o.Payments)
+                .Where(o => o.CustomerId == customer.Id)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
 
             var model = new CustomerOrdersViewModel
             {
                 Orders = orders.Select(o => new OrderSummaryViewModel
                 {
                     OrderId = o.OrderId,
-                    TailorName = o.Tailor.FullName ?? "خياط",
-                    TailorShopName = o.Tailor.ShopName,
-                    ServiceType = o.OrderType,
+                    TailorName = o.Tailor?.FullName ?? (o.OrderType == "StoreOrder" ? "متجر تفصيلك" : "خياط"),
+                    TailorShopName = o.Tailor?.ShopName ?? (o.OrderType == "StoreOrder" ? "متجر تفصيلك" : null),
+                    ServiceType = o.OrderType ?? "غير محدد",
                     Status = o.Status,
                     StatusDisplay = GetStatusDisplay(o.Status),
                     CreatedAt = o.CreatedAt,
@@ -360,10 +361,14 @@ public class OrdersController : Controller
                 Items = order.Items.Select(i => new OrderItemViewModel
                 {
                     ItemId = i.OrderItemId,
-                    ServiceName = i.Description,
+                    ServiceName = i.Description ?? i.Product?.Name ?? "منتج",
                     Quantity = i.Quantity,
                     Price = i.UnitPrice,
-                    Notes = $"المقاسات والملاحظات" // Can be extended
+                    Notes = !string.IsNullOrEmpty(i.SpecialInstructions) 
+                        ? i.SpecialInstructions 
+                        : (!string.IsNullOrEmpty(i.SelectedSize) || !string.IsNullOrEmpty(i.SelectedColor))
+                            ? $"المقاس: {i.SelectedSize ?? "غير محدد"}, اللون: {i.SelectedColor ?? "غير محدد"}"
+                            : null
                 }).ToList(),
 
                 // Payment info
@@ -421,7 +426,7 @@ public class OrdersController : Controller
                 return NotFound("الطلب غير موجود");
 
             // Check if order can be cancelled
-            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed && order.Status != OrderStatus.Processing)
             {
                 TempData["Error"] = "لا يمكن إلغاء الطلب في هذه المرحلة";
                 return RedirectToAction(nameof(OrderDetails), new { id });

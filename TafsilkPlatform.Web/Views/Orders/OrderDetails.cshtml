@@ -173,8 +173,8 @@
      <tr>
                    <td>@item.ServiceName</td>
      <td>@item.Quantity</td>
-            <td>@item.Price.ToString("C") EGP</td>
-           <td>@item.Notes</td>
+            <td>@item.Price.ToString("N2") ريال</td>
+           <td>@(item.Notes ?? "-")</td>
               </tr>
     }
        </tbody>
@@ -267,21 +267,29 @@
    }
 
  <!-- Customer Actions -->
-            @if (Model.IsCustomer && Model.Status == OrderStatus.Pending)
+            @if (Model.IsCustomer)
             {
-       <div class="card shadow-sm mb-4">
-        <div class="card-body text-center">
- <form asp-action="CancelOrder" asp-controller="Orders" method="post" 
-    onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
-            @Html.AntiForgeryToken()
-        <input type="hidden" name="id" value="@Model.OrderId" />
-        <button type="submit" class="btn btn-outline-danger">
-          <i class="fas fa-times-circle me-2"></i>
-  إلغاء الطلب
-           </button>
-     </form>
-           </div>
-     </div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Confirmed)
+                            {
+                                <form action="/orders/@Model.OrderId/cancel" method="post" 
+                                      onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-danger w-100">
+                                        <i class="fas fa-times-circle me-2"></i>
+                                        إلغاء الطلب
+                                    </button>
+                                </form>
+                            }
+                            <a href="/orders/my-orders" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-arrow-right me-2"></i>
+                                العودة إلى قائمة الطلبات
+                            </a>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
 
@@ -328,7 +336,7 @@
             <i class="fab fa-whatsapp me-2"></i>
   واتساب
         </a>
-      <a asp-action="ViewPublicTailorProfile" asp-controller="Profiles" 
+      <a asp-action="ViewPublicTailorProfile" asp-controller="TailorPortfolio" 
         asp-route-id="@Model.TailorId" 
        class="btn btn-outline-secondary">
             <i class="fas fa-eye me-2"></i>

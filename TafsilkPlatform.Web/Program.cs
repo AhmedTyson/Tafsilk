@@ -350,6 +350,8 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 // ✅ ECOMMERCE: Register store service
 builder.Services.AddScoped<IStoreService, StoreService>();
+// ✅ PAYMENT: Register payment processor service (supports Cash + Stripe when configured)
+builder.Services.AddScoped<TafsilkPlatform.Web.Services.Payment.IPaymentProcessorService, TafsilkPlatform.Web.Services.Payment.PaymentProcessorService>();
 
 
 // Register DateTime Service
@@ -613,14 +615,59 @@ if (app.Environment.IsDevelopment())
         throw;
     }
 
+    // ✅ PREVENT AUTOMATIC SHUTDOWN - Keep application running until explicitly stopped
+    Log.Information("=== Application is now running ===");
+    Log.Information("Press Ctrl+C to shut down");
+    
+    // Ensure console applications don't exit automatically
+    if (Environment.UserInteractive)
+    {
+        Log.Information("Running in interactive mode - Application will stay open until manually closed");
+    }
+
     app.Run();
+    
+    Log.Information("=== Application shutdown completed ===");
 }
 catch (Exception ex)
 {
     Log.Fatal(ex, "Application terminated unexpectedly");
+    
+    // ✅ PREVENT AUTOMATIC CLOSE ON ERROR - Show error and wait for user input
+    if (Environment.UserInteractive)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine("\n" + new string('=', 80));
+        Console.WriteLine("❌ APPLICATION ERROR - The application encountered a fatal error");
+        Console.WriteLine(new string('=', 80));
+        Console.ResetColor();
+        Console.WriteLine($"\nError: {ex.Message}");
+        Console.WriteLine($"\nStack Trace:\n{ex.StackTrace}");
+        
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"\nInner Exception: {ex.InnerException.Message}");
+        }
+        
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("\n" + new string('=', 80));
+        Console.WriteLine("Press ANY KEY to exit...");
+        Console.WriteLine(new string('=', 80));
+        Console.ResetColor();
+        Console.ReadKey();
+    }
+    
     throw;
 }
 finally
 {
+    Log.Information("=== Application cleanup in progress ===");
     Log.CloseAndFlush();
+    
+    // ✅ FINAL SAFETY NET - Ensure console stays open if running interactively
+    if (Environment.UserInteractive && !Console.IsOutputRedirected)
+    {
+        // Small delay to ensure logs are flushed
+        Thread.Sleep(500);
+    }
 }

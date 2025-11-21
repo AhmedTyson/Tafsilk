@@ -6,6 +6,7 @@ using TafsilkPlatform.Web.Extensions;
 using TafsilkPlatform.Web.Models;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
+using System.Text.Json;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -812,6 +813,645 @@ public class TailorManagementController : Controller
 
     #endregion
 
+    #region Product Management (إدارة المنتجات)
+
+    /// <summary>
+    /// View and manage products
+    /// GET: /tailor/manage/products
+    /// </summary>
+    [HttpGet("products")]
+    public async Task<IActionResult> ManageProducts()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound("الملف الشخصي غير موجود");
+
+            var products = await _context.Products
+                .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var model = new ManageProductsViewModel
+            {
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "خياط",
+                Products = products.Select(p => new ProductItemDto
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Category = p.Category,
+                    Price = p.Price,
+                    DiscountedPrice = p.DiscountedPrice,
+                    StockQuantity = p.StockQuantity,
+                    IsAvailable = p.IsAvailable,
+                    IsFeatured = p.IsFeatured,
+                    ViewCount = p.ViewCount,
+                    SalesCount = p.SalesCount,
+                    AverageRating = p.AverageRating,
+                    CreatedAt = p.CreatedAt,
+                    HasImage = p.PrimaryImageData != null
+                }).ToList(),
+                TotalProducts = products.Count,
+                ActiveProducts = products.Count(p => p.IsAvailable && p.StockQuantity > 0),
+                OutOfStockProducts = products.Count(p => p.StockQuantity == 0),
+                TotalInventoryValue = products.Sum(p => p.Price * p.StockQuantity)
+            };
+
+            ViewData["Title"] = "إدارة المنتجات";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading products management");
+            TempData["Error"] = "حدث خطأ أثناء تحميل المنتجات";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+    }
+
+    /// <summary>
+    /// Add new product form
+    /// GET: /tailor/manage/products/add
+    /// </summary>
+    [HttpGet("products/add")]
+    public async Task<IActionResult> AddProduct()
+    {
+        var userId = User.GetUserId();
+        var tailor = await GetTailorProfileAsync(userId);
+
+        if (tailor == null)
+            return NotFound();
+
+        var model = new AddProductViewModel
+        {
+            TailorId = tailor.Id,
+            IsAvailable = true,
+            StockQuantity = 1
+        };
+
+        ViewBag.Categories = GetProductCategories();
+        ViewBag.SubCategories = GetProductSubCategories();
+        ViewBag.Sizes = GetProductSizes();
+        ViewBag.Materials = GetProductMaterials();
+        
+        ViewData["Title"] = "إضافة منتج جديد";
+        return View(model);
+    }
+
+    /// <summary>
+    /// Save new product
+    /// POST: /tailor/manage/products/add
+    /// </summary>
+    [HttpPost("products/add")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddProduct(AddProductViewModel model)
+    {
+        try
+        {
+            _logger.LogInformation("AddProduct POST called for tailor {TailorId}", model.TailorId);
+            
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+            {
+                _logger.LogWarning("Tailor not found for user {UserId}", userId);
+                TempData["Error"] = "الملف الشخصي غير موجود";
+                return RedirectToAction("Tailor", "Dashboards");
+            }
+
+            if (tailor.Id != model.TailorId)
+            {
+                _logger.LogWarning("Tailor ID mismatch: {ExpectedId} vs {ProvidedId}", tailor.Id, model.TailorId);
+                return Unauthorized();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Model state invalid for AddProduct. Errors: {Errors}", 
+                    string.Join(", ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+                
+                // Re-populate ViewBag data
+                ViewBag.Categories = GetProductCategories();
+                ViewBag.SubCategories = GetProductSubCategories();
+                ViewBag.Sizes = GetProductSizes();
+                ViewBag.Materials = GetProductMaterials();
+                
+                ViewData["Title"] = "إضافة منتج جديد";
+                
+                // Add a general error message
+                TempData["Error"] = "يرجى التحقق من البيانات المدخلة وإصلاح الأخطاء";
+                return View(model);
+            }
+
+            // Validate primary image
+            if (model.PrimaryImage == null || model.PrimaryImage.Length == 0)
+            {
+                _logger.LogWarning("Primary image is null or empty");
+                ModelState.AddModelError(nameof(model.PrimaryImage), "الصورة الأساسية مطلوبة");
+                ViewBag.Categories = GetProductCategories();
+                ViewBag.SubCategories = GetProductSubCategories();
+                ViewBag.Sizes = GetProductSizes();
+                ViewBag.Materials = GetProductMaterials();
+                ViewData["Title"] = "إضافة منتج جديد";
+                TempData["Error"] = "الصورة الأساسية مطلوبة";
+                return View(model);
+            }
+
+            if (!_fileUploadService.IsValidImage(model.PrimaryImage))
+            {
+                _logger.LogWarning("Invalid primary image format");
+                ModelState.AddModelError(nameof(model.PrimaryImage), "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)");
+                ViewBag.Categories = GetProductCategories();
+                ViewBag.SubCategories = GetProductSubCategories();
+                ViewBag.Sizes = GetProductSizes();
+                ViewBag.Materials = GetProductMaterials();
+                ViewData["Title"] = "إضافة منتج جديد";
+                TempData["Error"] = "نوع الصورة غير صالح";
+                return View(model);
+            }
+
+            // Check file size
+            if (model.PrimaryImage.Length > _fileUploadService.GetMaxFileSizeInBytes())
+            {
+                _logger.LogWarning("Primary image file size too large: {Size} bytes", model.PrimaryImage.Length);
+                ModelState.AddModelError(nameof(model.PrimaryImage), $"حجم الصورة كبير جداً. الحد الأقصى {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
+                ViewBag.Categories = GetProductCategories();
+                ViewBag.SubCategories = GetProductSubCategories();
+                ViewBag.Sizes = GetProductSizes();
+                ViewBag.Materials = GetProductMaterials();
+                ViewData["Title"] = "إضافة منتج جديد";
+                TempData["Error"] = "حجم الصورة كبير جداً";
+                return View(model);
+            }
+
+            _logger.LogInformation("Reading primary image data for product");
+            
+            // Read primary image data
+            byte[] primaryImageData;
+            using (var memoryStream = new MemoryStream())
+            {
+                await model.PrimaryImage.CopyToAsync(memoryStream);
+                primaryImageData = memoryStream.ToArray();
+            }
+
+            _logger.LogInformation("Primary image read successfully, size: {Size} bytes", primaryImageData.Length);
+
+            // Process additional images
+            string? additionalImagesJson = null;
+            if (model.AdditionalImages != null && model.AdditionalImages.Any())
+            {
+                _logger.LogInformation("Processing {Count} additional images", model.AdditionalImages.Count);
+                
+                var additionalImagesBase64 = new List<string>();
+                foreach (var image in model.AdditionalImages.Take(5)) // Max 5 additional images
+                {
+                    if (_fileUploadService.IsValidImage(image))
+                    {
+                        using var ms = new MemoryStream();
+                        await image.CopyToAsync(ms);
+                        var base64 = Convert.ToBase64String(ms.ToArray());
+                        additionalImagesBase64.Add($"{image.ContentType}|{base64}");
+                    }
+                }
+                
+                if (additionalImagesBase64.Any())
+                {
+                    additionalImagesJson = string.Join(";;", additionalImagesBase64);
+                }
+                
+                _logger.LogInformation("Processed {Count} additional images successfully", additionalImagesBase64.Count);
+            }
+
+            // Generate slug from name
+            var slug = GenerateSlug(model.Name);
+            
+            // Ensure unique slug
+            var existingSlug = await _context.Products.AnyAsync(p => p.Slug == slug && !p.IsDeleted);
+            if (existingSlug)
+            {
+                slug = $"{slug}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                _logger.LogInformation("Slug already exists, using unique slug: {Slug}", slug);
+            }
+
+            var productId = Guid.NewGuid();
+            
+            _logger.LogInformation("Creating new product with ID {ProductId}", productId);
+
+            // Create product
+            var product = new Product
+            {
+                ProductId = productId,
+                Name = model.Name,
+                Description = model.Description,
+                Price = model.Price,
+                DiscountedPrice = model.DiscountedPrice,
+                Category = model.Category,
+                SubCategory = model.SubCategory,
+                Size = model.Size,
+                Color = model.Color,
+                Material = model.Material,
+                Brand = model.Brand,
+                StockQuantity = model.StockQuantity,
+                IsAvailable = model.IsAvailable,
+                IsFeatured = model.IsFeatured,
+                PrimaryImageData = primaryImageData,
+                PrimaryImageContentType = model.PrimaryImage.ContentType,
+                AdditionalImagesJson = additionalImagesJson,
+                MetaTitle = model.MetaTitle ?? model.Name,
+                MetaDescription = model.MetaDescription ?? model.Description.Substring(0, Math.Min(model.Description.Length, 160)),
+                Slug = slug,
+                TailorId = tailor.Id,
+                CreatedAt = DateTimeOffset.UtcNow,
+                IsDeleted = false,
+                ViewCount = 0,
+                SalesCount = 0,
+                AverageRating = 0,
+                ReviewCount = 0
+            };
+
+            _context.Products.Add(product);
+            
+            _logger.LogInformation("Saving product to database");
+            
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} created successfully by tailor {TailorId}", product.ProductId, tailor.Id);
+            TempData["Success"] = "تم إضافة المنتج بنجاح وهو الآن متاح في المتجر";
+
+            // ✅ UPDATED: Redirect to Tailor Dashboard instead of ManageProducts
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+        catch (DbUpdateException dbEx)
+        {
+            _logger.LogError(dbEx, "Database error while adding product");
+            ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
+            ViewBag.Categories = GetProductCategories();
+            ViewBag.SubCategories = GetProductSubCategories();
+            ViewBag.Sizes = GetProductSizes();
+            ViewBag.Materials = GetProductMaterials();
+            ViewData["Title"] = "إضافة منتج جديد";
+            TempData["Error"] = "حدث خطأ في قاعدة البيانات";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while adding product");
+            ModelState.AddModelError("", "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.");
+            ViewBag.Categories = GetProductCategories();
+            ViewBag.SubCategories = GetProductSubCategories();
+            ViewBag.Sizes = GetProductSizes();
+            ViewBag.Materials = GetProductMaterials();
+            ViewData["Title"] = "إضافة منتج جديد";
+            TempData["Error"] = $"حدث خطأ: {ex.Message}";
+            return View(model);
+        }
+    }
+
+    /// <summary>
+    /// Edit product
+    /// GET: /tailor/manage/products/edit/{id}
+    /// </summary>
+    [HttpGet("products/edit/{id:guid}")]
+    public async Task<IActionResult> EditProduct(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound();
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (product == null)
+                return NotFound("المنتج غير موجود");
+
+            var additionalImagesCount = 0;
+            if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
+            {
+                additionalImagesCount = product.AdditionalImagesJson.Split(";;").Length;
+            }
+
+            var model = new EditProductViewModel
+            {
+                ProductId = product.ProductId,
+                TailorId = tailor.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                DiscountedPrice = product.DiscountedPrice,
+                Category = product.Category,
+                SubCategory = product.SubCategory,
+                Size = product.Size,
+                Color = product.Color,
+                Material = product.Material,
+                Brand = product.Brand,
+                StockQuantity = product.StockQuantity,
+                IsAvailable = product.IsAvailable,
+                IsFeatured = product.IsFeatured,
+                MetaTitle = product.MetaTitle,
+                MetaDescription = product.MetaDescription,
+                HasCurrentPrimaryImage = product.PrimaryImageData != null,
+                CurrentAdditionalImagesCount = additionalImagesCount
+            };
+
+            ViewBag.Categories = GetProductCategories();
+            ViewBag.SubCategories = GetProductSubCategories();
+            ViewBag.Sizes = GetProductSizes();
+            ViewBag.Materials = GetProductMaterials();
+            
+            ViewData["Title"] = "تعديل المنتج";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading product for editing");
+            TempData["Error"] = "حدث خطأ أثناء تحميل المنتج";
+            return RedirectToAction(nameof(ManageProducts));
+        }
+    }
+
+    /// <summary>
+    /// Update product
+    /// POST: /tailor/manage/products/edit/{id}
+    /// </summary>
+    [HttpPost("products/edit/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditProduct(Guid id, EditProductViewModel model)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
+
+            if (id != model.ProductId)
+                return BadRequest();
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (product == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Categories = GetProductCategories();
+                ViewBag.SubCategories = GetProductSubCategories();
+                ViewBag.Sizes = GetProductSizes();
+                ViewBag.Materials = GetProductMaterials();
+                return View(model);
+            }
+
+            // Update product info
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Price = model.Price;
+            product.DiscountedPrice = model.DiscountedPrice;
+            product.Category = model.Category;
+            product.SubCategory = model.SubCategory;
+            product.Size = model.Size;
+            product.Color = model.Color;
+            product.Material = model.Material;
+            product.Brand = model.Brand;
+            product.StockQuantity = model.StockQuantity;
+            product.IsAvailable = model.IsAvailable;
+            product.IsFeatured = model.IsFeatured;
+            product.MetaTitle = model.MetaTitle ?? model.Name;
+            product.MetaDescription = model.MetaDescription;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
+
+            // Update primary image if provided
+            if (model.NewPrimaryImage != null && model.NewPrimaryImage.Length > 0)
+            {
+                if (!_fileUploadService.IsValidImage(model.NewPrimaryImage))
+                {
+                    ModelState.AddModelError(nameof(model.NewPrimaryImage), "نوع الملف غير صالح");
+                    ViewBag.Categories = GetProductCategories();
+                    ViewBag.SubCategories = GetProductSubCategories();
+                    ViewBag.Sizes = GetProductSizes();
+                    ViewBag.Materials = GetProductMaterials();
+                    return View(model);
+                }
+
+                using var ms = new MemoryStream();
+                await model.NewPrimaryImage.CopyToAsync(ms);
+                product.PrimaryImageData = ms.ToArray();
+                product.PrimaryImageContentType = model.NewPrimaryImage.ContentType;
+            }
+
+            // Add new additional images if provided
+            if (model.NewAdditionalImages != null && model.NewAdditionalImages.Any())
+            {
+                var existingImages = new List<string>();
+                if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
+                {
+                    existingImages = product.AdditionalImagesJson.Split(";;").ToList();
+                }
+
+                foreach (var image in model.NewAdditionalImages)
+                {
+                    if (existingImages.Count >= 5) break; // Max 5 total
+
+                    if (_fileUploadService.IsValidImage(image))
+                    {
+                        using var ms = new MemoryStream();
+                        await image.CopyToAsync(ms);
+                        var base64 = Convert.ToBase64String(ms.ToArray());
+                        existingImages.Add($"{image.ContentType}|{base64}");
+                    }
+                }
+
+                product.AdditionalImagesJson = existingImages.Any() ? string.Join(";;", existingImages) : null;
+            }
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} updated by tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "تم تحديث المنتج بنجاح";
+
+            return RedirectToAction(nameof(ManageProducts));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating product");
+            ModelState.AddModelError("", "حدث خطأ أثناء تحديث المنتج");
+            ViewBag.Categories = GetProductCategories();
+            ViewBag.SubCategories = GetProductSubCategories();
+            ViewBag.Sizes = GetProductSizes();
+            ViewBag.Materials = GetProductMaterials();
+            return View(model);
+        }
+    }
+
+    /// <summary>
+    /// Delete product
+    /// POST: /tailor/manage/products/delete/{id}
+    /// </summary>
+    [HttpPost("products/delete/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteProduct(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (product == null)
+                return NotFound();
+
+            // Check if product has active orders
+            var hasActiveOrders = await _context.OrderItems
+                .AnyAsync(oi => oi.ProductId == id && 
+                    oi.Order.Status != OrderStatus.Cancelled && 
+                    oi.Order.Status != OrderStatus.Delivered);
+
+            if (hasActiveOrders)
+            {
+                TempData["Error"] = "لا يمكن حذف المنتج لأنه مرتبط بطلبات نشطة";
+                return RedirectToAction(nameof(ManageProducts));
+            }
+
+            // Soft delete
+            product.IsDeleted = true;
+            product.IsAvailable = false;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Product {ProductId} deleted by tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "تم حذف المنتج بنجاح";
+
+            return RedirectToAction(nameof(ManageProducts));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product");
+            TempData["Error"] = "حدث خطأ أثناء حذف المنتج";
+            return RedirectToAction(nameof(ManageProducts));
+        }
+    }
+
+    /// <summary>
+    /// Toggle product availability
+    /// POST: /tailor/manage/products/toggle-availability/{id}
+    /// </summary>
+    [HttpPost("products/toggle-availability/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ToggleProductAvailability(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (product == null)
+                return NotFound();
+
+            product.IsAvailable = !product.IsAvailable;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, isAvailable = product.IsAvailable });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling product availability");
+            return Json(new { success = false, message = "حدث خطأ" });
+        }
+    }
+
+    /// <summary>
+    /// Quick stock update
+    /// POST: /tailor/manage/products/update-stock/{id}
+    /// </summary>
+    [HttpPost("products/update-stock/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateStock(Guid id, [FromForm] int newStock)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+            if (product == null)
+                return NotFound();
+
+            if (newStock < 0 || newStock > 10000)
+                return BadRequest("الكمية غير صالحة");
+
+            product.StockQuantity = newStock;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
+            
+            // Auto-update availability based on stock
+            if (newStock == 0 && product.IsAvailable)
+            {
+                product.IsAvailable = false;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, newStock = product.StockQuantity, isAvailable = product.IsAvailable });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating stock");
+            return Json(new { success = false, message = "حدث خطأ" });
+        }
+    }
+
+    /// <summary>
+    /// Get product image
+    /// GET: /tailor/manage/products/image/{id}
+    /// </summary>
+    [HttpGet("products/image/{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetProductImage(Guid id)
+    {
+        try
+        {
+            var product = await _context.Products
+                .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDeleted);
+
+            if (product == null || product.PrimaryImageData == null)
+                return NotFound();
+
+            return File(product.PrimaryImageData, product.PrimaryImageContentType ?? "image/jpeg");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving product image {ProductId}", id);
+            return NotFound();
+        }
+    }
+
+    #endregion
+
     #region Getting Started
 
     /// <summary>
@@ -870,6 +1510,94 @@ public class TailorManagementController : Controller
           "تطريز وزخرفة",
   "خياطة منزلية"
  };
+    }
+
+    private List<string> GetProductCategories()
+    {
+        return new List<string>
+        {
+            "ثوب رجالي",
+            "فستان نسائي",
+            "بدلة رسمية",
+            "عباءة",
+            "جلابية",
+            "قميص",
+            "تنورة",
+            "بنطلون",
+            "معطف",
+            "فستان سهرة",
+            "ملابس أطفال",
+            "اكسسوارات",
+            "أخرى"
+        };
+    }
+
+    private List<string> GetProductSubCategories()
+    {
+        return new List<string>
+        {
+            "رجالي",
+            "نسائي",
+            "أطفال",
+            "رسمي",
+            "كاجوال",
+            "رياضي",
+            "تقليدي",
+            "عصري"
+        };
+    }
+
+    private List<string> GetProductSizes()
+    {
+        return new List<string>
+        {
+            "XS",
+            "S",
+            "M",
+            "L",
+            "XL",
+            "XXL",
+            "XXXL",
+            "مقاس حر"
+        };
+    }
+
+    private List<string> GetProductMaterials()
+    {
+        return new List<string>
+        {
+            "قطن 100%",
+            "بوليستر",
+            "حرير",
+            "صوف",
+            "كتان",
+            "مخلوط",
+            "جينز",
+            "شيفون",
+            "ساتان",
+            "قطيفة"
+        };
+    }
+
+    private string GenerateSlug(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return Guid.NewGuid().ToString("N").Substring(0, 8);
+
+        // Remove diacritics and convert to lowercase
+        text = text.Trim().ToLowerInvariant();
+        
+        // Replace spaces and special characters with hyphens
+        text = System.Text.RegularExpressions.Regex.Replace(text, @"[^a-z0-9\u0600-\u06FF]+", "-");
+        
+        // Remove leading/trailing hyphens
+        text = text.Trim('-');
+        
+        // Limit length
+        if (text.Length > 50)
+            text = text.Substring(0, 50).TrimEnd('-');
+
+        return string.IsNullOrEmpty(text) ? Guid.NewGuid().ToString("N").Substring(0, 8) : text;
     }
 
     #endregion

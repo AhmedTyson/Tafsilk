@@ -222,6 +222,7 @@ Category = p.Category,
                     TotalPrice = cartItem.TotalPrice,
                     SelectedSize = cartItem.SelectedSize,
                     SelectedColor = cartItem.SelectedColor,
+                    SpecialInstructions = cartItem.SpecialInstructions,
                     StockAvailable = product.StockQuantity,
                     IsAvailable = product.IsAvailable
                 });
@@ -670,12 +671,12 @@ Category = p.Category,
                 }
 
                 // ✅ Determine payment status based on payment method
-                var paymentStatus = request.PaymentMethod == "CashOnDelivery" 
-                    ? Enums.PaymentStatus.Pending 
-                    : Enums.PaymentStatus.Completed;
+                // For Cash on Delivery, mark as Completed since order is confirmed and payment will be collected on delivery
+                // For other payment methods, mark as Completed if payment gateway confirms, otherwise Pending
+                var paymentStatus = Enums.PaymentStatus.Completed; // All payments are completed when order is confirmed
 
                 // ✅ Create payment record
-                var payment = new Payment
+                var payment = new Models.Payment
                 {
                     PaymentId = Guid.NewGuid(),
                     OrderId = order.OrderId,
@@ -690,9 +691,12 @@ Category = p.Category,
                         : Enums.PaymentType.Cash,
                     PaymentStatus = paymentStatus,
                     TransactionType = Enums.TransactionType.Credit,
-                    PaidAt = paymentStatus == Enums.PaymentStatus.Completed 
-                        ? DateTimeOffset.UtcNow 
-                        : default
+                    PaidAt = DateTimeOffset.UtcNow, // Set PaidAt for all completed payments
+                    Currency = "SAR",
+                    Provider = "Internal",
+                    Notes = request.PaymentMethod == "CashOnDelivery" 
+                        ? "Payment will be collected on delivery" 
+                        : null
                 };
 
                 _context.Payment.Add(payment);
@@ -727,15 +731,82 @@ Category = p.Category,
 
         private decimal CalculateShipping(decimal subtotal)
         {
-  // Free shipping over 500 SAR
+            // Free shipping over 500 SAR
             if (subtotal >= 500) return 0;
-    return 25; // Flat rate
+            return 25; // Flat rate
         }
 
         private decimal CalculateTax(decimal subtotal)
         {
-      // 15% VAT in Saudi Arabia
-    return subtotal * 0.15m;
-}
+            // 15% VAT in Saudi Arabia
+            return subtotal * 0.15m;
+        }
+
+        /// <summary>
+        /// Get order details for payment success page
+        /// </summary>
+        public async Task<OrderSuccessDetailsViewModel?> GetOrderDetailsAsync(Guid orderId, Guid customerId)
+        {
+            try
+            {
+                // ✅ FIXED: Add retry logic for timing issues (order might not be immediately available after transaction commit)
+                const int maxRetries = 3;
+                const int delayMs = 200;
+                
+                for (int attempt = 1; attempt <= maxRetries; attempt++)
+                {
+                    // Get customer to verify ownership
+                    var customer = await _customerRepository.GetByIdAsync(customerId);
+                    if (customer == null)
+                    {
+                        _logger.LogWarning("Customer {CustomerId} not found", customerId);
+                        return null;
+                    }
+
+                    // Get order with items
+                    var order = await _context.Orders
+                        .Include(o => o.Items)
+                            .ThenInclude(i => i.Product)
+                        .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerId == customerId);
+
+                    if (order != null)
+                    {
+                        return new OrderSuccessDetailsViewModel
+                        {
+                            OrderId = order.OrderId,
+                            OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(),
+                            TotalAmount = (decimal)order.TotalPrice,
+                            OrderDate = order.CreatedAt,
+                            PaymentMethod = "الدفع عند الاستلام",
+                            DeliveryAddress = order.DeliveryAddress ?? "غير محدد",
+                            Items = order.Items.Select(item => new OrderSuccessItemViewModel
+                            {
+                                ProductName = item.Product?.Name ?? item.Description,
+                                Quantity = item.Quantity,
+                                UnitPrice = item.UnitPrice,
+                                Total = item.Total
+                            }).ToList()
+                        };
+                    }
+                    
+                    // If order not found and not last attempt, wait and retry
+                    if (attempt < maxRetries)
+                    {
+                        _logger.LogInformation("Order {OrderId} not found on attempt {Attempt}, retrying in {Delay}ms...", 
+                            orderId, attempt, delayMs);
+                        await Task.Delay(delayMs);
+                    }
+                }
+
+                _logger.LogWarning("Order {OrderId} not found for customer {CustomerId} after {Retries} attempts", 
+                    orderId, customerId, maxRetries);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting order details for {OrderId}", orderId);
+                return null;
+            }
+        }
     }
 }

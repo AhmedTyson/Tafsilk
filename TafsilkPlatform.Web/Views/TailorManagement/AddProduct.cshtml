@@ -1,0 +1,514 @@
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.AddProductViewModel
+@{
+    ViewData["Title"] = "إضافة منتج جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-4" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1 class="h3 mb-2">
+                    <i class="fas fa-plus-circle"></i> إضافة منتج جديد
+                </h1>
+                <p class="text-muted">أضف منتجك إلى المتجر ليراه العملاء</p>
+            </div>
+
+            <form asp-action="AddProduct" method="post" enctype="multipart/form-data" id="productForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TailorId" />
+
+                <!-- Validation Summary -->
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle"></i> يرجى إصلاح الأخطاء التالية:
+                        </h5>
+                        <ul class="mb-0">
+                            @foreach (var state in ViewData.ModelState)
+                            {
+                                foreach (var error in state.Value.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- Basic Information -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle"></i> المعلومات الأساسية
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label asp-for="Name" class="form-label"></label>
+                                <input asp-for="Name" class="form-control" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Category" class="form-label"></label>
+                                <select asp-for="Category" class="form-select" id="categorySelect">
+                                    <option value="">اختر التصنيف</option>
+                                    @foreach (var category in ViewBag.Categories as List<string>)
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label"></label>
+                                <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                                <small class="text-muted">وصف تفصيلي للمنتج، المميزات، الخامات، وما يميزه</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing & Stock -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tag"></i> السعر والمخزون
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="Price" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="Price" type="number" step="0.01" class="form-control" />
+                                    <span class="input-group-text">ريال</span>
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="DiscountedPrice" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="DiscountedPrice" type="number" step="0.01" class="form-control" />
+                                    <span class="input-group-text">ريال</span>
+                                </div>
+                                <span asp-validation-for="DiscountedPrice" class="text-danger"></span>
+                                <small class="text-muted d-block">اتركه فارغاً إذا لم يكن هناك خصم</small>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="StockQuantity" class="form-label"></label>
+                                <input asp-for="StockQuantity" type="number" class="form-control" />
+                                <span asp-validation-for="StockQuantity" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsAvailable" class="form-check-label"></label>
+                                </div>
+                                <small class="text-muted d-block">إذا كان المنتج متاحاً للشراء الآن</small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsFeatured" class="form-check-label"></label>
+                                </div>
+                                <small class="text-muted d-block">المنتجات المميزة تظهر في الصفحة الرئيسية</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Details -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-th-list"></i> تفاصيل المنتج
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label asp-for="SubCategory" class="form-label"></label>
+                                <select asp-for="SubCategory" class="form-select">
+                                    <option value="">اختر (اختياري)</option>
+                                    @foreach (var sub in ViewBag.SubCategories as List<string>)
+                                    {
+                                        <option value="@sub">@sub</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label asp-for="Size" class="form-label"></label>
+                                <select asp-for="Size" class="form-select">
+                                    <option value="">اختر (اختياري)</option>
+                                    @foreach (var size in ViewBag.Sizes as List<string>)
+                                    {
+                                        <option value="@size">@size</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label asp-for="Color" class="form-label"></label>
+                                <input asp-for="Color" class="form-control" placeholder="مثال: أبيض، أسود" />
+                            </div>
+
+                            <div class="col-md-3">
+                                <label asp-for="Material" class="form-label"></label>
+                                <select asp-for="Material" class="form-select">
+                                    <option value="">اختر (اختياري)</option>
+                                    @foreach (var material in ViewBag.Materials as List<string>)
+                                    {
+                                        <option value="@material">@material</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Brand" class="form-label"></label>
+                                <input asp-for="Brand" class="form-control" placeholder="اسم العلامة التجارية (اختياري)" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-images"></i> صور المنتج
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="PrimaryImage" class="form-label"></label>
+                                <input asp-for="PrimaryImage" type="file" class="form-control" accept="image/*" id="primaryImageInput" />
+                                <span asp-validation-for="PrimaryImage" class="text-danger"></span>
+                                <small class="text-muted d-block mt-1">الصورة الرئيسية للمنتج (مطلوبة)</small>
+                                
+                                <div id="primaryImagePreview" class="mt-3" style="display: none;">
+                                    <img id="primaryImagePreviewImg" src="" class="img-fluid rounded" style="max-height: 200px;" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="AdditionalImages" class="form-label"></label>
+                                <input asp-for="AdditionalImages" type="file" class="form-control" accept="image/*" multiple id="additionalImagesInput" />
+                                <small class="text-muted d-block mt-1">يمكنك إضافة حتى 5 صور إضافية (اختياري)</small>
+                                
+                                <div id="additionalImagesPreview" class="mt-3 row g-2"></div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>نصائح للصور:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>استخدم صوراً واضحة وعالية الجودة</li>
+                                <li>اعرض المنتج من زوايا مختلفة</li>
+                                <li>الحجم الأقصى للصورة: 5 ميجابايت</li>
+                                <li>الصيغ المقبولة: JPG, PNG, GIF, WEBP</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO (Optional) -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-search"></i> تحسين محركات البحث (SEO)
+                            <small class="text-white-50">(اختياري)</small>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="MetaTitle" class="form-label"></label>
+                                <input asp-for="MetaTitle" class="form-control" placeholder="سيتم استخدام اسم المنتج إذا ترك فارغاً" />
+                                <span asp-validation-for="MetaTitle" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="MetaDescription" class="form-label"></label>
+                                <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="سيتم استخدام وصف المنتج إذا ترك فارغاً"></textarea>
+                                <span asp-validation-for="MetaDescription" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <a href="@Url.Action("ManageProducts")" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> إلغاء
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-save"></i> حفظ ونشر المنتج
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        $(document).ready(function() {
+            // Primary image preview
+            $('#primaryImageInput').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type)) {
+                        toastr.error('نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)');
+                        $(this).val('');
+                        return;
+                    }
+                    
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        toastr.error('حجم الصورة كبير جداً. الحد الأقصى 5 ميجابايت');
+                        $(this).val('');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#primaryImagePreviewImg').attr('src', e.target.result);
+                        $('#primaryImagePreview').show();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Additional images preview
+            $('#additionalImagesInput').change(function(e) {
+                const files = e.target.files;
+                $('#additionalImagesPreview').empty();
+                
+                if (files.length > 5) {
+                    toastr.warning('يمكنك إضافة 5 صور كحد أقصى. سيتم اختيار أول 5 صور فقط.');
+                }
+                
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                
+                Array.from(files).slice(0, 5).forEach(function(file) {
+                    // Validate file type
+                    if (!allowedTypes.includes(file.type)) {
+                        toastr.error('تم تجاهل ملف غير صالح: ' + file.name);
+                        return;
+                    }
+                    
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        toastr.error('تم تجاهل ملف كبير جداً: ' + file.name);
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const col = $('<div class="col-4"></div>');
+                        const img = $('<img>').attr('src', e.target.result)
+                            .addClass('img-fluid rounded')
+                            .css('max-height', '100px');
+                        col.append(img);
+                        $('#additionalImagesPreview').append(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            // Form validation before submission
+            $('#productForm').submit(function(e) {
+                console.log('Form submission started');
+                
+                // Clear previous errors
+                $('.text-danger').text('');
+                
+                // Validate required fields
+                let hasErrors = false;
+                const errors = [];
+                
+                // Name validation
+                const name = $('#Name').val().trim();
+                if (!name) {
+                    errors.push('اسم المنتج مطلوب');
+                    $('span[data-valmsg-for="Name"]').text('اسم المنتج مطلوب');
+                    hasErrors = true;
+                }
+                
+                // Description validation
+                const description = $('#Description').val().trim();
+                if (!description) {
+                    errors.push('وصف المنتج مطلوب');
+                    $('span[data-valmsg-for="Description"]').text('وصف المنتج مطلوب');
+                    hasErrors = true;
+                }
+                
+                // Price validation
+                const price = parseFloat($('#Price').val());
+                if (!price || price <= 0) {
+                    errors.push('السعر مطلوب ويجب أن يكون أكبر من صفر');
+                    $('span[data-valmsg-for="Price"]').text('السعر مطلوب ويجب أن يكون أكبر من صفر');
+                    hasErrors = true;
+                }
+                
+                // Category validation
+                const category = $('#categorySelect').val();
+                if (!category) {
+                    errors.push('التصنيف مطلوب');
+                    $('span[data-valmsg-for="Category"]').text('التصنيف مطلوب');
+                    hasErrors = true;
+                }
+                
+                // Stock quantity validation
+                const stock = parseInt($('#StockQuantity').val());
+                if (isNaN(stock) || stock < 0) {
+                    errors.push('الكمية المتوفرة مطلوبة');
+                    $('span[data-valmsg-for="StockQuantity"]').text('الكمية المتوفرة مطلوبة');
+                    hasErrors = true;
+                }
+                
+                // Primary image validation
+                const primaryImage = $('#primaryImageInput')[0].files[0];
+                if (!primaryImage) {
+                    errors.push('الصورة الأساسية مطلوبة');
+                    $('span[data-valmsg-for="PrimaryImage"]').text('الصورة الأساسية مطلوبة');
+                    hasErrors = true;
+                } else {
+                    // Validate file type
+                    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(primaryImage.type)) {
+                        errors.push('نوع الصورة غير صالح');
+                        $('span[data-valmsg-for="PrimaryImage"]').text('نوع الصورة غير صالح');
+                        hasErrors = true;
+                    }
+                    
+                    // Validate file size (5MB)
+                    if (primaryImage.size > 5 * 1024 * 1024) {
+                        errors.push('حجم الصورة كبير جداً (أكثر من 5 ميجابايت)');
+                        $('span[data-valmsg-for="PrimaryImage"]').text('حجم الصورة كبير جداً');
+                        hasErrors = true;
+                    }
+                }
+                
+                if (hasErrors) {
+                    e.preventDefault();
+                    console.log('Validation errors:', errors);
+                    toastr.error('يرجى إصلاح الأخطاء المشار إليها باللون الأحمر');
+                    
+                    // Scroll to first error
+                    $('html, body').animate({
+                        scrollTop: $('.text-danger:visible:first').offset().top - 100
+                    }, 500);
+                    
+                    return false;
+                }
+                
+                console.log('Validation passed, submitting form');
+                
+                // Disable submit button and show loading
+                $('#submitBtn').prop('disabled', true)
+                    .html('<span class="spinner-border spinner-border-sm me-2"></span>جارٍ الحفظ...');
+                
+                // Allow form submission
+                return true;
+            });
+
+            // Auto-fill meta title from product name
+            $('#Name').blur(function() {
+                if (!$('#MetaTitle').val()) {
+                    $('#MetaTitle').val($(this).val());
+                }
+            });
+
+            // Auto-fill meta description from description
+            $('#Description').blur(function() {
+                if (!$('#MetaDescription').val()) {
+                    const desc = $(this).val();
+                    $('#MetaDescription').val(desc.substring(0, 160));
+                }
+            });
+
+            // Price validation
+            $('#DiscountedPrice').change(function() {
+                const price = parseFloat($('#Price').val());
+                const discounted = parseFloat($(this).val());
+                
+                if (discounted && discounted >= price) {
+                    toastr.warning('سعر الخصم يجب أن يكون أقل من السعر الأصلي');
+                    $(this).val('');
+                }
+            });
+            
+            console.log('AddProduct form initialized successfully');
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+
+        .card {
+            border: none;
+        }
+
+        .card-header {
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        #primaryImagePreview img,
+        #additionalImagesPreview img {
+            object-fit: cover;
+        }
+
+        .form-check-input:checked {
+            background-color: #198754;
+            border-color: #198754;
+        }
+    </style>
+}

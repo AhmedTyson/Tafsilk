@@ -1,0 +1,448 @@
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.ManageProductsViewModel
+@{
+    ViewData["Title"] = "إدارة المنتجات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4" dir="rtl">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-box"></i> إدارة المنتجات
+                    </h1>
+                    <p class="text-muted">إضافة وتعديل وإدارة منتجاتك في المتجر</p>
+                </div>
+                <div>
+                    <a href="@Url.Action("AddProduct")" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus"></i> إضافة منتج جديد
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">إجمالي المنتجات</h6>
+                            <h2 class="mb-0">@Model.TotalProducts</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">منتجات نشطة</h6>
+                            <h2 class="mb-0">@Model.ActiveProducts</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">نفذت من المخزون</h6>
+                            <h2 class="mb-0">@Model.OutOfStockProducts</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">قيمة المخزون</h6>
+                            <h2 class="mb-0">@Model.TotalInventoryValue.ToString("N0")</h2>
+                            <small class="text-white-50">ريال</small>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> قائمة المنتجات
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle" id="productsTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الصورة</th>
+                                        <th>اسم المنتج</th>
+                                        <th>التصنيف</th>
+                                        <th>السعر</th>
+                                        <th>الكمية</th>
+                                        <th>المبيعات</th>
+                                        <th>التقييم</th>
+                                        <th>الحالة</th>
+                                        <th>تاريخ الإضافة</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr id="product-@product.ProductId">
+                                            <td>
+                                                @if (product.HasImage)
+                                                {
+                                                    <img src="@Url.Action("GetProductImage", new { id = product.ProductId })" 
+                                                         alt="@product.Name" 
+                                                         class="rounded" 
+                                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                                         style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong>@product.Name</strong>
+                                                @if (product.IsFeatured)
+                                                {
+                                                    <br><span class="badge bg-warning"><i class="fas fa-star"></i> مميز</span>
+                                                }
+                                            </td>
+                                            <td>@product.Category</td>
+                                            <td>
+                                                @if (product.DiscountedPrice.HasValue)
+                                                {
+                                                    <div>
+                                                        <span class="text-decoration-line-through text-muted small">@product.Price.ToString("N2")</span>
+                                                        <br>
+                                                        <strong class="text-success">@product.DiscountedPrice.Value.ToString("N2") ريال</strong>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <strong>@product.Price.ToString("N2") ريال</strong>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="input-group input-group-sm" style="max-width: 120px;">
+                                                    <input type="number" 
+                                                           class="form-control stock-input" 
+                                                           value="@product.StockQuantity" 
+                                                           min="0" 
+                                                           max="10000"
+                                                           data-product-id="@product.ProductId">
+                                                    <button class="btn btn-outline-secondary update-stock-btn" 
+                                                            type="button" 
+                                                            data-product-id="@product.ProductId">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+                                                @if (product.StockQuantity == 0)
+                                                {
+                                                    <small class="text-danger d-block mt-1">نفذت من المخزون</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-shopping-cart text-muted"></i> @product.SalesCount
+                                                <br>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-eye"></i> @product.ViewCount مشاهدة
+                                                </small>
+                                            </td>
+                                            <td>
+                                                @if (product.AverageRating > 0)
+                                                {
+                                                    <div class="text-warning">
+                                                        @for (int i = 0; i < (int)product.AverageRating; i++)
+                                                        {
+                                                            <i class="fas fa-star"></i>
+                                                        }
+                                                        @for (int i = (int)product.AverageRating; i < 5; i++)
+                                                        {
+                                                            <i class="far fa-star"></i>
+                                                        }
+                                                        <br>
+                                                        <small class="text-muted">@product.AverageRating.ToString("0.0")</small>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <small class="text-muted">لا يوجد</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <form asp-action="ToggleProductAvailability" 
+                                                      asp-route-id="@product.ProductId" 
+                                                      method="post" 
+                                                      class="toggle-availability-form">
+                                                    @Html.AntiForgeryToken()
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input availability-toggle" 
+                                                               type="checkbox" 
+                                                               @(product.IsAvailable ? "checked" : "")
+                                                               data-product-id="@product.ProductId"
+                                                               onchange="this.form.submit()">
+                                                        <label class="form-check-label small">
+                                                            @(product.IsAvailable ? "متاح" : "غير متاح")
+                                                        </label>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <small>@product.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("EditProduct", new { id = product.ProductId })" 
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="تعديل">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="@Url.Action("ProductDetails", "Store", new { id = product.ProductId })" 
+                                                       class="btn btn-sm btn-outline-info"
+                                                       target="_blank"
+                                                       title="معاينة">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-sm btn-outline-danger delete-product-btn"
+                                                            data-product-id="@product.ProductId"
+                                                            data-product-name="@product.Name"
+                                                            title="حذف">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="display-1 text-muted mb-3">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                            <h4 class="text-muted mb-3">لا توجد منتجات بعد</h4>
+                            <p class="text-muted mb-4">ابدأ بإضافة منتجاتك الأولى إلى المتجر</p>
+                            <a href="@Url.Action("AddProduct")" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus"></i> إضافة منتج جديد
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" dir="rtl">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تأكيد الحذف</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>هل أنت متأكد من حذف المنتج "<strong id="deleteProductName"></strong>"؟</p>
+                <p class="text-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    لن يكون بإمكانك التراجع عن هذا الإجراء.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-danger">حذف المنتج</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            if ($('#productsTable tbody tr').length > 0) {
+                $('#productsTable').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/ar.json'
+                    },
+                    order: [[8, 'desc']], // Sort by date (newest first)
+                    pageLength: 25,
+                    responsive: true
+                });
+            }
+
+            // Update stock button
+            $('.update-stock-btn').click(function() {
+                const productId = $(this).data('product-id');
+                const newStock = $(`.stock-input[data-product-id="${productId}"]`).val();
+                const btn = $(this);
+                
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: '@Url.Action("UpdateStock")/' + productId,
+                    method: 'POST',
+                    data: {
+                        newStock: newStock,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success('تم تحديث الكمية بنجاح');
+                            btn.html('<i class="fas fa-check"></i>');
+                            
+                            // Update stock display
+                            $(`.stock-input[data-product-id="${productId}"]`).val(response.newStock);
+                            
+                            // Update availability if needed
+                            if (!response.isAvailable) {
+                                $(`.availability-toggle[data-product-id="${productId}"]`).prop('checked', false);
+                                toastr.info('المنتج أصبح غير متاح بسبب نفاذ المخزون');
+                            }
+                            
+                            setTimeout(function() {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(response.message || 'حدث خطأ');
+                            btn.html('<i class="fas fa-check"></i>');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('حدث خطأ في الاتصال');
+                        btn.html('<i class="fas fa-check"></i>');
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Delete product button
+            $('.delete-product-btn').click(function() {
+                const productId = $(this).data('product-id');
+                const productName = $(this).data('product-name');
+                
+                $('#deleteProductName').text(productName);
+                $('#deleteForm').attr('action', '@Url.Action("DeleteProduct")/' + productId);
+                
+                new bootstrap.Modal(document.getElementById('deleteModal')).show();
+            });
+
+            // Prevent form resubmission on toggle
+            $('.toggle-availability-form').submit(function(e) {
+                e.preventDefault();
+                
+                const form = $(this);
+                const productId = form.find('.availability-toggle').data('product-id');
+                
+                $.ajax({
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            const toggle = $(`.availability-toggle[data-product-id="${productId}"]`);
+                            const label = toggle.next('label');
+                            
+                            if (response.isAvailable) {
+                                label.text('متاح');
+                                toastr.success('المنتج أصبح متاحاً');
+                            } else {
+                                label.text('غير متاح');
+                                toastr.info('المنتج أصبح غير متاح');
+                            }
+                        }
+                    },
+                    error: function() {
+                        toastr.error('حدث خطأ في الاتصال');
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .stock-input {
+            max-width: 70px;
+        }
+        
+        .update-stock-btn {
+            min-width: 35px;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        .form-switch {
+            padding-left: 2.5em;
+        }
+
+        .form-check-input {
+            cursor: pointer;
+        }
+
+        .btn-group .btn {
+            margin: 0 2px;
+        }
+    </style>
+}

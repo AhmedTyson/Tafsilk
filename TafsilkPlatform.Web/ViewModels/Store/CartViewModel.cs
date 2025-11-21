@@ -17,13 +17,14 @@ namespace TafsilkPlatform.Web.ViewModels.Store
   {
         public Guid CartItemId { get; set; }
         public Guid ProductId { get; set; }
-     public required string ProductName { get; set; }
+     public string ProductName { get; set; } = string.Empty;
         public string? ProductImageBase64 { get; set; }
         public decimal UnitPrice { get; set; }
         public int Quantity { get; set; }
 public decimal TotalPrice { get; set; }
         public string? SelectedSize { get; set; }
    public string? SelectedColor { get; set; }
+        public string? SpecialInstructions { get; set; }
         public int StockAvailable { get; set; }
         public bool IsAvailable { get; set; }
     }
