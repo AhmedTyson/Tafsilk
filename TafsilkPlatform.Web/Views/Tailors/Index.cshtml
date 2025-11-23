@@ -251,7 +251,7 @@ color: #2c3e50;
         </div>
 
         <div class="filters-section">
-        <form method="get" action="/tailors">
+        <form method="get" action="@Url.Action("Index", "Tailors")">
            <div class="filter-row">
              <div class="filter-group">
                <label>المدينة</label>
@@ -295,10 +295,10 @@ color: #2c3e50;
        <div class="tailors-grid">
     @foreach (var tailor in Model)
                 {
-    <a href="@($"/tailors/details/{tailor.Id}")" class="tailor-card">
+    <a href="@Url.Action("Details", "Tailors", new { id = tailor.Id })" class="tailor-card">
        @if (tailor.ProfilePictureData != null)
        {
-             <img src="@($"/tailors/picture/{tailor.Id}")" 
+             <img src="@Url.Action("GetProfilePicture", "Tailors", new { id = tailor.Id })" 
       alt="@tailor.ShopName" 
         class="tailor-image" />
         }
@@ -374,7 +374,7 @@ color: #2c3e50;
            <div class="pagination">
      @if (currentPage > 1)
       {
-          <a href="@($"/tailors?city={Uri.EscapeDataString(currentCity ?? string.Empty)}&specialization={Uri.EscapeDataString(currentSpec ?? string.Empty)}&page={currentPage - 1}")">
+          <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage - 1 })">
         <i class="fas fa-chevron-right"></i> السابق
              </a>
          }
@@ -387,13 +387,13 @@ color: #2c3e50;
        }
           else
         {
-      <a href="@($"/tailors?city={Uri.EscapeDataString(currentCity ?? string.Empty)}&specialization={Uri.EscapeDataString(currentSpec ?? string.Empty)}&page={i}")">@i</a>
+      <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = i })">@i</a>
  }
              }
 
   @if (currentPage < totalPages)
           {
-      <a href="@($"/tailors?city={Uri.EscapeDataString(currentCity ?? string.Empty)}&specialization={Uri.EscapeDataString(currentSpec ?? string.Empty)}&page={currentPage + 1}")">
+      <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage + 1 })">
                 التالي <i class="fas fa-chevron-left"></i>
       </a>
          }
@@ -406,7 +406,7 @@ color: #2c3e50;
         <i class="fas fa-search"></i>
       <h3>لا توجد نتائج</h3>
     <p>لم نعثر على خياطين مطابقين لمعايير البحث الخاصة بك</p>
-        <a href="/tailors" class="btn btn-primary">
+        <a href="@Url.Action("Index", "Tailors")" class="btn btn-primary">
         عرض جميع الخياطين
              </a>
      </div>

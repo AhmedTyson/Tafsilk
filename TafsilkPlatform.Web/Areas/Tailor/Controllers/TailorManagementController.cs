@@ -1090,7 +1090,6 @@ public class TailorManagementController : Controller
     /// View and manage products
     /// GET: /tailor/manage/products
     /// </summary>
-    [HttpGet("/TailorManagement/ManageProducts")]
     [HttpGet("products")]
     public async Task<IActionResult> ManageProducts()
     {

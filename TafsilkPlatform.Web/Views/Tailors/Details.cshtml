@@ -307,7 +307,7 @@ margin-bottom: 10px;
                 <div>
              @if (Model.ProfilePictureData != null)
    {
-           <img src="@($"/tailors/picture/{Model.Id}")" 
+           <img src="@Url.Action("GetProfilePicture", "Tailors", new { id = Model.Id })" 
    alt="@Model.ShopName" 
         class="tailor-avatar" />
          }
@@ -359,7 +359,7 @@ margin-bottom: 10px;
   @if (User.IsInRole("Customer"))
                 {
 <div>
-      <a href="@($"/orders/create/{Model.Id}")" class="cta-button">
+      <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = Model.Id })" class="cta-button">
             <i class="fas fa-plus-circle"></i>
          <span>اطلب خدمة</span>
        </a>
@@ -440,7 +440,7 @@ margin-bottom: 10px;
        <div class="portfolio-item">
   @if (image.ImageData != null)
      {
-           <img src="@($"/tailors/portfolio/{image.PortfolioImageId}")" 
+           <img src="@Url.Action("GetPortfolioImage", "Tailors", new { id = image.PortfolioImageId })" 
          alt="@image.Title" 
            class="portfolio-image" />
                 }

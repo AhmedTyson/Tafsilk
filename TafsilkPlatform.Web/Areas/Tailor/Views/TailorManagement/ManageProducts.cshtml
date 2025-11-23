@@ -1,10 +1,10 @@
-@model TafsilkPlatform.Models.ViewModels.TailorManagement.ManageProductsViewModel
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.ManageProductsViewModel
 @{
     ViewData["Title"] = "إدارة المنتجات";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", "/Dashboards/Tailor"),
+        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
         ("إدارة المنتجات", "")
     };
 }
@@ -260,7 +260,7 @@
                                                        title="تعديل">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="@($"/Store/Product/{product.ProductId}")" 
+                                                    <a href="@Url.Action("ProductDetails", "Store", new { id = product.ProductId })" 
                                                        class="btn btn-sm btn-outline-info"
                                                        target="_blank"
                                                        title="معاينة">
