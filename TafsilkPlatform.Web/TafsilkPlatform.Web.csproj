@@ -29,6 +29,9 @@
   <ItemGroup>
     <Compile Remove="Views\Reviews\**" />
     <Compile Remove="wwwroot\Tafsilk-v3-\**" />
+    <Compile Remove="TafsilkPlatform.Models\**" />
+    <Compile Remove="TafsilkPlatform.DataAccess\**" />
+    <Compile Remove="TafsilkPlatform.Utility\**" />
     <Content Remove="Views\Reviews\**" />
     <Content Remove="wwwroot\Tafsilk-v3-\**" />
     <EmbeddedResource Remove="Views\Reviews\**" />

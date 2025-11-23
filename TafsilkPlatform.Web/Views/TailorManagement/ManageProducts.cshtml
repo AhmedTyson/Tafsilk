@@ -260,7 +260,7 @@
                                                        title="تعديل">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <a href="@($"/store/product/{product.ProductId}")" 
+                                                    <a href="@Url.Action("ProductDetails", "Store", new { id = product.ProductId })" 
                                                        class="btn btn-sm btn-outline-info"
                                                        target="_blank"
                                                        title="معاينة">

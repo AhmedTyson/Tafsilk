@@ -724,7 +724,7 @@ color: var(--text-primary);
 
  .btn-secondary {
         background-color: var(--secondary-color);
-        color: var,--text-white;
+        color: var(--text-white);
     }
 
       .btn-secondary:hover,
@@ -771,437 +771,447 @@ color: var(--text-primary);
 <main class="container">
     <section class="tailor-profile">
         <div class="profile-header">
-            <div class="profile-banner"></div>
+         <div class="profile-banner"></div>
             <div class="profile-content">
-                <div class="profile-image">
-                    @if (safeModel.ProfilePictureData != null)
-                    {
-                        <img src="@($"/profile/tailor/picture/{safeModel.Id}")"
-                            alt="@safeModel.FullName"
-                            class="profile-img" />
-                    }
-                    else
-                    {
-                        <img src="https://placehold.co/400x400/e3f2fd/2c5aa0?text=خياط+محترف"
-                            alt="@safeModel.FullName"
-                            class="profile-img" />
-                    }
-                </div>
-                <div class="profile-info">
-                    <h1 class="profile-name">@(safeModel.ShopName ?? safeModel.FullName)</h1>
-                    @if (safeModel.IsVerified)
-                    {
-                        <div class="profile-badge">
-                            <i class="fas fa-check-circle"></i>
-                            <span>خياط موثوق</span>
-                        </div>
-                    }
+            <div class="profile-image">
+         @if (safeModel.ProfilePictureData != null)
+      {
+       <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = safeModel.Id })"
+          alt="@safeModel.FullName"
+    class="profile-img" />
+       }
+       else
+         {
+    <img src="https://placehold.co/400x400/e3f2fd/2c5aa0?text=خياط+محترف"
+     alt="@safeModel.FullName"
+           class="profile-img" />
+       }
+  </div>
+ <div class="profile-info">
+      <h1 class="profile-name">@(safeModel.ShopName ?? safeModel.FullName)</h1>
+           @if (safeModel.IsVerified)
+      {
+       <div class="profile-badge">
+         <i class="fas fa-check-circle"></i>
+              <span>خياط موثوق</span>
+   </div>
+ }
 
-                    <div class="profile-stats">
-                        <div class="stat">
-                            <span class="stat-value">@safeModel.AverageRating.ToString("F1")</span>
-                            <span class="stat-label">الت تقييم</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-value">@ViewBag.ReviewCount</span>
-                            <span class="stat-label">تقييم</span>
-                        </div>
-                        @if (safeModel.YearsOfExperience.HasValue)
-                        {
-                            <div class="stat">
-                                <span class="stat-value">@safeModel.YearsOfExperience</span>
-                                <span class="stat-label">سنوات خبرة</span>
-                            </div>
-                        }
-                    </div>
-
-                    <div class="profile-details">
-                        @if (!string.IsNullOrEmpty(safeModel.City))
-                        {
-                            <div class="detail-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>@safeModel.City@(!string.IsNullOrEmpty(safeModel.District) ? ", " + safeModel.District : "")</span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(safeModel.Specialization))
-                        {
-                            <div class="detail-item">
-                                <i class="fas fa-tshirt"></i>
-                                <span>@safeModel.Specialization</span>
-                            </div>
-                        }
-                        @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
-                        {
-                            <div class="detail-item">
-                                <i class="fas fa-clock"></i>
-                                <span>@safeModel.BusinessHours</span>
-                            </div>
-                        }
-                        <div class="detail-item">
-                            <i class="fas fa-bolt"></i>
-                            <span>خدمة عاجلة متاحة</span>
-                        </div>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(safeModel.Bio))
-                    {
-                        <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
-                            @safeModel.Bio
-                        </p>
-                    }
-                    else if (!string.IsNullOrEmpty(safeModel.ShopDescription))
-                    {
-                        <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
-                            @safeModel.ShopDescription
-                        </p>
-                    }
-
-                    <div class="profile-actions">
-                        <div class="action-buttons">
-                            <a href="@($"/orders/create/{safeModel.Id}")" class="btn btn-primary">
-                                <i class="fas fa-shopping-bag"></i>
-                                إنشاء طلب
-                            </a>
-                            <button class="btn btn-outline" id="favoriteBtn">
-                                <i class="far fa-heart"></i>
-                                إضافة إلى المفضلة
-                            </button>
-                            <a href="@($"/messages?recipientId={safeModel.UserId}")" class="btn btn-outline">
-                                <i class="fas fa-envelope"></i>
-                                مراسلة
-                            </a>
-                            <button class="btn btn-secondary" id="viewWorkBtn">
-                                <i class="fas fa-eye"></i>
-                                عرض الأعمال
-                            </button>
-                        </div>
-                    </div>
-                </div>
+   <div class="profile-stats">
+    <div class="stat">
+      <span class="stat-value">@safeModel.AverageRating.ToString("F1")</span>
+     <span class="stat-label">التقييم</span>
+    </div>
+     <div class="stat">
+     <span class="stat-value">@ViewBag.ReviewCount</span>
+      <span class="stat-label">تقييم</span>
             </div>
+@if (safeModel.YearsOfExperience.HasValue)
+  {
+     <div class="stat">
+           <span class="stat-value">@safeModel.YearsOfExperience</span>
+      <span class="stat-label">سنوات خبرة</span>
+     </div>
+                 }
+    </div>
+
+                <div class="profile-details">
+    @if (!string.IsNullOrEmpty(safeModel.City))
+             {
+           <div class="detail-item">
+        <i class="fas fa-map-marker-alt"></i>
+  <span>@safeModel.City@(!string.IsNullOrEmpty(safeModel.District) ? ", " + safeModel.District : "")</span>
+      </div>
+    }
+     @if (!string.IsNullOrEmpty(safeModel.Specialization))
+            {
+      <div class="detail-item">
+               <i class="fas fa-tshirt"></i>
+       <span>@safeModel.Specialization</span>
+            </div>
+   }
+         @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
+   {
+            <div class="detail-item">
+     <i class="fas fa-clock"></i>
+               <span>@safeModel.BusinessHours</span>
+     </div>
+       }
+             <div class="detail-item">
+              <i class="fas fa-bolt"></i>
+    <span>خدمة عاجلة متاحة</span>
+             </div>
+          </div>
+
+       @if (!string.IsNullOrEmpty(safeModel.Bio))
+ {
+    <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
+            @safeModel.Bio
+     </p>
+    }
+          else if (!string.IsNullOrEmpty(safeModel.ShopDescription))
+    {
+      <p class="text-muted" style="margin-bottom: var(--spacing-lg)">
+           @safeModel.ShopDescription
+      </p>
+     }
+
+   <div class="profile-actions">
+  <div class="action-buttons">
+           <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = safeModel.Id })" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i>
+   إنشاء طلب
+              </a>
+      <button class="btn btn-outline" id="favoriteBtn">
+        <i class="far fa-heart"></i>
+          إضافة إلى المفضلة
+    </button>
+        <a href="@Url.Action("Index", "Messages", new { recipientId = safeModel.UserId })" class="btn btn-outline">
+                     <i class="fas fa-envelope"></i>
+       مراسلة
+             </a>
+        <button class="btn btn-secondary" id="viewWorkBtn">
+               <i class="fas fa-eye"></i>
+        عرض الأعمال
+        </button>
+   </div>
+         </div>
         </div>
+            </div>
+  </div>
     </section>
 
     <!-- Tabs Section -->
     <section class="tabs-section">
-        <div class="tabs-container">
+   <div class="tabs-container">
             <div class="tabs-header">
-                <div class="tab active" data-tab="information">المعلومات</div>
-                <div class="tab" data-tab="reviews">التقييمات</div>
-                <div class="tab" data-tab="services">الخدمات</div>
-                <div class="tab" data-tab="portfolio">معرض الأعمال</div>
-            </div>
+       <div class="tab active" data-tab="information">المعلومات</div>
+  <div class="tab" data-tab="reviews">التقييمات</div>
+      <div class="tab" data-tab="services">الخدمات</div>
+  <div class="tab" data-tab="portfolio">معرض الأعمال</div>
+      </div>
 
             <!-- Information Tab -->
-            <div class="tab-content active" id="information-tab">
-                <h2 class="section-title">معلومات عن الخياط</h2>
-                <div class="info-grid">
-                    <div class="info-card">
-                        <h3 class="info-card-title">
-                            <i class="fas fa-info-circle"></i>
-                            معلومات عامة
-                        </h3>
-                        <ul class="info-list">
-                            <li>
-                                <span class="info-label">الاسم:</span>
-                                <span class="info-value">@(safeModel.ShopName ?? safeModel.FullName)</span>
-                            </li>
-                            @if (!string.IsNullOrEmpty(safeModel.Specialization))
-                            {
-                                <li>
-                                    <span class="info-label">التخصص:</span>
-                                    <span class="info-value">@safeModel.Specialization</span>
-                                </li>
-                            }
-                            @if (safeModel.YearsOfExperience.HasValue)
-                            {
-                                <li>
-                                    <span class="info-label">سنوات الخبرة:</span>
-                                    <span class="info-value">@safeModel.YearsOfExperience سنوات</span>
-                                </li>
-                            }
-                            <li>
-                                <span class="info-label">تاريخ الانضمام:</span>
-                                <span class="info-value">@safeModel.CreatedAt.ToString("MMMM yyyy")</span>
-                            </li>
-                        </ul>
-                    </div>
+   <div class="tab-content active" id="information-tab">
+ <h2 class="section-title">معلومات عن الخياط</h2>
+         <div class="info-grid">
+     <div class="info-card">
+             <h3 class="info-card-title">
+      <i class="fas fa-info-circle"></i>
+           معلومات عامة
+       </h3>
+              <ul class="info-list">
+ <li>
+         <span class="info-label">الاسم:</span>
+      <span class="info-value">@(safeModel.ShopName ?? safeModel.FullName)</span>
+         </li>
+       @if (!string.IsNullOrEmpty(safeModel.Specialization))
+    {
+       <li>
+        <span class="info-label">التخصص:</span>
+        <span class="info-value">@safeModel.Specialization</span>
+      </li>
+   }
+         @if (safeModel.YearsOfExperience.HasValue)
+       {
+    <li>
+     <span class="info-label">سنوات الخبرة:</span>
+   <span class="info-value">@safeModel.YearsOfExperience سنوات</span>
+              </li>
+         }
+    <li>
+   <span class="info-label">تاريخ الانضمام:</span>
+         <span class="info-value">@safeModel.CreatedAt.ToString("MMMM yyyy")</span>
+    </li>
+      </ul>
+    </div>
 
-                    @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
-                    {
-                        <div class="info-card">
-                            <h3 class="info-card-title">
-                                <i class="fas fa-clock"></i>
-                                أوقات العمل
-                            </h3>
-                            <ul class="info-list">
-                                <li>
-                                    <span class="info-label">ساعات العمل:</span>
-                                    <span class="info-value">@safeModel.BusinessHours</span>
-                                </li>
-                            </ul>
-                        </div>
-                    }
+      @if (!string.IsNullOrEmpty(safeModel.BusinessHours))
+          {
+   <div class="info-card">
+     <h3 class="info-card-title">
+   <i class="fas fa-clock"></i>
+ أوقات العمل
+           </h3>
+          <ul class="info-list">
+              <li>
+  <span class="info-label">ساعات العمل:</span>
+         <span class="info-value">@safeModel.BusinessHours</span>
+        </li>
+         </ul>
+  </div>
+}
 
-                    <div class="info-card">
-                        <h3 class="info-card-title">
-                            <i class="fas fa-map-marker-alt"></i>
-                            معلومات الاتصال
-                        </h3>
-                        <ul class="info-list">
-                            @if (!string.IsNullOrEmpty(safeModel.Address))
-                            {
-                                <li>
-                                    <span class="info-label">العنوان:</span>
-                                    <span class="info-value">@safeModel.Address</span>
-                                </li>
-                            }
-                            else if (!string.IsNullOrEmpty(safeModel.City))
-                            {
-                                <li>
-                                    <span class="info-label">المدينة:</span>
-                                    <span class="info-value">@safeModel.City</span>
-                                </li>
-                            }
-                            @if (safeModel.User?.PhoneNumber != null)
-                            {
-                                <li>
-                                    <span class="info-label">الهاتف:</span>
-                                    <span class="info-value">@safeModel.User.PhoneNumber</span>
-                                </li>
-                            }
-                            @if (!string.IsNullOrEmpty(safeModel.FacebookUrl) || !string.IsNullOrEmpty(safeModel.InstagramUrl))
-                            {
-                                <li>
-                                    <span class="info-label">وسائل التواصل:</span>
-                                    <span class="info-value">
-                                        @if (!string.IsNullOrEmpty(safeModel.FacebookUrl))
-                                        {
-                                            <a href="@safeModel.FacebookUrl" target="_blank" style="color: #1877F2; margin-left: 8px;">
-                                                <i class="fab fa-facebook"></i>
-                                            </a>
-                                        }
-                                        @if (!string.IsNullOrEmpty(safeModel.InstagramUrl))
-                                        {
-                                            <a href="@safeModel.InstagramUrl" target="_blank" style="color: #E4405F; margin-left: 8px;">
-                                                <i class="fab fa-instagram"></i>
-                                            </a>
-                                        }
-                                    </span>
-                                </li>
-                            }
-                        </ul>
-                    </div>
+     <div class="info-card">
+           <h3 class="info-card-title">
+           <i class="fas fa-map-marker-alt"></i>
+           معلومات الاتصال
+    </h3>
+               <ul class="info-list">
+  @if (!string.IsNullOrEmpty(safeModel.Address))
+               {
+            <li>
+        <span class="info-label">العنوان:</span>
+  <span class="info-value">@safeModel.Address</span>
+       </li>
+         }
+      else if (!string.IsNullOrEmpty(safeModel.City))
+         {
+     <li>
+<span class="info-label">المدينة:</span>
+ <span class="info-value">@safeModel.City</span>
+      </li>
+        }
+     @if (safeModel.User?.PhoneNumber != null)
+            {
+      <li>
+  <span class="info-label">الهاتف:</span>
+        <span class="info-value">@safeModel.User.PhoneNumber</span>
+       </li>
+       }
+          @if (!string.IsNullOrEmpty(safeModel.FacebookUrl) || !string.IsNullOrEmpty(safeModel.InstagramUrl))
+     {
+         <li>
+   <span class="info-label">وسائل التواصل:</span>
+    <span class="info-value">
+     @if (!string.IsNullOrEmpty(safeModel.FacebookUrl))
+          {
+               <a href="@safeModel.FacebookUrl" target="_blank" style="color: #1877F2; margin-left: 8px;">
+           <i class="fab fa-facebook"></i>
+           </a>
+        }
+          @if (!string.IsNullOrEmpty(safeModel.InstagramUrl))
+     {
+  <a href="@safeModel.InstagramUrl" target="_blank" style="color: #E4405F; margin-left: 8px;">
+       <i class="fab fa-instagram"></i>
+     </a>
+           }
+        </span>
+          </li>
+          }
+  </ul>
+        </div>
 
-                    <div class="info-card">
-                        <h3 class="info-card-title">
-                            <i class="fas fa-star"></i>
-                            المميزات
-                        </h3>
-                        <ul class="info-list">
-                            <li>
-                                <span class="info-label">التوصيل للمنزل:</span>
-                                <span class="info-value">متاح (رسوم إضافية)</span>
-                            </li>
-                            <li>
-                                <span class="info-label">الدفع الإلكتروني:</span>
-                                <span class="info-value">متاح</span>
-                            </li>
-                            <li>
-                                <span class="info-label">ضمان الجودة:</span>
-                                <span class="info-value">7 أيام</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+       <div class="info-card">
+    <h3 class="info-card-title">
+          <i class="fas fa-star"></i>
+         المميزات
+       </h3>
+     <ul class="info-list">
+      <li>
+     <span class="info-label">التوصيل للمنزل:</span>
+      <span class="info-value">متاح (رسوم إضافية)</span>
+          </li>
+             <li>
+   <span class="info-label">الدفع الإلكتروني:</span>
+ <span class="info-value">متاح</span>
+     </li>
+    <li>
+   <span class="info-label">ضمان الجودة:</span>
+                 <span class="info-value">7 أيام</span>
+  </li>
+        </ul>
+  </div>
+        </div>
             </div>
 
-            <!-- Reviews Tab -->
+ <!-- Reviews Tab -->
             <div class="tab-content" id="reviews-tab">
-                <h2 class="section-title">التقييم</h2>
-                <!-- Reviews simplified - showing average only -->
-                <div class="reviews-summary">
-                    <div class="rating-overview">
-                        <div class="average-rating">@Model.AverageRating.ToString("F1")</div>
-                        <div class="rating-stars">
-                            @for (int i = 1; i <= 5; i++)
-                            {
-                                <i class="fas fa-star @(i <= Model.AverageRating ? "text-warning" : "text-muted")"></i>
-                            }
-                        </div>
-                        <p class="text-muted mt-2">التقييم الإجمالي</p>
-                    </div>
-                </div>
-                <div class="alert alert-info mt-4">
-                    <i class="fas fa-info-circle me-2"></i>
-                    نظام التقييمات تم تبسيطه - التقييم الإجمالي فقط معروض
-                </div>
+              <h2 class="section-title">التقييم</h2>
+              
+              <!-- Reviews simplified - showing average only -->
+    <div class="reviews-summary">
+     <div class="rating-overview">
+   <div class="average-rating">@Model.AverageRating.ToString("F1")</div>
+         <div class="rating-stars">
+                @for (int i = 1; i <= 5; i++)
+ {
+  <i class="fas fa-star @(i <= Model.AverageRating ? "text-warning" : "text-muted")"></i>
+ }
+  </div>
+    <p class="text-muted mt-2">التقييم الإجمالي</p>
+        </div>
+    </div>
+ 
+    <div class="alert alert-info mt-4">
+        <i class="fas fa-info-circle me-2"></i>
+   نظام التقييمات تم تبسيطه - التقييم الإجمالي فقط معروض
+    </div>
             </div>
 
-            <!-- Services Tab -->
-            <div class="tab-content" id="services-tab">
-                <h2 class="section-title">الخدمات والأسعار</h2>
-                @if (Model.TailorServices != null && Model.TailorServices.Any())
-                {
-                    <div class="services-grid">
-                        @foreach (var service in Model.TailorServices.OrderBy(s => s.BasePrice))
-                        {
-                            <div class="service-card">
-                                <div class="service-icon">
-                                    <i class="fas fa-tshirt"></i>
-                                </div>
-                                <h3 class="service-title">@service.ServiceName</h3>
-                                @if (!string.IsNullOrEmpty(service.Description))
-                                {
-                                    <p class="service-desc">@service.Description</p>
-                                }
-                                <div class="service-price">@service.BasePrice.ToString("N0") جنيه</div>
-                                <a href="@($"/orders/create/{Model.Id}")" class="btn btn-primary">إنشاء طلب</a>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center">لا توجد خدمات معلنة بعد</p>
-                }
+          <!-- Services Tab -->
+      <div class="tab-content" id="services-tab">
+       <h2 class="section-title">الخدمات والأسعار</h2>
+     @if (Model.TailorServices != null && Model.TailorServices.Any())
+      {
+     <div class="services-grid">
+       @foreach (var service in Model.TailorServices.OrderBy(s => s.BasePrice))
+    {
+ <div class="service-card">
+     <div class="service-icon">
+         <i class="fas fa-tshirt"></i>
+       </div>
+       <h3 class="service-title">@service.ServiceName</h3>
+          @if (!string.IsNullOrEmpty(service.Description))
+         {
+      <p class="service-desc">@service.Description</p>
+ }
+   <div class="service-price">@service.BasePrice.ToString("N0") جنيه</div>
+         <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = Model.Id })" 
+    class="btn btn-primary">إنشاء طلب</a>
+      </div>
+           }
+      </div>
+       }
+       else
+ {
+                <p class="text-muted text-center">لا توجد خدمات معلنة بعد</p>
+  }
             </div>
 
             <!-- Portfolio Tab -->
-            <div class="tab-content" id="portfolio-tab">
+  <div class="tab-content" id="portfolio-tab">
                 <h2 class="section-title">معرض الأعمال</h2>
-                @if (Model.PortfolioImages != null && Model.PortfolioImages.Any())
-                {
-                    <div class="portfolio-grid">
-                        @foreach (var image in Model.PortfolioImages.OrderByDescending(p => p.CreatedAt))
-                        {
-                            <div class="portfolio-item">
-                                <img src="@($"/tailors/portfolio/{image.PortfolioImageId}")"
-                                    alt="@image.Title"
-                                    class="portfolio-img" />
-                                <div class="portfolio-overlay">
-                                    <h3 class="portfolio-title">@image.Title</h3>
-                                    @if (!string.IsNullOrEmpty(image.Description))
-                                    {
-                                        <p class="portfolio-desc">@image.Description</p>
-                                    }
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-muted text-center">لا توجد صور في المعرض بعد</p>
-                }
-            </div>
+     @if (Model.PortfolioImages != null && Model.PortfolioImages.Any())
+  {
+ <div class="portfolio-grid">
+      @foreach (var image in Model.PortfolioImages.OrderByDescending(p => p.CreatedAt))
+        {
+  <div class="portfolio-item">
+ <img src="@Url.Action("GetPortfolioImage", "TailorManagement", new { id = image.PortfolioImageId })"
+    alt="@image.Title"
+        class="portfolio-img" />
+         <div class="portfolio-overlay">
+   <h3 class="portfolio-title">@image.Title</h3>
+         @if (!string.IsNullOrEmpty(image.Description))
+  {
+   <p class="portfolio-desc">@image.Description</p>
+      }
+         </div>
+     </div>
+         }
+     </div>
+        }
+        else
+   {
+          <p class="text-muted text-center">لا توجد صور في المعرض بعد</p>
+    }
+   </div>
         </div>
     </section>
 
     <!-- Calendar and Map Section -->
     <section class="calendar-map-section">
-        <h2 class="section-title">الموقع والحجز</h2>
-        <div class="calendar-map-grid">
-            <div class="map-card">
-                <h3>موقع الورشة</h3>
-                <div class="map-placeholder">
-                    <i class="fas fa-map-marked-alt"></i>
-                    <p>خريطة تفاعلية لموقع الورشة</p>
-                    @if (!string.IsNullOrEmpty(Model.City))
-                    {
-                        <p class="text-muted">@Model.City@(!string.IsNullOrEmpty(Model.District) ? ", " + Model.District : "")</p>
-                    }
-                    @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
-                    {
-                        <a href="https://www.google.com/maps?q=@Model.Latitude,@Model.Longitude" 
-                            target="_blank" 
-                            class="btn btn-outline">
-                            <i class="fas fa-directions"></i>
-                            الحصول على الاتجاهات
-                        </a>
-                    }
-                </div>
-                <div class="workshop-info" style="margin-top: var(--spacing-lg);">
-                    <h4>معلومات الورشة</h4>
-                    @if (!string.IsNullOrEmpty(Model.BusinessHours))
-                    {
-                        <p><i class="fas fa-clock"></i> @Model.BusinessHours</p>
-                    }
-                    @if (Model.User?.PhoneNumber != null)
-                    {
-                        <p><i class="fas fa-phone"></i> @Model.User.PhoneNumber</p>
-                    }
-                </div>
-            </div>
-
-            <div class="calendar-card">
-                <h3>احجز موعد</h3>
-                <p style="margin-bottom: var(--spacing-lg); color: var(--text-secondary);">
-                    لحجز موعد مع الخياط، يرجى الضغط على الزر أدناه
-                </p>
-                <a href="@($"/orders/create/{Model.Id}")" 
-                    class="btn btn-primary" 
-                    style="width: 100%;">
-                    <i class="fas fa-shopping-bag"></i>
-                    إنشاء طلب
+      <h2 class="section-title">الموقع والحجز</h2>
+      <div class="calendar-map-grid">
+      <div class="map-card">
+      <h3>موقع الورشة</h3>
+       <div class="map-placeholder">
+       <i class="fas fa-map-marked-alt"></i>
+        <p>خريطة تفاعلية لموقع الورشة</p>
+              @if (!string.IsNullOrEmpty(Model.City))
+                 {
+        <p class="text-muted">@Model.City@(!string.IsNullOrEmpty(Model.District) ? ", " + Model.District : "")</p>
+           }
+          @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+            {
+  <a href="https://www.google.com/maps?q=@Model.Latitude,@Model.Longitude" 
+            target="_blank" 
+          class="btn btn-outline">
+   <i class="fas fa-directions"></i>
+          الحصول على الاتجاهات
                 </a>
+              }
+     </div>
+  <div class="workshop-info" style="margin-top: var(--spacing-lg);">
+              <h4>معلومات الورشة</h4>
+     @if (!string.IsNullOrEmpty(Model.BusinessHours))
+          {
+        <p><i class="fas fa-clock"></i> @Model.BusinessHours</p>
+     }
+  @if (Model.User?.PhoneNumber != null)
+    {
+            <p><i class="fas fa-phone"></i> @Model.User.PhoneNumber</p>
+ }
+       </div>
+</div>
+
+         <div class="calendar-card">
+    <h3>احجز موعد</h3>
+    <p style="margin-bottom: var(--spacing-lg); color: var(--text-secondary);">
+   لحجز موعد مع الخياط، يرجى الضغط على الزر أدناه
+              </p>
+      <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = Model.Id })" 
+          class="btn btn-primary" 
+  style="width: 100%;">
+     <i class="fas fa-shopping-bag"></i>
+            إنشاء طلب
+     </a>
             </div>
-        </div>
+  </div>
     </section>
 </main>
 
 @section Scripts {
     <script>
-        // Initialize Tabs
-        document.addEventListener('DOMContentLoaded', function() {
-            initTabs();
-            initFavorite();
+// Initialize Tabs
+   document.addEventListener('DOMContentLoaded', function() {
+         initTabs();
+        initFavorite();
         });
 
         // Initialize Tabs
         function initTabs() {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.getAttribute('data-tab');
+          const tabs = document.querySelectorAll('.tab');
+   const tabContents = document.querySelectorAll('.tab-content');
+       
+   tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+              const tabId = this.getAttribute('data-tab');
+   
                     // Update active tab
-                    tabs.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    // Show corresponding content
-                    tabContents.forEach(content => {
-                        content.classList.remove('active');
-                        if (content.id === `${tabId}-tab`) {
-                            content.classList.add('active');
-                        }
-                    });
-                });
+    tabs.forEach(t => t.classList.remove('active'));
+ this.classList.add('active');
+ 
+               // Show corresponding content
+         tabContents.forEach(content => {
+   content.classList.remove('active');
+  if (content.id === `${tabId}-tab`) {
+       content.classList.add('active');
+      }
+    });
+      });
             });
         }
 
         // Initialize Favorite Button
         function initFavorite() {
-            const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoriteBtn = document.getElementById('favoriteBtn');
             const viewWorkBtn = document.getElementById('viewWorkBtn');
-            if (favoriteBtn) {
-                favoriteBtn.addEventListener('click', function() {
-                    // In a real app, you would make an AJAX call to save/remove favorite
-                    const isFavorite = this.classList.contains('favorited');
-                    if (isFavorite) {
-                        this.classList.remove('favorited');
-                        this.innerHTML = '<i class="far fa-heart"></i> إضافة إلى المفضلة';
-                    } else {
-                        this.classList.add('favorited');
-                        this.innerHTML = '<i class="fas fa-heart"></i> إزالة من المفضلة';
-                    }
-                });
-            }
+            
+    if (favoriteBtn) {
+             favoriteBtn.addEventListener('click', function() {
+  // In a real app, you would make an AJAX call to save/remove favorite
+    const isFavorite = this.classList.contains('favorited');
+       
+  if (isFavorite) {
+  this.classList.remove('favorited');
+     this.innerHTML = '<i class="far fa-heart"></i> إضافة إلى المفضلة';
+     } else {
+          this.classList.add('favorited');
+        this.innerHTML = '<i class="fas fa-heart"></i> إزالة من المفضلة';
+      }
+    });
+          }
+
             if (viewWorkBtn) {
-                viewWorkBtn.addEventListener('click', function() {
-                    // Navigate to portfolio tab
-                    document.querySelector('.tab[data-tab="portfolio"]').click();
-                    // Scroll to portfolio section
-                    document.getElementById('portfolio-tab').scrollIntoView({ behavior: 'smooth' });
-                });
+          viewWorkBtn.addEventListener('click', function() {
+    // Navigate to portfolio tab
+        document.querySelector('.tab[data-tab="portfolio"]').click();
+         
+     // Scroll to portfolio section
+         document.getElementById('portfolio-tab').scrollIntoView({ behavior: 'smooth' });
+       });
             }
         }
     </script>

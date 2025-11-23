@@ -116,7 +116,7 @@ border-bottom: 3px solid #667eea;
         height: 35px;
   background: #667eea;
     border-radius: 50%;
-            display: flex;
+      display: flex;
             align-items: center;
             justify-content: center;
  color: white;
@@ -125,7 +125,7 @@ border-bottom: 3px solid #667eea;
 
       .test-link-text {
             font-weight: 500;
-        }
+     }
 
    .test-link-arrow {
       color: #667eea;
@@ -274,42 +274,42 @@ border: none;
             </div>
   </div>
      <div class="test-links">
-        <a href="/Account/Register" class="test-link">
+        <a href="@Url.Action("Register", "Account")" class="test-link">
               <div class="test-link-content">
    <div class="test-link-icon">1</div>
           <span class="test-link-text">التسجيل كعميل</span>
         </div>
    <i class="fas fa-arrow-left test-link-arrow"></i>
                     </a>
-              <a href="/Account/Login" class="test-link">
+              <a href="@Url.Action("Login", "Account")" class="test-link">
 <div class="test-link-content">
         <div class="test-link-icon">2</div>
       <span class="test-link-text">تسجيل الدخول</span>
            </div>
        <i class="fas fa-arrow-left test-link-arrow"></i>
    </a>
-        <a href="/Profiles/CompleteCustomerProfile" class="test-link">
+        <a href="@Url.Action("CompleteCustomerProfile", "Profiles")" class="test-link">
         <div class="test-link-content">
         <div class="test-link-icon">3</div>
     <span class="test-link-text">إكمال الملف الشخصي</span>
 </div>
                <i class="fas fa-arrow-left test-link-arrow"></i>
          </a>
-         <a href="/Tailors" class="test-link">
+         <a href="@Url.Action("Index", "Tailors")" class="test-link">
      <div class="test-link-content">
         <div class="test-link-icon">4</div>
        <span class="test-link-text">تصفح الخياطين</span>
   </div>
         <i class="fas fa-arrow-left test-link-arrow"></i>
  </a>
-           <a href="/Orders/CreateOrder" class="test-link">
+           <a href="@Url.Action("CreateOrder", "Orders")" class="test-link">
     <div class="test-link-content">
         <div class="test-link-icon">5</div>
   <span class="test-link-text">إنشاء طلب</span>
           </div>
             <i class="fas fa-arrow-left test-link-arrow"></i>
   </a>
-   <a href="/Orders/MyOrders" class="test-link">
+   <a href="@Url.Action("MyOrders", "Orders")" class="test-link">
         <div class="test-link-content">
 <div class="test-link-icon">6</div>
             <span class="test-link-text">طلباتي</span>
@@ -333,47 +333,47 @@ border: none;
              </div>
       </div>
  <div class="test-links">
-   <a href="/Account/Register" class="test-link">
+   <a href="@Url.Action("Register", "Account")" class="test-link">
   <div class="test-link-content">
      <div class="test-link-icon">1</div>
    <span class="test-link-text">التسجيل كخياط</span>
        </div>
        <i class="fas fa-arrow-left test-link-arrow"></i>
         </a>
-         <a href="/Account/CompleteTailorProfile" class="test-link">
+         <a href="@Url.Action("CompleteTailorProfile", "Account")" class="test-link">
          <div class="test-link-content">
              <div class="test-link-icon">2</div>
    <span class="test-link-text">إكمال ملف الخياط</span>
         </div>
          <i class="fas fa-arrow-left test-link-arrow"></i>
    </a>
-    <a href="/Account/ProvideTailorEvidence" class="test-link">
+    <a href="@Url.Action("ProvideTailorEvidence", "Account")" class="test-link">
               <div class="test-link-content">
             <div class="test-link-icon">3</div>
               <span class="test-link-text">تقديم وثائق التحقق</span>
           </div>
                 <i class="fas fa-arrow-left test-link-arrow"></i>
                   </a>
-        <a href="/Orders/TailorOrders" class="test-link">
+        <a href="@Url.Action("TailorOrders", "Orders")" class="test-link">
     <div class="test-link-content">
           <div class="test-link-icon">4</div>
         <span class="test-link-text">الطلبات الواردة</span>
     </div>
             <i class="fas fa-arrow-left test-link-arrow"></i>
          </a>
-     <a href="/Profiles/TailorProfile" class="test-link">
+     <a href="@Url.Action("TailorProfile", "Profiles")" class="test-link">
    <div class="test-link-content">
             <div class="test-link-icon">5</div>
      <span class="test-link-text">إدارة الملف الشخصي</span>
 </div>
     <i class="fas fa-arrow-left test-link-arrow"></i>
         </a>
-           <a href="/Tailor/manage/services" class="test-link">
+           <a href="@Url.Action("ManageServices", "TailorManagement")" class="test-link">
    <div class="test-link-content">
        <div class="test-link-icon">6</div>
        <span class="test-link-text">إدارة الخدمات</span>
       </div>
-   <i class="fas fa-arrow-left test_link-arrow"></i>
+   <i class="fas fa-arrow-left test-link-arrow"></i>
       </a>
         </div>
    </div>
@@ -392,28 +392,28 @@ border: none;
       </div>
       </div>
           <div class="test-links">
-     <a href="/Account/Login" class="test-link">
+     <a href="@Url.Action("Login", "Account")" class="test-link">
      <div class="test-link-content">
              <div class="test-link-icon">1</div>
    <span class="test-link-text">تسجيل دخول المشرف</span>
    </div>
      <i class="fas fa-arrow-left test-link-arrow"></i>
       </a>
-                    <a href="/Admin" class="test-link">
+                    <a href="@Url.Action("Index", "AdminDashboard")" class="test-link">
       <div class="test-link-content">
    <div class="test-link-icon">2</div>
          <span class="test-link-text">لوحة التحكم</span>
      </div>
   <i class="fas fa-arrow-left test-link-arrow"></i>
      </a>
-            <a href="/Admin/TailorVerification" class="test-link">
+            <a href="@Url.Action("TailorVerification", "AdminDashboard")" class="test-link">
               <div class="test-link-content">
       <div class="test-link-icon">3</div>
           <span class="test-link-text">التحقق من الخياطين</span>
         </div>
     <i class="fas fa-arrow-left test-link-arrow"></i>
               </a>
-         <a href="/Admin/Users" class="test-link">
+         <a href="@Url.Action("Users", "AdminDashboard")" class="test-link">
        <div class="test-link-content">
     <div class="test-link-icon">4</div>
       <span class="test-link-text">إدارة المستخدمين</span>
@@ -428,27 +428,27 @@ border: none;
         <div class="quick-actions">
       <h3><i class="fas fa-bolt"></i> إجراءات سريعة</h3>
     <div class="action-grid">
-     <a href="/" class="action-button">
+     <a href="@Url.Action("Index", "Home")" class="action-button">
    <i class="fas fa-home"></i>
          <span>الصفحة الرئيسية</span>
        </a>
-       <a href="/Testing/NavigationHub" class="action-button">
+       <a href="@Url.Action("NavigationHub", "Testing")" class="action-button">
     <i class="fas fa-map"></i>
    <span>خريطة الصفحات</span>
 </a>
-     <a href="/Testing/TestData" class="action-button">
+     <a href="@Url.Action("TestData", "Testing")" class="action-button">
  <i class="fas fa-database"></i>
      <span>بيانات الاختبار</span>
       </a>
-   <a href="/Testing/StyleGuide" class="action-button">
+   <a href="@Url.Action("StyleGuide", "Testing")" class="action-button">
  <i class="fas fa-palette"></i>
          <span>دليل الأنماط</span>
          </a>
- <a href="/Testing/Report" class="action-button">
+ <a href="@Url.Action("Report", "Testing")" class="action-button">
           <i class="fas fa-file-alt"></i>
     <span>تقرير الاختبار</span>
    </a>
-        <a href="/Testing/CheckPages" class="action-button">
+        <a href="@Url.Action("CheckPages", "Testing")" class="action-button">
 <i class="fas fa-check-circle"></i>
   <span>فحص الصفحات</span>
   </a>
