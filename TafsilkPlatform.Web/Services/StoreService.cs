@@ -1,9 +1,11 @@
+using TafsilkPlatform.Web.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Store;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Store;
 
 namespace TafsilkPlatform.Web.Services
 {
@@ -627,7 +629,7 @@ namespace TafsilkPlatform.Web.Services
                     var paymentStatus = Enums.PaymentStatus.Completed;
 
                     // Create payment record
-                    var payment = new Models.Payment
+                    var payment = new TafsilkPlatform.Models.Models.Payment
                     {
                         PaymentId = Guid.NewGuid(),
                         OrderId = order.OrderId,

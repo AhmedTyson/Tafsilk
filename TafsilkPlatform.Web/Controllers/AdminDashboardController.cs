@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.Web.Controllers.Base;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Admin;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Admin;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -14,10 +14,10 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminDashboardController : BaseController
 {
-  private readonly AppDbContext _db;
+  private readonly ApplicationDbContext _db;
 
     public AdminDashboardController(
-        AppDbContext db,
+        ApplicationDbContext db,
       ILogger<AdminDashboardController> logger) : base(logger)
     {
         _db = db;

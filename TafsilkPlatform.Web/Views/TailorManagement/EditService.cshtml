@@ -3,11 +3,11 @@
 @{
     ViewData["Title"] = "تعديل الخدمة";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var breadcrumbs = new List<(string Text, string Url)>
+    var breadcrumbs = new List<(string Text, string? Url)>
     {
         ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-    ("الخدمات", Url.Action("ManageServices", "TailorManagement")),
-   ("تعديل خدمة", "")
+        ("الخدمات", Url.Action("ManageServices", "TailorManagement")),
+       ("تعديل خدمة", "")
     };
 }
 

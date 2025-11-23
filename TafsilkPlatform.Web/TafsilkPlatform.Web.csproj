@@ -29,12 +29,22 @@
   <ItemGroup>
     <Compile Remove="Views\Reviews\**" />
     <Compile Remove="wwwroot\Tafsilk-v3-\**" />
+    <Compile Remove="TafsilkPlatform.Models\**" />
+    <Compile Remove="TafsilkPlatform.DataAccess\**" />
+    <Compile Remove="TafsilkPlatform.Utility\**" />
     <Content Remove="Views\Reviews\**" />
     <Content Remove="wwwroot\Tafsilk-v3-\**" />
     <EmbeddedResource Remove="Views\Reviews\**" />
     <EmbeddedResource Remove="wwwroot\Tafsilk-v3-\**" />
     <None Remove="Views\Reviews\**" />
     <None Remove="wwwroot\Tafsilk-v3-\**" />
+  </ItemGroup>
+
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="TafsilkPlatform.Models\TafsilkPlatform.Models.csproj" />
+    <ProjectReference Include="TafsilkPlatform.DataAccess\TafsilkPlatform.DataAccess.csproj" />
+    <ProjectReference Include="TafsilkPlatform.Utility\TafsilkPlatform.Utility.csproj" />
   </ItemGroup>
 
   <!-- All dependencies consolidated here -->
@@ -63,9 +73,6 @@
   <!-- Development-only files -->
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Remove="appsettings.Development.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="ViewModels\Reviews\" />
   </ItemGroup>
 
 </Project>

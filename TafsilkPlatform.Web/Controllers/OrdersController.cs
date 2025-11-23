@@ -1,14 +1,16 @@
+using TafsilkPlatform.Web.Interfaces;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services;
-using TafsilkPlatform.Web.ViewModels.Orders;
+using TafsilkPlatform.Models.ViewModels.Orders;
 using Microsoft.AspNetCore.Hosting;
-using TafsilkPlatform.Web.Extensions;
+using TafsilkPlatform.Utility.Extensions;
 using System.IO;
 
 namespace TafsilkPlatform.Web.Controllers;
@@ -21,14 +23,14 @@ namespace TafsilkPlatform.Web.Controllers;
 public class OrdersController : Controller
 {
     
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<OrdersController> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IOrderService _orderService;
     private readonly ImageUploadService _imageUploadService;
     private readonly IWebHostEnvironment _environment;
     public OrdersController(
-        AppDbContext db,
+        ApplicationDbContext db,
         ILogger<OrdersController> logger,
         IFileUploadService fileUploadService,
         IOrderService orderService,

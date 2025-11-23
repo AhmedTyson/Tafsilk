@@ -1,7 +1,8 @@
+using TafsilkPlatform.Web.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Security.Claims;
-using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.DataAccess.Repository;
 
 namespace TafsilkPlatform.Web.Middleware;
 

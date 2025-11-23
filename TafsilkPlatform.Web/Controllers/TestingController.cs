@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -12,10 +12,10 @@ namespace TafsilkPlatform.Web.Controllers;
 [Route("testing")]
 public class TestingController : Controller
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<TestingController> _logger;
 
-    public TestingController(AppDbContext db, ILogger<TestingController> logger)
+    public TestingController(ApplicationDbContext db, ILogger<TestingController> logger)
     {
       _db = db ?? throw new ArgumentNullException(nameof(db));
  _logger = logger ?? throw new ArgumentNullException(nameof(logger));

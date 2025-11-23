@@ -1,4 +1,4 @@
-@model TafsilkPlatform.Web.Models.CustomerProfile
+@model TafsilkPlatform.Models.Models.CustomerProfile
 
 @{
     ViewData["Title"] = "الملف الشخصي";
@@ -410,9 +410,9 @@ justify-content: center;
    </a>
             </h2>
 
- @if (ViewBag.Addresses != null && ((List<TafsilkPlatform.Web.Models.UserAddress>)ViewBag.Addresses).Any())
+ @if (ViewBag.Addresses != null && ((List<TafsilkPlatform.Models.Models.UserAddress>)ViewBag.Addresses).Any())
       {
-       @foreach (var address in (List<TafsilkPlatform.Web.Models.UserAddress>)ViewBag.Addresses)
+       @foreach (var address in (List<TafsilkPlatform.Models.Models.UserAddress>)ViewBag.Addresses)
    {
         <div class="address-card @(address.IsDefault ? "default" : "")">
      <div class="address-header">

@@ -1,5 +1,5 @@
 using FluentValidation.Results;
-using TafsilkPlatform.Web.ViewModels;
+using TafsilkPlatform.Models.ViewModels;
 
 namespace TafsilkPlatform.Web.Services
 {

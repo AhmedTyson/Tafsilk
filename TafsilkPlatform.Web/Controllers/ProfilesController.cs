@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services;
-using TafsilkPlatform.Web.ViewModels.Tailor;
+using TafsilkPlatform.Models.ViewModels.Tailor;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -16,13 +16,13 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize]
 public class ProfilesController : Controller
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<ProfilesController> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IProfileCompletionService _profileCompletionService;
 
     public ProfilesController(
-      AppDbContext db,
+      ApplicationDbContext db,
         ILogger<ProfilesController> logger,
    IFileUploadService fileUploadService,
         IProfileCompletionService profileCompletionService)
@@ -56,7 +56,7 @@ public class ProfilesController : Controller
 return RedirectToAction(nameof(CustomerProfile));
      }
 
-        var model = new TafsilkPlatform.Web.ViewModels.CompleteCustomerProfileRequest
+        var model = new TafsilkPlatform.Models.ViewModels.CompleteCustomerProfileRequest
          {
     // Pre-fill from user data if available
        };
@@ -78,7 +78,7 @@ return RedirectToAction(nameof(CustomerProfile));
     [HttpPost("complete-customer")]
     [ValidateAntiForgeryToken]
  [Authorize(Roles = "Customer")]
-    public async Task<IActionResult> CompleteCustomerProfile(TafsilkPlatform.Web.ViewModels.CompleteCustomerProfileRequest model)
+    public async Task<IActionResult> CompleteCustomerProfile(TafsilkPlatform.Models.ViewModels.CompleteCustomerProfileRequest model)
     {
  try
  {

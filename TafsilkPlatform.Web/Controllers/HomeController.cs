@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Controllers;
 

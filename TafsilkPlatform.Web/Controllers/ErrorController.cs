@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Controllers;
 

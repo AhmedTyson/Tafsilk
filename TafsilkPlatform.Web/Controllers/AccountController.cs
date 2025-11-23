@@ -1,14 +1,16 @@
+using TafsilkPlatform.Web.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.Security;
+using TafsilkPlatform.DataAccess.Repository;
+
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Utility.Security;
 using TafsilkPlatform.Web.Services;
-using TafsilkPlatform.Web.ViewModels;
+using TafsilkPlatform.Models.ViewModels;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -18,14 +20,14 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize]
 public class AccountController(
     IAuthService auth,
-    IUserRepository userRepository,
+    TafsilkPlatform.DataAccess.Repository.IUserRepository userRepository,
     IUnitOfWork unitOfWork,
     IFileUploadService fileUploadService,
     ILogger<AccountController> logger,
     IDateTimeService dateTime) : Controller
 {
     private readonly IAuthService _auth = auth;
-    private readonly IUserRepository _userRepository = userRepository;
+    private readonly TafsilkPlatform.DataAccess.Repository.IUserRepository _userRepository = userRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly IFileUploadService _fileUploadService = fileUploadService;
     private readonly ILogger<AccountController> _logger = logger;

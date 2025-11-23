@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels;
 
 namespace TafsilkPlatform.Web.Interfaces
 {

@@ -1,5 +1,5 @@
-﻿using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Orders;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Orders;
 
 namespace TafsilkPlatform.Web.Interfaces
 {

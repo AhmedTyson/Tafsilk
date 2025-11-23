@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
 using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Orders;
+
+using Microsoft.EntityFrameworkCore;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Orders;
 using TafsilkPlatform.Web.Services.Base;
 using TafsilkPlatform.Web.Common;
 
@@ -10,11 +12,11 @@ namespace TafsilkPlatform.Web.Services
 {
     public class OrderService : BaseService, IOrderService
     {
-        private readonly AppDbContext _db;
+        private readonly ApplicationDbContext _db;
         private readonly IUnitOfWork _unitOfWork;
 
         public OrderService(
-            AppDbContext db,
+            ApplicationDbContext db,
             IUnitOfWork unitOfWork,
             ILogger<OrderService> logger) : base(logger)
         {

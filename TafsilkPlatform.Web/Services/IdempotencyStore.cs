@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -68,7 +68,7 @@ Task<(bool Found, object? Result, int? StatusCode)> TryGetResponseAsync(string k
 /// </summary>
 public class EfCoreIdempotencyStore : IIdempotencyStore
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<EfCoreIdempotencyStore> _logger;
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -77,7 +77,7 @@ public class EfCoreIdempotencyStore : IIdempotencyStore
     };
 
     public EfCoreIdempotencyStore(
-        AppDbContext db,
+        ApplicationDbContext db,
    ILogger<EfCoreIdempotencyStore> logger)
     {
  _db = db ?? throw new ArgumentNullException(nameof(db));

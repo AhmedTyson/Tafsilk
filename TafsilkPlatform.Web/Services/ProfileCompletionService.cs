@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
+using TafsilkPlatform.DataAccess.Data;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -41,9 +41,9 @@ public class ProfileCompletionItem
 /// </summary>
 public class ProfileCompletionService : IProfileCompletionService
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
 
-    public ProfileCompletionService(AppDbContext db)
+    public ProfileCompletionService(ApplicationDbContext db)
     {
         _db = db;
     }

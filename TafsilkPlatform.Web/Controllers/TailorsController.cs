@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -12,10 +12,10 @@ namespace TafsilkPlatform.Web.Controllers;
 [Route("tailors")]
 public class TailorsController : Controller
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<TailorsController> _logger;
 
-public TailorsController(AppDbContext db, ILogger<TailorsController> logger)
+public TailorsController(ApplicationDbContext db, ILogger<TailorsController> logger)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));

@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "إضافة منتج جديد";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var breadcrumbs = new List<(string Text, string Url)>
+    var breadcrumbs = new List<(string Text, string? Url)>
     {
         ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
         ("إدارة المنتجات", Url.Action("ManageProducts", "TailorManagement")),
@@ -225,6 +225,7 @@
                                 <span asp-validation-for="PrimaryImage" class="text-danger" data-valmsg-for="PrimaryImage"></span>
                                 <small class="text-muted d-block mt-1">الصورة الرئيسية للمنتج (مطلوبة)</small>
                                 
+
                                 <div id="primaryImagePreview" class="mt-3" style="display: none;">
                                     <img id="primaryImagePreviewImg" src="" class="img-fluid rounded" style="max-height: 200px;" />
                                 </div>

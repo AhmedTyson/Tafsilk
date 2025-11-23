@@ -1,0 +1,135 @@
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.EditServiceViewModel
+
+@{
+    ViewData["Title"] = "تعديل الخدمة";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var breadcrumbs = new List<(string Text, string? Url)>
+    {
+        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
+        ("الخدمات", Url.Action("ManageServices", "TailorManagement")),
+        ("تعديل خدمة", "")
+    };
+}
+
+@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
+
+<div class="container tailor-management-container" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+   <!-- Page Header -->
+<div class="page-header">
+ <div class="d-flex justify-content-between align-items-center">
+         <div>
+       <h1 class="page-title">
+   <i class="fas fa-edit"></i>
+     تعديل الخدمة
+              </h1>
+              <p class="page-description">تحديث معلومات وتفاصيل الخدمة</p>
+         </div>
+    <a asp-action="ManageServices" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-right"></i>
+              رجوع
+  </a>
+        </div>
+   </div>
+
+<!-- Form Card -->
+   <div class="card">
+            <div class="card-body">
+      <form asp-action="EditService" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+     <input type="hidden" asp-for="Id" />
+       <input type="hidden" asp-for="TailorId" />
+   
+           <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+              <!-- Service Name -->
+          <div class="mb-3">
+   <label asp-for="ServiceName" class="form-label">
+<i class="fas fa-tag text-primary"></i>
+   اسم الخدمة
+       <span class="text-danger">*</span>
+      </label>
+               <input asp-for="ServiceName" class="form-control">
+      <span asp-validation-for="ServiceName" class="invalid-feedback"></span>
+        </div>
+
+    <!-- Description -->
+ <div class="mb-3">
+               <label asp-for="Description" class="form-label">
+  <i class="fas fa-align-right text-primary"></i>
+    وصف الخدمة
+   <span class="text-danger">*</span>
+ </label>
+            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+     <span asp-validation-for="Description" class="invalid-feedback"></span>
+    <div class="form-text">
+  <i class="fas fa-lightbulb text-primary"></i>
+      اكتب وصفاً واضحاً ومفصلاً للخدمة
+        </div>
+    </div>
+
+               <!-- Pricing & Duration Grid -->
+     <div class="row g-3 mb-4">
+           <!-- Base Price -->
+             <div class="col-md-6">
+                <label asp-for="BasePrice" class="form-label">
+    <i class="fas fa-dollar-sign text-success"></i>
+        السعر الأساسي
+      <span class="text-danger">*</span>
+     </label>
+ <div class="input-group">
+ <input asp-for="BasePrice" type="number" class="form-control" step="0.01" min="1">
+   <span class="input-group-text">ريال</span>
+         </div>
+<span asp-validation-for="BasePrice" class="invalid-feedback"></span>
+                 </div>
+
+        <!-- Estimated Duration -->
+        <div class="col-md-6">
+    <label asp-for="EstimatedDuration" class="form-label">
+        <i class="fas fa-clock text-warning"></i>
+              المدة التقديرية
+ <span class="text-danger">*</span>
+   </label>
+  <div class="input-group">
+   <input asp-for="EstimatedDuration" type="number" class="form-control" min="1" max="365">
+         <span class="input-group-text">يوم</span>
+   </div>
+    <span asp-validation-for="EstimatedDuration" class="invalid-feedback"></span>
+          </div>
+     </div>
+
+        <!-- Info Box -->
+     <div class="alert alert-info d-flex align-items-start gap-3 mb-4">
+      <i class="fas fa-info-circle fa-2x"></i>
+           <div>
+          <strong>نصيحة:</strong>
+            <p class="mb-0 mt-2">
+     تأكد من تحديث السعر والمدة بناءً على خبرتك الحالية. 
+       التقديرات الدقيقة تساعد في بناء ثقة العملاء.
+   </p>
+      </div>
+        </div>
+
+    <!-- Action Buttons -->
+      <div class="d-flex justify-content-between gap-2">
+  <button type="submit" class="btn btn-primary btn-lg">
+     <i class="fas fa-save"></i>
+    حفظ التعديلات
+    </button>
+                   <a asp-action="ManageServices" class="btn btn-outline-secondary btn-lg">
+               <i class="fas fa-times"></i>
+ إلغاء
+      </a>
+      </div>
+               </form>
+             </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

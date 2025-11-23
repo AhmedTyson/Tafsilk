@@ -1,12 +1,15 @@
+using TafsilkPlatform.Web.Interfaces;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.Security;
-using TafsilkPlatform.Web.ViewModels;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Utility.Security;
+using TafsilkPlatform.Models.ViewModels;
+using TafsilkPlatform.Utility;
 
 namespace TafsilkPlatform.Web.Services
 {
@@ -19,10 +22,10 @@ namespace TafsilkPlatform.Web.Services
     /// </summary>
     public class AuthService : IAuthService
     {
-        private readonly AppDbContext _db;
+        private readonly ApplicationDbContext _db;
         private readonly ILogger<AuthService> _logger;
         private readonly IDateTimeService _dateTime;
-        private readonly IEmailService _emailService;
+        private readonly TafsilkPlatform.Utility.IEmailService _emailService;
         private readonly IMemoryCache _cache;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
@@ -30,23 +33,23 @@ namespace TafsilkPlatform.Web.Services
         private static readonly string[] WeakPasswords = { "123456", "password", "qwerty", "111111", "123123" };
 
         // Compiled query for login validation - only loads what we need
-        private static readonly Func<AppDbContext, string, Task<User?>> _getUserForLoginQuery =
-       EF.CompileAsyncQuery((AppDbContext db, string email) =>
+        private static readonly Func<ApplicationDbContext, string, Task<User?>> _getUserForLoginQuery =
+       EF.CompileAsyncQuery((ApplicationDbContext db, string email) =>
  db.Users
      .AsNoTracking()
               .Include(u => u.Role)
                     .FirstOrDefault(u => u.Email == email));
 
         // Compiled query for checking tailor profile existence
-        private static readonly Func<AppDbContext, Guid, Task<bool>> _hasTailorProfileQuery =
-            EF.CompileAsyncQuery((AppDbContext db, Guid userId) =>
+        private static readonly Func<ApplicationDbContext, Guid, Task<bool>> _hasTailorProfileQuery =
+            EF.CompileAsyncQuery((ApplicationDbContext db, Guid userId) =>
               db.TailorProfiles.Any(t => t.UserId == userId));
 
         public AuthService(
-         AppDbContext db,
+         ApplicationDbContext db,
  ILogger<AuthService> logger,
    IDateTimeService dateTime,
-   IEmailService emailService,
+        TafsilkPlatform.Utility.IEmailService emailService,
     IMemoryCache cache,
     IServiceScopeFactory serviceScopeFactory)
         {
@@ -302,7 +305,7 @@ namespace TafsilkPlatform.Web.Services
                     try
                     {
                         using var scope = _serviceScopeFactory.CreateScope();
-                        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                         await db.Users
                             .Where(u => u.Id == user.Id)
                             .ExecuteUpdateAsync(setters => setters

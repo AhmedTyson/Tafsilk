@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Data.Seed;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Data.Seed;
 
 namespace TafsilkPlatform.Web.Controllers
 {
@@ -12,12 +12,12 @@ namespace TafsilkPlatform.Web.Controllers
     [Route("api/[controller]")]
     public class DevDataController : ControllerBase
   {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
         private readonly ILogger<DevDataController> _logger;
 
         public DevDataController(
-        AppDbContext context,
+        ApplicationDbContext context,
             IWebHostEnvironment env,
             ILogger<DevDataController> logger)
         {

@@ -1,4 +1,5 @@
-@model TafsilkPlatform.Web.ViewModels.Orders.OrderDetailsViewModel
+@using TafsilkPlatform.Models.Models
+@model TafsilkPlatform.Models.ViewModels.Orders.OrderDetailsViewModel
 @{
     ViewData["Title"] = $"تفاصيل الطلب - {Model.OrderNumber}";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -34,11 +35,11 @@
            @{
               var statusClass = Model.Status switch
       {
-  OrderStatus.Pending => "bg-warning",
-      OrderStatus.Processing => "bg-info",
-  OrderStatus.Shipped => "bg-primary",
-      OrderStatus.Delivered => "bg-success",
-        OrderStatus.Cancelled => "bg-danger",
+  TafsilkPlatform.Models.Models.OrderStatus.Pending => "bg-warning",
+      TafsilkPlatform.Models.Models.OrderStatus.Processing => "bg-info",
+  TafsilkPlatform.Models.Models.OrderStatus.Shipped => "bg-primary",
+      TafsilkPlatform.Models.Models.OrderStatus.Delivered => "bg-success",
+        TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "bg-danger",
      _ => "bg-secondary"
        };
        }
@@ -67,14 +68,14 @@
    @{
                var statuses = new List<(OrderStatus Status, string Display, string Icon)>
     {
-    (OrderStatus.Pending, "قيد الانتظار", "fa-clock"),
-     (OrderStatus.Processing, "قيد التنفيذ", "fa-cog"),
-    (OrderStatus.Shipped, "قيد الشحن", "fa-truck"),
-           (OrderStatus.Delivered, "تم التسليم", "fa-check-circle")
+    (TafsilkPlatform.Models.Models.OrderStatus.Pending, "قيد الانتظار", "fa-clock"),
+     (TafsilkPlatform.Models.Models.OrderStatus.Processing, "قيد التنفيذ", "fa-cog"),
+    (TafsilkPlatform.Models.Models.OrderStatus.Shipped, "قيد الشحن", "fa-truck"),
+           (TafsilkPlatform.Models.Models.OrderStatus.Delivered, "تم التسليم", "fa-check-circle")
    };
 
        var currentStatusIndex = statuses.FindIndex(s => s.Status == Model.Status);
-         var isCancelled = Model.Status == OrderStatus.Cancelled;
+         var isCancelled = Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Cancelled;
          }
 
      <div class="timeline">
@@ -216,7 +217,7 @@
  }
 
             <!-- Tailor Actions (if user is tailor) -->
-            @if (Model.IsTailor && Model.Status != OrderStatus.Delivered && Model.Status != OrderStatus.Cancelled)
+            @if (Model.IsTailor && Model.Status != TafsilkPlatform.Models.Models.OrderStatus.Delivered && Model.Status != TafsilkPlatform.Models.Models.OrderStatus.Cancelled)
 {
              <div class="card shadow-sm mb-4 border-primary">
         <div class="card-header bg-primary text-white">
@@ -234,19 +235,19 @@
     <label class="form-label fw-bold">تحديث حالة الطلب</label>
               <select name="newStatus" class="form-select" required>
      <option value="">-- اختر الحالة الجديدة --</option>
-     @if (Model.Status == OrderStatus.Pending)
+     @if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending)
      {
- <option value="@((int)OrderStatus.Processing)">بدء التنفيذ</option>
-   <option value="@((int)OrderStatus.Cancelled)">إلغاء الطلب</option>
+ <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Processing)">بدء التنفيذ</option>
+   <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">إلغاء الطلب</option>
           }
-    else if (Model.Status == OrderStatus.Processing)
+    else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
   {
-       <option value="@((int)OrderStatus.Shipped)">جاهز للشحن</option>
-          <option value="@((int)OrderStatus.Cancelled)">إلغاء الطلب</option>
+       <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Shipped)">جاهز للشحن</option>
+          <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">إلغاء الطلب</option>
               }
-     else if (Model.Status == OrderStatus.Shipped)
+     else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Shipped)
     {
-        <option value="@((int)OrderStatus.Delivered)">تم التسليم</option>
+        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Delivered)">تم التسليم</option>
     }
         </select>
      </div>
@@ -272,7 +273,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Confirmed)
+                            @if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending || Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Confirmed)
                             {
                                 <form action="/orders/@Model.OrderId/cancel" method="post" 
                                       onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
@@ -386,7 +387,7 @@
     تم دفع @Model.PaymentAmount.ToString("C") EGP
    </p>
       }
-   else if (Model.IsCustomer && Model.Status == OrderStatus.Processing)
+   else if (Model.IsCustomer && Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
               {
              <div class="d-grid">
                 <a asp-action="ProcessPayment" asp-controller="Payments" 

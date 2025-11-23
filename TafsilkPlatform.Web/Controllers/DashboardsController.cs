@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Extensions;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Dashboard;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Utility.Extensions;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Dashboard;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -13,12 +13,12 @@ namespace TafsilkPlatform.Web.Controllers;
 public class DashboardsController : Controller
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AppDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly ILogger<DashboardsController> _logger;
 
     public DashboardsController(
         IUnitOfWork unitOfWork,
-        AppDbContext context,
+        ApplicationDbContext context,
         ILogger<DashboardsController> logger)
     {
         _unitOfWork = unitOfWork;
@@ -41,7 +41,7 @@ public class DashboardsController : Controller
     [Authorize(Roles = "Tailor,Admin")]
     public IActionResult TailorAdd()
     {
-        return RedirectToAction("AddProduct", "TailorManagement");
+        return RedirectToAction("AddProduct", "TailorManagement", new { area = "Tailor" });
     }
 
     [Authorize(Roles = "Tailor,Admin")]

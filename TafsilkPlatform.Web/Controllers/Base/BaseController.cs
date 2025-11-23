@@ -318,7 +318,7 @@ string? successMessage = null)
 
         return roleName?.ToLowerInvariant() switch
         {
-            "admin" => RedirectToAction("Index", "AdminDashboard"),
+            "admin" => RedirectToAction("Index", "AdminDashboard", new { area = "Admin" }),
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
             "corporate" => RedirectToAction("Corporate", "Dashboards"),
             "customer" => RedirectToAction("Customer", "Dashboards"),

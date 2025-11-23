@@ -70,7 +70,7 @@ public class PaymentProcessingResult
     public bool RequiresAction { get; set; } // For Stripe 3D Secure
     public string? ClientSecret { get; set; } // For Stripe confirmation
     public string? RedirectUrl { get; set; } // For 3D Secure redirect
-    public Models.Enums.PaymentStatus Status { get; set; }
+    public TafsilkPlatform.Models.Models.Enums.PaymentStatus Status { get; set; }
     public string? ProviderTransactionId { get; set; } // Stripe PaymentIntent ID
     public string Message { get; set; } = string.Empty;
 }
@@ -95,7 +95,7 @@ public class RefundResult
     public Guid RefundId { get; set; }
     public decimal Amount { get; set; }
     public string? ProviderRefundId { get; set; } // Stripe refund ID
-    public Models.Enums.RefundStatus Status { get; set; }
+    public TafsilkPlatform.Models.Models.Enums.RefundStatus Status { get; set; }
     public string Message { get; set; } = string.Empty;
 }
 
@@ -105,7 +105,7 @@ public class RefundResult
 public class PaymentStatusResult
 {
     public Guid PaymentId { get; set; }
-    public Models.Enums.PaymentStatus Status { get; set; }
+    public TafsilkPlatform.Models.Models.Enums.PaymentStatus Status { get; set; }
     public decimal Amount { get; set; }
     public decimal? RefundedAmount { get; set; }
     public string? ProviderTransactionId { get; set; }

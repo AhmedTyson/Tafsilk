@@ -1,5 +1,5 @@
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services.Base;
 using TafsilkPlatform.Web.Common;
 

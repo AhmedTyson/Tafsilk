@@ -1,6 +1,6 @@
 using System.Security.Claims;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Services;
 

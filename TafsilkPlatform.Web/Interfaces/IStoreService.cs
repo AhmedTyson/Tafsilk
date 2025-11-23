@@ -1,4 +1,4 @@
-using TafsilkPlatform.Web.ViewModels.Store;
+using TafsilkPlatform.Models.ViewModels.Store;
 
 namespace TafsilkPlatform.Web.Interfaces
 {

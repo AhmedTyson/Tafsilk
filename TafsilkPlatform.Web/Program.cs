@@ -12,14 +12,14 @@ using System.Text;
 using System.IO.Compression;
 using Microsoft.AspNetCore.ResponseCompression;
 using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Extensions;
-using TafsilkPlatform.Web.Helpers; // Simple helper methods for easy maintenance
-using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Utility.Extensions;
+using TafsilkPlatform.Utility.Helpers; // Simple helper methods for easy maintenance
 using TafsilkPlatform.Web.Middleware;
-using TafsilkPlatform.Web.Repositories;
-using TafsilkPlatform.Web.Security;
+using TafsilkPlatform.Utility.Security;
 using TafsilkPlatform.Web.Services;
+using TafsilkPlatform.Utility;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 
@@ -42,7 +42,7 @@ try
     // ✅ SIMPLE CONFIGURATION VALIDATION - Clear error messages if something is missing
     try
     {
-        TafsilkPlatform.Web.Helpers.ConfigurationHelper.ValidateRequiredConfiguration(
+        TafsilkPlatform.Utility.Helpers.ConfigurationHelper.ValidateRequiredConfiguration(
             builder.Configuration, 
             LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup"));
     }
@@ -292,13 +292,13 @@ options.AppSecret = facebookAppSecret;
 }
 
 // Database context
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
   options.UseSqlServer(
    builder.Configuration.GetConnectionString("DefaultConnection"),
    sqlOptions =>
       {
-       sqlOptions.MigrationsAssembly("TafsilkPlatform.Web");
+       sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
        sqlOptions.EnableRetryOnFailure(
    maxRetryCount: 3,
      maxRetryDelay: TimeSpan.FromSeconds(5),
@@ -313,31 +313,31 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 
 // Register repositories - Only keep what's actually used
-builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ITailorRepository, TailorRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
-builder.Services.AddScoped<IPortfolioRepository, PortfolioRepository>();
-builder.Services.AddScoped<ITailorServiceRepository, TailorServiceRepository>();
-builder.Services.AddScoped<IAddressRepository, AddressRepository>();
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped(typeof(TafsilkPlatform.DataAccess.Repository.IRepository<>), typeof(TafsilkPlatform.DataAccess.Repository.EfRepository<>));
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IUserRepository, TafsilkPlatform.DataAccess.Repository.UserRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.ICustomerRepository, TafsilkPlatform.DataAccess.Repository.CustomerRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.ITailorRepository, TafsilkPlatform.DataAccess.Repository.TailorRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IOrderRepository, TafsilkPlatform.DataAccess.Repository.OrderRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IOrderItemRepository, TafsilkPlatform.DataAccess.Repository.OrderItemRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IPaymentRepository, TafsilkPlatform.DataAccess.Repository.PaymentRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IPortfolioRepository, TafsilkPlatform.DataAccess.Repository.PortfolioRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.ITailorServiceRepository, TafsilkPlatform.DataAccess.Repository.TailorServiceRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IAddressRepository, TafsilkPlatform.DataAccess.Repository.AddressRepository>();
+builder.Services.AddScoped<TafsilkPlatform.Web.Interfaces.IOrderService, OrderService>();
 // ✅ ECOMMERCE: Register product and cart repositories
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
-builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IProductRepository, TafsilkPlatform.DataAccess.Repository.ProductRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IShoppingCartRepository, TafsilkPlatform.DataAccess.Repository.ShoppingCartRepository>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.ICartItemRepository, TafsilkPlatform.DataAccess.Repository.CartItemRepository>();
 
 // Register Unit of Work
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<TafsilkPlatform.DataAccess.Repository.IUnitOfWork, TafsilkPlatform.DataAccess.Repository.UnitOfWork>();
 
 // Register services - Only essential ones
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<TafsilkPlatform.Web.Interfaces.IAuthService, AuthService>();
 builder.Services.AddScoped<IUserProfileHelper, UserProfileHelper>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 builder.Services.AddScoped<ImageUploadService>(); // Best practices image upload service
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<TafsilkPlatform.Utility.IEmailService, TafsilkPlatform.Utility.EmailService>();
 builder.Services.AddScoped<IProfileCompletionService, ProfileCompletionService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IValidationService, ValidationService>();
@@ -355,7 +355,7 @@ builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 builder.Services.AddGlobalExceptionHandler();
 
 // ✅ ECOMMERCE: Register store service
-builder.Services.AddScoped<IStoreService, StoreService>();
+builder.Services.AddScoped<TafsilkPlatform.Web.Interfaces.IStoreService, StoreService>();
 // Register product and portfolio management services
 builder.Services.AddScoped<TafsilkPlatform.Web.Services.IProductManagementService, TafsilkPlatform.Web.Services.ProductManagementService>();
 builder.Services.AddScoped<TafsilkPlatform.Web.Services.IPortfolioService, TafsilkPlatform.Web.Services.PortfolioService>();
@@ -367,11 +367,11 @@ builder.Services.AddScoped<TafsilkPlatform.Web.Services.Payment.IPaymentProcesso
 builder.Services.AddSingleton<IDateTimeService, DateTimeService>();
 
 // Register Authorization Handlers
-builder.Services.AddSingleton<IAuthorizationHandler, VerifiedTailorHandler>();
-builder.Services.AddSingleton<IAuthorizationHandler, ActiveUserHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, TafsilkPlatform.Web.Security.VerifiedTailorHandler>();
+builder.Services.AddSingleton<IAuthorizationHandler, TafsilkPlatform.Web.Security.ActiveUserHandler>();
 
 // Register TokenService
-builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddSingleton<TafsilkPlatform.Web.Security.ITokenService, TafsilkPlatform.Web.Security.TokenService>();
 
 // ✅ RESPONSE COMPRESSION (if enabled in config)
 var enableResponseCompression = builder.Configuration.GetValue<bool>("Performance:EnableResponseCompression", true);
@@ -429,7 +429,7 @@ builder.Services.AddCors(options =>
 
 // ✅ HEALTH CHECKS
 builder.Services.AddHealthChecks()
-    .AddDbContextCheck<AppDbContext>(
+    .AddDbContextCheck<ApplicationDbContext>(
         name: "database",
         failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
         tags: new[] { "db", "sql", "ready" })
@@ -507,10 +507,11 @@ app.Use(async (context, next) =>
 });
 
 // Initialize database in development
-if (app.Environment.IsDevelopment())
-{
-    await app.Services.InitializeDatabaseAsync(builder.Configuration);
-}
+// Note: Database seeding can be done via migrations or a separate initialization service
+// if (app.Environment.IsDevelopment())
+// {
+//     // Database initialization logic can be added here if needed
+// }
 
 // ✅ SECURITY HEADERS MIDDLEWARE (must be early in pipeline)
 app.UseMiddleware<SecurityHeadersMiddleware>();
@@ -612,6 +613,12 @@ app.UseMiddleware<UserStatusMiddleware>();
 // ✅ MAP CONTROLLERS - Required for API endpoint discovery
 app.MapControllers();
 
+// Area routing (must come before default route)
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+// Default route
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -649,7 +656,7 @@ if (app.Environment.IsDevelopment())
     try
     {
         using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var canConnect = await db.Database.CanConnectAsync();
         if (canConnect)
         {

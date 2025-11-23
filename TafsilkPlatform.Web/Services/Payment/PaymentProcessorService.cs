@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.Web.Common;
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Interfaces;
-using TafsilkPlatform.Web.Models;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.DataAccess.Repository;
+using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services.Base;
 
 namespace TafsilkPlatform.Web.Services.Payment;
@@ -14,7 +14,7 @@ namespace TafsilkPlatform.Web.Services.Payment;
 public class PaymentProcessorService : BaseService, IPaymentProcessorService
 {
     private readonly IUnitOfWork _unitOfWork;
-    private readonly AppDbContext _context;
+    private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly bool _stripeEnabled;
     private readonly string? _stripeSecretKey;
@@ -22,7 +22,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
     public PaymentProcessorService(
         IUnitOfWork unitOfWork,
-        AppDbContext context,
+        ApplicationDbContext context,
         IConfiguration configuration,
         ILogger<PaymentProcessorService> logger) : base(logger)
     {
@@ -72,7 +72,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 // Check if order already has a completed payment
                 var existingPayment = await _context.Payment
                     .FirstOrDefaultAsync(p => p.OrderId == request.OrderId && 
-                                            p.PaymentStatus == Enums.PaymentStatus.Completed);
+                                            p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
                 if (existingPayment != null)
                 {
@@ -130,7 +130,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessCashPaymentAsync(Order order, PaymentProcessingRequest request)
     {
-        var payment = new Models.Payment
+        var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
             OrderId = order.OrderId,
@@ -140,9 +140,9 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             TailorId = order.TailorId,
             Tailor = order.Tailor,
             Amount = request.Amount,
-            PaymentType = Enums.PaymentType.Cash,
-            PaymentStatus = Enums.PaymentStatus.Pending, // Will be completed on delivery
-            TransactionType = Enums.TransactionType.Credit,
+            PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Cash,
+            PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending, // Will be completed on delivery
+            TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
             PaidAt = default // Not paid yet
         };
 
@@ -158,7 +158,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         {
             PaymentId = payment.PaymentId,
             RequiresAction = false,
-            Status = Enums.PaymentStatus.Pending,
+            Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
             Message = "Order confirmed. Payment will be collected on delivery."
         };
     }
@@ -168,7 +168,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessPendingCardPaymentAsync(Order order, PaymentProcessingRequest request)
     {
-        var payment = new Models.Payment
+        var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
             OrderId = order.OrderId,
@@ -178,9 +178,9 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             TailorId = order.TailorId,
             Tailor = order.Tailor,
             Amount = request.Amount,
-            PaymentType = Enums.PaymentType.Card,
-            PaymentStatus = Enums.PaymentStatus.Pending,
-            TransactionType = Enums.TransactionType.Credit,
+            PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+            PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
+            TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
             PaidAt = default
         };
 
@@ -190,7 +190,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         {
             PaymentId = payment.PaymentId,
             RequiresAction = true,
-            Status = Enums.PaymentStatus.Pending,
+            Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
             Message = "Payment pending. Card processing will be available soon."
         };
     }
@@ -229,7 +229,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         */
 
         // For now, create a pending payment record
-        var payment = new Models.Payment
+        var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
             OrderId = order.OrderId,
@@ -239,9 +239,9 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             TailorId = order.TailorId,
             Tailor = order.Tailor,
             Amount = request.Amount,
-            PaymentType = Enums.PaymentType.Card,
-            PaymentStatus = Enums.PaymentStatus.Pending,
-            TransactionType = Enums.TransactionType.Credit,
+            PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+            PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
+            TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
             PaidAt = default
         };
 
@@ -252,7 +252,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             PaymentId = payment.PaymentId,
             RequiresAction = true, // Will require 3D Secure when Stripe is integrated
             ClientSecret = null, // Will be: paymentIntent.ClientSecret
-            Status = Enums.PaymentStatus.Pending,
+            Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
             ProviderTransactionId = null, // Will be: paymentIntent.Id
             Message = "Stripe payment processing ready for integration"
         };
@@ -265,7 +265,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             {
                 PaymentId = payment.PaymentId,
                 RequiresAction = false,
-                Status = Enums.PaymentStatus.Completed,
+                Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed,
                 ProviderTransactionId = paymentIntent.Id,
                 Message = "Payment successful"
             },
@@ -275,7 +275,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 RequiresAction = true,
                 ClientSecret = paymentIntent.ClientSecret,
                 RedirectUrl = paymentIntent.NextAction?.RedirectToUrl?.Url,
-                Status = Enums.PaymentStatus.Pending,
+                Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
                 ProviderTransactionId = paymentIntent.Id,
                 Message = "3D Secure authentication required"
             },
@@ -363,7 +363,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
                     if (payment != null)
                     {
-                        payment.PaymentStatus = Enums.PaymentStatus.Completed;
+                        payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
                         payment.PaidAt = DateTimeOffset.UtcNow;
 
                         // Update order status
@@ -405,7 +405,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                     throw new InvalidOperationException("Payment not found");
                 }
 
-                if (payment.PaymentStatus != Enums.PaymentStatus.Completed)
+                if (payment.PaymentStatus != TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed)
                 {
                     throw new InvalidOperationException("Can only refund completed payments");
                 }
@@ -423,11 +423,11 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 // Update payment status
                 if (amount >= payment.Amount)
                 {
-                    payment.PaymentStatus = Enums.PaymentStatus.Refunded;
+                    payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Refunded;
                 }
                 else
                 {
-                    payment.PaymentStatus = Enums.PaymentStatus.PartiallyPaid;
+                    payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.PartiallyPaid;
                 }
 
                 // Update order status
@@ -501,7 +501,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             // Check if order already paid
             var existingPayment = await _context.Payment
                 .FirstOrDefaultAsync(p => p.OrderId == orderId && 
-                                        p.PaymentStatus == Enums.PaymentStatus.Completed);
+                                        p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
             if (existingPayment != null)
             {
@@ -510,14 +510,14 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         }, "ValidatePayment");
     }
 
-    private string GetPaymentStatusMessage(Enums.PaymentStatus status) => status switch
+    private string GetPaymentStatusMessage(TafsilkPlatform.Models.Models.Enums.PaymentStatus status) => status switch
     {
-        Enums.PaymentStatus.Pending => "Payment pending",
-        Enums.PaymentStatus.Completed => "Payment completed successfully",
-        Enums.PaymentStatus.Failed => "Payment failed",
-        Enums.PaymentStatus.Refunded => "Payment refunded",
-        Enums.PaymentStatus.Cancelled => "Payment cancelled",
-        Enums.PaymentStatus.PartiallyPaid => "Payment partially completed",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending => "Payment pending",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed => "Payment completed successfully",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.Failed => "Payment failed",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.Refunded => "Payment refunded",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.Cancelled => "Payment cancelled",
+        TafsilkPlatform.Models.Models.Enums.PaymentStatus.PartiallyPaid => "Payment partially completed",
         _ => "Unknown status"
     };
 }

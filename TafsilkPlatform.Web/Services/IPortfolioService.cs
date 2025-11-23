@@ -1,5 +1,5 @@
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.TailorManagement;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.TailorManagement;
 
 namespace TafsilkPlatform.Web.Services;
 

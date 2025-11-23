@@ -2,9 +2,9 @@
 // TODO: Refactor to use Enums.PaymentType instead of PaymentMethod and align with existing Payment entity
 // See: Docs/BUILD_ERROR_ANALYSIS.md for refactoring checklist
 
-using TafsilkPlatform.Web.Data;
-using TafsilkPlatform.Web.Models;
-using TafsilkPlatform.Web.ViewModels.Payments;
+using TafsilkPlatform.DataAccess.Data;
+using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels.Payments;
 using Microsoft.EntityFrameworkCore;
 
 namespace TafsilkPlatform.Web.Services;
@@ -41,12 +41,12 @@ public interface IPaymentService
 
 public class PaymentService : IPaymentService
 {
-    private readonly AppDbContext _db;
+    private readonly ApplicationDbContext _db;
     private readonly ILogger<PaymentService> _logger;
     private readonly IConfiguration _configuration;
 
     public PaymentService(
-     AppDbContext db,
+     ApplicationDbContext db,
         ILogger<PaymentService> logger,
         IConfiguration configuration)
     {

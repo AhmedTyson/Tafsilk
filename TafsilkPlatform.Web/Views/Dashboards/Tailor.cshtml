@@ -1,4 +1,5 @@
-@model TafsilkPlatform.Web.ViewModels.Dashboard.TailorDashboardViewModel
+@using TafsilkPlatform.Models.Models
+@model TafsilkPlatform.Models.ViewModels.Dashboard.TailorDashboardViewModel
 
 @{
     ViewData["Title"] = "تفصيلك — لوحة تحكم الخياط";
@@ -974,22 +975,22 @@
                                         <td>
                                             @switch (order.Status)
                                             {
-                                                case OrderStatus.Pending:
+                                                case TafsilkPlatform.Models.Models.OrderStatus.Pending:
                                                     <span class="status-badge status-pending">
                                                         <i class="fas fa-clock"></i> في الانتظار
                                                     </span>
                                                     break;
-                                                case OrderStatus.Processing:
+                                                case TafsilkPlatform.Models.Models.OrderStatus.Processing:
                                                     <span class="status-badge status-in-progress">
                                                         <i class="fas fa-sync-alt"></i> قيد التنفيذ
                                                     </span>
                                                     break;
-                                                case OrderStatus.Delivered:
+                                                case TafsilkPlatform.Models.Models.OrderStatus.Delivered:
                                                     <span class="status-badge status-completed">
                                                         <i class="fas fa-check"></i> مكتمل
                                                     </span>
                                                     break;
-                                                case OrderStatus.Cancelled:
+                                                case TafsilkPlatform.Models.Models.OrderStatus.Cancelled:
                                                     <span class="status-badge status-delivered">
                                                         <i class="fas fa-times"></i> ملغي
                                                     </span>
@@ -1036,13 +1037,13 @@
                                     <p class="activity-text">
                                         @switch (order.Status)
                                         {
-                                            case OrderStatus.Pending:
+                                            case TafsilkPlatform.Models.Models.OrderStatus.Pending:
                                                 <text>طلب جديد</text>
                                                 break;
-                                            case OrderStatus.Processing:
+                                            case TafsilkPlatform.Models.Models.OrderStatus.Processing:
                                                 <text>قيد التنفيذ</text>
                                                 break;
-                                            case OrderStatus.Delivered:
+                                            case TafsilkPlatform.Models.Models.OrderStatus.Delivered:
                                                 <text>تم التسليم</text>
                                                 break;
                                         }
