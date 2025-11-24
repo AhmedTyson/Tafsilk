@@ -710,16 +710,16 @@
             <!-- Store Management Section -->
             <div class="nav-section">
                 <div class="nav-section-title">إدارة المتجر</div>
-                <a href="@Url.Action("ManageProducts", "TailorManagement")" class="nav-item">
+                <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts" class="nav-item">
                     <i class="fas fa-box"></i>
                     <span>إدارة المنتجات</span>
                     <span class="nav-badge new">جديد</span>
                 </a>
-                <a href="@Url.Action("ManagePortfolio", "TailorManagement")" class="nav-item">
+                <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManagePortfolio" class="nav-item">
                     <i class="fas fa-images"></i>
                     <span>معرض الأعمال</span>
                 </a>
-                <a href="@Url.Action("ManageServices", "TailorManagement")" class="nav-item">
+                <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageServices" class="nav-item">
                     <i class="fas fa-concierge-bell"></i>
                     <span>الخدمات</span>
                 </a>
@@ -899,7 +899,7 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions">
-            <a href="@Url.Action("AddProduct", "TailorManagement")" class="quick-action-card">
+            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="AddProduct" class="quick-action-card">
                 <div class="quick-action-icon" style="background: linear-gradient(135deg, #27ae60, #2ecc71);">
                     <i class="fas fa-plus-circle"></i>
                 </div>
@@ -908,8 +908,7 @@
                     <p>أضف منتجاتك الجاهزة إلى المتجر</p>
                 </div>
             </a>
-
-            <a href="@Url.Action("ManageProducts", "TailorManagement")" class="quick-action-card">
+            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts" class="quick-action-card">
                 <div class="quick-action-icon" style="background: linear-gradient(135deg, #2c5aa0, #3a6bb8);">
                     <i class="fas fa-box-open"></i>
                 </div>
@@ -918,8 +917,7 @@
                     <p>عرض وتعديل منتجاتك</p>
                 </div>
             </a>
-
-            <a href="@Url.Action("ManagePortfolio", "TailorManagement")" class="quick-action-card">
+            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManagePortfolio" class="quick-action-card">
                 <div class="quick-action-icon" style="background: linear-gradient(135deg, #f39c12, #f1c40f);">
                     <i class="fas fa-images"></i>
                 </div>

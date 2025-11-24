@@ -5,7 +5,7 @@ using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services;
-using TafsilkPlatform.Models.ViewModels.TailorManagement;
+using TafsilkPlatform.Web.ViewModels.TailorManagement;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 
