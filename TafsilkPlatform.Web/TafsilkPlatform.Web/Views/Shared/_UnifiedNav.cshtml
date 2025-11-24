@@ -171,6 +171,27 @@
                </a>
      }
 
+       <!-- Tailor Management Links (for Tailors only) -->
+       @if (userRole == "Tailor")
+       {
+           <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts" class="taf-dropdown-item">
+               <i class="fas fa-box"></i>
+               <span>إدارة المنتجات</span>
+           </a>
+           <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="AddProduct" class="taf-dropdown-item">
+               <i class="fas fa-plus"></i>
+               <span>إضافة منتج</span>
+           </a>
+           <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageServices" class="taf-dropdown-item">
+               <i class="fas fa-concierge-bell"></i>
+               <span>إدارة الخدمات</span>
+           </a>
+           <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManagePortfolio" class="taf-dropdown-item">
+               <i class="fas fa-images"></i>
+               <span>معرض الأعمال</span>
+           </a>
+       }
+
        <!-- Settings -->
                <a href="#" class="taf-dropdown-item">
      <i class="fas fa-cog"></i>
@@ -790,27 +811,5 @@ function updateCartCount() {
         }
     });
 })();
-
-
-// Tailor Management Links (for Tailors only)
-@if (userRole == "Tailor")
-{
-    <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts" class="taf-dropdown-item">
-        <i class="fas fa-box"></i>
-        <span>إدارة المنتجات</span>
-    </a>
-    <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="AddProduct" class="taf-dropdown-item">
-        <i class="fas fa-plus"></i>
-        <span>إضافة منتج</span>
-    </a>
-    <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageServices" class="taf-dropdown-item">
-        <i class="fas fa-concierge-bell"></i>
-        <span>إدارة الخدمات</span>
-    </a>
-    <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManagePortfolio" class="taf-dropdown-item">
-        <i class="fas fa-images"></i>
-        <span>معرض الأعمال</span>
-    </a>
-}
 </script>
 

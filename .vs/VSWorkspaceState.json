@@ -1,7 +1,14 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\TafsilkPlatform.Web",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess\\Data",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess\\Data\\Seed",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\Views",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\Views\\Profiles"
   ],
-  "SelectedNode": "\\TafsilkPlatformSolution.sln",
+  "SelectedNode": "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\Views\\Profiles\\EditTailorProfile.cshtml",
   "PreviewInSolutionExplorer": false
 }
