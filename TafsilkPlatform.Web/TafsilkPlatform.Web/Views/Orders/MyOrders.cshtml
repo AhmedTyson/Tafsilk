@@ -1,0 +1,346 @@
+@model TafsilkPlatform.Models.ViewModels.Orders.CustomerOrdersViewModel
+@using TafsilkPlatform.Models.Models
+@{
+    ViewData["Title"] = "طلباتي";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" dir="rtl">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                    <li class="breadcrumb-item active">طلباتي</li>
+                </ol>
+            </nav>
+            <h2 class="display-5 fw-bold mb-3">
+                <i class="fas fa-shopping-bag text-primary me-2"></i>
+                طلباتي
+            </h2>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">إجمالي الطلبات</h6>
+                            <h2 class="mb-0 fw-bold">@Model.TotalOrders</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-dark mb-1">قيد الانتظار</h6>
+                            <h2 class="mb-0 fw-bold">@Model.PendingOrders</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">قيد التنفيذ</h6>
+                            <h2 class="mb-0 fw-bold">@Model.ProcessingOrders</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="fas fa-cog fa-spin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">مكتمل</h6>
+                            <h2 class="mb-0 fw-bold">@Model.CompletedOrders</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders List -->
+    @if (Model.Orders.Any())
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    قائمة الطلبات
+                </h5>
+                <div>
+                    <a href="/Store" class="btn btn-primary btn-sm me-2">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        متجر المنتجات
+                    </a>
+                    <a asp-action="SearchTailors" asp-controller="Profiles" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-plus me-2"></i>
+                        طلب جديد من خياط
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>رقم الطلب</th>
+                                <th>النوع</th>
+                                <th>التفاصيل</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                                <th>السعر</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model.Orders)
+                            {
+                                var statusClass = order.Status switch
+                                {
+                                    TafsilkPlatform.Models.Models.OrderStatus.Pending => "bg-warning text-dark",
+                                    TafsilkPlatform.Models.Models.OrderStatus.Confirmed => "bg-info text-white",
+                                    TafsilkPlatform.Models.Models.OrderStatus.Processing => "bg-info text-white",
+                                    TafsilkPlatform.Models.Models.OrderStatus.Shipped => "bg-primary text-white",
+                                    TafsilkPlatform.Models.Models.OrderStatus.Delivered => "bg-success text-white",
+                                    TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "bg-danger text-white",
+                                    _ => "bg-secondary text-white"
+                                };
+
+                                var isStoreOrder = order.ServiceType == "StoreOrder";
+                                var statusDisplay = order.StatusDisplay ?? order.Status.ToString();
+
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">#@order.OrderId.ToString().Substring(0, 8).ToUpper()</strong>
+                                    </td>
+                                    <td>
+                                        @if (isStoreOrder)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-shopping-bag me-1"></i>
+                                                طلب متجر
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-cut me-1"></i>
+                                                طلب خياط
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (isStoreOrder)
+                                        {
+                                            <div>
+                                                <div class="fw-bold">
+                                                    <i class="fas fa-store text-muted me-1"></i>
+                                                    طلب من المتجر
+                                                </div>
+                                                <small class="text-muted">منتجات متنوعة</small>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                <div class="fw-bold">@(order.TailorShopName ?? "خياط")</div>
+                                                <small class="text-muted">@(order.TailorName ?? "خياط")</small>
+                                                @if (!string.IsNullOrEmpty(order.ServiceType) && order.ServiceType != "StoreOrder")
+                                                {
+                                                    <div>
+                                                        <span class="badge bg-light text-dark">
+                                                            <i class="fas fa-cut me-1"></i>
+                                                            @order.ServiceType
+                                                        </span>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge @statusClass">
+                                            @statusDisplay
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            <div class="small">@order.CreatedAt.ToString("dd MMM yyyy")</div>
+                                            <div class="text-muted small">@order.CreatedAt.ToString("hh:mm tt")</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">@order.TotalPrice.ToString("N2") ريال</strong>
+                                        @if (order.IsPaid)
+                                        {
+                                            <div>
+                                                <span class="badge bg-success small">
+                                                    <i class="fas fa-check-circle"></i> مدفوع
+                                                </span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div>
+                                                <span class="badge bg-warning small">
+                                                    <i class="fas fa-clock"></i> غير مدفوع
+                                                </span>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/orders/@order.OrderId" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="عرض التفاصيل">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if ((order.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending || order.Status == TafsilkPlatform.Models.Models.OrderStatus.Confirmed) && !isStoreOrder)
+                                            {
+                                                <form action="/orders/@order.OrderId/cancel" method="post" class="d-inline"
+                                                      onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="إلغاء">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-shopping-bag text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+                </div>
+                <h4 class="mb-3">لا توجد طلبات حتى الآن</h4>
+                <p class="text-muted mb-4">ابدأ بتصفح المنتجات أو الخياطين وإنشاء طلبك الأول</p>
+                <div>
+                    <a href="/Store" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-shopping-bag me-2"></i>
+                        تصفح المتجر
+                    </a>
+                    <a asp-action="SearchTailors" asp-controller="Profiles" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>
+                        تصفح الخياطين
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-refresh for orders in progress
+            const hasActiveOrders = @(Model.ProcessingOrders > 0 ? "true" : "false");
+            if (hasActiveOrders) {
+                console.log('Active orders detected - consider adding real-time updates');
+            }
+            
+            // Show success/info messages if redirected from payment success
+            @if (TempData["Success"] != null)
+            {
+                <text>
+                const successMsg = '@Html.Raw(TempData["Success"])';
+                if (successMsg) {
+                    showNotification(successMsg, 'success');
+                }
+                </text>
+            }
+            
+            @if (TempData["Info"] != null)
+            {
+                <text>
+                const infoMsg = '@Html.Raw(TempData["Info"])';
+                if (infoMsg) {
+                    showNotification(infoMsg, 'info');
+                }
+                </text>
+            }
+            
+            // Notification helper function
+            function showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+        });
+    </script>
+}
+
+<style>
+    .table tbody tr {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .btn-group .btn {
+        border-radius: 0;
+    }
+
+    .btn-group .btn:first-child {
+        border-radius: 0.25rem 0 0 0.25rem;
+    }
+
+    .btn-group .btn:last-child {
+        border-radius: 0 0.25rem 0.25rem 0;
+    }
+</style>

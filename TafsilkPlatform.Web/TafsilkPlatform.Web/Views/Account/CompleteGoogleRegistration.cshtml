@@ -1,0 +1,328 @@
+@model TafsilkPlatform.Models.ViewModels.CompleteGoogleRegistrationViewModel
+
+@{
+    ViewData["Title"] = "إكمال التسجيل - تفصيلك";
+    var provider = ViewData["Provider"]?.ToString() ?? "Google";
+    var providerName = provider == "Google" ? "Google" : "Facebook";
+    var providerIcon = provider == "Google" ? "fab fa-google" : "fab fa-facebook-f";
+    var providerColor = provider == "Google" ? "#db4437" : "#1877f2";
+}
+
+@section Styles {
+    <style>
+  .complete-registration-page {
+      background-color: var(--background-gray);
+         min-height: calc(100vh - 200px);
+         padding: var(--spacing-3xl) 0;
+     }
+
+        .registration-container {
+   max-width: 600px;
+      margin: 0 auto;
+        }
+
+  .card {
+       background: var(--background-white);
+   border: 1px solid var(--border-color);
+     border-radius: var(--radius-xl);
+ padding: var(--spacing-2xl);
+     box-shadow: var(--shadow-lg);
+        }
+
+    .page-header {
+   text-align: center;
+  margin-bottom: var(--spacing-2xl);
+   }
+
+  .page-title {
+   font-size: var(--font-size-3xl);
+  font-weight: 700;
+   color: var(--text-primary);
+   margin-bottom: var(--spacing-sm);
+        }
+
+     .page-subtitle {
+  color: var(--text-secondary);
+font-size: var(--font-size-base);
+   }
+
+ .@(provider.ToLower())-info {
+     background: var(--primary-light);
+ padding: var(--spacing-md);
+   border-radius: var(--radius-md);
+ margin-bottom: var(--spacing-xl);
+ display: flex;
+align-items: center;
+      gap: var(--spacing-md);
+        }
+
+  .@(provider.ToLower())-info img {
+     width: 60px;
+    height: 60px;
+  border-radius: 50%;
+       border: 3px solid white;
+      }
+
+        .@(provider.ToLower())-info-text {
+      flex: 1;
+    }
+
+  .@(provider.ToLower())-info-text strong {
+   display: block;
+   font-size: 1.1rem;
+        color: var(--text-primary);
+   }
+
+   .@(provider.ToLower())-info-text small {
+ color: var(--text-secondary);
+      }
+
+        .@(provider.ToLower())-info-text .provider-badge {
+   display: inline-block;
+       padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+       background: @providerColor;
+         color: white;
+   font-size: 0.75rem;
+ margin-top: 0.25rem;
+      }
+
+   .form-group {
+     margin-bottom: 1.25rem;
+  }
+
+      .form-label {
+    display: block;
+       margin-bottom: 0.5rem;
+  font-weight: 600;
+ color: var(--text-primary);
+      }
+
+ .form-control {
+   width: 100%;
+padding: 0.875rem 1rem;
+     border: 1px solid var(--border-color);
+border-radius: var(--radius-md);
+ font-size: 1rem;
+  font-family: var(--font-family);
+    transition: all 0.2s;
+ }
+
+.form-control:focus {
+      outline: none;
+border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+   }
+
+   .form-control:disabled {
+ background-color: var(--background-light);
+     cursor: not-allowed;
+      }
+
+   .user-type-toggle {
+  display: flex;
+     background: var(--background-gray);
+   border-radius: var(--radius-md);
+   padding: 4px;
+       margin-bottom: var(--spacing-lg);
+      gap: 4px;
+ }
+
+ .user-type-option {
+            flex: 1;
+   text-align: center;
+       padding: var(--spacing-sm) var(--spacing-md);
+     border-radius: var(--radius-sm);
+       cursor: pointer;
+       transition: all var(--transition-fast);
+       font-weight: 600;
+       font-size: 0.9rem;
+     color: var(--text-secondary);
+  display: flex;
+   flex-direction: column;
+  align-items: center;
+ gap: 4px;
+ }
+
+  .user-type-option i {
+     font-size: 1.2rem;
+ }
+
+   .user-type-option.active {
+     background: var(--background-white);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+        }
+
+        .btn-submit {
+width: 100%;
+  padding: 0.875rem 1rem;
+      background-color: var(--primary-color);
+       color: white;
+    border: none;
+  border-radius: var(--radius-md);
+ font-size: 1rem;
+   font-weight: 600;
+ cursor: pointer;
+      transition: all 0.2s;
+  margin-top: var(--spacing-md);
+   }
+
+      .btn-submit:hover {
+   background-color: var(--primary-hover);
+        transform: translateY(-2px);
+   box-shadow: var(--shadow-md);
+        }
+
+   .text-danger {
+   color: var(--error-color);
+      font-size: 0.85rem;
+    margin-top: 0.25rem;
+  display: block;
+   }
+
+ @@media (max-width: 768px) {
+      .complete-registration-page {
+    padding: var(--spacing-xl) var(--spacing-md);
+     }
+
+  .card {
+   padding: var(--spacing-lg);
+   }
+      }
+
+  .google-info {
+      background: var(--primary-light);
+      padding: var(--spacing-md);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+  }
+
+  .google-info img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: 3px solid white;
+  }
+
+  .google-info-text {
+      flex: 1;
+  }
+
+  .google-info-text strong {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+  }
+
+  .google-info-text small {
+      color: var(--text-secondary);
+  }
+
+  .google-info-text .provider-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      background: #db4437;
+      color: white;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+  }
+</style>
+}
+
+<div class="complete-registration-page">
+    <div class="container registration-container">
+     <div class="card">
+   <div class="page-header">
+    <h1 class="page-title">مرحباً في تفصيلك!</h1>
+     <p class="page-subtitle">قم بإكمال معلومات حسابك للمتابعة</p>
+  </div>
+
+       <div class="@(provider.ToLower())-info">
+       @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+       {
+         <img src="@Model.ProfilePictureUrl" alt="صورة الملف الشخصي" />
+    }
+  else
+   {
+       <div style="width: 60px; height: 60px; border-radius: 50%; background: var(--background-gray); display: flex; align-items: center; justify-content: center;">
+        <i class="@providerIcon" style="font-size: 1.5rem; color: @providerColor;"></i>
+       </div>
+    }
+    <div class="@(provider.ToLower())-info-text">
+        <strong>@Model.FullName</strong>
+ <small>@Model.Email</small>
+         <span class="provider-badge">
+       <i class="@providerIcon me-1"></i>
+      @providerName
+      </span>
+     </div>
+ </div>
+
+    <form asp-action="CompleteSocialRegistration" method="post">
+  @Html.AntiForgeryToken()
+
+      <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+  <input type="hidden" asp-for="Email" />
+       <input type="hidden" asp-for="ProfilePictureUrl" />
+
+     <div class="form-group">
+     <label asp-for="FullName" class="form-label">الاسم الكامل</label>
+<input asp-for="FullName" class="form-control" placeholder="أدخل اسمك الكامل" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+  </div>
+
+   <div class="form-group">
+      <label asp-for="PhoneNumber" class="form-label">رقم الهاتف (اختياري)</label>
+       <input asp-for="PhoneNumber" class="form-control" placeholder="أدخل رقم هاتفك" />
+     <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+ </div>
+
+    <div class="form-group">
+   <label class="form-label">اختر نوع الحساب</label>
+     <div class="user-type-toggle" id="userTypeToggle">
+  <div class="user-type-option" data-type="customer">
+<i class="fas fa-user"></i>
+<span>عميل</span>
+  </div>
+     <div class="user-type-option active" data-type="tailor">
+<i class="fas fa-cut"></i>
+     <span>خياط</span>
+      </div>
+    </div>
+  <input type="hidden" asp-for="UserType" id="userTypeInput" value="tailor" />
+ </div>
+
+        <button type="submit" class="btn-submit">
+  <i class="fas fa-check me-2"></i>
+ إنشاء الحساب
+   </button>
+  </form>
+        </div>
+  </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ 
+ <script>
+      document.addEventListener("DOMContentLoaded", function () {
+   const userTypeOptions = document.querySelectorAll(".user-type-option");
+       const userTypeInput = document.getElementById("userTypeInput");
+
+    userTypeOptions.forEach(option => {
+      option.addEventListener("click", function () {
+  userTypeOptions.forEach(opt => opt.classList.remove("active"));
+       this.classList.add("active");
+   const selectedType = this.getAttribute("data-type");
+  userTypeInput.value = selectedType;
+ });
+     });
+    });
+    </script>
+}

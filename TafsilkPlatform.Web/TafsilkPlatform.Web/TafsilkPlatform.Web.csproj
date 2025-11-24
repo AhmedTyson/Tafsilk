@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+	<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>53d19473-2fd6-4a7c-906f-dda85cf58376</UserSecretsId>
+  
+    <!-- Publishing Optimizations -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>false</PublishTrimmed>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <!-- Version Information -->
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Company>Tafsilk Platform</Company>
+    <Product>Tafsilk Platform</Product>
+    <Description>Tafsilk - منصة الخياطين والتفصيل</Description>
+    <Copyright>Copyright © 2025 Tafsilk Platform</Copyright>
+    
+    <!-- Development Settings -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Views\Reviews\**" />
+    <Compile Remove="wwwroot\Tafsilk-v3-\**" />
+    <Compile Remove="TafsilkPlatform.Models\**" />
+    <Compile Remove="TafsilkPlatform.DataAccess\**" />
+    <Compile Remove="TafsilkPlatform.Utility\**" />
+    <Content Remove="Views\Reviews\**" />
+    <Content Remove="wwwroot\Tafsilk-v3-\**" />
+    <EmbeddedResource Remove="Views\Reviews\**" />
+    <EmbeddedResource Remove="wwwroot\Tafsilk-v3-\**" />
+    <None Remove="Views\Reviews\**" />
+    <None Remove="wwwroot\Tafsilk-v3-\**" />
+  </ItemGroup>
+
+  <!-- Project References -->
+  <ItemGroup>
+    <ProjectReference Include="TafsilkPlatform.Models\TafsilkPlatform.Models.csproj" />
+    <ProjectReference Include="TafsilkPlatform.DataAccess\TafsilkPlatform.DataAccess.csproj" />
+    <ProjectReference Include="TafsilkPlatform.Utility\TafsilkPlatform.Utility.csproj" />
+  </ItemGroup>
+
+  <!-- All dependencies consolidated here -->
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.10" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.10">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.Cryptography.KeyDerivation" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
+  </ItemGroup>
+  
+  <!-- Development-only files -->
+  <ItemGroup Condition="'$(Configuration)' == 'Release'">
+    <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TafsilkPlatform.Web\Areas\Customer\Controllers\" />
+  </ItemGroup>
+
+</Project>

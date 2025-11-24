@@ -1,0 +1,126 @@
+@model TafsilkPlatform.Models.Models.UserAddress
+
+@{
+    ViewData["Title"] = "تعديل العنوان";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+     <div class="card border-0 shadow-sm">
+ <div class="card-header bg-gradient-primary text-white p-4">
+         <h3 class="mb-0">
+       <i class="fas fa-edit me-2"></i>تعديل العنوان
+       </h3>
+    </div>
+      
+       <div class="card-body p-4">
+      <form asp-action="EditAddress" asp-route-id="@Model.Id" method="post">
+         @Html.AntiForgeryToken()
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+     
+   <input type="hidden" asp-for="Id" />
+      <input type="hidden" asp-for="UserId" />
+       <input type="hidden" asp-for="CreatedAt" />
+        
+  <!-- Label -->
+      <div class="mb-4">
+       <label asp-for="Label" class="form-label fw-bold">
+    <i class="fas fa-tag me-2"></i>تسمية العنوان
+     </label>
+  <input asp-for="Label" class="form-control form-control-lg" 
+         placeholder="مثال: المنزل، العمل، المكتب" />
+         <span asp-validation-for="Label" class="text-danger small"></span>
+      </div>
+
+   <!-- Street -->
+         <div class="mb-4">
+         <label asp-for="Street" class="form-label fw-bold">
+   <i class="fas fa-road me-2"></i>الشارع والحي
+     </label>
+            <textarea asp-for="Street" class="form-control" rows="2"
+   placeholder="أدخل اسم الشارع والحي والتفاصيل"></textarea>
+        <span asp-validation-for="Street" class="text-danger small"></span>
+     </div>
+
+<!-- City -->
+   <div class="mb-4">
+       <label asp-for="City" class="form-label fw-bold">
+ <i class="fas fa-city me-2"></i>المدينة
+       </label>
+       <input asp-for="City" class="form-control form-control-lg" 
+       placeholder="أدخل المدينة" />
+    <span asp-validation-for="City" class="text-danger small"></span>
+ </div>
+
+    <!-- Coordinates (Optional) -->
+         <div class="card bg-light mb-4">
+  <div class="card-body">
+        <h6 class="mb-3">
+   <i class="fas fa-map-marked-alt me-2"></i>الإحداثيات (اختياري)
+    </h6>
+      <div class="row">
+     <div class="col-md-6 mb-3 mb-md-0">
+   <label asp-for="Latitude" class="form-label">خط العرض</label>
+      <input asp-for="Latitude" class="form-control" 
+           placeholder="مثال: 24.7136" type="number" step="0.000001" />
+     <span asp-validation-for="Latitude" class="text-danger small"></span>
+     </div>
+   <div class="col-md-6">
+ <label asp-for="Longitude" class="form-label">خط الطول</label>
+       <input asp-for="Longitude" class="form-control" 
+   placeholder="مثال: 46.6753" type="number" step="0.000001" />
+     <span asp-validation-for="Longitude" class="text-danger small"></span>
+     </div>
+    </div>
+    <small class="text-muted d-block mt-2">
+       <i class="fas fa-info-circle me-1"></i>
+       يمكنك إضافة الإحداثيات لتحديد الموقع بدقة على الخريطة
+ </small>
+</div>
+</div>
+
+       <!-- Default Address Checkbox -->
+<div class="form-check mb-4">
+ <input asp-for="IsDefault" class="form-check-input" type="checkbox" />
+       <label asp-for="IsDefault" class="form-check-label">
+      <i class="fas fa-star me-2 text-warning"></i>
+      جعل هذا العنوان افتراضي
+     </label>
+<small class="d-block text-muted ms-4 mt-1">
+      سيتم استخدام هذا العنوان تلقائياً في الطلبات الجديدة
+</small>
+   </div>
+
+     <!-- Action Buttons -->
+       <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary btn-lg flex-fill">
+  <i class="fas fa-save me-2"></i>حفظ التعديلات
+          </button>
+      <a asp-action="ManageAddresses" class="btn btn-outline-secondary btn-lg">
+     <i class="fas fa-times me-2"></i>إلغاء
+     </a>
+   </div>
+       </form>
+ </div>
+  </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 100%);
+    }
+    
+    .form-control:focus {
+ border-color: #2c5aa0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+    }
+</style>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

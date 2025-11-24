@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "TafsilkPlatform.Models": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "Executable"
+    }
+  }
+}

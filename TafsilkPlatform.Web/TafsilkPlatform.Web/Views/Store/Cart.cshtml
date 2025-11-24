@@ -1,0 +1,479 @@
+@model TafsilkPlatform.Models.ViewModels.Store.CartViewModel
+@{
+    ViewData["Title"] = "سلة التسوق";
+}
+
+<div class="container py-5">
+    <h1 class="mb-4">
+     <i class="fas fa-shopping-cart"></i> سلة التسوق
+</h1>
+
+    @if (Model.Items.Any())
+    {
+ <div class="row">
+     <div class="col-lg-8">
+      <div class="card shadow-sm mb-4">
+                 <div class="card-header bg-light">
+  <h5 class="mb-0">المنتجات (@Model.TotalItems منتج)</h5>
+      </div>
+   <div class="card-body">
+       @foreach (var item in Model.Items)
+     {
+        <div class="row align-items-center mb-3 pb-3 @(item != Model.Items.Last() ? "border-bottom" : "")">
+         <div class="col-md-2 col-3">
+  @if (!string.IsNullOrEmpty(item.ProductImageBase64))
+             {
+   <img src="data:image/jpeg;base64,@item.ProductImageBase64" 
+  class="img-fluid rounded" alt="@item.ProductName">
+}
+      else
+             {
+    <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+   style="height: 80px;">
+     <i class="fas fa-image text-muted"></i>
+    </div>
+    }
+     </div>
+          
+       <div class="col-md-4 col-9">
+          <h6 class="mb-1">@item.ProductName</h6>
+@if (!string.IsNullOrEmpty(item.SelectedSize))
+     {
+  <small class="text-muted d-block">
+      <i class="fas fa-ruler"></i> المقاس: @item.SelectedSize
+  </small>
+  }
+  @if (!string.IsNullOrEmpty(item.SelectedColor))
+     {
+        <small class="text-muted d-block">
+       <i class="fas fa-palette"></i> اللون: @item.SelectedColor
+  </small>
+      }
+           
+     @if (!item.IsAvailable)
+      {
+ <div class="badge bg-danger mt-2">
+        <i class="fas fa-times"></i> غير متوفر
+    </div>
+       }
+    else if (item.Quantity > item.StockAvailable)
+  {
+        <div class="badge bg-warning text-dark mt-2">
+    <i class="fas fa-exclamation-triangle"></i> متوفر @item.StockAvailable فقط
+      </div>
+      }
+     </div>
+     
+         <div class="col-md-2 col-4 text-center">
+       <strong class="text-primary">
+      @item.UnitPrice.ToString("N2") ريال
+         </strong>
+  </div>
+         
+    <div class="col-md-2 col-4">
+    <form asp-action="UpdateCartItem" method="post" class="d-inline">
+       @Html.AntiForgeryToken()
+ <input type="hidden" name="CartItemId" value="@item.CartItemId" />
+    <div class="input-group input-group-sm">
+ <button type="button" class="btn btn-outline-secondary" 
+   onclick="updateQuantity(this, -1, @item.StockAvailable)">
+        <i class="fas fa-minus"></i>
+  </button>
+     <input type="number" name="Quantity" class="form-control text-center qty-input" 
+                data-item-id="@item.CartItemId"
+     value="@item.Quantity" min="1" max="@item.StockAvailable" 
+          onchange="this.form.submit()" style="max-width: 60px;">
+       <button type="button" class="btn btn-outline-secondary" 
+    onclick="updateQuantity(this, 1, @item.StockAvailable)">
+<i class="fas fa-plus"></i>
+              </button>
+      </div>
+       </form>
+          </div>
+    
+       <div class="col-md-2 col-4 text-end">
+        <div class="fw-bold text-success mb-2">
+            @item.TotalPrice.ToString("N2") ريال
+          </div>
+       <form asp-action="RemoveFromCart" method="post" class="d-inline">
+      @Html.AntiForgeryToken()
+  <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+    <button type="submit" class="btn btn-sm btn-outline-danger" 
+       onclick="return confirm('هل تريد حذف هذا المنتج من السلة؟')">
+      <i class="fas fa-trash"></i> حذف
+      </button>
+      </form>
+    </div>
+ </div>
+       }
+      </div>
+              </div>
+    
+   <div class="d-flex justify-content-between align-items-center">
+         <a href="/Store" class="btn btn-outline-primary">
+     <i class="fas fa-arrow-right"></i> متابعة التسوق
+  </a>
+             <form asp-action="ClearCart" method="post" class="d-inline" onsubmit="return confirm('هل تريد إفراغ السلة بالكامل؟')">
+         @Html.AntiForgeryToken()
+   <button type="submit" class="btn btn-outline-danger">
+     <i class="fas fa-trash-alt"></i> إفراغ السلة
+      </button>
+ </form>
+   </div>
+   </div>
+
+            <div class="col-lg-4">
+     <div class="card shadow-sm sticky-top" style="top: 20px;">
+   <div class="card-header bg-primary text-white">
+  <h5 class="mb-0">
+     <i class="fas fa-calculator"></i> ملخص الطلب
+      </h5>
+        </div>
+           <div class="card-body">
+       <div class="d-flex justify-content-between mb-2">
+      <span>المجموع الفرعي (@Model.TotalItems منتج):</span>
+         <span class="fw-bold">@Model.SubTotal.ToString("N2") ريال</span>
+  </div>
+       
+  <div class="d-flex justify-content-between mb-2">
+     <span>الشحن:</span>
+       <span class="@(Model.ShippingCost == 0 ? "text-success fw-bold" : "")">
+    @if (Model.ShippingCost == 0)
+       {
+        <text><i class="fas fa-gift"></i> مجاني</text>
+           }
+    else
+      {
+        <text>@Model.ShippingCost.ToString("N2") ريال</text>
+               }
+    </span>
+   </div>
+     
+     <div class="d-flex justify-content-between mb-3">
+      <span>ضريبة القيمة المضافة (15%):</span>
+         <span>@Model.Tax.ToString("N2") ريال</span>
+      </div>
+   
+  @if (Model.SubTotal < 500)
+   {
+       <div class="alert alert-info small mb-3">
+    <i class="fas fa-truck"></i>
+         أضف @((500 - Model.SubTotal).ToString("N2")) ريال للحصول على <strong>شحن مجاني!</strong>
+      </div>
+       }
+ 
+      <hr class="my-3"/>
+        
+<div class="d-flex justify-content-between mb-4">
+     <span class="h5 mb-0 fw-bold">الإجمالي:</span>
+         <span class="h4 text-primary mb-0 fw-bold">
+           @Model.Total.ToString("N2") ريال
+    </span>
+        </div>
+    
+  <a href="/Store/Checkout" class="btn btn-success btn-lg w-100 mb-2">
+  <i class="fas fa-lock"></i> متابعة للدفع
+          </a>
+            
+       <div class="text-center mt-3">
+          <small class="text-muted">
+  <i class="fas fa-shield-alt"></i> عملية دفع آمنة ومشفرة
+    </small>
+       </div>
+       </div>
+      </div>
+
+       <!-- Trust Badges -->
+ <div class="card shadow-sm mt-3">
+    <div class="card-body">
+      <div class="row text-center small">
+          <div class="col-4">
+         <i class="fas fa-shipping-fast fa-2x text-primary mb-2"></i>
+     <p class="mb-0">شحن سريع</p>
+       </div>
+       <div class="col-4">
+     <i class="fas fa-undo fa-2x text-success mb-2"></i>
+         <p class="mb-0">إرجاع سهل</p>
+        </div>
+          <div class="col-4">
+       <i class="fas fa-headset fa-2x text-info mb-2"></i>
+       <p class="mb-0">دعم 24/7</p>
+      </div>
+           </div>
+           </div>
+</div>
+   </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+    <i class="fas fa-shopping-cart fa-5x text-muted"></i>
+     </div>
+       <h3 class="text-muted mb-3">سلتك فارغة</h3>
+  <p class="text-muted mb-4">لم تقم بإضافة أي منتجات إلى سلتك بعد</p>
+ <a href="/Store" class="btn btn-primary btn-lg">
+    <i class="fas fa-store"></i> ابدأ التسوق
+     </a>
+ </div>
+    }
+</div>
+
+<!-- Cart Item Count Badge (for navbar) -->
+<div id="cart-count-data" data-count="@Model.TotalItems" style="display: none;"></div>
+
+@section Scripts {
+    <script>
+ // ===== QUANTITY UPDATE FUNCTION =====
+        function updateQuantity(btn, change, max) {
+    const input = btn.parentElement.querySelector('.qty-input');
+     const currentValue = parseInt(input.value) || 0;
+          const newValue = currentValue + change;
+      
+            // Validate new value
+ if (newValue >= 1 && newValue <= max) {
+             input.value = newValue;
+        
+   // Show loading state on the button
+        const originalContent = btn.innerHTML;
+                btn.disabled = true;
+       btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+      
+       // Submit the form
+                input.form.submit();
+     } else if (newValue > max) {
+            // Show stock limit warning
+             showNotification('متوفر ' + max + ' فقط في المخزون', 'warning');
+  }
+        }
+
+    // ===== CART BADGE UPDATE FUNCTION =====
+        function updateCartBadge() {
+  try {
+          const countElement = document.getElementById('cart-count-data');
+    const count = countElement ? parseInt(countElement.dataset.count) || 0 : 0;
+            const badge = document.getElementById('cart-badge');
+        
+if (badge) {
+          if (count > 0) {
+       badge.textContent = count;
+            badge.style.display = 'inline-block';
+           
+   // Add animation effect
+   badge.classList.add('badge-pulse');
+          setTimeout(() => badge.classList.remove('badge-pulse'), 600);
+          } else {
+    badge.style.display = 'none';
+                  }
+           }
+        
+    // Update cart button title
+         const cartButton = document.getElementById('cartButton');
+     if (cartButton) {
+   cartButton.title = count > 0 ? `سلة التسوق (${count})` : 'سلة التسوق';
+       }
+       
+      console.log('Cart badge updated:', count);
+          } catch (error) {
+  console.error('Error updating cart badge:', error);
+ }
+        }
+
+  // ===== FETCH CART COUNT FROM SERVER =====
+        async function fetchCartCount() {
+      try {
+             const response = await fetch('@Url.Action("GetCartCount", "Store")', {
+   method: 'GET',
+         headers: {
+          'Accept': 'application/json'
+          },
+  credentials: 'same-origin'
+                });
+     
+  if (response.ok) {
+  const data = await response.json();
+     
+  // Update the hidden data element
+const countElement = document.getElementById('cart-count-data');
+     if (countElement) {
+        countElement.dataset.count = data.count || 0;
+     }
+     
+   // Update the badge
+           updateCartBadge();
+   
+             console.log('Cart count fetched:', data.count);
+            } else {
+         console.error('Failed to fetch cart count:', response.status);
+       }
+} catch (error) {
+          console.error('Error fetching cart count:', error);
+         }
+        }
+
+     // ===== REMOVE ITEM CONFIRMATION =====
+        function confirmRemoveItem(itemName) {
+        return confirm(`هل تريد حذف "${itemName}" من السلة؟`);
+        }
+
+        // ===== NOTIFICATION HELPER =====
+        function showNotification(message, type = 'info') {
+            // Create notification element
+      const notification = document.createElement('div');
+          notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+     ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+         
+      document.body.appendChild(notification);
+            
+  // Auto-remove after 3 seconds
+            setTimeout(() => {
+      notification.remove();
+         }, 3000);
+  }
+
+        // ===== AUTO-SAVE QUANTITY ON BLUR =====
+        function setupQuantityInputs() {
+       const quantityInputs = document.querySelectorAll('.qty-input');
+            
+     quantityInputs.forEach(input => {
+    let originalValue = input.value;
+    
+     // Store original value on focus
+        input.addEventListener('focus', function() {
+           originalValue = this.value;
+        });
+       
+       // Check for changes on blur
+                input.addEventListener('blur', function() {
+         const newValue = parseInt(this.value) || 1;
+            const max = parseInt(this.max) || 999;
+         
+      // Validate and correct value
+       if (newValue < 1) {
+  this.value = 1;
+            } else if (newValue > max) {
+        this.value = max;
+      showNotification('متوفر ' + max + ' فقط في المخزون', 'warning');
+     }
+        
+  // Submit if value changed
+   if (this.value !== originalValue) {
+this.form.submit();
+     }
+   });
+   
+      // Allow Enter key to submit
+              input.addEventListener('keypress', function(e) {
+ if (e.key === 'Enter') {
+  e.preventDefault();
+      this.blur(); // Trigger blur event which will submit if changed
+    }
+                });
+  });
+    }
+
+        // ===== CALCULATE TOTALS (CLIENT-SIDE PREVIEW) =====
+    function updateCartTotals() {
+            const items = document.querySelectorAll('.qty-input');
+      let subtotal = 0;
+    
+            items.forEach(input => {
+                const row = input.closest('.row');
+        const unitPrice = parseFloat(row.querySelector('.text-primary').textContent.replace(/[^0-9.]/g, '')) || 0;
+             const quantity = parseInt(input.value) || 0;
+                const itemTotal = unitPrice * quantity;
+     
+       // Update item total display
+     const totalElement = row.querySelector('.text-success');
+      if (totalElement) {
+         totalElement.textContent = itemTotal.toFixed(2) + ' ريال';
+       }
+     
+      subtotal += itemTotal;
+            });
+ 
+            console.log('Cart subtotal calculated:', subtotal);
+        }
+
+        // ===== INITIALIZE ON PAGE LOAD =====
+    document.addEventListener('DOMContentLoaded', function() {
+       console.log('Cart page loaded - Initializing...');
+        
+         // Update cart badge immediately
+      updateCartBadge();
+            
+            // Setup quantity input handlers
+       setupQuantityInputs();
+    
+         // Fetch latest cart count from server
+       fetchCartCount();
+       
+         // Auto-refresh cart count every 30 seconds
+      setInterval(fetchCartCount, 30000);
+            
+        // Add smooth scroll to checkout button
+            const checkoutBtn = document.querySelector('a[href*="Checkout"]');
+   if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', function() {
+             console.log('Proceeding to checkout...');
+       });
+          }
+     
+            // Handle empty cart state
+            const emptyStateBtn = document.querySelector('.btn-primary.btn-lg');
+        if (emptyStateBtn && emptyStateBtn.textContent.includes('ابدأ التسوق')) {
+     console.log('Cart is empty - showing empty state');
+      }
+            
+         // Log cart items for debugging
+     const cartItems = document.querySelectorAll('.qty-input');
+      console.log('Cart items count:', cartItems.length);
+            
+            console.log('Cart initialization complete!');
+    });
+
+        // ===== HANDLE PAGE VISIBILITY CHANGE =====
+  document.addEventListener('visibilitychange', function() {
+       if (!document.hidden) {
+     console.log('Page became visible - refreshing cart count');
+         fetchCartCount();
+         }
+        });
+
+  // ===== ANIMATION CLASS FOR BADGE =====
+        const style = document.createElement('style');
+        style.textContent = `
+  .badge-pulse {
+      animation: pulse 0.6s ease-in-out;
+    }
+ 
+       @@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+         50% { transform: scale(1.2); }
+   }
+        `;
+        document.head.appendChild(style);
+    </script>
+}
+
+@section Styles {
+    <style>
+        .qty-input::-webkit-outer-spin-button,
+     .qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+     margin: 0;
+        }
+     .qty-input[type=number] {
+       -moz-appearance: textfield;
+      }
+        .sticky-top {
+            position: -webkit-sticky;
+   position: sticky;
+  }
+    </style>
+}

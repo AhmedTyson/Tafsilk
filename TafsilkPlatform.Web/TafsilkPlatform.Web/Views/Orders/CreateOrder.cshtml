@@ -1,0 +1,595 @@
+@model TafsilkPlatform.Models.ViewModels.Orders.CreateOrderViewModel
+@{
+    ViewData["Title"] = "إنشاء طلب جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5" dir="rtl">
+    <!-- Page Header -->
+    <div class="row mb-4">
+  <div class="col-12">
+ <nav aria-label="breadcrumb">
+   <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+   <li class="breadcrumb-item"><a asp-action="SearchTailors" asp-controller="Profiles">الخياطين</a></li>
+          <li class="breadcrumb-item active">إنشاء طلب جديد</li>
+         </ol>
+    </nav>
+            <h2 class="display-5 fw-bold mb-2">
+       <i class="fas fa-shopping-bag text-primary me-2"></i>
+       إنشاء طلب جديد
+          </h2>
+            <p class="text-muted">أكمل بيانات الطلب للتواصل مع الخياط</p>
+    </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Form Column -->
+        <div class="col-lg-8">
+    <!-- Tailor Info Card -->
+        <div class="card shadow-sm mb-4">
+      <div class="card-body">
+    <div class="d-flex align-items-center">
+               @if (Model.TailorProfilePictureData != null)
+     {
+<img src="data:@Model.TailorProfilePictureContentType;base64,@Convert.ToBase64String(Model.TailorProfilePictureData)" 
+       class="rounded-circle me-3" 
+        style="width: 80px; height: 80px; object-fit: cover;" 
+   alt="@Model.TailorName" />
+             }
+      else
+     {
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+      style="width: 80px; height: 80px;">
+<i class="fas fa-user fa-2x"></i>
+       </div>
+          }
+             <div class="flex-grow-1">
+        <h4 class="mb-1">@Model.TailorShopName</h4>
+           <p class="text-muted mb-2">@Model.TailorName</p>
+            <div class="d-flex align-items-center">
+      <span class="badge bg-warning text-dark me-2">
+       <i class="fas fa-star"></i> @Model.TailorAverageRating.ToString("0.0")
+         </span>
+           <span class="text-muted small">(@Model.TailorReviewCount تقييم)</span>
+        <span class="text-muted mx-2">|</span>
+      <span class="text-muted small">
+         <i class="fas fa-map-marker-alt"></i> @Model.TailorCity, @Model.TailorDistrict
+  </span>
+      </div>
+  </div>
+          </div>
+                </div>
+            </div>
+
+            <!-- Order Form -->
+     <form asp-action="CreateOrder" asp-controller="Orders" method="post" enctype="multipart/form-data" id="orderForm">
+       @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.TailorId)
+        @Html.HiddenFor(m => m.CustomerId)
+
+       <!-- Service Selection -->
+        <div class="card shadow-sm mb-4">
+       <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">
+      <i class="fas fa-cut me-2"></i>
+      1. اختر نوع الخدمة
+       </h5>
+  </div>
+                <div class="card-body">
+          @if (Model.AvailableServices.Any())
+{
+       <div class="row g-3">
+   @foreach (var service in Model.AvailableServices)
+    {
+      <div class="col-md-6">
+  <div class="service-option">
+     <input type="radio" 
+              name="SelectedServiceId" 
+             value="@service.ServiceId" 
+  id="service_@service.ServiceId"
+         class="service-radio"
+     data-price="@service.ServicePrice"
+                data-name="@service.ServiceName" />
+           <label for="service_@service.ServiceId" class="service-card">
+     <div class="d-flex align-items-start">
+        <div class="service-icon me-3">
+              <i class="fas @service.ServiceIcon fa-2x text-primary"></i>
+              </div>
+         <div class="flex-grow-1">
+       <h6 class="fw-bold mb-1">@service.ServiceName</h6>
+        <p class="small text-muted mb-2">@service.ServiceDescription</p>
+   <div class="d-flex justify-content-between align-items-center">
+         <span class="badge bg-success">@service.ServicePrice.ToString("C") EGP</span>
+               </div>
+     </div>
+      </div>
+              </label>
+     </div>
+        </div>
+     }
+            </div>
+    <span asp-validation-for="SelectedServiceId" class="text-danger"></span>
+         }
+                  else
+         {
+  <div class="alert alert-warning">
+         <i class="fas fa-exclamation-triangle me-2"></i>
+       لا توجد خدمات متاحة حاليًا
+          </div>
+     }
+  </div>
+         </div>
+
+     <!-- Order Description -->
+        <div class="card shadow-sm mb-4">
+             <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+     <i class="fas fa-edit me-2"></i>
+                  2. وصف الطلب
+      </h5>
+        </div>
+        <div class="card-body">
+   <div class="mb-3">
+           <label asp-for="Description" class="form-label fw-bold">
+             وصف تفصيلي للطلب <span class="text-danger">*</span>
+    </label>
+      <textarea asp-for="Description" 
+  class="form-control" 
+   rows="5" 
+           placeholder="صف بالتفصيل ما تريده من الخياط (نوع القماش، اللون، التصميم، إلخ...)"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+   <div class="mb-3">
+        <label asp-for="Measurements" class="form-label fw-bold">المقاسات</label>
+      <textarea asp-for="Measurements" 
+      class="form-control" 
+   rows="3" 
+        placeholder="أدخل المقاسات المطلوبة (الطول، العرض، إلخ...)"></textarea>
+      <small class="text-muted">يمكنك ترك هذا الحقل فارغًا إذا كنت ستأخذ المقاسات مع الخياط</small>
+        </div>
+
+        <div class="mb-0">
+           <label asp-for="AdditionalNotes" class="form-label fw-bold">ملاحظات إضافية</label>
+   <textarea asp-for="AdditionalNotes" 
+      class="form-control" 
+  rows="2" 
+       placeholder="أي ملاحظات أو تفاصيل أخرى"></textarea>
+  </div>
+    </div>
+            </div>
+
+     <!-- Image Upload -->
+    <div class="card shadow-sm mb-4">
+<div class="card-header bg-primary text-white">
+      <h5 class="mb-0">
+          <i class="fas fa-image me-2"></i>
+            3. صور مرجعية
+        </h5>
+   </div>
+   <div class="card-body">
+              <p class="text-muted">أضف صورًا توضح ما تريد (حتى 10 صور، كل صورة بحد أقصى 5 ميجابايت)</p>
+  <div class="mb-3">
+  <label for="imageUpload" class="btn btn-outline-primary w-100">
+ <i class="fas fa-cloud-upload-alt me-2"></i>
+           اختر الصور
+            </label>
+         <input type="file" 
+      asp-for="ReferenceImages" 
+  id="imageUpload" 
+           class="d-none" 
+     accept="image/*" 
+            multiple />
+           </div>
+  <div id="imagePreview" class="row g-2"></div>
+          </div>
+        </div>
+
+     <!-- Due Date -->
+  <div class="card shadow-sm mb-4">
+          <div class="card-header bg-primary text-white">
+         <h5 class="mb-0">
+          <i class="fas fa-calendar-alt me-2"></i>
+      4. تاريخ التسليم
+         </h5>
+    </div>
+             <div class="card-body">
+         <div class="mb-3">
+        <label asp-for="DueDate" class="form-label fw-bold">التاريخ المطلوب للتسليم</label>
+      <input asp-for="DueDate" 
+       type="date" 
+          class="form-control" 
+      min="@DateTime.Now.AddDays(3).ToString("yyyy-MM-dd")" />
+<small class="text-muted">الحد الأدنى 3 أيام من تاريخ اليوم</small>
+     </div>
+
+     <div class="form-check">
+            <input asp-for="IsExpressService" 
+      class="form-check-input" 
+          type="checkbox" 
+        id="expressService" />
+    <label class="form-check-label" for="expressService">
+   <i class="fas fa-bolt text-warning me-1"></i>
+    خدمة سريعة (+50 EGP)
+     </label>
+  </div>
+     </div>
+    </div>
+
+           <!-- Terms and Submit -->
+   <div class="card shadow-sm mb-4">
+          <div class="card-body">
+      <div class="form-check mb-3">
+ <input asp-for="AgreeToTerms" 
+ class="form-check-input" 
+         type="checkbox" 
+     id="agreeTerms" />
+         <label class="form-check-label" for="agreeTerms">
+      أوافق على <a href="#" target="_blank">الشروط والأحكام</a> وسياسة الخصوصية
+            </label>
+                 <span asp-validation-for="AgreeToTerms" class="text-danger d-block"></span>
+    </div>
+
+   <div class="d-grid gap-2">
+ <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+       <i class="fas fa-paper-plane me-2"></i>
+             إرسال الطلب
+          </button>
+       <a asp-action="SearchTailors" asp-controller="Profiles" class="btn btn-outline-secondary">
+       <i class="fas fa-times me-2"></i>
+    إلغاء
+     </a>
+             </div>
+</div>
+           </div>
+          </form>
+     </div>
+
+   <!-- Summary Sidebar -->
+        <div class="col-lg-4">
+   <div class="card shadow-sm sticky-top" style="top: 20px;">
+           <div class="card-header bg-light">
+           <h5 class="mb-0">
+    <i class="fas fa-file-invoice me-2"></i>
+              ملخص الطلب
+       </h5>
+             </div>
+ <div class="card-body">
+       <div class="mb-3">
+        <h6 class="text-muted">الخدمة المختارة</h6>
+         <p id="selectedServiceName" class="fw-bold">لم يتم الاختيار بعد</p>
+        </div>
+
+   <div class="mb-3">
+   <h6 class="text-muted">السعر المبدئي</h6>
+         <p id="estimatedPrice" class="h4 text-primary fw-bold">0 EGP</p>
+             <small class="text-muted">السعر النهائي سيتم تحديده من قبل الخياط</small>
+        </div>
+
+             <hr />
+
+       <div class="alert alert-info small">
+            <i class="fas fa-info-circle me-2"></i>
+     سيتم مراجعة طلبك من قبل الخياط والرد عليك خلال 24 ساعة
+           </div>
+  </div>
+      </div>
+     </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // CRITICAL: Prevent app crashes from image upload errors
+        // This must be at the top to catch all errors
+        (function() {
+            'use strict';
+            
+            // Global error handler - PREVENTS APP CRASHES
+            window.addEventListener('error', function(e) {
+                var errorMsg = e.message || '';
+                var errorSource = e.filename || '';
+                
+                console.error('Global error caught:', {
+                    message: errorMsg,
+                    filename: errorSource,
+                    lineno: e.lineno,
+                    colno: e.colno,
+                    error: e.error
+                });
+                
+                // Prevent crashes from image upload related errors
+                if (errorMsg.includes('previewImages') || 
+                    errorMsg.includes('imageUpload') ||
+                    errorMsg.includes('ReferenceImages') ||
+                    errorMsg.includes('FileReader') ||
+                    errorMsg.includes('Cannot read') ||
+                    errorMsg.includes('null') ||
+                    errorMsg.includes('undefined') ||
+                    errorSource.includes('CreateOrder')) {
+                    console.error('Image upload error detected - preventing crash');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return true; // Indicate error was handled
+                }
+            }, true); // Use capture phase
+
+            // Handle unhandled promise rejections
+            window.addEventListener('unhandledrejection', function(e) {
+                console.error('Unhandled promise rejection:', e.reason);
+                var reason = e.reason ? (e.reason.message || String(e.reason)) : '';
+                if (reason.includes('previewImages') || 
+                    reason.includes('imageUpload') ||
+                    reason.includes('ReferenceImages') ||
+                    reason.includes('FileReader')) {
+                    console.error('Image upload promise rejection - preventing crash');
+                    e.preventDefault();
+                }
+            });
+        })();
+        
+        // Image Preview with error handling
+        function previewImages(input) {
+            try {
+                if (!input || !input.files) {
+                    console.warn('No files selected');
+                    return;
+                }
+
+                const preview = document.getElementById('imagePreview');
+                if (!preview) {
+                    console.error('Preview container not found');
+                    return;
+                }
+
+                preview.innerHTML = '';
+
+                const files = Array.from(input.files);
+                if (files.length === 0) {
+                    return;
+                }
+
+                // Limit to 5 images
+                if (files.length > 5) {
+                    alert('يمكنك رفع 5 صور كحد أقصى. سيتم عرض أول 5 صور فقط.');
+                    files.splice(5);
+                }
+
+                files.forEach((file, index) => {
+                    // Validate file type
+                    if (!file.type.startsWith('image/')) {
+                        console.warn('Invalid file type:', file.name);
+                        return;
+                    }
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`الصورة "${file.name}" كبيرة جداً. الحد الأقصى 5 ميجابايت`);
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        try {
+                            const col = document.createElement('div');
+                            col.className = 'col-4 mb-2';
+                            col.innerHTML = `
+                                <div class="position-relative">
+                                    <img src="${e.target.result}" class="img-fluid rounded shadow-sm" style="height: 100px; object-fit: cover; width: 100%;" />
+                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1" data-image-index="${index}" onclick="removeImageByIndex(this)">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            `;
+                            preview.appendChild(col);
+                        } catch (error) {
+                            console.error('Error creating preview element:', error);
+                        }
+                    };
+                    
+                    reader.onerror = function(error) {
+                        console.error('Error reading file:', file.name, error);
+                        alert(`حدث خطأ أثناء قراءة الصورة "${file.name}"`);
+                    };
+                    
+                    reader.readAsDataURL(file);
+                });
+            } catch (error) {
+                console.error('Error in previewImages:', error);
+                alert('حدث خطأ أثناء معاينة الصور. يرجى المحاولة مرة أخرى.');
+            }
+        }
+
+        // Remove image function - SAFE VERSION
+        function removeImageByIndex(button) {
+            try {
+                if (!button) {
+                    console.warn('Remove button not provided');
+                    return;
+                }
+
+                const index = parseInt(button.getAttribute('data-image-index') || button.dataset.imageIndex || '0');
+                if (isNaN(index)) {
+                    console.warn('Invalid image index');
+                    return;
+                }
+
+                const input = document.getElementById('imageUpload') || 
+                              document.querySelector('input[type="file"][name="ReferenceImages"]');
+                if (!input) {
+                    console.warn('File input not found');
+                    return;
+                }
+
+                // Remove the preview element
+                const previewContainer = button.closest('.col-4');
+                if (previewContainer) {
+                    previewContainer.remove();
+                }
+
+                // Update file list
+                try {
+                    const dt = new DataTransfer();
+                    const files = Array.from(input.files || []);
+                    
+                    files.forEach((file, i) => {
+                        if (i !== index) {
+                            dt.items.add(file);
+                        }
+                    });
+                    
+                    input.files = dt.files;
+                } catch (dtError) {
+                    // DataTransfer might not be supported in all browsers
+                    console.warn('DataTransfer not supported, removing preview only');
+                }
+            } catch (error) {
+                console.error('Error removing image:', error);
+                alert('حدث خطأ أثناء حذف الصورة');
+            }
+        }
+
+        // Legacy function for backward compatibility
+        function removeImage(index) {
+            try {
+                const buttons = document.querySelectorAll('button[data-image-index]');
+                if (buttons[index]) {
+                    removeImageByIndex(buttons[index]);
+                }
+            } catch (error) {
+                console.error('Error in removeImage:', error);
+            }
+        }
+
+        // Service Selection Update
+        document.querySelectorAll('.service-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                try {
+                    const price = this.getAttribute('data-price');
+                    const name = this.getAttribute('data-name');
+                    const nameElement = document.getElementById('selectedServiceName');
+                    const priceElement = document.getElementById('estimatedPrice');
+                    
+                    if (nameElement && name) {
+                        nameElement.textContent = name;
+                    }
+                    
+                    if (priceElement && price) {
+                        priceElement.textContent = parseFloat(price).toFixed(2) + ' EGP';
+                    }
+                } catch (error) {
+                    console.error('Error updating service selection:', error);
+                }
+            });
+        });
+
+        // Express Service Toggle
+        const expressServiceCheckbox = document.getElementById('expressService');
+        if (expressServiceCheckbox) {
+            expressServiceCheckbox.addEventListener('change', function() {
+                try {
+                    const priceElement = document.getElementById('estimatedPrice');
+                    if (!priceElement) return;
+                    
+                    let currentPrice = parseFloat(priceElement.textContent.replace(' EGP', '')) || 0;
+                    if (this.checked) {
+                        currentPrice += 50;
+                    } else {
+                        currentPrice -= 50;
+                    }
+                    priceElement.textContent = currentPrice.toFixed(2) + ' EGP';
+                } catch (error) {
+                    console.error('Error updating express service:', error);
+                }
+            });
+        }
+
+        // Ensure file input has proper event handler with error handling
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const fileInput = document.getElementById('imageUpload') || 
+                                  document.querySelector('input[type="file"][name="ReferenceImages"]');
+                
+                if (!fileInput) {
+                    console.warn('File input not found for ReferenceImages');
+                    return;
+                }
+
+                // Add safe change handler
+                fileInput.addEventListener('change', function(e) {
+                    try {
+                        if (e.target && e.target.files) {
+                            previewImages(e.target);
+                        }
+                    } catch (error) {
+                        console.error('Error in file input change handler:', error);
+                        alert('حدث خطأ أثناء معاينة الصور. يرجى المحاولة مرة أخرى.');
+                    }
+                });
+
+                // Make the label clickable safely
+                const label = document.querySelector('label[for="imageUpload"]');
+                if (label) {
+                    label.addEventListener('click', function(e) {
+                        try {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (fileInput) {
+                                fileInput.click();
+                            }
+                        } catch (error) {
+                            console.error('Error clicking file input:', error);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error setting up file input:', error);
+            }
+        });
+
+    </script>
+}
+
+<style>
+    .service-option {
+        position: relative;
+    }
+
+.service-radio {
+    display: none;
+    }
+
+    .service-card {
+        display: block;
+        padding: 1rem;
+   border: 2px solid #dee2e6;
+        border-radius: 0.5rem;
+  cursor: pointer;
+        transition: all 0.3s ease;
+ background: white;
+    }
+
+    .service-card:hover {
+        border-color: var(--bs-primary);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+    }
+
+    .service-radio:checked + .service-card {
+        border-color: var(--bs-primary);
+     background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .service-icon {
+   width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      background: rgba(13, 110, 253, 0.1);
+        border-radius: 0.5rem;
+    }
+</style>

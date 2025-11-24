@@ -1,0 +1,278 @@
+@model TafsilkPlatform.Models.ViewModels.Store.ProductListViewModel
+@{
+    ViewData["Title"] = "المتجر - تصفح المنتجات";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 col-md-4 mb-4">
+    <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+  <h5 class="mb-0">
+            <i class="fas fa-filter"></i> تصفية المنتجات
+</h5>
+       </div>
+          <div class="card-body">
+      <form method="get" asp-action="Index" id="filterForm">
+       <!-- Category Filter -->
+ <div class="mb-3">
+           <label class="form-label fw-bold">التصنيف</label>
+          <select name="category" class="form-select" onchange="this.form.submit()">
+    <option value="">جميع التصنيفات</option>
+     <option value="Thobe" selected="@(Model.Category == "Thobe")">ثوب</option>
+                 <option value="Abaya" selected="@(Model.Category == "Abaya")">عباية</option>
+     <option value="Suit" selected="@(Model.Category == "Suit")">بدلة</option>
+     <option value="Traditional" selected="@(Model.Category == "Traditional")">تقليدي</option>
+            <option value="Accessories" selected="@(Model.Category == "Accessories")">إكسسوارات</option>
+            </select>
+  </div>
+
+   <!-- Price Range -->
+    <div class="mb-3">
+              <label class="form-label fw-bold">نطاق السعر (ريال)</label>
+    <div class="row g-2">
+        <div class="col-6">
+      <input type="number" name="minPrice" class="form-control form-control-sm" 
+   placeholder="الأدنى" value="@Model.MinPrice" />
+    </div>
+      <div class="col-6">
+          <input type="number" name="maxPrice" class="form-control form-control-sm" 
+                 placeholder="الأعلى" value="@Model.MaxPrice" />
+     </div>
+  </div>
+     </div>
+
+<!-- Search -->
+    <div class="mb-3">
+            <label class="form-label fw-bold">البحث</label>
+    <input type="text" name="search" class="form-control" 
+   placeholder="ابحث عن منتج..." value="@Model.SearchQuery" />
+            </div>
+
+        <!-- Sort By -->
+             <div class="mb-3">
+           <label class="form-label fw-bold">ترتيب حسب</label>
+   <select name="sortBy" class="form-select">
+     <option value="">الأحدث</option>
+    <option value="price_asc" selected="@(Model.SortBy == "price_asc")">السعر: من الأقل للأعلى</option>
+     <option value="price_desc" selected="@(Model.SortBy == "price_desc")">السعر: من الأعلى للأقل</option>
+ <option value="name" selected="@(Model.SortBy == "name")">الاسم أ-ي</option>
+        <option value="rating" selected="@(Model.SortBy == "rating")">الأعلى تقييماً</option>
+            <option value="popular" selected="@(Model.SortBy == "popular")">الأكثر مبيعاً</option>
+                  </select>
+    </div>
+
+     <button type="submit" class="btn btn-primary w-100">
+  <i class="fas fa-search"></i> تطبيق الفلاتر
+     </button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100 mt-2">
+           <i class="fas fa-redo"></i> إعادة تعيين
+      </a>
+  </form>
+      </div>
+ </div>
+        </div>
+
+        <!-- Products Grid -->
+      <div class="col-lg-9 col-md-8">
+         <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">
+ @if (!string.IsNullOrEmpty(Model.Category))
+              {
+           <text>@Model.Category</text>
+               }
+          else if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+  <text>نتائج البحث: "@Model.SearchQuery"</text>
+         }
+       else
+ {
+      <text>جميع المنتجات</text>
+        }
+          </h2>
+         <span class="text-muted">@Model.TotalCount منتج</span>
+        </div>
+
+            @if (Model.Products.Any())
+      {
+    <div class="row g-4">
+       @foreach (var product in Model.Products)
+       {
+    <div class="col-lg-4 col-md-6">
+        <div class="card product-card h-100 shadow-sm hover-lift">
+    <a asp-action="ProductDetails" asp-route-id="@product.ProductId" class="text-decoration-none">
+        @if (!string.IsNullOrEmpty(product.PrimaryImageBase64))
+   {
+         <img src="data:image/jpeg;base64,@product.PrimaryImageBase64" 
+     class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
+        }
+    else
+       {
+            <div class="bg-light d-flex align-items-center justify-content-center" 
+          style="height: 250px;">
+  <i class="fas fa-image fa-3x text-muted"></i>
+    </div>
+           }
+        </a>
+       
+   <div class="card-body">
+     <span class="badge bg-info mb-2">@product.Category</span>
+    
+        @if (product.IsFeatured)
+   {
+ <span class="badge bg-warning text-dark mb-2">
+  <i class="fas fa-star"></i> مميز
+             </span>
+       }
+             
+    <h5 class="card-title">
+<a asp-action="ProductDetails" asp-route-id="@product.ProductId" 
+                   class="text-dark text-decoration-none">
+     @product.Name
+          </a>
+          </h5>
+ 
+      <p class="card-text text-muted small">
+    @(product.Description.Length > 80 
+      ? product.Description.Substring(0, 80) + "..." 
+          : product.Description)
+         </p>
+    
+     <div class="d-flex justify-content-between align-items-center mb-2">
+      @if (product.DiscountedPrice.HasValue)
+           {
+         <div>
+               <span class="text-muted text-decoration-line-through">
+     @product.Price.ToString("N2") ريال
+               </span>
+     <span class="h5 text-danger mb-0 ms-2">
+       @product.DiscountedPrice.Value.ToString("N2") ريال
+            </span>
+             </div>
+   }
+    else
+          {
+            <span class="h5 text-primary mb-0">
+         @product.Price.ToString("N2") ريال
+         </span>
+        }
+    </div>
+               
+         <div class="d-flex align-items-center mb-3">
+            <div class="text-warning">
+           @for (int i = 0; i < 5; i++)
+       {
+    @if (i < Math.Floor(product.AverageRating))
+           {
+  <i class="fas fa-star"></i>
+                }
+   else if (i < product.AverageRating)
+          {
+          <i class="fas fa-star-half-alt"></i>
+                }
+            else
+   {
+  <i class="far fa-star"></i>
+           }
+ }
+  </div>
+              <small class="text-muted ms-2">(@product.ReviewCount)</small>
+       </div>
+   
+         @if (product.StockQuantity > 0)
+                 {
+        <a asp-action="ProductDetails" asp-route-id="@product.ProductId" 
+       class="btn btn-primary w-100">
+     <i class="fas fa-eye"></i> عرض التفاصيل
+        </a>
+    }
+      else
+        {
+   <button class="btn btn-secondary w-100" disabled>
+          <i class="fas fa-times"></i> غير متوفر
+          </button>
+   }
+        </div>
+       </div>
+        </div>
+          }
+     </div>
+
+        <!-- Pagination -->
+      @if (Model.TotalPages > 1)
+             {
+       <nav aria-label="تنقل بين الصفحات" class="mt-4">
+       <ul class="pagination justify-content-center">
+        @if (Model.HasPrevious)
+        {
+      <li class="page-item">
+          <a class="page-link" asp-action="Index" 
+  asp-route-page="@(Model.PageNumber - 1)"
+      asp-route-category="@Model.Category"
+          asp-route-search="@Model.SearchQuery"
+     asp-route-sortBy="@Model.SortBy">السابق</a>
+         </li>
+}
+        
+       @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+        {
+       <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+       <a class="page-link" asp-action="Index" 
+         asp-route-page="@i"
+asp-route-category="@Model.Category"
+         asp-route-search="@Model.SearchQuery"
+                   asp-route-sortBy="@Model.SortBy">@i</a>
+              </li>
+    }
+          
+      @if (Model.HasNext)
+          {
+             <li class="page-item">
+       <a class="page-link" asp-action="Index" 
+           asp-route-page="@(Model.PageNumber + 1)"
+      asp-route-category="@Model.Category"
+              asp-route-search="@Model.SearchQuery"
+   asp-route-sortBy="@Model.SortBy">التالي</a>
+     </li>
+      }
+     </ul>
+   </nav>
+        }
+      }
+ else
+      {
+            <div class="text-center py-5">
+     <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
+          <h3 class="text-muted">لا توجد منتجات</h3>
+         <p class="text-muted">جرب تغيير الفلاتر أو مصطلحات البحث</p>
+ <a asp-action="Index" class="btn btn-primary">
+<i class="fas fa-redo"></i> إعادة تعيين الفلاتر
+        </a>
+                </div>
+   }
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .hover-lift {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+        }
+      .product-card {
+       border-radius: 10px;
+  overflow: hidden;
+        }
+   .product-card .card-img-top {
+transition: transform 0.3s ease;
+        }
+        .product-card:hover .card-img-top {
+ transform: scale(1.05);
+        }
+ </style>
+}
