@@ -856,23 +856,9 @@ cursor: pointer;
      </div>
       </div>
 </form>
- </div>
-        </div>
-    </div>
-</main>
-
-<!-- Toast Notification -->
-<div class="toast" id="toast">
-    <i class="fas fa-check-circle"></i>
-    <span id="toast-message">تم تنفيذ العملية بنجاح</span>
-</div>
-
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-      // DOM Elements
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // DOM Elements
             const steps = document.querySelectorAll('.step');
        const formSteps = document.querySelectorAll('.form-step');
          const progressBar = document.getElementById('progressBar');
@@ -1018,6 +1004,24 @@ function updateSummary() {
 
        // Initialize the page
   initializePage();
+
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            // On successful profile completion, redirect to tailor dashboard
+            // This should be handled server-side, but ensure client-side expectation
+        });
     });
-    </script>
+</script>
+</div>
+        </div>
+    </div>
+</main>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-message">تم تنفيذ العملية بنجاح</span>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

@@ -16,7 +16,7 @@ public partial class ApplicationDbContext : DbContext
         // Use AsNoTracking() explicitly in read-only queries instead
         ChangeTracker.AutoDetectChangesEnabled = true;
         ChangeTracker.LazyLoadingEnabled = false;
-        
+
         // ✅ Enable sensitive data logging only in development (controlled by Program.cs)
         // This prevents accidental logging of sensitive data in production
     }
@@ -36,18 +36,18 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<AppSetting> AppSettings { get; set; }
     // ✅ IDEMPOTENCY: Idempotency keys for preventing duplicate requests
     public virtual DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
-    
+
     // ✅ NEW: Loyalty and rewards system
     public virtual DbSet<CustomerLoyalty> CustomerLoyalties { get; set; }
     public virtual DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
-    
+
     // ✅ NEW: Saved measurements for faster rebooking
     public virtual DbSet<CustomerMeasurement> CustomerMeasurements { get; set; }
-    
+
     // ✅ NEW: Complaints and support system
     public virtual DbSet<Complaint> Complaints { get; set; }
     public virtual DbSet<ComplaintAttachment> ComplaintAttachments { get; set; }
-    
+
     // ✅ ECOMMERCE: Products and shopping cart
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
@@ -167,9 +167,9 @@ public partial class ApplicationDbContext : DbContext
    .HasForeignKey<TailorProfile>(d => d.UserId)
         .OnDelete(DeleteBehavior.NoAction)
         .HasConstraintName("FK_TailorProfiles_Users");
-});
+        });
 
-// UserAddress Entity
+        // UserAddress Entity
         modelBuilder.Entity<UserAddress>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__UserAddr__3214EC07DDE0E48B");
@@ -240,6 +240,7 @@ public partial class ApplicationDbContext : DbContext
         modelBuilder.Entity<Payment>(entity =>
            {
                entity.Property(e => e.Amount).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+               entity.Property(e => e.RefundedAmount).HasColumnType("decimal(18,4)"); // Or use HasPrecision(18, 4)
 
                entity.HasOne(p => p.Customer)
       .WithMany(cp => cp.Payments)
@@ -314,150 +315,150 @@ public partial class ApplicationDbContext : DbContext
           });
 
         // ✅ IDEMPOTENCY: IdempotencyKey Entity Configuration
-    modelBuilder.Entity<IdempotencyKey>(entity =>
-      {
-     entity.ToTable("IdempotencyKeys");
-    entity.HasKey(e => e.Key).HasName("PK_IdempotencyKeys");
+        modelBuilder.Entity<IdempotencyKey>(entity =>
+          {
+              entity.ToTable("IdempotencyKeys");
+              entity.HasKey(e => e.Key).HasName("PK_IdempotencyKeys");
 
-    entity.Property(e => e.Key).IsRequired().HasMaxLength(128);
-entity.Property(e => e.Status).HasDefaultValue(IdempotencyStatus.InProgress);
-  entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("(getutcdate())");
-   entity.Property(e => e.ContentType).HasMaxLength(100);
-      entity.Property(e => e.Endpoint).HasMaxLength(500);
-       entity.Property(e => e.Method).HasMaxLength(10);
+              entity.Property(e => e.Key).IsRequired().HasMaxLength(128);
+              entity.Property(e => e.Status).HasDefaultValue(IdempotencyStatus.InProgress);
+              entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("(getutcdate())");
+              entity.Property(e => e.ContentType).HasMaxLength(100);
+              entity.Property(e => e.Endpoint).HasMaxLength(500);
+              entity.Property(e => e.Method).HasMaxLength(10);
 
-  // Indexes for performance
-     entity.HasIndex(e => e.Status).HasDatabaseName("IX_IdempotencyKeys_Status");
-        entity.HasIndex(e => e.ExpiresAtUtc).HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
-     entity.HasIndex(e => e.UserId).HasDatabaseName("IX_IdempotencyKeys_UserId");
-     });
-        
+              // Indexes for performance
+              entity.HasIndex(e => e.Status).HasDatabaseName("IX_IdempotencyKeys_Status");
+              entity.HasIndex(e => e.ExpiresAtUtc).HasDatabaseName("IX_IdempotencyKeys_ExpiresAtUtc");
+              entity.HasIndex(e => e.UserId).HasDatabaseName("IX_IdempotencyKeys_UserId");
+          });
+
         // ✅ NEW: CustomerLoyalty Entity Configuration
-     modelBuilder.Entity<CustomerLoyalty>(entity =>
-        {
-        entity.ToTable("CustomerLoyalty");
-            entity.HasKey(e => e.Id).HasName("PK_CustomerLoyalty");
-            
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-  entity.Property(e => e.Tier).HasMaxLength(50).HasDefaultValue("Bronze");
-   entity.Property(e => e.ReferralCode).HasMaxLength(20);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-       
-   entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerLoyalty_CustomerId").IsUnique();
-            entity.HasIndex(e => e.ReferralCode).HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
+        modelBuilder.Entity<CustomerLoyalty>(entity =>
+           {
+               entity.ToTable("CustomerLoyalty");
+               entity.HasKey(e => e.Id).HasName("PK_CustomerLoyalty");
 
-            entity.HasOne(l => l.Customer)
-    .WithOne(c => c.Loyalty)
-           .HasForeignKey<CustomerLoyalty>(l => l.CustomerId)
-  .OnDelete(DeleteBehavior.NoAction);
-    });
-        
+               entity.Property(e => e.Id).ValueGeneratedOnAdd();
+               entity.Property(e => e.Tier).HasMaxLength(50).HasDefaultValue("Bronze");
+               entity.Property(e => e.ReferralCode).HasMaxLength(20);
+               entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+               entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerLoyalty_CustomerId").IsUnique();
+               entity.HasIndex(e => e.ReferralCode).HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
+
+               entity.HasOne(l => l.Customer)
+       .WithOne(c => c.Loyalty)
+              .HasForeignKey<CustomerLoyalty>(l => l.CustomerId)
+     .OnDelete(DeleteBehavior.NoAction);
+           });
+
         // ✅ NEW: LoyaltyTransaction Entity Configuration
         modelBuilder.Entity<LoyaltyTransaction>(entity =>
       {
-   entity.ToTable("LoyaltyTransactions");
-        entity.HasKey(e => e.Id).HasName("PK_LoyaltyTransactions");
+          entity.ToTable("LoyaltyTransactions");
+          entity.HasKey(e => e.Id).HasName("PK_LoyaltyTransactions");
 
-      entity.Property(e => e.Id).ValueGeneratedOnAdd();
-     entity.Property(e => e.Type).IsRequired().HasMaxLength(20);
-         entity.Property(e => e.Description).HasMaxLength(200);
-        entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-      
-     entity.HasIndex(e => e.CustomerLoyaltyId).HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
-   entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
-    
-    entity.HasOne(t => t.CustomerLoyalty)
-     .WithMany(l => l.Transactions)
-   .HasForeignKey(t => t.CustomerLoyaltyId)
-     .OnDelete(DeleteBehavior.NoAction);
-        });
-        
-  // ✅ NEW: CustomerMeasurement Entity Configuration
-      modelBuilder.Entity<CustomerMeasurement>(entity =>
- {
-            entity.ToTable("CustomerMeasurements");
-   entity.HasKey(e => e.Id).HasName("PK_CustomerMeasurements");
-    
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.GarmentType).HasMaxLength(50);
+          entity.Property(e => e.Id).ValueGeneratedOnAdd();
+          entity.Property(e => e.Type).IsRequired().HasMaxLength(20);
+          entity.Property(e => e.Description).HasMaxLength(200);
+          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+          entity.HasIndex(e => e.CustomerLoyaltyId).HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
+          entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
+
+          entity.HasOne(t => t.CustomerLoyalty)
+           .WithMany(l => l.Transactions)
+         .HasForeignKey(t => t.CustomerLoyaltyId)
+           .OnDelete(DeleteBehavior.NoAction);
+      });
+
+        // ✅ NEW: CustomerMeasurement Entity Configuration
+        modelBuilder.Entity<CustomerMeasurement>(entity =>
+   {
+       entity.ToTable("CustomerMeasurements");
+       entity.HasKey(e => e.Id).HasName("PK_CustomerMeasurements");
+
+       entity.Property(e => e.Id).ValueGeneratedOnAdd();
+       entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+       entity.Property(e => e.GarmentType).HasMaxLength(50);
        entity.Property(e => e.CustomMeasurementsJson).HasMaxLength(2000);
-            entity.Property(e => e.Notes).HasMaxLength(500);
-        entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            
-            // Decimal precision for measurements
-          entity.Property(e => e.Chest).HasColumnType("decimal(5,2)");
-         entity.Property(e => e.Waist).HasColumnType("decimal(5,2)");
-     entity.Property(e => e.Hips).HasColumnType("decimal(5,2)");
-            entity.Property(e => e.ShoulderWidth).HasColumnType("decimal(5,2)");
-  entity.Property(e => e.SleeveLength).HasColumnType("decimal(5,2)");
-            entity.Property(e => e.InseamLength).HasColumnType("decimal(5,2)");
-            entity.Property(e => e.OutseamLength).HasColumnType("decimal(5,2)");
-   entity.Property(e => e.NeckCircumference).HasColumnType("decimal(5,2)");
-entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
-            entity.Property(e => e.ThighCircumference).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.Notes).HasMaxLength(500);
+       entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+       // Decimal precision for measurements
+       entity.Property(e => e.Chest).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.Waist).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.Hips).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.ShoulderWidth).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.SleeveLength).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.InseamLength).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.OutseamLength).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.NeckCircumference).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
+       entity.Property(e => e.ThighCircumference).HasColumnType("decimal(5,2)");
        entity.Property(e => e.ThobeLength).HasColumnType("decimal(5,2)");
-        entity.Property(e => e.AbayaLength).HasColumnType("decimal(5,2)");
-         
-   entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerMeasurements_CustomerId");
-    
-      entity.HasOne(m => m.Customer)
-     .WithMany(c => c.SavedMeasurements)
-      .HasForeignKey(m => m.CustomerId)
-     .OnDelete(DeleteBehavior.NoAction);
-        });
-      
-        // ✅ NEW: Complaint Entity Configuration
-      modelBuilder.Entity<Complaint>(entity =>
-        {
-            entity.ToTable("Complaints");
-      entity.HasKey(e => e.Id).HasName("PK_Complaints");
-        
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.Subject).IsRequired().HasMaxLength(100);
-            entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
-     entity.Property(e => e.ComplaintType).HasMaxLength(50).HasDefaultValue("Other");
-            entity.Property(e => e.DesiredResolution).HasMaxLength(50);
-            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
-        entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Medium");
-            entity.Property(e => e.AdminResponse).HasMaxLength(2000);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-        
-            entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Complaints_OrderId");
-            entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Complaints_CustomerId");
-   entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Complaints_TailorId");
-         entity.HasIndex(e => e.Status).HasDatabaseName("IX_Complaints_Status");
-            
-            entity.HasOne(c => c.Order)
-      .WithMany(o => o.Complaints)
-.HasForeignKey(c => c.OrderId)
-     .OnDelete(DeleteBehavior.NoAction);
-           
-            entity.HasOne(c => c.Customer)
-       .WithMany(cp => cp.Complaints)
-  .HasForeignKey(c => c.CustomerId)
-         .OnDelete(DeleteBehavior.NoAction);
-      
-            entity.HasOne(c => c.Tailor)
-           .WithMany()
-          .HasForeignKey(c => c.TailorId)
+       entity.Property(e => e.AbayaLength).HasColumnType("decimal(5,2)");
+
+       entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerMeasurements_CustomerId");
+
+       entity.HasOne(m => m.Customer)
+    .WithMany(c => c.SavedMeasurements)
+     .HasForeignKey(m => m.CustomerId)
     .OnDelete(DeleteBehavior.NoAction);
-        });
-        
+   });
+
+        // ✅ NEW: Complaint Entity Configuration
+        modelBuilder.Entity<Complaint>(entity =>
+          {
+              entity.ToTable("Complaints");
+              entity.HasKey(e => e.Id).HasName("PK_Complaints");
+
+              entity.Property(e => e.Id).ValueGeneratedOnAdd();
+              entity.Property(e => e.Subject).IsRequired().HasMaxLength(100);
+              entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
+              entity.Property(e => e.ComplaintType).HasMaxLength(50).HasDefaultValue("Other");
+              entity.Property(e => e.DesiredResolution).HasMaxLength(50);
+              entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
+              entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Medium");
+              entity.Property(e => e.AdminResponse).HasMaxLength(2000);
+              entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+
+              entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Complaints_OrderId");
+              entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Complaints_CustomerId");
+              entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Complaints_TailorId");
+              entity.HasIndex(e => e.Status).HasDatabaseName("IX_Complaints_Status");
+
+              entity.HasOne(c => c.Order)
+        .WithMany(o => o.Complaints)
+  .HasForeignKey(c => c.OrderId)
+       .OnDelete(DeleteBehavior.NoAction);
+
+              entity.HasOne(c => c.Customer)
+         .WithMany(cp => cp.Complaints)
+    .HasForeignKey(c => c.CustomerId)
+           .OnDelete(DeleteBehavior.NoAction);
+
+              entity.HasOne(c => c.Tailor)
+             .WithMany()
+            .HasForeignKey(c => c.TailorId)
+      .OnDelete(DeleteBehavior.NoAction);
+          });
+
         // ✅ NEW: ComplaintAttachment Entity Configuration
         modelBuilder.Entity<ComplaintAttachment>(entity =>
         {
             entity.ToTable("ComplaintAttachments");
             entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
 
-  entity.Property(e => e.Id).ValueGeneratedOnAdd();
-         entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
             entity.Property(e => e.ContentType).HasMaxLength(100);
-          entity.Property(e => e.FileName).HasMaxLength(255);
-  entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
-     
-  entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
-            
+            entity.Property(e => e.FileName).HasMaxLength(255);
+            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
+
             entity.HasOne(a => a.Complaint)
        .WithMany(c => c.Attachments)
    .HasForeignKey(a => a.ComplaintId)
@@ -465,83 +466,83 @@ entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
         });
 
         // ✅ ECOMMERCE: Product Entity
-      modelBuilder.Entity<Product>(entity =>
-        {
-            entity.HasKey(e => e.ProductId);
- entity.Property(e => e.Price).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-        entity.Property(e => e.DiscountedPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-          
-            entity.HasIndex(e => e.Category);
-   entity.HasIndex(e => e.Slug).IsUnique();
-    entity.HasIndex(e => e.IsAvailable);
-    entity.HasIndex(e => e.IsFeatured);
+        modelBuilder.Entity<Product>(entity =>
+          {
+              entity.HasKey(e => e.ProductId);
+              entity.Property(e => e.Price).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+              entity.Property(e => e.DiscountedPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+              entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
 
-            entity.HasOne(p => p.Tailor)
-.WithMany()
-       .HasForeignKey(p => p.TailorId)
-  .OnDelete(DeleteBehavior.NoAction);
-  });
+              entity.HasIndex(e => e.Category);
+              entity.HasIndex(e => e.Slug).IsUnique();
+              entity.HasIndex(e => e.IsAvailable);
+              entity.HasIndex(e => e.IsFeatured);
+
+              entity.HasOne(p => p.Tailor)
+  .WithMany()
+         .HasForeignKey(p => p.TailorId)
+    .OnDelete(DeleteBehavior.NoAction);
+          });
 
         // ✅ ECOMMERCE: ShoppingCart Entity
         modelBuilder.Entity<ShoppingCart>(entity =>
         {
             entity.HasKey(e => e.CartId);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-            
-    entity.HasIndex(e => e.CustomerId).IsUnique();
- 
-   entity.HasOne(c => c.Customer)
-       .WithOne(cp => cp.ShoppingCart)
-                .HasForeignKey<ShoppingCart>(c => c.CustomerId)
-          .OnDelete(DeleteBehavior.NoAction);
-      });
+
+            entity.HasIndex(e => e.CustomerId).IsUnique();
+
+            entity.HasOne(c => c.Customer)
+                .WithOne(cp => cp.ShoppingCart)
+                         .HasForeignKey<ShoppingCart>(c => c.CustomerId)
+                   .OnDelete(DeleteBehavior.NoAction);
+        });
 
         // ✅ ECOMMERCE: CartItem Entity
         modelBuilder.Entity<CartItem>(entity =>
         {
-   entity.HasKey(e => e.CartItemId);
-    entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-entity.Property(e => e.AddedAt).HasDefaultValueSql("(getutcdate())");
-    
-       entity.HasIndex(e => e.CartId);
-      entity.HasIndex(e => e.ProductId);
-     
-       entity.HasOne(ci => ci.Cart)
-      .WithMany(c => c.Items)
-    .HasForeignKey(ci => ci.CartId)
-     .OnDelete(DeleteBehavior.NoAction);
-   
-    entity.HasOne(ci => ci.Product)
-                .WithMany(p => p.CartItems)
-            .HasForeignKey(ci => ci.ProductId)
-              .OnDelete(DeleteBehavior.NoAction);
+            entity.HasKey(e => e.CartItemId);
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
+            entity.Property(e => e.AddedAt).HasDefaultValueSql("(getutcdate())");
+
+            entity.HasIndex(e => e.CartId);
+            entity.HasIndex(e => e.ProductId);
+
+            entity.HasOne(ci => ci.Cart)
+           .WithMany(c => c.Items)
+         .HasForeignKey(ci => ci.CartId)
+          .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(ci => ci.Product)
+                        .WithMany(p => p.CartItems)
+                    .HasForeignKey(ci => ci.ProductId)
+                      .OnDelete(DeleteBehavior.NoAction);
         });
 
- // ✅ ECOMMERCE: ProductReview Entity
+        // ✅ ECOMMERCE: ProductReview Entity
         modelBuilder.Entity<ProductReview>(entity =>
         {
- entity.HasKey(e => e.ReviewId);
+            entity.HasKey(e => e.ReviewId);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
-    
- entity.HasIndex(e => e.ProductId);
+
+            entity.HasIndex(e => e.ProductId);
             entity.HasIndex(e => e.CustomerId);
-            
-     entity.HasOne(r => r.Product)
-          .WithMany(p => p.Reviews)
-    .HasForeignKey(r => r.ProductId)
- .OnDelete(DeleteBehavior.NoAction);
-  
+
+            entity.HasOne(r => r.Product)
+                 .WithMany(p => p.Reviews)
+           .HasForeignKey(r => r.ProductId)
+        .OnDelete(DeleteBehavior.NoAction);
+
             entity.HasOne(r => r.Customer)
      .WithMany(c => c.ProductReviews)
           .HasForeignKey(r => r.CustomerId)
      .OnDelete(DeleteBehavior.NoAction);
         });
 
-// Ensure all foreign keys use NoAction to prevent multiple cascade path errors
-  foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
-  {
- foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
+        // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
+        foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+        {
+            foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
         }
 
     }

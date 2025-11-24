@@ -2,10 +2,10 @@
 
 @{
     ViewData["Title"] = "إكمال التسجيل - تفصيلك";
-    var provider = ViewData["Provider"]?.ToString() ?? "Google";
-    var providerName = provider == "Google" ? "Google" : "Facebook";
-    var providerIcon = provider == "Google" ? "fab fa-google" : "fab fa-facebook-f";
-    var providerColor = provider == "Google" ? "#db4437" : "#1877f2";
+    var provider = "Google";
+    var providerName = "Google";
+    var providerIcon = "fab fa-google";
+    var providerColor = "#db4437";
 }
 
 @section Styles {
@@ -303,26 +303,30 @@ width: 100%;
  إنشاء الحساب
    </button>
   </form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const userTypeOptions = document.querySelectorAll(".user-type-option");
+        const userTypeInput = document.getElementById("userTypeInput");
+
+        userTypeOptions.forEach(option => {
+            option.addEventListener("click", function () {
+                userTypeOptions.forEach(opt => opt.classList.remove("active"));
+                this.classList.add("active");
+                const selectedType = this.getAttribute("data-type");
+                userTypeInput.value = selectedType;
+            });
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            // On successful registration, redirect to profile completion or dashboard
+            // This should be handled server-side, but ensure client-side expectation
+        });
+    });
+</script>
         </div>
   </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- 
- <script>
-      document.addEventListener("DOMContentLoaded", function () {
-   const userTypeOptions = document.querySelectorAll(".user-type-option");
-       const userTypeInput = document.getElementById("userTypeInput");
-
-    userTypeOptions.forEach(option => {
-      option.addEventListener("click", function () {
-  userTypeOptions.forEach(opt => opt.classList.remove("active"));
-       this.classList.add("active");
-   const selectedType = this.getAttribute("data-type");
-  userTypeInput.value = selectedType;
- });
-     });
-    });
-    </script>
 }

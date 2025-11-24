@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Repository;
-
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Utility.Security;
 using TafsilkPlatform.Web.Services;
@@ -705,125 +704,6 @@ if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
 
     #endregion
 
-    #region Password Reset
-
-    /// <summary>
-    /// Displays the forgot password page.
-    /// </summary>
-    [HttpGet]
-    [AllowAnonymous]
-    public IActionResult ForgottenPassword()
-    {
-        return View();
-    }
-
-    /// <summary>
-    /// Handles POST for forgotten password. Sends a reset link if the email exists.
-    /// </summary>
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ForgottenPassword(string email)
-    {
-        email = SanitizeInput(email ?? string.Empty, 254)?.ToLowerInvariant() ?? string.Empty;
-
-        if (string.IsNullOrWhiteSpace(email))
-        {
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
-            return View();
-        }
-
-        if (!IsValidEmail(email))
-        {
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
-            return View();
-        }
-
-        var user = await _unitOfWork.Users.GetByEmailAsync(email);
-
-        // Security: Always show success message (don't reveal if email exists)
-        if (user == null)
-        {
-            _logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
-            TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
-            return View();
-        }
-
-        var resetToken = GeneratePasswordResetToken();
-        user.PasswordResetToken = resetToken;
-        user.PasswordResetTokenExpires = _dateTime.Now.AddHours(1);
-        user.UpdatedAt = _dateTime.Now;
-
-        await _unitOfWork.Users.UpdateAsync(user);
-        await _unitOfWork.SaveChangesAsync();
-
-        var resetLink = Url.Action(nameof(ResetPassword), "Account",
-     new { token = resetToken }, Request.Scheme);
-        _logger.LogInformation("Password reset link generated for {Email}: {Link}", email, resetLink);
-
-        TempData["SuccessMessage"] = "إذا كان البريد الإلكتروني موجوداً في نظامنا، ستتلقى رسالة لإعادة تعيين كلمة المرور خلال بضع دقائق.";
-        return View();
-    }
-
-    /// <summary>
-    /// Displays the reset password page for a given token.
-    /// </summary>
-    [HttpGet]
-    [AllowAnonymous]
-    public IActionResult ResetPassword(string token)
-    {
-        if (string.IsNullOrEmpty(token))
-        {
-            TempData["ErrorMessage"] = "رابط إعادة تعيين كلمة المرور غير صالح";
-            return RedirectToAction(nameof(Login));
-        }
-
-        var model = new ResetPasswordViewModel { Token = token };
-        return View(model);
-    }
-
-    /// <summary>
-    /// Handles POST for resetting the user's password.
-    /// </summary>
-    [HttpPost]
-    [AllowAnonymous]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
-    {
-        if (!ModelState.IsValid)
-            return View(model);
-
-        var user = await _unitOfWork.Context.Set<User>()
-        .FirstOrDefaultAsync(u => u.PasswordResetToken == model.Token);
-
-        if (user == null)
-        {
-            ModelState.AddModelError(string.Empty, "رابط إعادة تعيين كلمة المرور غير صالح");
-            return View(model);
-        }
-
-        if (user.PasswordResetTokenExpires == null || user.PasswordResetTokenExpires < _dateTime.Now)
-        {
-            ModelState.AddModelError(string.Empty, "انتهت صلاحية رابط إعادة تعيين كلمة المرور. يرجى طلب رابط جديد.");
-            return View(model);
-        }
-
-        user.PasswordHash = PasswordHasher.Hash(model.NewPassword);
-        user.PasswordResetToken = null;
-        user.PasswordResetTokenExpires = null;
-        user.UpdatedAt = _dateTime.Now;
-
-        await _unitOfWork.Users.UpdateAsync(user);
-        await _unitOfWork.SaveChangesAsync();
-
-        _logger.LogInformation("Password reset successful for user: {Email}", user.Email);
-
-        TempData["RegisterSuccess"] = "تم إعادة تعيين كلمة.password بنجاح! يمكنك الآن تسجيل الدخول بكلمة المرور الجديدة.";
-        return RedirectToAction(nameof(Login));
-    }
-
-    #endregion
-
     #region OAuth (Google)
 
     /// <summary>
@@ -1359,16 +1239,6 @@ if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
 
         return input;
     }
-
-    /// <summary>
-    /// Generates a secure password reset token.
-    /// </summary>
-    private static string GeneratePasswordResetToken() =>
- Convert.ToBase64String(Guid.NewGuid().ToByteArray())
- .Replace("+", "")
-       .Replace("/", "")
-      .Replace("=", "")
-     [..32];
 
     /// <summary>
     /// Generates a secure random token for email verification or other purposes.
