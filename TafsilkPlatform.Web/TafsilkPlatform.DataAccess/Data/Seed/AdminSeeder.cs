@@ -20,122 +20,156 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
             // Read admin credentials from configuration
             var adminEmail = config["Admin:Email"] ?? "admin@tafsilk.local";
             var adminPassword = config["Admin:Password"] ?? "Admin@123!";
-            
-            // ✅ Create tester account (admin with all roles)
-            var testerEmail = config["Tester:Email"] ?? "tester@tafsilk.local";
-            var testerPassword = config["Tester:Password"] ?? "Tester@123!";
 
             if (string.IsNullOrWhiteSpace(adminEmail) || adminEmail == "admin@tafsilk.local")
- {
-       logger.LogWarning("Admin email not configured. Using default 'admin@tafsilk.local'. Set 'Admin:Email' in user-secrets.");
+            {
+                logger.LogWarning("Admin email not configured. Using default 'admin@tafsilk.local'. Set 'Admin:Email' in user-secrets.");
             }
 
             if (string.IsNullOrWhiteSpace(adminPassword) || adminPassword == "Admin@123!")
-      {
-  logger.LogWarning("Admin password not configured. Using default. Set 'Admin:Password' in user-secrets and change after first login.");
-         }
-
-         // ✅ Ensure admin user exists
-  var adminUser = db.Users.FirstOrDefault(u => u.Email == adminEmail);
-    if (adminUser == null)
-         {
-    adminUser = new User
-       {
-   Id = Guid.NewGuid(),
-      Email = adminEmail,
-  PasswordHash = PasswordHasher.Hash(adminPassword),
-  RoleId = adminRole.Id,
-          IsActive = true,
-  CreatedAt = DateTime.UtcNow,
-       EmailVerified = true
-    };
-     db.Users.Add(adminUser);
-         logger.LogInformation("✅ Admin user created: {Email}", adminEmail);
-         }
-
-          // ✅ NEW: Create tester/admin user for testing all pages
-         var testerUser = db.Users.FirstOrDefault(u => u.Email == testerEmail);
-       if (testerUser == null)
-   {
-      var testerId = Guid.NewGuid();
-                testerUser = new User
-         {
-           Id = testerId,
-  Email = testerEmail,
-             PasswordHash = PasswordHasher.Hash(testerPassword),
-          RoleId = adminRole.Id, // Admin role
- IsActive = true,
-          CreatedAt = DateTime.UtcNow,
-     EmailVerified = true
-            };
-        db.Users.Add(testerUser);
-
-            // ✅ Create CustomerProfile for tester
- var customerProfile = new CustomerProfile
- {
-              Id = Guid.NewGuid(),
-   UserId = testerId,
-       FullName = "Tester Account",
-          Gender = "Other",
-   City = "Test City",
-                Bio = "Test account with full platform access",
-         CreatedAt = DateTime.UtcNow
-      };
-       db.CustomerProfiles.Add(customerProfile);
-
-   // ✅ Create TailorProfile for tester
-        var tailorProfile = new TailorProfile
-     {
-       Id = Guid.NewGuid(),
-            UserId = testerId,
-    FullName = "Tester Tailor",
-         ShopName = "Test Tailor Shop",
-     Address = "Test Address, Test City",
-          City = "Test City",
-                Bio = "Test tailor profile for testing purposes",
-    Specialization = "تفصيل عام",
-   IsVerified = true, // Auto-verify for testing
-ExperienceYears = 5,
-          AverageRating = 4.5m,
-    CreatedAt = DateTime.UtcNow
-              };
-       db.TailorProfiles.Add(tailorProfile);
-
-                logger.LogInformation("✅ Tester account created: {Email} (can access all pages)", testerEmail);
+            {
+                logger.LogWarning("Admin password not configured. Using default. Set 'Admin:Password' in user-secrets and change after first login.");
             }
 
-            // Set admin role permissions
-      if (string.IsNullOrEmpty(adminRole.Permissions))
-         {
-          adminRole.Permissions = "{\"CanVerifyTailors\":true,\"CanManageUsers\":true,\"CanViewReports\":true,\"CanManageOrders\":true,\"CanResolveDisputes\":true,\"CanManageRefunds\":true,\"CanSendNotifications\":true,\"CanViewAuditLogs\":true,\"CanManageRoles\":true,\"CanAccessAllPages\":true}";
-       adminRole.Priority = 100;
-       logger.LogInformation("✅ Admin role permissions configured");
-       }
+            // ✅ Ensure admin user exists and can log in directly
+            var adminUser = db.Users.FirstOrDefault(u => u.Email == adminEmail);
+            if (adminUser == null)
+            {
+                adminUser = new User
+                {
+                    Id = Guid.NewGuid(),
+                    Email = adminEmail,
+                    PasswordHash = PasswordHasher.Hash(adminPassword),
+                    RoleId = adminRole.Id,
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow,
+                    EmailVerified = true
+                };
+                db.Users.Add(adminUser);
+                logger.LogInformation("✅ Admin user created: {Email}", adminEmail);
+            }
+            else
+            {
+                // Ensure admin has correct role, active state and verified email so they can login
+                adminUser.RoleId = adminRole.Id;
+                adminUser.IsActive = true;
+                adminUser.EmailVerified = true;
+                // If password not set or empty, set it to configured adminPassword
+                if (string.IsNullOrEmpty(adminUser.PasswordHash))
+                {
+                    adminUser.PasswordHash = PasswordHasher.Hash(adminPassword);
+                }
+                logger.LogInformation("✅ Admin user ensured: {Email}", adminEmail);
+            }
 
-  db.SaveChanges();
-            
+            // Ensure admin has customer profile so pages that require a customer profile work
+            var adminCustomerProfile = db.CustomerProfiles.FirstOrDefault(p => p.UserId == adminUser.Id);
+            if (adminCustomerProfile == null)
+            {
+                adminCustomerProfile = new CustomerProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = adminUser.Id,
+                    FullName = "Administrator",
+                    Gender = "Other",
+                    City = "Admin City",
+                    CreatedAt = DateTime.UtcNow
+                };
+                db.CustomerProfiles.Add(adminCustomerProfile);
+                logger.LogInformation("✅ Customer profile created for admin user: {Email}", adminEmail);
+            }
+
+            // Ensure admin has a tailor profile so pages that require tailor profile work
+            var adminTailorProfile = db.TailorProfiles.FirstOrDefault(t => t.UserId == adminUser.Id);
+            if (adminTailorProfile == null)
+            {
+                adminTailorProfile = new TailorProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = adminUser.Id,
+                    FullName = "Admin Tailor",
+                    ShopName = "Admin Tailor Shop",
+                    City = "Admin City",
+                    Address = "Admin Address",
+                    Bio = "Administrator tailor profile for platform-wide access",
+                    Specialization = "General",
+                    IsVerified = true,
+                    ExperienceYears = 0,
+                    AverageRating = 5.0m,
+                    CreatedAt = DateTime.UtcNow
+                };
+                db.TailorProfiles.Add(adminTailorProfile);
+                logger.LogInformation("✅ Tailor profile created for admin user: {Email}", adminEmail);
+            }
+
+            // Set admin role permissions - ensure CanAccessAllPages and audit/payment permissions are present
+            // If permissions already exist, attempt to merge required keys; otherwise set default full permission set
+            var requiredPermissions = new Dictionary<string, object>
+            {
+                { "CanVerifyTailors", true },
+                { "CanManageUsers", true },
+                { "CanViewReports", true },
+                { "CanManageOrders", true },
+                { "CanResolveDisputes", true },
+                { "CanManageRefunds", true },
+                { "CanSendNotifications", true },
+                { "CanViewAuditLogs", true },
+                { "CanViewCustomerAudit", true },
+                { "CanViewTailorAudit", true },
+                { "CanManageRoles", true },
+                { "CanAccessAllPages", true },
+                { "CanViewPayments", true },
+                { "CanViewTotalPayments", true }
+            };
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(adminRole.Permissions))
+                {
+                    adminRole.Permissions = System.Text.Json.JsonSerializer.Serialize(requiredPermissions);
+                }
+                else
+                {
+                    // Merge existing JSON with required keys (existing keys preserved)
+                    var existing = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(adminRole.Permissions) ?? new Dictionary<string, object>();
+                    foreach (var kv in requiredPermissions)
+                    {
+                        if (!existing.ContainsKey(kv.Key)) existing[kv.Key] = kv.Value;
+                    }
+                    adminRole.Permissions = System.Text.Json.JsonSerializer.Serialize(existing);
+                }
+                adminRole.Priority = Math.Max(adminRole.Priority, 100);
+                logger.LogInformation("✅ Admin role permissions ensured and updated");
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to update admin role permissions; setting default permission JSON");
+                adminRole.Permissions = System.Text.Json.JsonSerializer.Serialize(requiredPermissions);
+            }
+
+            db.SaveChanges();
+
             logger.LogInformation("✅ Seeding completed:");
             logger.LogInformation(" - Admin: {AdminEmail}", adminEmail);
-   logger.LogInformation("   - Tester: {TesterEmail} (Password: {TesterPassword})", testerEmail, testerPassword);
-       logger.LogInformation("   - Tester has both Customer and Tailor profiles for full testing");
-      }
+            logger.LogInformation("   - Admin has customer and tailor profiles and required audit/payment permissions");
+        }
 
         private static Role EnsureRole(ApplicationDbContext db, string roleName, string description, int priority)
         {
-       var role = db.Roles.FirstOrDefault(r => r.Name == roleName);
-      if (role == null)
+            var role = db.Roles.FirstOrDefault(r => r.Name == roleName);
+            if (role == null)
             {
-             role = new Role
-    {
+                role = new Role
+                {
                     Id = Guid.NewGuid(),
-        Name = roleName,
-     Description = description,
-                Priority = priority,
+                    Name = roleName,
+                    Description = description,
+                    Priority = priority,
                     CreatedAt = DateTime.UtcNow
-      };
-          db.Roles.Add(role);
+                };
+                db.Roles.Add(role);
             }
-       return role;
-     }
+            return role;
+        }
     }
 }

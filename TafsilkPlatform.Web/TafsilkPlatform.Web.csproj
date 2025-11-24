@@ -74,5 +74,8 @@
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
     <Content Remove="appsettings.Development.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TafsilkPlatform.Web\Areas\Customer\Controllers\" />
+  </ItemGroup>
 
 </Project>
