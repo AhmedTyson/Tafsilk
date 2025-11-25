@@ -3,6 +3,7 @@ using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
+using BLL.Services.Interfaces;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -10,6 +11,7 @@ public class ImageUploadService : IFileUploadService
 {
     private readonly ILogger<ImageUploadService> _logger;
     private readonly IHostEnvironment _environment;
+    private readonly IAttachmentService _attachmentService;
     private readonly string[] _allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
     private readonly string[] _allowedMimeTypes = { "image/jpeg", "image/png", "image/gif", "image/webp" };
     private const long MaxFileSizeInBytes = 5 * 1024 * 1024; // 5MB
@@ -25,10 +27,11 @@ public class ImageUploadService : IFileUploadService
         { ".webp", new[] { new byte[] { 0x52, 0x49, 0x46, 0x46 } } } // RIFF header, need to check for WEBP
     };
 
-    public ImageUploadService(ILogger<ImageUploadService> logger, IHostEnvironment environment)
+    public ImageUploadService(ILogger<ImageUploadService> logger, IHostEnvironment environment, IAttachmentService attachmentService)
     {
         _logger = logger;
         _environment = environment;
+        _attachmentService = attachmentService;
     }
 
     public async Task<string> UploadProfilePictureAsync(IFormFile file, string userId)
@@ -37,15 +40,15 @@ public class ImageUploadService : IFileUploadService
         if (!validationResult.IsValid)
             throw new ArgumentException(validationResult.ErrorMessage);
 
-        var fileName = GenerateUniqueFileName(file.FileName);
-        var uploadsFolder = Path.Combine(_environment.ContentRootPath, "wwwroot", "uploads", "profiles");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-        var filePath = Path.Combine(uploadsFolder, fileName);
-        await using var fileStream = new FileStream(filePath, FileMode.Create);
-        await file.CopyToAsync(fileStream);
-        _logger.LogInformation("Profile picture uploaded for user {UserId}. File: {FileName}", userId, fileName);
-        return $"/uploads/profiles/{fileName}";
+        // Use attachment service to store under Attachments/profile
+        var relative = await _attachmentService.Upload(file, "profile");
+        if (string.IsNullOrEmpty(relative))
+        {
+            throw new InvalidOperationException("فشل رفع الصورة إلى التخزين");
+        }
+
+        _logger.LogInformation("Profile picture uploaded for user {UserId}. File: {File}", userId, relative);
+        return relative; // e.g. "Attachments/profile/{filename}"
     }
 
     public async Task<bool> DeleteProfilePictureAsync(string filePath)
@@ -57,17 +60,14 @@ public class ImageUploadService : IFileUploadService
                 _logger.LogWarning("DeleteProfilePictureAsync: File path is null or empty");
                 return false;
             }
-            var physicalPath = filePath.StartsWith("/")
-                ? Path.Combine(_environment.ContentRootPath, "wwwroot", filePath.TrimStart('/'))
-                : filePath;
-            if (!File.Exists(physicalPath))
-            {
-                _logger.LogWarning("DeleteProfilePictureAsync: File does not exist: {FilePath}", physicalPath);
-                return false;
-            }
-            File.Delete(physicalPath);
-            _logger.LogInformation("DeleteProfilePictureAsync: File deleted: {FilePath}", physicalPath);
-            return true;
+
+            var deleted = await _attachmentService.Delete(filePath);
+            if (deleted)
+                _logger.LogInformation("DeleteProfilePictureAsync: File deleted: {FilePath}", filePath);
+            else
+                _logger.LogWarning("DeleteProfilePictureAsync: File not found or not allowed: {FilePath}", filePath);
+
+            return deleted;
         }
         catch (Exception ex)
         {

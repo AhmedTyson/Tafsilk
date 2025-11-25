@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\TafsilkPlatform.Web",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess",
+    "\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess\\Migrations"
+  ],
+  "SelectedNode": "\\TafsilkPlatform.Web\\TafsilkPlatform.DataAccess\\Migrations\\ApplicationDbContextModelSnapshot.cs",
+  "PreviewInSolutionExplorer": false
+}

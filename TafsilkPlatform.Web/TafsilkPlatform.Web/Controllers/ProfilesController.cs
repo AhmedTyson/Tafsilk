@@ -1,3 +1,4 @@
+using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -20,17 +21,20 @@ public class ProfilesController : Controller
     private readonly ILogger<ProfilesController> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IProfileCompletionService _profileCompletionService;
+    private readonly IAttachmentService _attachmentService;
 
     public ProfilesController(
       ApplicationDbContext db,
         ILogger<ProfilesController> logger,
    IFileUploadService fileUploadService,
-        IProfileCompletionService profileCompletionService)
+        IProfileCompletionService profileCompletionService,
+        IAttachmentService attachmentService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
         _profileCompletionService = profileCompletionService ?? throw new ArgumentNullException(nameof(profileCompletionService));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
     }
 
     #region Customer Profile Actions
@@ -596,6 +600,7 @@ if (existingProfile != null)
                 WebsiteUrl = tailor.WebsiteUrl,
                 CurrentProfilePictureData = tailor.ProfilePictureData,
                 CurrentProfilePictureContentType = tailor.ProfilePictureContentType,
+                CurrentProfilePictureUrl = tailor.ProfileImageUrl,
 
                 // Statistics
                 TotalOrders = await _db.Orders.CountAsync(o => o.TailorId == tailor.Id),
@@ -700,7 +705,7 @@ if (existingProfile != null)
             tailor.TwitterUrl = model.TwitterUrl;
             tailor.WebsiteUrl = model.WebsiteUrl;
 
-            // Handle profile picture upload
+            // Handle profile picture upload - prefer filesystem (Attachments/profile)
             if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)
             {
                 // Validate image
@@ -718,12 +723,36 @@ if (existingProfile != null)
                     return View(model);
                 }
 
-                // Read and store image data
-                using (var memoryStream = new MemoryStream())
+                try
                 {
-                    await model.ProfilePicture.CopyToAsync(memoryStream);
-                    tailor.ProfilePictureData = memoryStream.ToArray();
-                    tailor.ProfilePictureContentType = model.ProfilePicture.ContentType;
+                    var uploadedRelative = await _attachmentService.Upload(model.ProfilePicture, "profile");
+                    if (!string.IsNullOrEmpty(uploadedRelative))
+                    {
+                        tailor.ProfileImageUrl = uploadedRelative.StartsWith('/') ? uploadedRelative : "/" + uploadedRelative;
+                        // clear DB blob to prefer filesystem storage
+                        tailor.ProfilePictureData = null;
+                        tailor.ProfilePictureContentType = null;
+                    }
+                    else
+                    {
+                        // Fallback to DB storage if attachment service rejects
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await model.ProfilePicture.CopyToAsync(memoryStream);
+                            tailor.ProfilePictureData = memoryStream.ToArray();
+                            tailor.ProfilePictureContentType = model.ProfilePicture.ContentType;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error uploading profile picture via AttachmentService, falling back to DB storage");
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await model.ProfilePicture.CopyToAsync(memoryStream);
+                        tailor.ProfilePictureData = memoryStream.ToArray();
+                        tailor.ProfilePictureContentType = model.ProfilePicture.ContentType;
+                    }
                 }
             }
 
@@ -757,9 +786,39 @@ if (existingProfile != null)
             var tailor = await _db.TailorProfiles
      .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (tailor == null || tailor.ProfilePictureData == null)
+            if (tailor == null)
             {
-                // Return default avatar
+                return NotFound();
+            }
+
+            // Prefer filesystem-backed image
+            if (!string.IsNullOrWhiteSpace(tailor.ProfileImageUrl))
+            {
+                var imgUrl = tailor.ProfileImageUrl;
+
+                if (Uri.IsWellFormedUriString(imgUrl, UriKind.Absolute))
+                {
+                    return Redirect(imgUrl);
+                }
+
+                if (imgUrl.StartsWith('/'))
+                {
+                    var relativePath = imgUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        var contentType = tailor.ProfilePictureContentType ?? "image/jpeg";
+                        return PhysicalFile(physicalPath, contentType);
+                    }
+                }
+
+                // If not physical, redirect
+                return Redirect(imgUrl);
+            }
+
+            // Fallback to DB stored image
+            if (tailor.ProfilePictureData == null)
+            {
                 return NotFound();
             }
 

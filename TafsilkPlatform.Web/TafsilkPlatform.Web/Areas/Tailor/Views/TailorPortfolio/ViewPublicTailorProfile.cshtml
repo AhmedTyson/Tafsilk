@@ -774,7 +774,11 @@ color: var(--text-primary);
          <div class="profile-banner"></div>
             <div class="profile-content">
             <div class="profile-image">
-         @if (safeModel.ProfilePictureData != null)
+         @if (!string.IsNullOrWhiteSpace(safeModel.ProfileImageUrl))
+      {
+          <img src="@safeModel.ProfileImageUrl" alt="@safeModel.FullName" class="profile-img" />
+      }
+      else if (safeModel.ProfilePictureData != null)
       {
        <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = safeModel.Id })"
           alt="@safeModel.FullName"
