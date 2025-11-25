@@ -49,20 +49,25 @@ namespace TafsilkPlatform.Web.Services
             if (maxPrice.HasValue)
                 query = query.Where(p => p.Price <= maxPrice.Value);
 
-            // Apply sorting
-            query = sortBy switch
+            // Build filtered query (use the same `query` after applying filters)
+            var filtered = query;
+
+            // Get total count BEFORE applying OrderBy
+            var totalCount = await filtered.CountAsync();
+
+            // Apply sorting only to the paged query
+            var ordered = sortBy switch
             {
-                "price_asc" => query.OrderBy(p => p.Price),
-                "price_desc" => query.OrderByDescending(p => p.Price),
-                "name" => query.OrderBy(p => p.Name),
-                "rating" => query.OrderByDescending(p => p.AverageRating),
-                "popular" => query.OrderByDescending(p => p.SalesCount),
-                _ => query.OrderByDescending(p => p.CreatedAt)
+                "price_asc" => filtered.OrderBy(p => p.Price),
+                "price_desc" => filtered.OrderByDescending(p => p.Price),
+                "name" => filtered.OrderBy(p => p.Name),
+                "rating" => filtered.OrderByDescending(p => p.AverageRating),
+                "popular" => filtered.OrderByDescending(p => p.SalesCount),
+                // Use the underlying converted column value for CreatedAt to avoid SQLite ordering on DateTimeOffset
+                _ => filtered.OrderByDescending(p => EF.Property<long>(p, nameof(Product.CreatedAt)))
             };
 
-            var totalCount = await query.CountAsync();
-            
-            var products = await query
+            var products = await ordered
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(p => new ProductViewModel
@@ -480,156 +485,157 @@ namespace TafsilkPlatform.Web.Services
             ProcessPaymentRequest request)
         {
             // Use UnitOfWork's ExecuteInTransactionAsync for consistent transaction handling
-            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
-            {
-                try
-                {
-                    _logger.LogInformation("Processing checkout for customer {CustomerId}", customerId);
+            // Specify the exact tuple type (with nullable ErrorMessage) to avoid nullability inference issues
+            return await _unitOfWork.ExecuteInTransactionAsync<(bool Success, Guid? OrderId, string? ErrorMessage)>(async () =>
+             {
+                 try
+                 {
+                     _logger.LogInformation("Processing checkout for customer {CustomerId}", customerId);
 
-                    // Get cart with fresh data (prevent stale data issues)
-                    var cart = await _unitOfWork.Context.ShoppingCarts
-                        .Include(c => c.Items)
-                            .ThenInclude(i => i.Product)
-                        .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.IsActive);
+                     // Get cart with fresh data (prevent stale data issues)
+                     var cart = await _unitOfWork.Context.ShoppingCarts
+                         .Include(c => c.Items)
+                             .ThenInclude(i => i.Product)
+                         .FirstOrDefaultAsync(c => c.CustomerId == customerId && c.IsActive);
 
-                    if (cart == null || !cart.Items.Any())
-                    {
-                        _logger.LogWarning("Empty cart for customer {CustomerId}", customerId);
-                        return (false, (Guid?)null, "Your cart is empty. Please add items before checkout.");
-                    }
+                     if (cart == null || !cart.Items.Any())
+                     {
+                         _logger.LogWarning("Empty cart for customer {CustomerId}", customerId);
+                         return (false, (Guid?)null, "Your cart is empty. Please add items before checkout.");
+                     }
 
-                    // Validate and lock stock (CRITICAL - like Amazon prevents overselling)
-                    var stockValidationErrors = new List<string>();
-                    foreach (var cartItem in cart.Items)
-                    {
-                        // Reload product with lock to prevent race conditions
-                        var product = await _unitOfWork.Context.Products
-                            .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
+                     // Validate and lock stock (CRITICAL - like Amazon prevents overselling)
+                     var stockValidationErrors = new List<string>();
+                     foreach (var cartItem in cart.Items)
+                     {
+                         // Reload product with lock to prevent race conditions
+                         var product = await _unitOfWork.Context.Products
+                             .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
 
-                        if (product == null)
-                        {
-                            stockValidationErrors.Add($"{cartItem.Product?.Name ?? "Product"} is no longer available");
-                            continue;
-                        }
+                         if (product == null)
+                         {
+                             stockValidationErrors.Add($"{cartItem.Product?.Name ?? "Product"} is no longer available");
+                             continue;
+                         }
 
-                        if (!product.IsAvailable)
-                        {
-                            stockValidationErrors.Add($"{product.Name} is currently unavailable");
-                            continue;
-                        }
+                         if (!product.IsAvailable)
+                         {
+                             stockValidationErrors.Add($"{product.Name} is currently unavailable");
+                             continue;
+                         }
 
-                        // Check stock availability (CRITICAL)
-                        if (product.StockQuantity < cartItem.Quantity)
-                        {
-                            stockValidationErrors.Add(
-                                $"{product.Name}: Only {product.StockQuantity} available, but {cartItem.Quantity} requested");
-                        }
-                    }
+                         // Check stock availability (CRITICAL)
+                         if (product.StockQuantity < cartItem.Quantity)
+                         {
+                             stockValidationErrors.Add(
+                                 $"{product.Name}: Only {product.StockQuantity} available, but {cartItem.Quantity} requested");
+                         }
+                     }
 
-                    if (stockValidationErrors.Any())
-                    {
-                        _logger.LogWarning(
-                            "Stock validation failed for customer {CustomerId}. Errors: {Errors}",
-                            customerId, string.Join("; ", stockValidationErrors));
-                        return (false, (Guid?)null, $"Stock issues: {string.Join("; ", stockValidationErrors)}");
-                    }
+                     if (stockValidationErrors.Any())
+                     {
+                         _logger.LogWarning(
+                             "Stock validation failed for customer {CustomerId}. Errors: {Errors}",
+                             customerId, string.Join("; ", stockValidationErrors));
+                         return (false, (Guid?)null, $"Stock issues: {string.Join("; ", stockValidationErrors)}");
+                     }
 
-                    // Get customer
-                    var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
-                    if (customer == null)
-                    {
-                        return (false, (Guid?)null, "Customer not found");
-                    }
+                     // Get customer
+                     var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
+                     if (customer == null)
+                     {
+                         return (false, (Guid?)null, "Customer not found");
+                     }
 
-                    // Get system tailor for store orders
-                    var systemTailor = await _unitOfWork.Context.TailorProfiles.FirstOrDefaultAsync();
-                    if (systemTailor == null)
-                    {
-                        _logger.LogError("System tailor not configured");
-                        return (false, (Guid?)null, "System configuration error. Please contact support.");
-                    }
+                     // Get system tailor for store orders
+                     var systemTailor = await _unitOfWork.Context.TailorProfiles.FirstOrDefaultAsync();
+                     if (systemTailor == null)
+                     {
+                         _logger.LogError("System tailor not configured");
+                         return (false, (Guid?)null, "System configuration error. Please contact support.");
+                     }
 
-                    // Calculate totals
-                    var subtotal = cart.Items.Sum(i => i.TotalPrice);
-                    var shipping = CalculateShipping(subtotal);
-                    var tax = CalculateTax(subtotal);
-                    var total = subtotal + shipping + tax;
+                     // Calculate totals
+                     var subtotal = cart.Items.Sum(i => i.TotalPrice);
+                     var shipping = CalculateShipping(subtotal);
+                     var tax = CalculateTax(subtotal);
+                     var total = subtotal + shipping + tax;
 
-                    // Create order
-                    var order = new Order
-                    {
-                        OrderId = Guid.NewGuid(),
-                        CustomerId = customerId,
-                        Customer = customer,
-                        TailorId = systemTailor.Id,
-                        Tailor = systemTailor,
-                        Description = "Store Purchase",
-                        OrderType = "StoreOrder",
-                        TotalPrice = (double)total,
-                        Status = OrderStatus.Confirmed, // Store orders are auto-confirmed
-                        CreatedAt = DateTimeOffset.UtcNow,
-                        DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
-                        FulfillmentMethod = "Delivery"
-                    };
+                     // Create order
+                     var order = new Order
+                     {
+                         OrderId = Guid.NewGuid(),
+                         CustomerId = customerId,
+                         Customer = customer,
+                         TailorId = systemTailor.Id,
+                         Tailor = systemTailor,
+                         Description = "Store Purchase",
+                         OrderType = "StoreOrder",
+                         TotalPrice = (double)total,
+                         Status = OrderStatus.Confirmed, // Store orders are auto-confirmed
+                         CreatedAt = DateTimeOffset.UtcNow,
+                         DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
+                         FulfillmentMethod = "Delivery"
+                     };
 
-                    await _unitOfWork.Orders.AddAsync(order);
-                    await _unitOfWork.SaveChangesAsync(); // Save to get OrderId
+                     await _unitOfWork.Orders.AddAsync(order);
+                     await _unitOfWork.SaveChangesAsync(); // Save to get OrderId
 
-                    // Create order items and update stock atomically (CRITICAL)
-                    foreach (var cartItem in cart.Items)
-                    {
-                        // Reload product with lock
-                        var product = await _unitOfWork.Context.Products
-                            .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
+                     // Create order items and update stock atomically (CRITICAL)
+                     foreach (var cartItem in cart.Items)
+                     {
+                         // Reload product with lock
+                         var product = await _unitOfWork.Context.Products
+                             .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
 
-                        if (product == null) continue;
+                         if (product == null) continue;
 
-                        // Double-check stock before updating (prevent race conditions)
-                        if (product.StockQuantity < cartItem.Quantity)
-                        {
-                            _logger.LogError(
-                                "Stock check failed during order creation for product {ProductId}. Available: {Available}, Requested: {Requested}",
-                                product.ProductId, product.StockQuantity, cartItem.Quantity);
-                            return (false, (Guid?)null, $"Insufficient stock for {product.Name}");
-                        }
+                         // Double-check stock before updating (prevent race conditions)
+                         if (product.StockQuantity < cartItem.Quantity)
+                         {
+                             _logger.LogError(
+                                 "Stock check failed during order creation for product {ProductId}. Available: {Available}, Requested: {Requested}",
+                                 product.ProductId, product.StockQuantity, cartItem.Quantity);
+                             return (false, (Guid?)null, $"Insufficient stock for {product.Name}");
+                         }
 
-                        // Create order item
-                        var orderItem = new OrderItem
-                        {
-                            OrderItemId = Guid.NewGuid(),
-                            OrderId = order.OrderId,
-                            Order = order,
-                            ProductId = cartItem.ProductId,
-                            Product = product,
-                            Description = product.Name,
-                            Quantity = cartItem.Quantity,
-                            UnitPrice = cartItem.UnitPrice,
-                            Total = cartItem.TotalPrice,
-                            SelectedSize = cartItem.SelectedSize,
-                            SelectedColor = cartItem.SelectedColor,
-                            SpecialInstructions = cartItem.SpecialInstructions
-                        };
+                         // Create order item
+                         var orderItem = new OrderItem
+                         {
+                             OrderItemId = Guid.NewGuid(),
+                             OrderId = order.OrderId,
+                             Order = order,
+                             ProductId = cartItem.ProductId,
+                             Product = product,
+                             Description = product.Name,
+                             Quantity = cartItem.Quantity,
+                             UnitPrice = cartItem.UnitPrice,
+                             Total = cartItem.TotalPrice,
+                             SelectedSize = cartItem.SelectedSize,
+                             SelectedColor = cartItem.SelectedColor,
+                             SpecialInstructions = cartItem.SpecialInstructions
+                         };
 
-                        // Use Context to add entity
-                        _unitOfWork.Context.OrderItems.Add(orderItem);
+                         // Use Context to add entity
+                         _unitOfWork.Context.OrderItems.Add(orderItem);
 
-                        // Update stock atomically (CRITICAL - like Amazon)
-                        product.StockQuantity -= cartItem.Quantity;
-                        product.SalesCount += cartItem.Quantity;
-                        product.UpdatedAt = DateTimeOffset.UtcNow;
+                         // Update stock atomically (CRITICAL - like Amazon)
+                         product.StockQuantity -= cartItem.Quantity;
+                         product.SalesCount += cartItem.Quantity;
+                         product.UpdatedAt = DateTimeOffset.UtcNow;
 
-                        // Mark product as unavailable if stock reaches zero
-                        if (product.StockQuantity == 0)
-                        {
-                            product.IsAvailable = false;
-                        }
-                    }
+                         // Mark product as unavailable if stock reaches zero
+                         if (product.StockQuantity == 0)
+                         {
+                             product.IsAvailable = false;
+                         }
+                     }
 
-                    // Determine payment status
-                    var paymentStatus = Enums.PaymentStatus.Completed;
+                     // Determine payment status
+                     var paymentStatus = Enums.PaymentStatus.Completed;
 
-                    // Create payment record
-                    var payment = new TafsilkPlatform.Models.Models.Payment
+                     // Create payment record
+                     var payment = new TafsilkPlatform.Models.Models.Payment
                     {
                         PaymentId = Guid.NewGuid(),
                         OrderId = order.OrderId,
@@ -666,13 +672,13 @@ namespace TafsilkPlatform.Web.Services
                         customerId, order.OrderId);
 
                     return (true, order.OrderId, (string?)null);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing checkout for customer {CustomerId}", customerId);
-                    throw; // Let UnitOfWork handle rollback via ExecuteInTransactionAsync
-                }
-            });
+                 }
+                 catch (Exception ex)
+                 {
+                     _logger.LogError(ex, "Error processing checkout for customer {CustomerId}", customerId);
+                     throw; // Let UnitOfWork handle rollback via ExecuteInTransactionAsync
+                 }
+             });
         }
 
         private decimal CalculateShipping(decimal subtotal)

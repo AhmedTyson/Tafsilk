@@ -1,4 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
+using System.Linq;
 using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.DataAccess.Data;
@@ -58,30 +61,66 @@ public partial class ApplicationDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Fallback to named connection string (resolved from IConfiguration when available)
-            optionsBuilder.UseSqlServer(
-          "Name=ConnectionStrings:TafsilkPlatform",
-    sqlOptions =>
-    {
-        // OPTIMIZATION: Enable query splitting to avoid cartesian explosion
-        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-    });
+            // Do not provide a silent fallback provider here. Using a hard-coded
+            // "Name=ConnectionStrings:DefaultConnection" caused the runtime to
+            // attempt SQL Server even when the development connection string
+            // pointed to a SQLite file (e.g. "Data Source=tafsilk-dev.db")
+            // That produced confusing errors like attempts to connect to a
+            // SQL Server named "tafsilk-dev.db".
+            //
+            // Require callers to configure the provider explicitly (via
+            // AddDbContext in Program.cs or by using the DesignTime factory).
+            throw new InvalidOperationException(
+                "ApplicationDbContext was constructed without configured DbContextOptions. " +
+                "Register the context with AddDbContext in Program.cs or supply a properly configured DbContextOptions when creating ApplicationDbContext. " +
+                "If you intended to use a named connection string, configure the provider explicitly (UseSqlServer or UseSqlite)."
+            );
         }
-
-        // OPTIMIZATION: Only enable sensitive data logging in Development environment
-        // This will be controlled by the environment-specific configuration in Program.cs
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Determine provider so we can emit provider-specific SQL for defaults/column types
-        var provider = Database.ProviderName ?? string.Empty;
-        var isSqlite = provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase);
+        // SQL Server defaults (SQLite support removed)
+        string guidDefaultSql = "(newid())";
+        string utcNowDefaultSql = "(getutcdate())";
+        string blobColumnType = "varbinary(max)";
 
-        // Helper locals for provider-specific SQL
-        string guidDefaultSql = isSqlite ? "lower(hex(randomblob(16)))" : "(newid())";
-        string utcNowDefaultSql = isSqlite ? "CURRENT_TIMESTAMP" : "(getutcdate())";
-        string blobColumnType = isSqlite ? "BLOB" : "varbinary(max)";
+        // Apply DateTimeOffset converters when using SQLite provider
+        var isSqlite = Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true;
+        if (isSqlite)
+        {
+            // SQLite does not support DateTimeOffset natively. Store as INTEGER (Unix ms).
+            var dtoToLongConverter = new ValueConverter<DateTimeOffset, long>(
+                v => v.ToUnixTimeMilliseconds(),
+                v => DateTimeOffset.FromUnixTimeMilliseconds(v));
+
+            var nullableDtoToLongConverter = new ValueConverter<DateTimeOffset?, long?>(
+                v => v.HasValue ? v.Value.ToUnixTimeMilliseconds() : (long?)null,
+                v => v.HasValue ? DateTimeOffset.FromUnixTimeMilliseconds(v.Value) : (DateTimeOffset?)null);
+
+            // Apply converters to all DateTimeOffset properties across entities
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var clrType = entityType.ClrType;
+                if (clrType == null) continue;
+
+                var dtoProps = clrType.GetProperties().Where(p => p.PropertyType == typeof(DateTimeOffset));
+                foreach (var prop in dtoProps)
+                {
+                    modelBuilder.Entity(clrType).Property(prop.Name)
+                        .HasConversion(dtoToLongConverter)
+                        .HasColumnType("INTEGER");
+                }
+
+                var nullableDtoProps = clrType.GetProperties().Where(p => p.PropertyType == typeof(DateTimeOffset?));
+                foreach (var prop in nullableDtoProps)
+                {
+                    modelBuilder.Entity(clrType).Property(prop.Name)
+                        .HasConversion(nullableDtoToLongConverter)
+                        .HasColumnType("INTEGER");
+                }
+            }
+        }
 
         // User Entity
         modelBuilder.Entity<User>(entity =>
@@ -108,43 +147,41 @@ public partial class ApplicationDbContext : DbContext
 
         // Role Entity
         modelBuilder.Entity<Role>(entity =>
- {
-     entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
 
-     entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
-     entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
-     entity.Property(e => e.Description).HasMaxLength(255);
-     entity.Property(e => e.Name).HasMaxLength(50);
-     entity.Property(e => e.Permissions).HasMaxLength(2000); // JSON permissions
-     entity.Property(e => e.Priority).HasDefaultValue(0);
- });
+            entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Permissions).HasMaxLength(2000);
+            entity.Property(e => e.Priority).HasDefaultValue(0);
+        });
 
         // CustomerProfile Entity
         modelBuilder.Entity<CustomerProfile>(entity =>
-             {
-                 entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Customer__3214EC07880E7F94");
 
-                 entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
-                 entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
+            entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
+            entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
 
-                 entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
-                 entity.Property(e => e.City).HasMaxLength(100);
-                 entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
-                 entity.Property(e => e.FullName).HasMaxLength(255);
-                 entity.Property(e => e.Gender).HasMaxLength(20);
-                 entity.Property(e => e.Bio).HasMaxLength(1000);
-#pragma warning disable CS0618
-                 entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-#pragma warning restore CS0618
-                 entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-                 entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
+            entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
+            entity.Property(e => e.FullName).HasMaxLength(255);
+            entity.Property(e => e.Gender).HasMaxLength(20);
+            entity.Property(e => e.Bio).HasMaxLength(1000);
+            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
+            entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
-                 entity.HasOne(d => d.User)
-           .WithOne(p => p.CustomerProfile)
-              .HasForeignKey<CustomerProfile>(d => d.UserId)
-               .OnDelete(DeleteBehavior.NoAction)
-         .HasConstraintName("FK_CustomerProfiles_Users");
-             });
+            entity.HasOne(d => d.User)
+                .WithOne(p => p.CustomerProfile)
+                .HasForeignKey<CustomerProfile>(d => d.UserId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_CustomerProfiles_Users");
+        });
 
         // TailorProfile Entity
         modelBuilder.Entity<TailorProfile>(entity =>
@@ -165,17 +202,15 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
             entity.Property(e => e.PricingRange).HasMaxLength(100);
             entity.Property(e => e.ShopName).HasMaxLength(255);
-#pragma warning disable CS0618
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-#pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
             entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
             entity.HasOne(d => d.User)
-        .WithOne(p => p.TailorProfile)
-   .HasForeignKey<TailorProfile>(d => d.UserId)
-        .OnDelete(DeleteBehavior.NoAction)
-        .HasConstraintName("FK_TailorProfiles_Users");
+                .WithOne(p => p.TailorProfile)
+                .HasForeignKey<TailorProfile>(d => d.UserId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_TailorProfiles_Users");
         });
 
         // UserAddress Entity
@@ -195,10 +230,10 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Street).HasMaxLength(255);
 
             entity.HasOne(d => d.User)
-        .WithMany(p => p.UserAddresses)
-        .HasForeignKey(d => d.UserId)
-        .OnDelete(DeleteBehavior.NoAction)
-                    .HasConstraintName("FK_UserAddresses_Users");
+                .WithMany(p => p.UserAddresses)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.NoAction)
+                .HasConstraintName("FK_UserAddresses_Users");
         });
 
         // Order Entity + relations

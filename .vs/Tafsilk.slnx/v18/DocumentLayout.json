@@ -8,7 +8,7 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedHeight": 296,
+          "DockedHeight": 110,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -50,7 +50,7 @@
           ]
         },
         {
-          "DockedHeight": 104,
+          "DockedHeight": 290,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -60,7 +60,13 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
+            }
+          ]
+        },
+        {
+          "DockedHeight": 104,
+          "SelectedChildIndex": -1,
+          "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"

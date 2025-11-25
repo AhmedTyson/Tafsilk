@@ -248,26 +248,28 @@ Array.Empty<string>()
     }
 
     // Database context
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                           ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is required.");
+
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        // Support SQLite for local development (if connection string points to a file) or SQL Server otherwise
+        // If connection string points to a SQLite file (development), use SQLite provider
         if (!string.IsNullOrEmpty(connectionString) && connectionString.Trim().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
         {
-            options.UseSqlite(connectionString);
+            options.UseSqlite(connectionString, sqliteOpt => sqliteOpt.MigrationsAssembly("TafsilkPlatform.DataAccess"));
         }
         else
         {
             options.UseSqlServer(
-         connectionString,
-         sqlOptions =>
-            {
-                  sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
-                  sqlOptions.EnableRetryOnFailure(
-          maxRetryCount: 3,
-            maxRetryDelay: TimeSpan.FromSeconds(5),
-                 errorNumbersToAdd: null);
-              });
+                connectionString,
+                sqlOptions =>
+                {
+                    sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null);
+                });
         }
 
         // Enable sensitive data logging only when explicitly allowed in config AND in Development
@@ -634,15 +636,15 @@ Array.Empty<string>()
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         var providerName = db.Database.ProviderName ?? string.Empty;
 
+        // Apply migrations and seed minimal data
         // If using SQLite in development, prefer EnsureCreated to avoid running SQL Server-specific migrations
-        if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
+        if (db.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
         {
             try
             {
                 await db.Database.EnsureCreatedAsync();
                 Log.Information("✓ SQLite database ensured/created successfully");
 
-                // Seed minimal data required for application to operate (roles)
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
@@ -662,13 +664,12 @@ Array.Empty<string>()
         }
         else
         {
-            // For SQL Server and other providers, attempt to apply migrations (more realistic for production/dev with migrations)
+            // For SQL Server and other providers, attempt to apply migrations
             try
             {
                 await db.Database.MigrateAsync();
                 Log.Information("✓ Database migrations applied successfully");
 
-                // Seed minimal data required for application to operate (roles)
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
