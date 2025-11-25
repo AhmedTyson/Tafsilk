@@ -13,6 +13,7 @@ using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
 using TafsilkPlatform.Web.Middleware;
 using TafsilkPlatform.Web.Services;
+using Microsoft.AspNetCore.Hosting;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -292,6 +293,8 @@ Array.Empty<string>()
     builder.Services.AddScoped<IUserProfileHelper, UserProfileHelper>();
     builder.Services.AddScoped<IFileUploadService, FileUploadService>();
     builder.Services.AddScoped<ImageUploadService>(); // Best practices image upload service
+    // Register AttachmentService (file storage helper)
+    builder.Services.AddScoped<BLL.Services.Interfaces.IAttachmentService, BLL.Services.AttachmentService>();
     builder.Services.AddScoped<TafsilkPlatform.Utility.IEmailService, TafsilkPlatform.Utility.EmailService>();
     builder.Services.AddScoped<IProfileCompletionService, ProfileCompletionService>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
@@ -388,7 +391,8 @@ Array.Empty<string>()
             name: "database",
             failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
             tags: new[] { "db", "sql", "ready" })
-        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "self" });
+        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "self" })
+        .AddCheck<TafsilkPlatform.Web.HealthChecks.AttachmentHealthCheck>("attachments", tags: new[] { "ready", "attachments" });
 
     // Authorization policies
     builder.Services.AddAuthorization(options =>
@@ -625,6 +629,33 @@ Array.Empty<string>()
     catch (Exception ex)
     {
         Log.Fatal(ex, "❌ Cannot connect to database. Please check connection string and ensure SQL Server is running.");
+        throw;
+    }
+
+    // ✅ STARTUP HEALTH CHECKS - fail fast if attachments folder not writable
+    try
+    {
+        using var healthScope = app.Services.CreateScope();
+        var healthService = healthScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckService>();
+        var healthReport = await healthService.CheckHealthAsync(h => h.Tags.Contains("attachments"));
+        if (healthReport.Status != Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy)
+        {
+            var logger = healthScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogCritical("Startup aborted: attachments health check failed: {Status}. Details: {Entries}",
+                healthReport.Status,
+                string.Join("; ", healthReport.Entries.Select(e => $"{e.Key}={e.Value.Status}:{e.Value.Description}")));
+
+            // Throw to abort startup and make failure explicit
+            throw new InvalidOperationException("Attachments health check failed. See logs for details.");
+        }
+        else
+        {
+            Log.Information("✓ Attachments health check passed (writable + sufficient disk space)");
+        }
+    }
+    catch (Exception ex)
+    {
+        Log.Fatal(ex, "❌ Startup health check for attachments failed and prevented application start");
         throw;
     }
 

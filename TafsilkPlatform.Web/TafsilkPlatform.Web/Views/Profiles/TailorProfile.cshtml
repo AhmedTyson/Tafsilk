@@ -251,7 +251,18 @@ height: 100px;
    <!-- Profile Header -->
       <div class="profile-header">
          <div class="profile-avatar">
-      @if (Model.ProfilePictureData != null)
+      @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
+ {
+     if (Uri.IsWellFormedUriString(Model.ProfileImageUrl, UriKind.Absolute))
+     {
+         <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
+     }
+     else
+     {
+         <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
+     }
+ }
+    else if (Model.ProfilePictureData != null)
  {
          <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })" 
         alt="@Model.FullName" />

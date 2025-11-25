@@ -105,6 +105,10 @@ namespace TafsilkPlatform.Models.Models
         [StringLength(100)]
         public string? ProfilePictureContentType { get; set; }
 
+        // New: filesystem-backed profile image URL (stored under wwwroot/Attachments/profile)
+        [StringLength(500)]
+        public string? ProfileImageUrl { get; set; }
+
         // Verification & Statistics
         [Display(Name = "Verified Status")]
         public bool IsVerified { get; set; } = false;

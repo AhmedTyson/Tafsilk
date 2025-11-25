@@ -43,15 +43,6 @@ namespace TafsilkPlatform.DataAccess.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "AppSettings",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier")
-                .Annotation("SqlServer:Identity", "1, 1");
-
             migrationBuilder.AddColumn<string>(
                 name: "Description",
                 table: "AppSettings",
@@ -110,15 +101,6 @@ namespace TafsilkPlatform.DataAccess.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "Id",
-                table: "AppSettings",
-                type: "uniqueidentifier",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .OldAnnotation("SqlServer:Identity", "1, 1");
         }
     }
 }

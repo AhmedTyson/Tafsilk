@@ -622,7 +622,13 @@ transform: translateY(-50%);
         </div>
     <div class="profile-picture-upload">
         <div class="profile-picture-preview" id="picturePreview">
-            @if (Model.CurrentProfilePictureData != null)
+            @if (!string.IsNullOrWhiteSpace(Model.CurrentProfilePictureUrl))
+            {
+                <img src="@Model.CurrentProfilePictureUrl"
+                     alt="Profile Picture"
+                     id="previewImage" />
+            }
+            else if (Model.CurrentProfilePictureData != null)
             {
                 <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.TailorId })"
                      alt="Profile Picture"

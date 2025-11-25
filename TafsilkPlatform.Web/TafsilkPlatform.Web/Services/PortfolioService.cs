@@ -1,7 +1,9 @@
+using BLL.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.TailorManagement;
+using System.IO;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -12,15 +14,18 @@ public class PortfolioService : IPortfolioService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IFileUploadService _fileUploadService;
+    private readonly IAttachmentService _attachmentService;
     private readonly ILogger<PortfolioService> _logger;
 
     public PortfolioService(
         IUnitOfWork unitOfWork,
         IFileUploadService fileUploadService,
+        IAttachmentService attachmentService,
         ILogger<PortfolioService> logger)
     {
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -56,7 +61,7 @@ public class PortfolioService : IPortfolioService
                     IsBeforeAfter = p.IsBeforeAfter,
                     DisplayOrder = p.DisplayOrder,
                     UploadedAt = p.UploadedAt,
-                    HasImageData = p.ImageData != null
+                    HasImageData = p.ImageData != null || !string.IsNullOrEmpty(p.ImageUrl)
                 }).ToList(),
                 TotalImages = portfolioImages.Count,
                 FeaturedCount = portfolioImages.Count(p => p.IsFeatured),
@@ -110,12 +115,11 @@ public class PortfolioService : IPortfolioService
                 return (false, null, "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)");
             }
 
-            // Read image data
-            byte[] imageData;
-            using (var memoryStream = new MemoryStream())
+            // Upload to filesystem (gallery folder)
+            var uploadedRelative = await _attachmentService.Upload(model.ImageFile, "gallery");
+            if (string.IsNullOrEmpty(uploadedRelative))
             {
-                await model.ImageFile.CopyToAsync(memoryStream);
-                imageData = memoryStream.ToArray();
+                return (false, null, "فشل رفع الملف أو نوع الملف غير مدعوم");
             }
 
             // Get next display order
@@ -123,7 +127,7 @@ public class PortfolioService : IPortfolioService
                 .Where(p => p.TailorId == tailorId && !p.IsDeleted)
                 .MaxAsync(p => (int?)p.DisplayOrder) ?? 0;
 
-            // Create portfolio image
+            // Create portfolio image record referencing filesystem URL
             var portfolioImage = new PortfolioImage
             {
                 PortfolioImageId = Guid.NewGuid(),
@@ -135,7 +139,8 @@ public class PortfolioService : IPortfolioService
                 IsFeatured = model.IsFeatured,
                 IsBeforeAfter = model.IsBeforeAfter,
                 DisplayOrder = maxOrder + 1,
-                ImageData = imageData,
+                ImageData = null,
+                ImageUrl = uploadedRelative, // e.g. Attachments/gallery/uuid.jpg
                 ContentType = model.ImageFile.ContentType,
                 UploadedAt = DateTime.UtcNow,
                 CreatedAt = DateTime.UtcNow,
@@ -157,17 +162,6 @@ public class PortfolioService : IPortfolioService
                     throw new InvalidOperationException("فشل حفظ الصورة في قاعدة البيانات");
                 }
 
-                // Verify the portfolio image was saved
-                var savedImage = await _unitOfWork.Context.PortfolioImages
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.PortfolioImageId == portfolioImage.PortfolioImageId && !p.IsDeleted);
-                
-                if (savedImage == null)
-                {
-                    _logger.LogError("Portfolio image not found after save. ImageId: {ImageId}", portfolioImage.PortfolioImageId);
-                    throw new InvalidOperationException("فشل التحقق من حفظ الصورة");
-                }
-                
                 _logger.LogInformation(
                     "✅ Portfolio image {ImageId} added successfully for tailor {TailorId}",
                     portfolioImage.PortfolioImageId, tailorId);
@@ -205,7 +199,7 @@ public class PortfolioService : IPortfolioService
                 IsFeatured = image.IsFeatured,
                 IsBeforeAfter = image.IsBeforeAfter,
                 DisplayOrder = image.DisplayOrder,
-                HasCurrentImage = image.ImageData != null
+                HasCurrentImage = image.ImageData != null || !string.IsNullOrEmpty(image.ImageUrl)
             };
         }
         catch (Exception ex)
@@ -241,7 +235,7 @@ public class PortfolioService : IPortfolioService
                 image.IsBeforeAfter = model.IsBeforeAfter;
                 image.DisplayOrder = model.DisplayOrder;
 
-                // Update image data if new file provided
+                // Update image file if new file provided
                 if (model.NewImageFile != null && model.NewImageFile.Length > 0)
                 {
                     if (!_fileUploadService.IsValidImage(model.NewImageFile))
@@ -254,12 +248,22 @@ public class PortfolioService : IPortfolioService
                         return (false, "حجم الملف كبير جداً");
                     }
 
-                    using (var memoryStream = new MemoryStream())
+                    // Upload new file
+                    var newRelative = await _attachmentService.Upload(model.NewImageFile, "gallery");
+                    if (string.IsNullOrEmpty(newRelative))
                     {
-                        await model.NewImageFile.CopyToAsync(memoryStream);
-                        image.ImageData = memoryStream.ToArray();
-                        image.ContentType = model.NewImageFile.ContentType;
+                        return (false, "فشل رفع الملف الجديد");
                     }
+
+                    // Delete old file if it exists and was stored in attachments
+                    if (!string.IsNullOrEmpty(image.ImageUrl))
+                    {
+                        try { await _attachmentService.Delete(image.ImageUrl); } catch { /* ignore */ }
+                    }
+
+                    image.ImageUrl = newRelative;
+                    image.ImageData = null;
+                    image.ContentType = model.NewImageFile.ContentType;
                 }
 
                 await _unitOfWork.SaveChangesAsync();
@@ -286,6 +290,19 @@ public class PortfolioService : IPortfolioService
             if (image == null)
             {
                 return (false, "الصورة غير موجودة");
+            }
+
+            // Try delete the stored file if exists
+            if (!string.IsNullOrEmpty(image.ImageUrl))
+            {
+                try
+                {
+                    await _attachmentService.Delete(image.ImageUrl);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to delete file for image {ImageId}", imageId);
+                }
             }
 
             // Soft delete
@@ -339,12 +356,31 @@ public class PortfolioService : IPortfolioService
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.PortfolioImageId == imageId && !p.IsDeleted);
 
-            if (image == null || image.ImageData == null)
+            if (image == null)
             {
                 return (null, null);
             }
 
-            return (image.ImageData, image.ContentType ?? "image/jpeg");
+            if (image.ImageData != null)
+            {
+                return (image.ImageData, image.ContentType ?? "image/jpeg");
+            }
+
+            // If ImageUrl is present, try to read file from attachments folder
+            if (!string.IsNullOrEmpty(image.ImageUrl))
+            {
+                // image.ImageUrl expected like "Attachments/gallery/filename.jpg"
+                var relative = image.ImageUrl.Replace("Attachments/", string.Empty, StringComparison.OrdinalIgnoreCase).TrimStart('/', '\\');
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Attachments", relative);
+                if (File.Exists(fullPath))
+                {
+                    var bytes = await File.ReadAllBytesAsync(fullPath);
+                    var contentType = image.ContentType ?? "image/jpeg";
+                    return (bytes, contentType);
+                }
+            }
+
+            return (null, null);
         }
         catch (Exception ex)
         {

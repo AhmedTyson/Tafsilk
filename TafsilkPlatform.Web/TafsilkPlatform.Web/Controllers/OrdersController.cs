@@ -1,17 +1,13 @@
-using TafsilkPlatform.Web.Interfaces;
-
+using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
-using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Models.ViewModels.Orders;
-using Microsoft.AspNetCore.Hosting;
-using TafsilkPlatform.Utility.Extensions;
-using System.IO;
+using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Services;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -22,20 +18,22 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize]
 public class OrdersController : Controller
 {
-    
+
     private readonly ApplicationDbContext _db;
     private readonly ILogger<OrdersController> _logger;
     private readonly IFileUploadService _fileUploadService;
     private readonly IOrderService _orderService;
     private readonly ImageUploadService _imageUploadService;
     private readonly IWebHostEnvironment _environment;
+    private readonly IAttachmentService _attachmentService;
     public OrdersController(
         ApplicationDbContext db,
         ILogger<OrdersController> logger,
         IFileUploadService fileUploadService,
         IOrderService orderService,
         ImageUploadService imageUploadService,
-        IWebHostEnvironment environment)
+        IWebHostEnvironment environment,
+        IAttachmentService attachmentService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -43,6 +41,7 @@ public class OrdersController : Controller
         _orderService = orderService ?? throw new ArgumentNullException(nameof(orderService));
         _imageUploadService = imageUploadService ?? throw new ArgumentNullException(nameof(imageUploadService));
         _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+        _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
     }
 
     #region Customer Order Actions
@@ -213,16 +212,16 @@ public class OrdersController : Controller
                         {
                             try
                             {
-                                var uploadsDir = Path.Combine(_environment.WebRootPath ?? "wwwroot", "uploads", "orders");
-                                if (!Directory.Exists(uploadsDir)) Directory.CreateDirectory(uploadsDir);
+                                // Use IAttachmentService to store large images under Attachments/order
+                                var uploadedRelative = await _attachmentService.Upload(image, "order");
+                                if (string.IsNullOrEmpty(uploadedRelative))
+                                {
+                                    _logger.LogWarning("AttachmentService rejected large order image: {FileName}", image.FileName);
+                                    continue;
+                                }
 
-                                var fileName = _imageUploadService.GenerateUniqueFileName(image.FileName);
-                                var physicalPath = Path.Combine(uploadsDir, fileName);
-
-                                await using var fs = new FileStream(physicalPath, FileMode.Create);
-                                await image.CopyToAsync(fs);
-
-                                var imgUrl = $"/uploads/orders/{fileName}";
+                                // Ensure URL starts with '/'
+                                var imgUrl = uploadedRelative.StartsWith('/') ? uploadedRelative : "/" + uploadedRelative;
 
                                 var orderImage = new OrderImages
                                 {
@@ -238,13 +237,13 @@ public class OrdersController : Controller
                                 };
 
                                 _db.OrderImages.Add(orderImage);
-                                _logger.LogInformation("Order image saved to disk and referenced by URL. ImageId: {ImageId}, Url: {Url}", orderImage.OrderImageId, imgUrl);
+                                _logger.LogInformation("Order image saved to attachments and referenced by URL. ImageId: {ImageId}, Url: {Url}", orderImage.OrderImageId, imgUrl);
                                 validImageCount++;
                                 continue;
                             }
-                            catch (Exception diskEx)
+                            catch (Exception ex)
                             {
-                                _logger.LogError(diskEx, "Failed to save large image to disk: {FileName}", image.FileName);
+                                _logger.LogError(ex, "Failed to save large image via AttachmentService: {FileName}", image.FileName);
                                 continue;
                             }
                         }
@@ -298,19 +297,19 @@ public class OrdersController : Controller
             }
 
             // Save measurements as order items (if provided)
-   if (!string.IsNullOrEmpty(model.Measurements))
-  {
-     var orderItem = new OrderItem
+            if (!string.IsNullOrEmpty(model.Measurements))
+            {
+                var orderItem = new OrderItem
                 {
-          OrderItemId = Guid.NewGuid(),
-             OrderId = order.OrderId,
-            Description = model.ServiceType ?? "خدمة عامة",
-        Quantity = 1,
-         UnitPrice = model.EstimatedPrice,
-     Total = model.EstimatedPrice,
-    Order = order
-      };
-   _db.OrderItems.Add(orderItem);
+                    OrderItemId = Guid.NewGuid(),
+                    OrderId = order.OrderId,
+                    Description = model.ServiceType ?? "خدمة عامة",
+                    Quantity = 1,
+                    UnitPrice = model.EstimatedPrice,
+                    Total = model.EstimatedPrice,
+                    Order = order
+                };
+                _db.OrderItems.Add(orderItem);
             }
 
             await _db.SaveChangesAsync();
@@ -456,8 +455,8 @@ public class OrdersController : Controller
                     ServiceName = i.Description ?? i.Product?.Name ?? "منتج",
                     Quantity = i.Quantity,
                     Price = i.UnitPrice,
-                    Notes = !string.IsNullOrEmpty(i.SpecialInstructions) 
-                        ? i.SpecialInstructions 
+                    Notes = !string.IsNullOrEmpty(i.SpecialInstructions)
+                        ? i.SpecialInstructions
                         : (!string.IsNullOrEmpty(i.SelectedSize) || !string.IsNullOrEmpty(i.SelectedColor))
                             ? $"المقاس: {i.SelectedSize ?? "غير محدد"}, اللون: {i.SelectedColor ?? "غير محدد"}"
                             : null
@@ -797,15 +796,15 @@ public class OrdersController : Controller
     {
         return status switch
         {
- OrderStatus.Pending => "قيد الانتظار",
-   OrderStatus.Confirmed => "تم التأكيد",
-   OrderStatus.Processing => "قيد التنفيذ",
-     OrderStatus.Shipped => "قيد الشحن",
-   OrderStatus.ReadyForPickup => "جاهز للاستلام",
-   OrderStatus.Delivered => "تم التسليم",
-  OrderStatus.Cancelled => "ملغي",
-  _ => "غير محدد"
-     };
+            OrderStatus.Pending => "قيد الانتظار",
+            OrderStatus.Confirmed => "تم التأكيد",
+            OrderStatus.Processing => "قيد التنفيذ",
+            OrderStatus.Shipped => "قيد الشحن",
+            OrderStatus.ReadyForPickup => "جاهز للاستلام",
+            OrderStatus.Delivered => "تم التسليم",
+            OrderStatus.Cancelled => "ملغي",
+            _ => "غير محدد"
+        };
     }
 
     private bool IsValidStatusTransition(OrderStatus currentStatus, OrderStatus newStatus)
@@ -822,8 +821,8 @@ public class OrdersController : Controller
             { OrderStatus.Cancelled, new List<OrderStatus>() }
    };
 
-  return validTransitions.ContainsKey(currentStatus) &&
-          validTransitions[currentStatus].Contains(newStatus);
+        return validTransitions.ContainsKey(currentStatus) &&
+                validTransitions[currentStatus].Contains(newStatus);
     }
 
     #endregion
