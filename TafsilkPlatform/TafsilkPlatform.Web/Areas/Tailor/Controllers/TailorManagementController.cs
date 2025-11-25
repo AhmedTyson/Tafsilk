@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
 

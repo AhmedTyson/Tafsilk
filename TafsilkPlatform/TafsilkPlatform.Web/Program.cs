@@ -13,7 +13,6 @@ using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
 using TafsilkPlatform.Web.Middleware;
 using TafsilkPlatform.Web.Services;
-using Microsoft.AspNetCore.Hosting;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -417,9 +416,9 @@ Array.Empty<string>()
     {
         options.AddPolicy("AdminPolicy", policy =>
           {
-               policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-               policy.RequireRole("Admin");
-           });
+              policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+              policy.RequireRole("Admin");
+          });
 
         options.AddPolicy("TailorPolicy", policy =>
        {
@@ -648,9 +647,9 @@ Array.Empty<string>()
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into SQLite database");
@@ -673,9 +672,9 @@ Array.Empty<string>()
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into database");

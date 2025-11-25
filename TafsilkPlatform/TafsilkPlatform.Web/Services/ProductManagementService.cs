@@ -75,7 +75,7 @@ public class ProductManagementService : IProductManagementService
     }
 
     public async Task<(bool Success, Guid? ProductId, string? ErrorMessage)> AddProductAsync(
-        Guid tailorId, 
+        Guid tailorId,
         AddProductViewModel model)
     {
         try
@@ -99,19 +99,19 @@ public class ProductManagementService : IProductManagementService
                 return (false, null, "الصورة الأساسية مطلوبة");
             }
 
-            _logger.LogInformation("[ProductManagement] Primary image received: {FileName}, Size: {Size} bytes", 
+            _logger.LogInformation("[ProductManagement] Primary image received: {FileName}, Size: {Size} bytes",
                 model.PrimaryImage.FileName, model.PrimaryImage.Length);
 
             if (!_fileUploadService.IsValidImage(model.PrimaryImage))
             {
-                _logger.LogWarning("[ProductManagement] Invalid image type for tailor {TailorId}: {ContentType}", 
+                _logger.LogWarning("[ProductManagement] Invalid image type for tailor {TailorId}: {ContentType}",
                     tailorId, model.PrimaryImage.ContentType);
                 return (false, null, "نوع الصورة غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)");
             }
 
             if (model.PrimaryImage.Length > _fileUploadService.GetMaxFileSizeInBytes())
             {
-                _logger.LogWarning("[ProductManagement] Image too large for tailor {TailorId}: {Size} bytes", 
+                _logger.LogWarning("[ProductManagement] Image too large for tailor {TailorId}: {Size} bytes",
                     tailorId, model.PrimaryImage.Length);
                 return (false, null, $"حجم الصورة كبير جداً. الحد الأقصى {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
             }
@@ -140,7 +140,7 @@ public class ProductManagementService : IProductManagementService
             if (model.AdditionalImages != null && model.AdditionalImages.Any())
             {
                 _logger.LogInformation("[ProductManagement] Processing {Count} additional images", model.AdditionalImages.Count);
-                
+
                 var additionalImagesBase64 = new List<string>();
                 foreach (var image in model.AdditionalImages.Take(5)) // Max 5 additional images
                 {
@@ -159,18 +159,18 @@ public class ProductManagementService : IProductManagementService
                         }
                     }
                 }
-                
+
                 if (additionalImagesBase64.Any())
                 {
                     additionalImagesJson = string.Join(";;", additionalImagesBase64);
                 }
-                
+
                 _logger.LogInformation("[ProductManagement] Processed {Count} additional images successfully", additionalImagesBase64.Count);
             }
 
             // Generate slug from name
             var slug = GenerateSlug(model.Name);
-            
+
             // Ensure unique slug
             var existingSlug = await _unitOfWork.Context.Products
                 .AnyAsync(p => p.Slug == slug && !p.IsDeleted);
@@ -181,7 +181,7 @@ public class ProductManagementService : IProductManagementService
             }
 
             var productId = Guid.NewGuid();
-            
+
             _logger.LogInformation("[ProductManagement] Creating product entity with ID {ProductId}", productId);
 
             // Create product with ALL required fields
@@ -204,13 +204,13 @@ public class ProductManagementService : IProductManagementService
                 PrimaryImageData = primaryImageData,
                 PrimaryImageContentType = model.PrimaryImage.ContentType ?? "image/jpeg",
                 AdditionalImagesJson = additionalImagesJson,
-                MetaTitle = !string.IsNullOrWhiteSpace(model.MetaTitle) 
-                    ? model.MetaTitle.Trim() 
+                MetaTitle = !string.IsNullOrWhiteSpace(model.MetaTitle)
+                    ? model.MetaTitle.Trim()
                     : model.Name.Trim(),
-                MetaDescription = !string.IsNullOrWhiteSpace(model.MetaDescription) 
-                    ? model.MetaDescription.Trim() 
-                    : (model.Description.Length > 160 
-                        ? model.Description.Substring(0, 160).Trim() 
+                MetaDescription = !string.IsNullOrWhiteSpace(model.MetaDescription)
+                    ? model.MetaDescription.Trim()
+                    : (model.Description.Length > 160
+                        ? model.Description.Substring(0, 160).Trim()
                         : model.Description.Trim()),
                 Slug = slug,
                 TailorId = tailorId,
@@ -229,18 +229,18 @@ public class ProductManagementService : IProductManagementService
 
             // Use UnitOfWork transaction management
             _logger.LogInformation("[ProductManagement] Starting transaction for product {ProductId}", productId);
-            
+
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 _logger.LogInformation("[ProductManagement] Adding product {ProductId} to repository", productId);
                 await _unitOfWork.Products.AddAsync(product);
-                
+
                 _logger.LogInformation("[ProductManagement] Calling SaveChangesAsync for product {ProductId}", productId);
-                
+
                 var saveResult = await _unitOfWork.SaveChangesAsync();
-                
+
                 _logger.LogInformation("[ProductManagement] SaveChangesAsync returned {Result} for product {ProductId}", saveResult, productId);
-                
+
                 if (saveResult == 0)
                 {
                     _logger.LogError("[ProductManagement] SaveChangesAsync returned 0 - no rows affected for product {ProductId}", productId);
@@ -252,13 +252,13 @@ public class ProductManagementService : IProductManagementService
                 var savedProduct = await _unitOfWork.Context.Products
                     .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.ProductId == product.ProductId && !p.IsDeleted);
-                
+
                 if (savedProduct == null)
                 {
                     _logger.LogError("[ProductManagement] Product {ProductId} not found after save", productId);
                     throw new InvalidOperationException("فشل التحقق من حفظ المنتج");
                 }
-                
+
                 _logger.LogInformation(
                     "[ProductManagement] ✅ Product {ProductId} created successfully. Name: {Name}, Price: {Price}",
                     product.ProductId, savedProduct.Name, savedProduct.Price);
@@ -322,8 +322,8 @@ public class ProductManagementService : IProductManagementService
     }
 
     public async Task<(bool Success, string? ErrorMessage)> UpdateProductAsync(
-        Guid productId, 
-        Guid tailorId, 
+        Guid productId,
+        Guid tailorId,
         EditProductViewModel model)
     {
         try
@@ -425,8 +425,8 @@ public class ProductManagementService : IProductManagementService
 
                 // Check if product has active orders
                 var hasActiveOrders = await _unitOfWork.Context.OrderItems
-                    .AnyAsync(oi => oi.ProductId == productId && 
-                        oi.Order.Status != OrderStatus.Cancelled && 
+                    .AnyAsync(oi => oi.ProductId == productId &&
+                        oi.Order.Status != OrderStatus.Cancelled &&
                         oi.Order.Status != OrderStatus.Delivered);
 
                 if (hasActiveOrders)
@@ -438,7 +438,7 @@ public class ProductManagementService : IProductManagementService
                 product.IsDeleted = true;
                 product.IsAvailable = false;
                 product.UpdatedAt = DateTimeOffset.UtcNow;
-                
+
                 await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("Product {ProductId} deleted by tailor {TailorId}", productId, tailorId);
@@ -454,7 +454,7 @@ public class ProductManagementService : IProductManagementService
     }
 
     public async Task<(bool Success, bool IsAvailable, string? ErrorMessage)> ToggleProductAvailabilityAsync(
-        Guid productId, 
+        Guid productId,
         Guid tailorId)
     {
         try
@@ -469,7 +469,7 @@ public class ProductManagementService : IProductManagementService
 
             product.IsAvailable = !product.IsAvailable;
             product.UpdatedAt = DateTimeOffset.UtcNow;
-            
+
             await _unitOfWork.SaveChangesAsync();
 
             return (true, product.IsAvailable, null);
@@ -482,8 +482,8 @@ public class ProductManagementService : IProductManagementService
     }
 
     public async Task<(bool Success, int NewStock, bool IsAvailable, string? ErrorMessage)> UpdateStockAsync(
-        Guid productId, 
-        Guid tailorId, 
+        Guid productId,
+        Guid tailorId,
         int newStock)
     {
         try
@@ -503,7 +503,7 @@ public class ProductManagementService : IProductManagementService
 
             product.StockQuantity = newStock;
             product.UpdatedAt = DateTimeOffset.UtcNow;
-            
+
             // Auto-update availability based on stock
             if (newStock == 0 && product.IsAvailable)
             {
@@ -571,7 +571,7 @@ public class ProductManagementService : IProductManagementService
         text = text.Trim().ToLowerInvariant();
         text = System.Text.RegularExpressions.Regex.Replace(text, @"[^a-z0-9\u0600-\u06FF]+", "-");
         text = text.Trim('-');
-        
+
         if (text.Length > 50)
             text = text.Substring(0, 50).TrimEnd('-');
 

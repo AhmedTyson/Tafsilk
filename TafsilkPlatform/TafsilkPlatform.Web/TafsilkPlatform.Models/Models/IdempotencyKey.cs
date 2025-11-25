@@ -41,18 +41,18 @@ public class IdempotencyKey
     /// <summary>
     /// When this key was last accessed
     /// </summary>
-  public DateTime? LastAccessedAtUtc { get; set; }
+    public DateTime? LastAccessedAtUtc { get; set; }
 
     /// <summary>
     /// When this key expires and can be cleaned up
     /// Default: 24 hours from creation
     /// </summary>
-public DateTime ExpiresAtUtc { get; set; } = DateTime.UtcNow.AddHours(24);
+    public DateTime ExpiresAtUtc { get; set; } = DateTime.UtcNow.AddHours(24);
 
     /// <summary>
     /// User ID who initiated the request (for tracking)
-  /// </summary>
-  public Guid? UserId { get; set; }
+    /// </summary>
+    public Guid? UserId { get; set; }
 
     /// <summary>
     /// Endpoint that was called (e.g., /api/orders)
@@ -89,10 +89,10 @@ public enum IdempotencyStatus
 
     /// <summary>
     /// Request failed
-  /// </summary>
+    /// </summary>
     Failed = 2,
 
-/// <summary>
+    /// <summary>
     /// Key has expired and can be cleaned up
     /// </summary>
     Expired = 3

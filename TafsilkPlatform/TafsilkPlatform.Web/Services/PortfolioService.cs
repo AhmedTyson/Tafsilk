@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.TailorManagement;
-using System.IO;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -76,7 +75,7 @@ public class PortfolioService : IPortfolioService
     }
 
     public async Task<(bool Success, Guid? ImageId, string? ErrorMessage)> AddPortfolioImageAsync(
-        Guid tailorId, 
+        Guid tailorId,
         AddPortfolioImageViewModel model)
     {
         try
@@ -151,11 +150,11 @@ public class PortfolioService : IPortfolioService
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 await _unitOfWork.PortfolioImages.AddAsync(portfolioImage);
-                
+
                 _logger.LogInformation("Saving portfolio image to database");
-                
+
                 var saveResult = await _unitOfWork.SaveChangesAsync();
-                
+
                 if (saveResult == 0)
                 {
                     _logger.LogError("Failed to save portfolio image - SaveChangesAsync returned 0");
@@ -210,8 +209,8 @@ public class PortfolioService : IPortfolioService
     }
 
     public async Task<(bool Success, string? ErrorMessage)> UpdatePortfolioImageAsync(
-        Guid imageId, 
-        Guid tailorId, 
+        Guid imageId,
+        Guid tailorId,
         EditPortfolioImageViewModel model)
     {
         try
@@ -307,7 +306,7 @@ public class PortfolioService : IPortfolioService
 
             // Soft delete
             image.IsDeleted = true;
-            
+
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} deleted for tailor {TailorId}", imageId, tailorId);
@@ -322,7 +321,7 @@ public class PortfolioService : IPortfolioService
     }
 
     public async Task<(bool Success, bool IsFeatured, string? ErrorMessage)> ToggleFeaturedAsync(
-        Guid imageId, 
+        Guid imageId,
         Guid tailorId)
     {
         try
@@ -336,7 +335,7 @@ public class PortfolioService : IPortfolioService
             }
 
             image.IsFeatured = !image.IsFeatured;
-            
+
             await _unitOfWork.SaveChangesAsync();
 
             return (true, image.IsFeatured, null);

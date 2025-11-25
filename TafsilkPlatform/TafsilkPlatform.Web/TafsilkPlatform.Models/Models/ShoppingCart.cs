@@ -14,14 +14,14 @@ namespace TafsilkPlatform.Models.Models
         [Required]
         public Guid CustomerId { get; set; }
 
-    [ForeignKey("CustomerId")]
-      public required CustomerProfile Customer { get; set; }
+        [ForeignKey("CustomerId")]
+        public required CustomerProfile Customer { get; set; }
 
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? UpdatedAt { get; set; }
 
         // Cart expiration (auto-cleanup after 30 days of inactivity)
-   public DateTimeOffset? ExpiresAt { get; set; }
+        public DateTimeOffset? ExpiresAt { get; set; }
 
         public bool IsActive { get; set; } = true;
 
@@ -33,6 +33,6 @@ namespace TafsilkPlatform.Models.Models
         public decimal SubTotal => Items?.Sum(i => i.TotalPrice) ?? 0;
 
         [NotMapped]
-  public int TotalItems => Items?.Sum(i => i.Quantity) ?? 0;
+        public int TotalItems => Items?.Sum(i => i.Quantity) ?? 0;
     }
 }

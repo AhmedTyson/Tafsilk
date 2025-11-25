@@ -192,7 +192,7 @@ public class QuickStockUpdateViewModel
     public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public int CurrentStock { get; set; }
-    
+
     [Required]
     [Range(0, 10000)]
     public int NewStock { get; set; }

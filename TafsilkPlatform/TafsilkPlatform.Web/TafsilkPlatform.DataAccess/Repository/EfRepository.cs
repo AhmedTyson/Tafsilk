@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.DataAccess.Repository;
 
 namespace TafsilkPlatform.DataAccess.Repository;
 

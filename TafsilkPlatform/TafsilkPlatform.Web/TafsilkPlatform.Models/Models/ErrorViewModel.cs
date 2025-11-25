@@ -7,7 +7,7 @@ public class ErrorViewModel
     public string? Message { get; set; }
 
     public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-    
+
     public string StatusCodeMessage => StatusCode switch
     {
         400 => "Bad Request",

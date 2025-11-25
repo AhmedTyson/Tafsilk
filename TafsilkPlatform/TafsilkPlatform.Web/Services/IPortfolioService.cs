@@ -17,7 +17,7 @@ public interface IPortfolioService
     /// Add a new portfolio image
     /// </summary>
     Task<(bool Success, Guid? ImageId, string? ErrorMessage)> AddPortfolioImageAsync(
-        Guid tailorId, 
+        Guid tailorId,
         AddPortfolioImageViewModel model);
 
     /// <summary>
@@ -29,8 +29,8 @@ public interface IPortfolioService
     /// Update an existing portfolio image
     /// </summary>
     Task<(bool Success, string? ErrorMessage)> UpdatePortfolioImageAsync(
-        Guid imageId, 
-        Guid tailorId, 
+        Guid imageId,
+        Guid tailorId,
         EditPortfolioImageViewModel model);
 
     /// <summary>
@@ -42,7 +42,7 @@ public interface IPortfolioService
     /// Toggle featured status of a portfolio image
     /// </summary>
     Task<(bool Success, bool IsFeatured, string? ErrorMessage)> ToggleFeaturedAsync(
-        Guid imageId, 
+        Guid imageId,
         Guid tailorId);
 
     /// <summary>

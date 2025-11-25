@@ -16,7 +16,7 @@ namespace TafsilkPlatform.DataAccess.Repository
         IPortfolioRepository PortfolioImages { get; }
         ITailorServiceRepository TailorServices { get; }
         IAddressRepository Addresses { get; }
-        
+
         // ✅ NEW: E-commerce repositories
         IProductRepository Products { get; }
         IShoppingCartRepository ShoppingCarts { get; }

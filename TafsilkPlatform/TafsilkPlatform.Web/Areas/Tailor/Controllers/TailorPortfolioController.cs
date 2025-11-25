@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Web.Services;
-using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 

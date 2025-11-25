@@ -5,20 +5,20 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
 {
     public static class ProductSeeder
     {
-     public static async Task SeedProductsAsync(ApplicationDbContext context)
+        public static async Task SeedProductsAsync(ApplicationDbContext context)
         {
-      if (await context.Products.AnyAsync())
-     {
-     return; // Already seeded
+            if (await context.Products.AnyAsync())
+            {
+                return; // Already seeded
             }
 
-  // Get a system tailor or create one
-  var systemTailor = await context.TailorProfiles.FirstOrDefaultAsync();
-         if (systemTailor == null)
-         {
-         Console.WriteLine("⚠️ No tailor found. Please create at least one tailor before seeding products.");
-      return;
-    }
+            // Get a system tailor or create one
+            var systemTailor = await context.TailorProfiles.FirstOrDefaultAsync();
+            if (systemTailor == null)
+            {
+                Console.WriteLine("⚠️ No tailor found. Please create at least one tailor before seeding products.");
+                return;
+            }
 
             var products = new List<Product>
 {
@@ -242,20 +242,20 @@ Price = 95.00m,
          }
             };
 
-        // Set random ratings for variety
+            // Set random ratings for variety
             var random = new Random();
-         foreach (var product in products)
-         {
-      product.AverageRating = Math.Round(3.5 + (random.NextDouble() * 1.5), 1); // 3.5 - 5.0
-    product.ReviewCount = random.Next(5, 50);
-      product.SalesCount = random.Next(10, 200);
-     product.ViewCount = random.Next(100, 1000);
-        }
+            foreach (var product in products)
+            {
+                product.AverageRating = Math.Round(3.5 + (random.NextDouble() * 1.5), 1); // 3.5 - 5.0
+                product.ReviewCount = random.Next(5, 50);
+                product.SalesCount = random.Next(10, 200);
+                product.ViewCount = random.Next(100, 1000);
+            }
 
-    await context.Products.AddRangeAsync(products);
-          await context.SaveChangesAsync();
+            await context.Products.AddRangeAsync(products);
+            await context.SaveChangesAsync();
 
             Console.WriteLine($"✅ Seeded {products.Count} products successfully!");
-   }
+        }
     }
 }

@@ -10,10 +10,10 @@ namespace TafsilkPlatform.Models.Models
     [Table("CustomerMeasurements")]
     public class CustomerMeasurement
     {
-      [Key]
-    public Guid Id { get; set; }
+        [Key]
+        public Guid Id { get; set; }
 
- [Required]
+        [Required]
         public Guid CustomerId { get; set; }
 
         [Required]
@@ -24,20 +24,20 @@ namespace TafsilkPlatform.Models.Models
         [MaxLength(50)]
         public string? GarmentType { get; set; } // e.g., "Thobe", "Suit", "Dress", "Abaya"
 
-    // Common measurements (stored as JSON or individual fields)
+        // Common measurements (stored as JSON or individual fields)
         public decimal? Chest { get; set; }
-   public decimal? Waist { get; set; }
+        public decimal? Waist { get; set; }
         public decimal? Hips { get; set; }
         public decimal? ShoulderWidth { get; set; }
-     public decimal? SleeveLength { get; set; }
-public decimal? InseamLength { get; set; }
+        public decimal? SleeveLength { get; set; }
+        public decimal? InseamLength { get; set; }
         public decimal? OutseamLength { get; set; }
-    public decimal? NeckCircumference { get; set; }
+        public decimal? NeckCircumference { get; set; }
         public decimal? ArmLength { get; set; }
         public decimal? ThighCircumference { get; set; }
 
-  // For traditional garments (Thobe, Abaya, etc.)
-   public decimal? ThobeLength { get; set; }
+        // For traditional garments (Thobe, Abaya, etc.)
+        public decimal? ThobeLength { get; set; }
         public decimal? AbayaLength { get; set; }
 
         // Additional custom measurements (JSON format)
@@ -50,10 +50,10 @@ public decimal? InseamLength { get; set; }
         public bool IsDefault { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-     public DateTime? UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
-// Navigation properties
-  [ForeignKey("CustomerId")]
+        // Navigation properties
+        [ForeignKey("CustomerId")]
         public virtual CustomerProfile Customer { get; set; } = null!;
     }
 }

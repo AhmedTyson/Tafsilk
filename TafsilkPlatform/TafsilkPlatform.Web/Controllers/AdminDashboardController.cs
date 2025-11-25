@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Controllers.Base;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.Admin;
+using TafsilkPlatform.Web.Controllers.Base;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -14,7 +14,7 @@ namespace TafsilkPlatform.Web.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminDashboardController : BaseController
 {
-  private readonly ApplicationDbContext _db;
+    private readonly ApplicationDbContext _db;
 
     public AdminDashboardController(
         ApplicationDbContext db,
@@ -30,88 +30,88 @@ public class AdminDashboardController : BaseController
     public async Task<IActionResult> Index()
     {
         try
-  {
+        {
             // Get basic counts
-   var totalUsers = await _db.Users.CountAsync(u => !u.IsDeleted);
+            var totalUsers = await _db.Users.CountAsync(u => !u.IsDeleted);
             var totalCustomers = await _db.CustomerProfiles.CountAsync();
             var totalTailors = await _db.TailorProfiles.CountAsync();
-     var activeOrders = await _db.Orders.CountAsync(o =>
-         o.Status != OrderStatus.Delivered &&
-        o.Status != OrderStatus.Cancelled);
-          var totalRevenue = await _db.Orders
-                .Where(o => o.Status == OrderStatus.Delivered)
-                .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+            var activeOrders = await _db.Orders.CountAsync(o =>
+                o.Status != OrderStatus.Delivered &&
+               o.Status != OrderStatus.Cancelled);
+            var totalRevenue = await _db.Orders
+                  .Where(o => o.Status == OrderStatus.Delivered)
+                  .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
 
-         var viewModel = new DashboardHomeViewModel
+            var viewModel = new DashboardHomeViewModel
             {
-       TotalUsers = totalUsers,
-      TotalCustomers = totalCustomers,
+                TotalUsers = totalUsers,
+                TotalCustomers = totalCustomers,
                 TotalTailors = totalTailors,
-       PendingTailorVerifications = 0, // Simplified - no verification
-           PendingPortfolioReviews = 0,
-            ActiveOrders = activeOrders,
-  TotalRevenue = totalRevenue,
-   RecentActivity = new List<ActivityLogDto>()
+                PendingTailorVerifications = 0, // Simplified - no verification
+                PendingPortfolioReviews = 0,
+                ActiveOrders = activeOrders,
+                TotalRevenue = totalRevenue,
+                RecentActivity = new List<ActivityLogDto>()
             };
 
-          return View(viewModel);
+            return View(viewModel);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading admin dashboard");
-    TempData["Error"] = "حدث خطأ أثناء تحميل لوحة التحكم";
-    return View(new DashboardHomeViewModel());
+            TempData["Error"] = "حدث خطأ أثناء تحميل لوحة التحكم";
+            return View(new DashboardHomeViewModel());
         }
     }
 
     [HttpGet]
     public async Task<IActionResult> Users()
     {
-     try
-   {
-     var users = await _db.Users
-        .Include(u => u.Role)
-          .Include(u => u.CustomerProfile)
-    .Include(u => u.TailorProfile)
-     .Where(u => !u.IsDeleted)
-        .OrderByDescending(u => u.CreatedAt)
-     .ToListAsync();
-
-     return View(users);
- }
- catch (Exception ex)
+        try
         {
- _logger.LogError(ex, "Error loading users page");
-   TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المستخدمين";
- return View(new List<User>());
+            var users = await _db.Users
+               .Include(u => u.Role)
+                 .Include(u => u.CustomerProfile)
+           .Include(u => u.TailorProfile)
+            .Where(u => !u.IsDeleted)
+               .OrderByDescending(u => u.CreatedAt)
+            .ToListAsync();
+
+            return View(users);
         }
- }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading users page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المستخدمين";
+            return View(new List<User>());
+        }
+    }
 
     [HttpGet]
     public async Task<IActionResult> UserDetails(Guid id)
     {
-  try
- {
-     var user = await _db.Users
-     .Include(u => u.Role)
-        .Include(u => u.CustomerProfile)
-         .Include(u => u.TailorProfile)
-   .FirstOrDefaultAsync(u => u.Id == id);
+        try
+        {
+            var user = await _db.Users
+            .Include(u => u.Role)
+               .Include(u => u.CustomerProfile)
+                .Include(u => u.TailorProfile)
+          .FirstOrDefaultAsync(u => u.Id == id);
 
-      if (user == null)
+            if (user == null)
             {
-           TempData["Error"] = "المستخدم غير موجود";
-            return RedirectToAction(nameof(Users));
-}
+                TempData["Error"] = "المستخدم غير موجود";
+                return RedirectToAction(nameof(Users));
+            }
 
-      return View(user);
- }
+            return View(user);
+        }
         catch (Exception ex)
         {
- _logger.LogError(ex, "Error loading user details for {UserId}", id);
-  TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل المستخدم";
-return RedirectToAction(nameof(Users));
-   }
+            _logger.LogError(ex, "Error loading user details for {UserId}", id);
+            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل المستخدم";
+            return RedirectToAction(nameof(Users));
+        }
     }
 
     /// <summary>
@@ -125,32 +125,32 @@ return RedirectToAction(nameof(Users));
         try
         {
             var user = await _db.Users.FindAsync(id);
-if (user == null)
-       {
-    TempData["Error"] = "المستخدم غير موجود";
-    return RedirectToAction(nameof(Users));
+            if (user == null)
+            {
+                TempData["Error"] = "المستخدم غير موجود";
+                return RedirectToAction(nameof(Users));
             }
 
             // Prevent suspending other admins
-          if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
-{
-         TempData["Error"] = "لا يمكن تعليق حساب المسؤول";
-     return RedirectToAction(nameof(UserDetails), new { id });
-        }
+            if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
+            {
+                TempData["Error"] = "لا يمكن تعليق حساب المسؤول";
+                return RedirectToAction(nameof(UserDetails), new { id });
+            }
 
-user.IsActive = false;
+            user.IsActive = false;
             user.UpdatedAt = DateTime.UtcNow;
-     
-     await _db.SaveChangesAsync();
 
-  _logger.LogInformation("User {UserId} suspended by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-      TempData["Success"] = "تم تعليق حساب المستخدم بنجاح";
+            await _db.SaveChangesAsync();
 
-        return RedirectToAction(nameof(UserDetails), new { id });
-      }
-   catch (Exception ex)
+            _logger.LogInformation("User {UserId} suspended by admin. Reason: {Reason}", id, reason ?? "No reason provided");
+            TempData["Success"] = "تم تعليق حساب المستخدم بنجاح";
+
+            return RedirectToAction(nameof(UserDetails), new { id });
+        }
+        catch (Exception ex)
         {
-     _logger.LogError(ex, "Error suspending user {UserId}", id);
+            _logger.LogError(ex, "Error suspending user {UserId}", id);
             TempData["Error"] = "حدث خطأ أثناء تعليق الحساب";
             return RedirectToAction(nameof(UserDetails), new { id });
         }
@@ -158,7 +158,7 @@ user.IsActive = false;
 
     /// <summary>
     /// Activate a suspended user account
- /// POST: /AdminDashboard/ActivateUser/{id}
+    /// POST: /AdminDashboard/ActivateUser/{id}
     /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -168,30 +168,30 @@ user.IsActive = false;
         {
             var user = await _db.Users.FindAsync(id);
             if (user == null)
- {
-       TempData["Error"] = "المستخدم غير موجود";
-  return RedirectToAction(nameof(Users));
+            {
+                TempData["Error"] = "المستخدم غير موجود";
+                return RedirectToAction(nameof(Users));
             }
 
             user.IsActive = true;
- user.UpdatedAt = DateTime.UtcNow;
-            
+            user.UpdatedAt = DateTime.UtcNow;
+
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("User {UserId} activated by admin", id);
-      TempData["Success"] = "تم تفعيل حساب المستخدم بنجاح";
+            TempData["Success"] = "تم تفعيل حساب المستخدم بنجاح";
 
-     return RedirectToAction(nameof(UserDetails), new { id });
-    }
-    catch (Exception ex)
-        {
-        _logger.LogError(ex, "Error activating user {UserId}", id);
- TempData["Error"] = "حدث خطأ أثناء تفعيل الحساب";
             return RedirectToAction(nameof(UserDetails), new { id });
-   }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error activating user {UserId}", id);
+            TempData["Error"] = "حدث خطأ أثناء تفعيل الحساب";
+            return RedirectToAction(nameof(UserDetails), new { id });
+        }
     }
 
-/// <summary>
+    /// <summary>
     /// Soft delete a user account
     /// POST: /AdminDashboard/DeleteUser/{id}
     /// </summary>
@@ -200,39 +200,39 @@ user.IsActive = false;
     public async Task<IActionResult> DeleteUser(Guid id, string? reason)
     {
         try
-     {
-        var user = await _db.Users.FindAsync(id);
-      if (user == null)
-   {
-    TempData["Error"] = "المستخدم غير موجود";
-             return RedirectToAction(nameof(Users));
+        {
+            var user = await _db.Users.FindAsync(id);
+            if (user == null)
+            {
+                TempData["Error"] = "المستخدم غير موجود";
+                return RedirectToAction(nameof(Users));
             }
 
             // Prevent deleting other admins
-         if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
+            if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
             {
                 TempData["Error"] = "لا يمكن حذف حساب المسؤول";
-              return RedirectToAction(nameof(UserDetails), new { id });
+                return RedirectToAction(nameof(UserDetails), new { id });
             }
 
             // Soft delete
-     user.IsDeleted = true;
-        user.IsActive = false;
-   user.UpdatedAt = DateTime.UtcNow;
-        
-     await _db.SaveChangesAsync();
+            user.IsDeleted = true;
+            user.IsActive = false;
+            user.UpdatedAt = DateTime.UtcNow;
 
-  _logger.LogWarning("User {UserId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
+            await _db.SaveChangesAsync();
+
+            _logger.LogWarning("User {UserId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
             TempData["Success"] = "تم حذف حساب المستخدم بنجاح";
 
-        return RedirectToAction(nameof(Users));
+            return RedirectToAction(nameof(Users));
         }
-    catch (Exception ex)
+        catch (Exception ex)
         {
-  _logger.LogError(ex, "Error deleting user {UserId}", id);
- TempData["Error"] = "حدث خطأ أثناء حذف الحساب";
+            _logger.LogError(ex, "Error deleting user {UserId}", id);
+            TempData["Error"] = "حدث خطأ أثناء حذف الحساب";
             return RedirectToAction(nameof(UserDetails), new { id });
- }
+        }
     }
 
     /// <summary>
@@ -240,65 +240,65 @@ user.IsActive = false;
     /// POST: /AdminDashboard/UpdateUserRole/{id}
     /// </summary>
     [HttpPost]
- [ValidateAntiForgeryToken]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateUserRole(Guid id, Guid newRoleId)
     {
         try
-  {
+        {
             var user = await _db.Users
             .Include(u => u.Role)
              .FirstOrDefaultAsync(u => u.Id == id);
-         
+
             if (user == null)
-    {
-     TempData["Error"] = "المستخدم غير موجود";
+            {
+                TempData["Error"] = "المستخدم غير موجود";
                 return RedirectToAction(nameof(Users));
-        }
+            }
 
             var newRole = await _db.Roles.FindAsync(newRoleId);
-   if (newRole == null)
-    {
-       TempData["Error"] = "الدور المحدد غير موجود";
+            if (newRole == null)
+            {
+                TempData["Error"] = "الدور المحدد غير موجود";
                 return RedirectToAction(nameof(UserDetails), new { id });
             }
 
             // Prevent changing admin roles
             if (user.Role?.Name == "Admin" || newRole.Name == "Admin")
-   {
-       TempData["Error"] = "لا يمكن تغيير دور المسؤول";
-         return RedirectToAction(nameof(UserDetails), new { id });
- }
+            {
+                TempData["Error"] = "لا يمكن تغيير دور المسؤول";
+                return RedirectToAction(nameof(UserDetails), new { id });
+            }
 
-     user.RoleId = newRoleId;
-     user.UpdatedAt = DateTime.UtcNow;
-      
-         await _db.SaveChangesAsync();
+            user.RoleId = newRoleId;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            await _db.SaveChangesAsync();
 
             _logger.LogInformation("User {UserId} role updated to {RoleName} by admin", id, newRole.Name);
-    TempData["Success"] = $"تم تحديث دور المستخدم إلى {newRole.Name} بنجاح";
+            TempData["Success"] = $"تم تحديث دور المستخدم إلى {newRole.Name} بنجاح";
 
-        return RedirectToAction(nameof(UserDetails), new { id });
+            return RedirectToAction(nameof(UserDetails), new { id });
         }
- catch (Exception ex)
-     {
-      _logger.LogError(ex, "Error updating user {UserId} role", id);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user {UserId} role", id);
             TempData["Error"] = "حدث خطأ أثناء تحديث الدور";
             return RedirectToAction(nameof(UserDetails), new { id });
-    }
+        }
     }
 
     [HttpGet]
     public IActionResult TailorVerification()
     {
-    TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-      return RedirectToAction(nameof(Users));
+        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
+        return RedirectToAction(nameof(Users));
     }
 
     [HttpGet]
     public IActionResult ReviewTailor(Guid id)
     {
-TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-return RedirectToAction(nameof(Users));
+        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
+        return RedirectToAction(nameof(Users));
     }
 
     [HttpPost]
@@ -306,36 +306,36 @@ return RedirectToAction(nameof(Users));
     public IActionResult ApproveTailor(Guid id, string? notes)
     {
         TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-    return RedirectToAction(nameof(Users));
+        return RedirectToAction(nameof(Users));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult RejectTailor(Guid id, string? reason)
     {
-      TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-    return RedirectToAction(nameof(Users));
+        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
+        return RedirectToAction(nameof(Users));
     }
 
-  [HttpGet]
-  public async Task<IActionResult> PortfolioReview()
-  {
-   try
-   {
-    var images = await _db.PortfolioImages
-     .Include(p => p.Tailor)
-     .ThenInclude(t => t.User)
-             .Where(p => !p.IsDeleted)
-        .OrderByDescending(p => p.UploadedAt)
-.ToListAsync();
-
-      return View(images);
-   }
-     catch (Exception ex)
+    [HttpGet]
+    public async Task<IActionResult> PortfolioReview()
+    {
+        try
         {
-    _logger.LogError(ex, "Error loading portfolio review page");
-    TempData["Error"] = "حدث خطأ أثناء تحميل صفحة مراجعة الصور";
-       return View(new List<PortfolioImage>());
+            var images = await _db.PortfolioImages
+             .Include(p => p.Tailor)
+             .ThenInclude(t => t.User)
+                     .Where(p => !p.IsDeleted)
+                .OrderByDescending(p => p.UploadedAt)
+        .ToListAsync();
+
+            return View(images);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading portfolio review page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة مراجعة الصور";
+            return View(new List<PortfolioImage>());
         }
     }
 
@@ -349,50 +349,50 @@ return RedirectToAction(nameof(Users));
     {
         try
         {
-    var image = await _db.PortfolioImages.FindAsync(id);
-       if (image == null)
-       {
+            var image = await _db.PortfolioImages.FindAsync(id);
+            if (image == null)
+            {
                 TempData["Error"] = "الصورة غير موجودة";
-    return RedirectToAction(nameof(PortfolioReview));
+                return RedirectToAction(nameof(PortfolioReview));
             }
 
             image.IsDeleted = true;
             await _db.SaveChangesAsync();
 
-   _logger.LogWarning("Portfolio image {ImageId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
+            _logger.LogWarning("Portfolio image {ImageId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
             TempData["Success"] = "تم حذف الصورة بنجاح";
 
-  return RedirectToAction(nameof(PortfolioReview));
+            return RedirectToAction(nameof(PortfolioReview));
         }
         catch (Exception ex)
-     {
+        {
             _logger.LogError(ex, "Error deleting portfolio image {ImageId}", id);
- TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
-         return RedirectToAction(nameof(PortfolioReview));
+            TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
+            return RedirectToAction(nameof(PortfolioReview));
         }
     }
 
- [HttpGet]
+    [HttpGet]
     public async Task<IActionResult> Orders()
     {
- try
-     {
-  var orders = await _db.Orders
- .Include(o => o.Customer)
-.ThenInclude(c => c.User)
-      .Include(o => o.Tailor)
-         .ThenInclude(t => t.User)
-   .OrderByDescending(o => o.CreatedAt)
- .ToListAsync();
+        try
+        {
+            var orders = await _db.Orders
+           .Include(o => o.Customer)
+          .ThenInclude(c => c.User)
+                .Include(o => o.Tailor)
+                   .ThenInclude(t => t.User)
+             .OrderByDescending(o => o.CreatedAt)
+           .ToListAsync();
 
-  return View(orders);
-    }
+            return View(orders);
+        }
         catch (Exception ex)
-{
+        {
             _logger.LogError(ex, "Error loading orders page");
-    TempData["Error"] = "حدث خطأ أثناء تحميل صفحة الطلبات";
- return View(new List<Order>());
-    }
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة الطلبات";
+            return View(new List<Order>());
+        }
     }
 
     /// <summary>
@@ -405,33 +405,33 @@ return RedirectToAction(nameof(Users));
     {
         try
         {
-       var order = await _db.Orders.FindAsync(id);
-      if (order == null)
-         {
-     TempData["Error"] = "الطلب غير موجود";
-          return RedirectToAction(nameof(Orders));
+            var order = await _db.Orders.FindAsync(id);
+            if (order == null)
+            {
+                TempData["Error"] = "الطلب غير موجود";
+                return RedirectToAction(nameof(Orders));
             }
 
- if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
-        {
-             TempData["Error"] = "لا يمكن إلغاء هذا الطلب";
- return RedirectToAction(nameof(Orders));
-      }
+            if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
+            {
+                TempData["Error"] = "لا يمكن إلغاء هذا الطلب";
+                return RedirectToAction(nameof(Orders));
+            }
 
-         order.Status = OrderStatus.Cancelled;
-      await _db.SaveChangesAsync();
+            order.Status = OrderStatus.Cancelled;
+            await _db.SaveChangesAsync();
 
             _logger.LogWarning("Order {OrderId} cancelled by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-   TempData["Success"] = "تم إلغاء الطلب بنجاح";
+            TempData["Success"] = "تم إلغاء الطلب بنجاح";
 
-        return RedirectToAction(nameof(Orders));
-  }
+            return RedirectToAction(nameof(Orders));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error cancelling order {OrderId}", id);
-   TempData["Error"] = "حدث خطأ أثناء إلغاء الطلب";
-    return RedirectToAction(nameof(Orders));
-   }
+            TempData["Error"] = "حدث خطأ أثناء إلغاء الطلب";
+            return RedirectToAction(nameof(Orders));
+        }
     }
 
     #region Product Management
@@ -444,72 +444,72 @@ return RedirectToAction(nameof(Users));
     public async Task<IActionResult> Products(string? category = null, string? search = null, int page = 1)
     {
         try
-     {
-   var query = _db.Products.Where(p => !p.IsDeleted);
+        {
+            var query = _db.Products.Where(p => !p.IsDeleted);
 
-          if (!string.IsNullOrEmpty(category))
+            if (!string.IsNullOrEmpty(category))
             {
-    query = query.Where(p => p.Category == category);
-         }
+                query = query.Where(p => p.Category == category);
+            }
 
-         if (!string.IsNullOrEmpty(search))
+            if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
-}
+            }
 
-     var products = await query
-     .Include(p => p.Tailor)
-              .OrderByDescending(p => p.CreatedAt)
-       .Skip((page - 1) * 20)
-       .Take(20)
-    .ToListAsync();
+            var products = await query
+            .Include(p => p.Tailor)
+                     .OrderByDescending(p => p.CreatedAt)
+              .Skip((page - 1) * 20)
+              .Take(20)
+           .ToListAsync();
 
-       ViewBag.TotalProducts = await query.CountAsync();
- ViewBag.CurrentPage = page;
+            ViewBag.TotalProducts = await query.CountAsync();
+            ViewBag.CurrentPage = page;
             ViewBag.Category = category;
             ViewBag.Search = search;
 
             return View(products);
-      }
-    catch (Exception ex)
+        }
+        catch (Exception ex)
         {
-    _logger.LogError(ex, "Error loading products page");
-        TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المنتجات";
-     return View(new List<Product>());
+            _logger.LogError(ex, "Error loading products page");
+            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المنتجات";
+            return View(new List<Product>());
         }
     }
 
-  /// <summary>
+    /// <summary>
     /// Toggle product availability
     /// POST: /AdminDashboard/ToggleProductAvailability/{id}
     /// </summary>
-  [HttpPost]
+    [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleProductAvailability(Guid id)
     {
- try
- {
-        var product = await _db.Products.FindAsync(id);
-         if (product == null)
-         {
-        TempData["Error"] = "المنتج غير موجود";
-     return RedirectToAction(nameof(Products));
-    }
+        try
+        {
+            var product = await _db.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["Error"] = "المنتج غير موجود";
+                return RedirectToAction(nameof(Products));
+            }
 
-      product.IsAvailable = !product.IsAvailable;
-     product.UpdatedAt = DateTimeOffset.UtcNow;
+            product.IsAvailable = !product.IsAvailable;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
             await _db.SaveChangesAsync();
 
-_logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable} by admin", id, product.IsAvailable);
+            _logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable} by admin", id, product.IsAvailable);
             TempData["Success"] = $"تم {(product.IsAvailable ? "تفعيل" : "إيقاف")} المنتج بنجاح";
 
-      return RedirectToAction(nameof(Products));
-     }
+            return RedirectToAction(nameof(Products));
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling product availability {ProductId}", id);
- TempData["Error"] = "حدث خطأ أثناء تحديث حالة المنتج";
-       return RedirectToAction(nameof(Products));
+            TempData["Error"] = "حدث خطأ أثناء تحديث حالة المنتج";
+            return RedirectToAction(nameof(Products));
         }
     }
 
@@ -521,115 +521,115 @@ _logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteProduct(Guid id, string? reason)
     {
-     try
-  {
+        try
+        {
             var product = await _db.Products.FindAsync(id);
             if (product == null)
-      {
-       TempData["Error"] = "المنتج غير موجود";
+            {
+                TempData["Error"] = "المنتج غير موجود";
                 return RedirectToAction(nameof(Products));
-   }
+            }
 
-         // Soft delete
-   product.IsDeleted = true;
-  product.IsAvailable = false;
-          product.UpdatedAt = DateTimeOffset.UtcNow;
+            // Soft delete
+            product.IsDeleted = true;
+            product.IsAvailable = false;
+            product.UpdatedAt = DateTimeOffset.UtcNow;
             await _db.SaveChangesAsync();
 
-   _logger.LogWarning("Product {ProductId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-    TempData["Success"] = "تم حذف المنتج بنجاح";
+            _logger.LogWarning("Product {ProductId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
+            TempData["Success"] = "تم حذف المنتج بنجاح";
 
-        return RedirectToAction(nameof(Products));
+            return RedirectToAction(nameof(Products));
         }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error deleting product {ProductId}", id);
- TempData["Error"] = "حدث خطأ أثناء حذف المنتج";
-      return RedirectToAction(nameof(Products));
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting product {ProductId}", id);
+            TempData["Error"] = "حدث خطأ أثناء حذف المنتج";
+            return RedirectToAction(nameof(Products));
         }
     }
 
     /// <summary>
     /// Update product stock
     /// POST: /AdminDashboard/UpdateProductStock/{id}
-  /// </summary>
+    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-  public async Task<IActionResult> UpdateProductStock(Guid id, int newStock)
+    public async Task<IActionResult> UpdateProductStock(Guid id, int newStock)
     {
         try
-  {
+        {
             var product = await _db.Products.FindAsync(id);
- if (product == null)
+            if (product == null)
             {
-    TempData["Error"] = "المنتج غير موجود";
-     return RedirectToAction(nameof(Products));
+                TempData["Error"] = "المنتج غير موجود";
+                return RedirectToAction(nameof(Products));
             }
 
-        if (newStock < 0)
+            if (newStock < 0)
             {
                 TempData["Error"] = "الكمية يجب أن تكون أكبر من أو تساوي صفر";
-       return RedirectToAction(nameof(Products));
+                return RedirectToAction(nameof(Products));
             }
 
-       product.StockQuantity = newStock;
+            product.StockQuantity = newStock;
             product.UpdatedAt = DateTimeOffset.UtcNow;
 
             // Auto-disable if out of stock
-          if (newStock == 0)
-         {
-       product.IsAvailable = false;
+            if (newStock == 0)
+            {
+                product.IsAvailable = false;
             }
 
-     await _db.SaveChangesAsync();
+            await _db.SaveChangesAsync();
 
-   _logger.LogInformation("Product {ProductId} stock updated to {Stock} by admin", id, newStock);
-       TempData["Success"] = "تم تحديث المخزون بنجاح";
+            _logger.LogInformation("Product {ProductId} stock updated to {Stock} by admin", id, newStock);
+            TempData["Success"] = "تم تحديث المخزون بنجاح";
 
-       return RedirectToAction(nameof(Products));
+            return RedirectToAction(nameof(Products));
         }
         catch (Exception ex)
-     {
-    _logger.LogError(ex, "Error updating product stock {ProductId}", id);
+        {
+            _logger.LogError(ex, "Error updating product stock {ProductId}", id);
             TempData["Error"] = "حدث خطأ أثناء تحديث المخزون";
             return RedirectToAction(nameof(Products));
- }
+        }
     }
 
     #endregion
 
     [HttpGet]
     public IActionResult Disputes()
-  {
-   TempData["Info"] = "ميزة النزاعات غير متاحة حالياً";
-  return View();
+    {
+        TempData["Info"] = "ميزة النزاعات غير متاحة حالياً";
+        return View();
     }
 
     [HttpGet]
     public IActionResult Refunds()
     {
-   TempData["Info"] = "ميزة طلبات الاسترداد غير متاحة حالياً";
+        TempData["Info"] = "ميزة طلبات الاسترداد غير متاحة حالياً";
         return View();
     }
 
     [HttpGet]
     public IActionResult Reviews()
     {
-   TempData["Info"] = "تم تبسيط النظام - التقييمات غير متاحة";
-    return RedirectToAction(nameof(Orders));
+        TempData["Info"] = "تم تبسيط النظام - التقييمات غير متاحة";
+        return RedirectToAction(nameof(Orders));
     }
 
     [HttpGet]
-public IActionResult Analytics()
-  {
-return View();
+    public IActionResult Analytics()
+    {
+        return View();
     }
 
     [HttpGet]
     public IActionResult Notifications()
     {
-    TempData["Info"] = "تم تبسيط النظام - الإشعارات غير متاحة";
-    return View(new List<string>());
+        TempData["Info"] = "تم تبسيط النظام - الإشعارات غير متاحة";
+        return View(new List<string>());
     }
 
     [HttpGet]
@@ -645,7 +645,7 @@ return View();
     [HttpGet]
     public IActionResult ViewVerificationDocument(Guid tailorId, string documentType)
     {
-     TempData["Info"] = "تم تبسيط النظام - وثائق التحقق غير متاحة";
-    return RedirectToAction(nameof(Users));
-}
+        TempData["Info"] = "تم تبسيط النظام - وثائق التحقق غير متاحة";
+        return RedirectToAction(nameof(Users));
     }
+}

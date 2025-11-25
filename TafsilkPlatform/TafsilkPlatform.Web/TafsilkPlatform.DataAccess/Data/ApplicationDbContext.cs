@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
-using System.Linq;
 using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.DataAccess.Data;

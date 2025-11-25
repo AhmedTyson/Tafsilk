@@ -1,4 +1,3 @@
-using TafsilkPlatform.Web.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -7,9 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
-using TafsilkPlatform.Utility.Security;
-using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Models.ViewModels;
+using TafsilkPlatform.Utility.Security;
+using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Services;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -267,94 +267,94 @@ public class AccountController(
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> CompleteTailorProfile(Guid? userId)
- {
+    {
         _logger.LogInformation("[AccountController] CompleteTailorProfile GET accessed. UserId param: {UserId}", userId);
 
         // Check if coming from registration (unauthenticated)
-     var userIdStr = TempData["UserId"]?.ToString();
+        var userIdStr = TempData["UserId"]?.ToString();
 
         // Keep the data for the POST
         TempData.Keep("UserId");
-     TempData.Keep("UserEmail");
+        TempData.Keep("UserEmail");
         TempData.Keep("UserName");
         TempData.Keep("InfoMessage");
 
         Guid userGuid;
         User? user = null;
 
-  // Priority 1: Get from query string parameter (most reliable)
-  if (userId.HasValue && userId.Value != Guid.Empty)
+        // Priority 1: Get from query string parameter (most reliable)
+        if (userId.HasValue && userId.Value != Guid.Empty)
         {
             userGuid = userId.Value;
-_logger.LogInformation("[AccountController] Using UserId from query string: {UserId}", userGuid);
-    }
+            _logger.LogInformation("[AccountController] Using UserId from query string: {UserId}", userGuid);
+        }
         // Priority 2: Get from TempData (fallback)
         else if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out userGuid))
         {
-        _logger.LogInformation("[AccountController] Using UserId from TempData: {UserId}", userGuid);
-    }
+            _logger.LogInformation("[AccountController] Using UserId from TempData: {UserId}", userGuid);
+        }
         // Priority 3: Check if authenticated tailor (editing profile after login)
         else if (User.Identity?.IsAuthenticated == true)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-       if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
             {
-     _logger.LogWarning("[AccountController] Authenticated user has no valid UserId claim");
-       TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى تسجيل الدخول مرة أخرى";
-      return RedirectToAction(nameof(Login));
-       }
+                _logger.LogWarning("[AccountController] Authenticated user has no valid UserId claim");
+                TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى تسجيل الدخول مرة أخرى";
+                return RedirectToAction(nameof(Login));
+            }
 
-  _logger.LogInformation("[AccountController] Using UserId from claims: {UserId}", userGuid);
+            _logger.LogInformation("[AccountController] Using UserId from claims: {UserId}", userGuid);
         }
-     else
-   {
+        else
+        {
             // No user ID and not authenticated - redirect to registration
-       _logger.LogWarning("[AccountController] No UserId available from any source");
-    TempData["InfoMessage"] = "يرجى التسجيل أولاً لإنشاء حساب خياط";
+            _logger.LogWarning("[AccountController] No UserId available from any source");
+            TempData["InfoMessage"] = "يرجى التسجيل أولاً لإنشاء حساب خياط";
             return RedirectToAction(nameof(Register));
-     }
+        }
 
         // ✅ FIX: Use GetUserWithProfileAsync which includes Role navigation property
-      user = await _userRepository.GetUserWithProfileAsync(userGuid);
-        
- // ✅ FIX: More detailed validation and better error messages
-        if (user == null)
-  {
-            _logger.LogWarning("[AccountController] User not found: {UserId}", userGuid);
-  TempData["ErrorMessage"] = "المستخدم غير موجود. يرجى التسجيل مرة أخرى";
-   return RedirectToAction(nameof(Register));
- }
+        user = await _userRepository.GetUserWithProfileAsync(userGuid);
 
-   if (user.Role == null)
-    {
-       _logger.LogError("[AccountController] User {UserId} has no role assigned. Email: {Email}", userGuid, user.Email);
-TempData["ErrorMessage"] = "خطأ في البيانات: الدور غير محدد. يرجى الاتصال بالدعم";
+        // ✅ FIX: More detailed validation and better error messages
+        if (user == null)
+        {
+            _logger.LogWarning("[AccountController] User not found: {UserId}", userGuid);
+            TempData["ErrorMessage"] = "المستخدم غير موجود. يرجى التسجيل مرة أخرى";
             return RedirectToAction(nameof(Register));
-     }
+        }
+
+        if (user.Role == null)
+        {
+            _logger.LogError("[AccountController] User {UserId} has no role assigned. Email: {Email}", userGuid, user.Email);
+            TempData["ErrorMessage"] = "خطأ في البيانات: الدور غير محدد. يرجى الاتصال بالدعم";
+            return RedirectToAction(nameof(Register));
+        }
 
         if (user.Role.Name?.ToLower() != "tailor")
         {
-   _logger.LogWarning("[AccountController] User {UserId} is not a tailor. Role: {Role}", userGuid, user.Role.Name);
-   TempData["ErrorMessage"] = $"هذا الحساب مسجل كـ {user.Role.Name}. يرجى تسجيل الدخول بدلاً من ذلك";
-  return RedirectToAction(nameof(Login));
+            _logger.LogWarning("[AccountController] User {UserId} is not a tailor. Role: {Role}", userGuid, user.Role.Name);
+            TempData["ErrorMessage"] = $"هذا الحساب مسجل كـ {user.Role.Name}. يرجى تسجيل الدخول بدلاً من ذلك";
+            return RedirectToAction(nameof(Login));
         }
 
- _logger.LogInformation("[AccountController] User found: {UserId}, Email: {Email}, Role: {Role}",
-             user.Id, user.Email, user.Role.Name);
+        _logger.LogInformation("[AccountController] User found: {UserId}, Email: {Email}, Role: {Role}",
+                    user.Id, user.Email, user.Role.Name);
 
-      // CRITICAL: Check if profile already exists (evidence already provided)
+        // CRITICAL: Check if profile already exists (evidence already provided)
         // This ensures ONE-TIME submission only
-      var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
+        var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(user.Id);
         if (existingProfile != null)
         {
-_logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to dashboard.", user.Id);
- TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بالفعل. مرحباً بك!";
-            
-   // ✅ FIX: If profile exists, auto-login and redirect to dashboard
-   if (User.Identity?.IsAuthenticated != true)
+            _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to dashboard.", user.Id);
+            TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بالفعل. مرحباً بك!";
+
+            // ✅ FIX: If profile exists, auto-login and redirect to dashboard
+            if (User.Identity?.IsAuthenticated != true)
             {
-       // Build claims for authentication
-     var claims = new List<Claim>
+                // Build claims for authentication
+                var claims = new List<Claim>
   {
     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
           new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -363,19 +363,19 @@ _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access comp
     new Claim(ClaimTypes.Role, "Tailor")
   };
 
-      var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        var principal = new ClaimsPrincipal(identity);
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
-        new AuthenticationProperties { IsPersistent = true });
-      }
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+                new AuthenticationProperties { IsPersistent = true });
+            }
 
-  return RedirectToAction("Tailor", "Dashboards");
+            return RedirectToAction("Tailor", "Dashboards");
         }
 
-    var model = new CompleteTailorProfileRequest
+        var model = new CompleteTailorProfileRequest
         {
-    UserId = user.Id,
-Email = user.Email ?? string.Empty,
+            UserId = user.Id,
+            Email = user.Email ?? string.Empty,
             FullName = user.Email ?? "خياط جديد"
         };
 
@@ -393,122 +393,122 @@ Email = user.Email ?? string.Empty,
         if (!ModelState.IsValid)
             return View(model);
 
-     try
+        try
         {
             // Get the user - model.UserId comes from hidden field
-   var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
-  if (user == null)
-      {
-     _logger.LogWarning("[AccountController] User not found during profile completion: {UserId}", model.UserId);
-ModelState.AddModelError(string.Empty, "المستخدم غير موجود");
- return View(model);
-      }
+            var user = await _unitOfWork.Users.GetByIdAsync(model.UserId);
+            if (user == null)
+            {
+                _logger.LogWarning("[AccountController] User not found during profile completion: {UserId}", model.UserId);
+                ModelState.AddModelError(string.Empty, "المستخدم غير موجود");
+                return View(model);
+            }
 
-   // ✅ FIX: Load role navigation property
-await _unitOfWork.Context.Entry(user).Reference(u => u.Role).LoadAsync();
+            // ✅ FIX: Load role navigation property
+            await _unitOfWork.Context.Entry(user).Reference(u => u.Role).LoadAsync();
 
-    if (user.Role == null || user.Role.Name?.ToLower() != "tailor")
-       {
-  _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}", 
-    model.UserId, user.Role?.Name ?? "NULL");
-    ModelState.AddModelError(string.Empty, "حساب غير صالح");
-   return View(model);
-       }
+            if (user.Role == null || user.Role.Name?.ToLower() != "tailor")
+            {
+                _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}",
+                  model.UserId, user.Role?.Name ?? "NULL");
+                ModelState.AddModelError(string.Empty, "حساب غير صالح");
+                return View(model);
+            }
 
-          // CRITICAL: Check if profile already exists - BLOCK double submission
-   var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
-if (existingProfile != null)
-       {
-     _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
- TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
-     return RedirectToAction("Tailor", "Dashboards");
- }
+            // CRITICAL: Check if profile already exists - BLOCK double submission
+            var existingProfile = await _unitOfWork.Tailors.GetByUserIdAsync(model.UserId);
+            if (existingProfile != null)
+            {
+                _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
+                TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
+                return RedirectToAction("Tailor", "Dashboards");
+            }
 
-  // ✅ FIX: Documents are now OPTIONAL (removed from UI)
- // Only validate if provided
-     if (model.IdDocumentFront != null && model.IdDocumentFront.Length > 0)
-   {
-     var (isValidId, idError) = ValidateFileUpload(model.IdDocumentFront, "document");
-       if (!isValidId)
-{
-   ModelState.AddModelError(nameof(model.IdDocumentFront), idError!);
-      return View(model);
-    }
-     }
+            // ✅ FIX: Documents are now OPTIONAL (removed from UI)
+            // Only validate if provided
+            if (model.IdDocumentFront != null && model.IdDocumentFront.Length > 0)
+            {
+                var (isValidId, idError) = ValidateFileUpload(model.IdDocumentFront, "document");
+                if (!isValidId)
+                {
+                    ModelState.AddModelError(nameof(model.IdDocumentFront), idError!);
+                    return View(model);
+                }
+            }
 
-      // Portfolio images are also optional now
-    if (model.PortfolioImages != null && model.PortfolioImages.Any())
-         {
-  var portfolioFiles = model.PortfolioImages;
-          
-       if (portfolioFiles.Count > 10)
-     {
-       ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
-        return View(model);
-         }
+            // Portfolio images are also optional now
+            if (model.PortfolioImages != null && model.PortfolioImages.Any())
+            {
+                var portfolioFiles = model.PortfolioImages;
 
-   foreach (var image in portfolioFiles)
-{
-      var (isValidImage, imageError) = ValidateFileUpload(image, "image");
-      if (!isValidImage)
-    {
-        ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
-         return View(model);
-  }
-     }
-   }
+                if (portfolioFiles.Count > 10)
+                {
+                    ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
+                    return View(model);
+                }
 
-     // Sanitize text inputs
- var sanitizedFullName = SanitizeInput(model.FullName, 100);
-     var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
-         var sanitizedAddress = SanitizeInput(model.Address, 200);
-     var sanitizedCity = SanitizeInput(model.City, 50);
-      var sanitizedDescription = SanitizeInput(model.Description, 1000);
+                foreach (var image in portfolioFiles)
+                {
+                    var (isValidImage, imageError) = ValidateFileUpload(image, "image");
+                    if (!isValidImage)
+                    {
+                        ModelState.AddModelError(nameof(model.PortfolioImages), imageError!);
+                        return View(model);
+                    }
+                }
+            }
 
-   // Create tailor profile NOW (this is the ONE AND ONLY TIME)
-    var tailorProfile = new TailorProfile
-     {
-        Id = Guid.NewGuid(),
- UserId = model.UserId,
-   FullName = sanitizedFullName,
-   ShopName = sanitizedWorkshopName,
-         Address = sanitizedAddress,
-City = sanitizedCity,
-    Bio = sanitizedDescription,
-  Specialization = SanitizeInput(model.WorkshopType, 50) ?? "خياطة عامة",
-     ExperienceYears = model.ExperienceYears,
-    IsVerified = false, // Awaiting admin approval
-   CreatedAt = _dateTime.Now
-  };
+            // Sanitize text inputs
+            var sanitizedFullName = SanitizeInput(model.FullName, 100);
+            var sanitizedWorkshopName = SanitizeInput(model.WorkshopName, 100);
+            var sanitizedAddress = SanitizeInput(model.Address, 200);
+            var sanitizedCity = SanitizeInput(model.City, 50);
+            var sanitizedDescription = SanitizeInput(model.Description, 1000);
+
+            // Create tailor profile NOW (this is the ONE AND ONLY TIME)
+            var tailorProfile = new TailorProfile
+            {
+                Id = Guid.NewGuid(),
+                UserId = model.UserId,
+                FullName = sanitizedFullName,
+                ShopName = sanitizedWorkshopName,
+                Address = sanitizedAddress,
+                City = sanitizedCity,
+                Bio = sanitizedDescription,
+                Specialization = SanitizeInput(model.WorkshopType, 50) ?? "خياطة عامة",
+                ExperienceYears = model.ExperienceYears,
+                IsVerified = false, // Awaiting admin approval
+                CreatedAt = _dateTime.Now
+            };
 
             await _unitOfWork.Tailors.AddAsync(tailorProfile);
 
             await _unitOfWork.SaveChangesAsync();
-         // Keep user ACTIVE so they can use the platform immediately
-       // Admin verification (IsVerified) is checked separately for sensitive features
-  user.IsActive = true;
+            // Keep user ACTIVE so they can use the platform immediately
+            // Admin verification (IsVerified) is checked separately for sensitive features
+            user.IsActive = true;
             user.UpdatedAt = _dateTime.Now;
 
             // Update phone number if provided
-if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
-        {
-    user.PhoneNumber = model.PhoneNumber;
+            if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                user.PhoneNumber = model.PhoneNumber;
             }
 
-   // ✅ FIX: Generate email verification token safely
-          var verificationToken = GenerateSecureToken();
+            // ✅ FIX: Generate email verification token safely
+            var verificationToken = GenerateSecureToken();
 
-    user.EmailVerificationToken = verificationToken;
- user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
+            user.EmailVerificationToken = verificationToken;
+            user.EmailVerificationTokenExpires = _dateTime.Now.AddHours(24);
 
-     await _unitOfWork.Users.UpdateAsync(user);
-         await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.Users.UpdateAsync(user);
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("[AccountController] Tailor {UserId} completed profile. User is ACTIVE and can use platform.", model.UserId);
 
-  // ✅ FIX: Auto-login the tailor and redirect to their dashboard
-  // Build claims for authentication
-   var claims = new List<Claim>
+            // ✅ FIX: Auto-login the tailor and redirect to their dashboard
+            // Build claims for authentication
+            var claims = new List<Claim>
        {
     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
@@ -517,21 +517,21 @@ if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
        new Claim(ClaimTypes.Role, "Tailor")
   };
 
-   var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-      var principal = new ClaimsPrincipal(identity);
- await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
- new AuthenticationProperties { IsPersistent = true });
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+            new AuthenticationProperties { IsPersistent = true });
 
-        _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
+            _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
 
             TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! مرحباً بك في منصة تفصيلك.";
-        return RedirectToAction("Tailor", "Dashboards");
+            return RedirectToAction("Tailor", "Dashboards");
         }
-  catch (Exception ex)
+        catch (Exception ex)
         {
-   _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
-   ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
-      return View(model);
+            _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
+            ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+            return View(model);
         }
     }
 
@@ -1251,8 +1251,8 @@ if (!string.IsNullOrWhiteSpace(model.PhoneNumber))
         {
             rng.GetBytes(randomBytes);
         }
-        
-   // Convert to Base64 and make it URL-safe
+
+        // Convert to Base64 and make it URL-safe
         return Convert.ToBase64String(randomBytes)
             .Replace("+", "-")
             .Replace("/", "_")

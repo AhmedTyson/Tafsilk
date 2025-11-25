@@ -1,11 +1,9 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TafsilkPlatform.Web.Controllers.Base;
-using TafsilkPlatform.DataAccess.Repository;
-using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Models.ViewModels.Orders;
+using TafsilkPlatform.Web.Controllers.Base;
+using TafsilkPlatform.Web.Interfaces;
+using TafsilkPlatform.Web.Services;
 
 namespace TafsilkPlatform.Web.Controllers;
 

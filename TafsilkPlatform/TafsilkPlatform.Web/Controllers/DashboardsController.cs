@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.Dashboard;
+using TafsilkPlatform.Utility.Extensions;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -53,8 +53,8 @@ public class DashboardsController : Controller
 
             // ✅ ADMIN/TESTER: Check if admin is testing
             var isAdmin = User.IsInRole("Admin");
-   
-     // CRITICAL: Check if tailor has completed verification
+
+            // CRITICAL: Check if tailor has completed verification
             // ✅ Use split query to avoid cartesian explosion with multiple collections
             var tailor = await _context.TailorProfiles
                 .Include(t => t.User)
@@ -71,7 +71,7 @@ public class DashboardsController : Controller
                 TempData["ErrorMessage"] = "يجب تقديم الأوراق الثبوتية وإكمال ملفك الشخصي أولاً. هذه الخطوة إلزامية للخياطين.";
                 return RedirectToAction("ProvideTailorEvidence", "Account", new { incomplete = true });
             }
-            
+
             // ✅ ADMIN/TESTER: Show demo data if no profile exists
             if (tailor == null && isAdmin)
             {
@@ -162,7 +162,7 @@ public class DashboardsController : Controller
             model.AverageRating = tailor.AverageRating;
             model.RatingBreakdown = new RatingBreakdown
             {
-              FiveStars = 0,
+                FiveStars = 0,
                 FourStars = 0,
                 ThreeStars = 0,
                 TwoStars = 0,
@@ -268,51 +268,51 @@ public class DashboardsController : Controller
 
         return alerts;
     }
-    
+
     /// <summary>
     /// Generate demo dashboard for admin/tester when no profile exists
     /// </summary>
     private TailorDashboardViewModel GetDemoTailorDashboard()
     {
-    return new TailorDashboardViewModel
- {
+        return new TailorDashboardViewModel
+        {
             TailorId = Guid.NewGuid(),
-         FullName = "Tester Tailor",
-    ShopName = "Test Tailor Shop",
-         IsVerified = true,
-         City = "Test City",
- TotalOrdersCount = 0,
-        NewOrdersCount = 0,
-    ActiveOrdersCount = 0,
+            FullName = "Tester Tailor",
+            ShopName = "Test Tailor Shop",
+            IsVerified = true,
+            City = "Test City",
+            TotalOrdersCount = 0,
+            NewOrdersCount = 0,
+            ActiveOrdersCount = 0,
             CompletedOrdersCount = 0,
-         TotalRevenue = 0,
-   MonthlyRevenue = 0,
+            TotalRevenue = 0,
+            MonthlyRevenue = 0,
             WalletBalance = 0,
-     PendingPayments = 0,
-    TotalServices = 0,
-          ActiveServices = 0,
-       PortfolioImagesCount = 0,
-        RecentOrders = new List<RecentOrderDto>(),
-       TotalReviews = 0,
- AverageRating = 0,
-          RatingBreakdown = new RatingBreakdown
-         {
-   FiveStars = 0,
+            PendingPayments = 0,
+            TotalServices = 0,
+            ActiveServices = 0,
+            PortfolioImagesCount = 0,
+            RecentOrders = new List<RecentOrderDto>(),
+            TotalReviews = 0,
+            AverageRating = 0,
+            RatingBreakdown = new RatingBreakdown
+            {
+                FiveStars = 0,
                 FourStars = 0,
-     ThreeStars = 0,
- TwoStars = 0,
-         OneStar = 0
-     },
-    Performance = new PerformanceMetrics
-    {
-     OrderGrowthPercentage = 0,
-       RevenueGrowthPercentage = 0,
-        AverageOrderValue = 0,
-AverageCompletionTime = 0,
-      CustomerSatisfactionRate = 0,
-       RepeatCustomersCount = 0
-    },
-     Alerts = new List<DashboardAlert>
+                ThreeStars = 0,
+                TwoStars = 0,
+                OneStar = 0
+            },
+            Performance = new PerformanceMetrics
+            {
+                OrderGrowthPercentage = 0,
+                RevenueGrowthPercentage = 0,
+                AverageOrderValue = 0,
+                AverageCompletionTime = 0,
+                CustomerSatisfactionRate = 0,
+                RepeatCustomersCount = 0
+            },
+            Alerts = new List<DashboardAlert>
           {
          new DashboardAlert
          {

@@ -1,12 +1,10 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.Orders;
+using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Services.Base;
-using TafsilkPlatform.Web.Common;
 
 namespace TafsilkPlatform.Web.Services
 {

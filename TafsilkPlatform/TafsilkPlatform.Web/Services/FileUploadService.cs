@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace TafsilkPlatform.Web.Services;
 
 public class FileUploadService : IFileUploadService
