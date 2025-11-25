@@ -20,7 +20,7 @@ public interface IFileUploadService
     /// <summary>
     /// Checks if the image is valid
     /// </summary>
-    bool IsValidImage(IFormFile file);
+    Task<bool> IsValidImageAsync(IFormFile file);
 
     /// <summary>
     /// Gets the allowed file extensions

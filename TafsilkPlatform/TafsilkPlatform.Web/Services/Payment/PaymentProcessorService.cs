@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TafsilkPlatform.Web.Common;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Web.Common;
 using TafsilkPlatform.Web.Services.Base;
 
 namespace TafsilkPlatform.Web.Services.Payment;
@@ -71,7 +71,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
                 // Check if order already has a completed payment
                 var existingPayment = await _context.Payment
-                    .FirstOrDefaultAsync(p => p.OrderId == request.OrderId && 
+                    .FirstOrDefaultAsync(p => p.OrderId == request.OrderId &&
                                             p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
                 if (existingPayment != null)
@@ -203,7 +203,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     {
         // ✅ READY FOR STRIPE INTEGRATION
         // This method will handle Stripe payment processing when you add the Stripe.net NuGet package
-        
+
         Logger.LogInformation("Processing Stripe payment for order {OrderId}", order.OrderId);
 
         // TODO: When Stripe is integrated, uncomment and implement:
@@ -500,7 +500,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
             // Check if order already paid
             var existingPayment = await _context.Payment
-                .FirstOrDefaultAsync(p => p.OrderId == orderId && 
+                .FirstOrDefaultAsync(p => p.OrderId == orderId &&
                                         p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
             if (existingPayment != null)

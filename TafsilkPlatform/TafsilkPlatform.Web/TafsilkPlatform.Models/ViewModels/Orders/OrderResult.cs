@@ -1,4 +1,3 @@
-using TafsilkPlatform.Models.Models;
 namespace TafsilkPlatform.Models.ViewModels.Orders;
 
 /// <summary>
@@ -20,8 +19,8 @@ public class OrderResult
 /// </summary>
 public class OrderSummaryDto
 {
-  public Guid OrderId { get; set; }
-public string OrderNumber { get; set; } = string.Empty;
+    public Guid OrderId { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
     public string OrderType { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public decimal TotalPrice { get; set; }

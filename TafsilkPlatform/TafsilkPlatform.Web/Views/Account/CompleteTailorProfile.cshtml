@@ -1,375 +1,375 @@
 @model TafsilkPlatform.Models.ViewModels.CompleteTailorProfileRequest
 @{
-    ViewData["Title"] = "تفصيلك — إكمال تسجيل الورشة";
+    ViewData["Title"] = "Tafsilk — Complete Workshop Registration";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 @section Meta {
-    <meta name="description" content="أكمل تسجيل ورشتك في منصة تفصيلك" />
+    <meta name="description" content="Complete your workshop registration on Tafsilk platform" />
     <meta name="robots" content="noindex, nofollow" />
 }
 
 @section Styles {
     <style>
         :root {
-   --primary-color: #2c5aa0;
-          --primary-hover: #1e3f73;
-  --primary-light: #e3f2fd;
-      --secondary-color: #f39c12;
+            --primary-color: #2c5aa0;
+            --primary-hover: #1e3f73;
+            --primary-light: #e3f2fd;
+            --secondary-color: #f39c12;
             --secondary-hover: #e67e22;
             --success-color: #27ae60;
-    --warning-color: #f39c12;
-  --error-color: #e74c3c;
-        --text-primary: #2c3e50;
-       --text-secondary: #7f8c8d;
- --text-light: #bdc3c7;
-    --text-white: #ffffff;
-          --background-white: #ffffff;
+            --warning-color: #f39c12;
+            --error-color: #e74c3c;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --text-light: #bdc3c7;
+            --text-white: #ffffff;
+            --background-white: #ffffff;
             --background-gray: #f8f9fa;
-          --background-light: #ecf0f1;
+            --background-light: #ecf0f1;
             --border-color: #e1e8ed;
-   --dark: #0f172a;
+            --dark: #0f172a;
 
             --font-family: "Cairo", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  --font-size-xs: 0.75rem;
- --font-size-sm: 0.875rem;
-     --font-size-base: 1rem;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
             --font-size-lg: 1.125rem;
-    --font-size-xl: 1.25rem;
-         --font-size-2xl: 1.5rem;
-         --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
 
             --spacing-xs: 0.25rem;
             --spacing-sm: 0.5rem;
             --spacing-md: 1rem;
-          --spacing-lg: 1.5rem;
-   --spacing-xl: 2rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
             --spacing-2xl: 3rem;
             --spacing-3xl: 4rem;
 
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
-        --radius-sm: 0.25rem;
-     --radius-md: 0.5rem;
+            --radius-sm: 0.25rem;
+            --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
---radius-xl: 1rem;
+            --radius-xl: 1rem;
             --radius-full: 9999px;
 
             --transition-fast: 0.15s ease-in-out;
-     --transition-normal: 0.3s ease-in-out;
-     --transition-slow: 0.5s ease-in-out;
+            --transition-normal: 0.3s ease-in-out;
+            --transition-slow: 0.5s ease-in-out;
         }
 
-  * {
+        * {
             box-sizing: border-box;
-         margin: 0;
-       padding: 0;
+            margin: 0;
+            padding: 0;
         }
 
         html {
-   font-size: 16px;
-   scroll-behavior: smooth;
+            font-size: 16px;
+            scroll-behavior: smooth;
         }
 
-      body {
+        body {
             font-family: var(--font-family);
-    line-height: 1.6;
-color: var(--text-primary);
-       background-color: var(--background-gray);
-        direction: rtl;
- text-align: right;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background-color: var(--background-gray);
+            /* direction: rtl; REMOVED RTL */
+            /* text-align: right; REMOVED RTL */
         }
 
-    .container {
-     max-width: 1200px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
-   padding: 0 var(--spacing-md);
+            padding: 0 var(--spacing-md);
         }
 
         @@media (min-width: 768px) {
             .container {
-      padding: 0 var(--spacing-lg);
-        }
-   }
-
-     @@media (min-width: 1024px) {
-         .container {
-     padding: 0 var(--spacing-xl);
-        }
+                padding: 0 var(--spacing-lg);
+            }
         }
 
-     /* Registration Page Styles */
+        @@media (min-width: 1024px) {
+            .container {
+                padding: 0 var(--spacing-xl);
+            }
+        }
+
+        /* Registration Page Styles */
         .registration-page {
             padding: var(--spacing-2xl) 0;
         }
 
-   .page-header {
-  text-align: center;
-        margin-bottom: var(--spacing-2xl);
+        .page-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
         }
 
         .page-title {
-    font-size: var(--font-size-3xl);
-   font-weight: 700;
-   margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
             color: var(--text-primary);
         }
 
-     .page-subtitle {
-   font-size: var(--font-size-lg);
- color: var(--text-secondary);
-      max-width: 600px;
- margin: 0 auto;
-        }
-
-        .registration-container {
-    max-width: 800px;
+        .page-subtitle {
+            font-size: var(--font-size-lg);
+            color: var(--text-secondary);
+            max-width: 600px;
             margin: 0 auto;
         }
 
-.registration-card {
-         background-color: var(--background-white);
-    border-radius: var(--radius-lg);
-   padding: var(--spacing-xl);
-box-shadow: var(--shadow-sm);
+        .registration-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .registration-card {
+            background-color: var(--background-white);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            box-shadow: var(--shadow-sm);
         }
 
         /* Progress Steps */
         .progress-steps {
             display: flex;
             justify-content: space-between;
-      margin-bottom: var(--spacing-2xl);
- position: relative;
+            margin-bottom: var(--spacing-2xl);
+            position: relative;
         }
 
         .progress-steps::before {
             content: '';
-          position: absolute;
+            position: absolute;
             top: 15px;
             right: 0;
-   left: 0;
-     height: 4px;
-background-color: var(--border-color);
-z-index: 1;
+            left: 0;
+            height: 4px;
+            background-color: var(--border-color);
+            z-index: 1;
         }
 
         .progress-bar {
-    position: absolute;
-         top: 15px;
-          right: 0;
+            position: absolute;
+            top: 15px;
+            left: 0; /* Changed from right to left for LTR */
             height: 4px;
-      background-color: var(--primary-color);
-          z-index: 2;
-        transition: width var(--transition-slow);
+            background-color: var(--primary-color);
+            z-index: 2;
+            transition: width var(--transition-slow);
         }
 
         .step {
             display: flex;
             flex-direction: column;
-    align-items: center;
-   position: relative;
-     z-index: 3;
+            align-items: center;
+            position: relative;
+            z-index: 3;
         }
 
-   .step-circle {
+        .step-circle {
             width: 34px;
-         height: 34px;
-          border-radius: 50%;
-  background-color: var(--background-white);
+            height: 34px;
+            border-radius: 50%;
+            background-color: var(--background-white);
             border: 2px solid var(--border-color);
             display: flex;
             align-items: center;
-   justify-content: center;
-  font-weight: 700;
-    margin-bottom: var(--spacing-sm);
+            justify-content: center;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
             transition: all var(--transition-normal);
-  }
+        }
 
         .step.active .step-circle {
             background-color: var(--primary-color);
-        border-color: var(--primary-color);
-         color: var(--text-white);
+            border-color: var(--primary-color);
+            color: var(--text-white);
         }
 
-     .step.completed .step-circle {
-background-color: var(--success-color);
+        .step.completed .step-circle {
+            background-color: var(--success-color);
             border-color: var(--success-color);
             color: var(--text-white);
         }
 
         .step-label {
-        font-size: var(--font-size-sm);
-  font-weight: 600;
- color: var(--text-secondary);
-       text-align: center;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
         }
 
         .step.active .step-label {
-      color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         /* Form Steps */
-    .form-step {
-      display: none;
-    }
+        .form-step {
+            display: none;
+        }
 
-   .form-step.active {
-        display: block;
-   animation: fadeIn 0.5s ease-in-out;
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
         @@keyframes fadeIn {
-         from {
-      opacity: 0;
-           transform: translateY(10px);
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
 
-      to {
-     opacity: 1;
-         transform: translateY(0);
-  }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-  .step-title {
-       font-size: var(--font-size-xl);
+        .step-title {
+            font-size: var(--font-size-xl);
             font-weight: 700;
-  margin-bottom: var(--spacing-lg);
-   color: var(--text-primary);
-          text-align: center;
+            margin-bottom: var(--spacing-lg);
+            color: var(--text-primary);
+            text-align: center;
         }
 
-.form-grid {
+        .form-grid {
             display: grid;
-      grid-template-columns: 1fr;
-     gap: var(--spacing-lg);
+            grid-template-columns: 1fr;
+            gap: var(--spacing-lg);
         }
 
         @@media (min-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr 1fr;
-    }
-  }
+            }
+        }
 
         .form-group {
-        margin-bottom: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
         }
 
         .form-label {
             display: block;
-  margin-bottom: var(--spacing-sm);
-     font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
         }
 
         .form-control {
-   width: 100%;
-         padding: var(--spacing-md);
+            width: 100%;
+            padding: var(--spacing-md);
             border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
+            border-radius: var(--radius-md);
             font-family: var(--font-family);
-     transition: border-color var(--transition-normal);
+            transition: border-color var(--transition-normal);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
         }
 
         .form-control.error {
-          border-color: var(--error-color);
+            border-color: var(--error-color);
         }
 
         .error-message {
-      color: var(--error-color);
-         font-size: var(--font-size-sm);
-margin-top: var(--spacing-xs);
-     display: none;
+            color: var(--error-color);
+            font-size: var(--font-size-sm);
+            margin-top: var(--spacing-xs);
+            display: none;
         }
 
         .error-message.show {
-     display: block;
+            display: block;
         }
 
         .full-width {
-     grid-column: 1 / -1;
- }
+            grid-column: 1 / -1;
+        }
 
         /* Upload Area */
         .upload-area {
-border: 2px dashed var(--border-color);
-     border-radius: var(--radius-md);
- padding: var(--spacing-2xl);
-         text-align: center;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-2xl);
+            text-align: center;
             cursor: pointer;
-         transition: all var(--transition-normal);
+            transition: all var(--transition-normal);
             margin-bottom: var(--spacing-lg);
         }
 
         .upload-area:hover, .upload-area.dragover {
-        border-color: var(--primary-color);
-      background-color: var(--primary-light);
+            border-color: var(--primary-color);
+            background-color: var(--primary-light);
         }
 
         .upload-icon {
             font-size: 48px;
-      color: var(--text-secondary);
-         margin-bottom: var(--spacing-md);
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-md);
         }
 
         .upload-text {
-     margin-bottom: var(--spacing-md);
-     }
+            margin-bottom: var(--spacing-md);
+        }
 
         .upload-btn {
-   display: inline-block;
+            display: inline-block;
             padding: var(--spacing-sm) var(--spacing-lg);
             background-color: var(--primary-color);
-  color: white;
-   border-radius: var(--radius-md);
+            color: white;
+            border-radius: var(--radius-md);
             cursor: pointer;
-       transition: background-color var(--transition-normal);
- }
+            transition: background-color var(--transition-normal);
+        }
 
         .upload-btn:hover {
-       background-color: var(--primary-hover);
+            background-color: var(--primary-hover);
         }
 
         .uploaded-files {
-      display: grid;
-grid-template-columns: repeat(1, 1fr);
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
             gap: var(--spacing-md);
-        margin-top: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
         }
 
         @@media (min-width: 640px) {
-    .uploaded-files {
-          grid-template-columns: repeat(2, 1fr);
+            .uploaded-files {
+                grid-template-columns: repeat(2, 1fr);
             }
- }
+        }
 
         .uploaded-file {
-     position: relative;
-    border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+            position: relative;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
             padding: var(--spacing-md);
-       display: flex;
-  align-items: center;
- gap: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
         }
 
         .file-icon {
-    width: 40px;
-  height: 40px;
-  background-color: var(--background-light);
-       border-radius: var(--radius-md);
-    display: flex;
- align-items: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--background-light);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
             justify-content: center;
             color: var(--primary-color);
-font-size: var(--font-size-lg);
+            font-size: var(--font-size-lg);
         }
 
         .file-info {
@@ -377,651 +377,559 @@ font-size: var(--font-size-lg);
         }
 
         .file-name {
-  font-weight: 600;
+            font-weight: 600;
             margin-bottom: 2px;
-   }
+        }
 
         .file-size {
             font-size: var(--font-size-sm);
-            color: var,--text-secondary);
+            color: var(--text-secondary);
         }
 
         .remove-file {
-background: none;
-          border: none;
-   color: var(--error-color);
-     cursor: pointer;
-   font-size: var(--font-size-lg);
+            background: none;
+            border: none;
+            color: var(--error-color);
+            cursor: pointer;
+            font-size: var(--font-size-lg);
         }
 
-   /* Verification Section */
-   .verification-section {
-        background-color: var(--background-light);
-   border-radius: var(--radius-lg);
+        /* Verification Section */
+        .verification-section {
+            background-color: var(--background-light);
+            border-radius: var(--radius-lg);
             padding: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
         }
 
         .verification-title {
-      font-size: var(--font-size-lg);
+            font-size: var(--font-size-lg);
             font-weight: 700;
-      margin-bottom: var(--spacing-md);
-     display: flex;
-    align-items: center;
-        gap: var(--spacing-sm);
-     }
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
 
         .verification-steps {
-         display: grid;
-grid-template-columns: repeat(1, 1fr);
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
             gap: var(--spacing-md);
         }
 
         @@media (min-width: 768px) {
-  .verification-steps {
-           grid-template-columns: repeat(2, 1fr);
+            .verification-steps {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
-     }
 
-    .verification-step {
-  display: flex;
-          align-items: flex-start;
-    gap: var(--spacing-md);
+        .verification-step {
+            display: flex;
+            align-items: flex-start;
+            gap: var(--spacing-md);
         }
 
         .step-number {
-    width: 24px;
-      height: 24px;
-      border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             background-color: var(--primary-color);
-         color: white;
-       display: flex;
-   align-items: center;
-   justify-content: center;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: var(--font-size-sm);
-   font-weight: 700;
+            font-weight: 700;
             flex-shrink: 0;
- }
+        }
 
         .step-content {
-         flex: 1;
-   }
+            flex: 1;
+        }
 
         .step-description {
-    color: var(--text-secondary);
+            color: var(--text-secondary);
             font-size: var(--font-size-sm);
-       margin-top: var(--spacing-xs);
-      }
+            margin-top: var(--spacing-xs);
+        }
 
         /* Form Navigation */
         .form-navigation {
-       display: flex;
+            display: flex;
             justify-content: space-between;
             margin-top: var(--spacing-2xl);
-   }
+        }
 
-     /* Summary Section */
+        /* Summary Section */
         .summary-section {
-background-color: var(--background-light);
- border-radius: var(--radius-lg);
+            background-color: var(--background-light);
+            border-radius: var(--radius-lg);
             padding: var(--spacing-xl);
             margin-bottom: var(--spacing-xl);
         }
 
         .summary-title {
-       font-size: var(--font-size-lg);
-         font-weight: 700;
-  margin-bottom: var(--spacing-lg);
-      display: flex;
-       align-items: center;
-       gap: var(--spacing-sm);
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+            margin-bottom: var(--spacing-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: var(--spacing-md);
-      padding-bottom: var(--spacing-md);
-     border-bottom: 1px solid var(--border-color);
-    }
+            padding-bottom: var(--spacing-md);
+            border-bottom: 1px solid var(--border-color);
+        }
 
         .summary-item:last-child {
             border-bottom: none;
             margin-bottom: 0;
-   padding-bottom: 0;
+            padding-bottom: 0;
         }
 
         .summary-label {
-       color: var(--text-secondary);
+            color: var(--text-secondary);
         }
 
         .summary-value {
-     font-weight: 600;
+            font-weight: 600;
         }
 
         /* Toast Notification */
-   .toast {
-     position: fixed;
-  bottom: 20px;
- right: 20px;
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
             background-color: var(--success-color);
             color: white;
             padding: var(--spacing-md) var(--spacing-lg);
-     border-radius: var(--radius-md);
-       box-shadow: var(--shadow-lg);
-     z-index: 3000;
-    display: flex;
-      align-items: center;
-   gap: var(--spacing-sm);
-    transform: translateY(100px);
-       opacity: 0;
-      transition: all var(--transition-normal);
-   }
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all var(--transition-normal);
+        }
 
         .toast.show {
             transform: translateY(0);
-       opacity: 1;
-     }
+            opacity: 1;
+        }
 
-      .toast.error {
-        background-color: var(--error-color);
+        .toast.error {
+            background-color: var(--error-color);
         }
 
         .toast.warning {
- background-color: var(--warning-color);
-  }
+            background-color: var(--warning-color);
+        }
 
         .btn {
- display: inline-block;
+            display: inline-block;
             padding: var(--spacing-sm) var(--spacing-lg);
             border: none;
             border-radius: var(--radius-md);
-   font-family: var(--font-family);
-   font-size: var(--font-size-base);
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
             font-weight: 600;
-         text-align: center;
+            text-align: center;
             text-decoration: none;
-cursor: pointer;
-     transition: all var(--transition-normal);
-      line-height: 1.5;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            line-height: 1.5;
         }
 
-   .btn-primary {
-      background-color: var(--primary-color);
+        .btn-primary {
+            background-color: var(--primary-color);
             color: var(--text-white);
         }
 
         .btn-primary:hover, .btn-primary:focus {
-  background-color: var(--primary-hover);
-       color: var(--text-white);
-        transform: translateY(-1px);
+            background-color: var(--primary-hover);
+            color: var(--text-white);
+            transform: translateY(-1px);
             box-shadow: var(--shadow-md);
         }
 
-.btn-outline {
+        .btn-outline {
             background-color: transparent;
-         color: var(--primary-color);
-   border: 2px solid var(--primary-color);
-  }
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
 
         .btn-outline:hover, .btn-outline:focus {
-    background-color: var(--primary-color);
+            background-color: var(--primary-color);
             color: var(--text-white);
         }
 
         .btn-success {
             background-color: var(--success-color);
-       color: white;
+            color: white;
         }
 
         .btn-success:hover {
-       background-color: #229954;
+            background-color: #229954;
         }
 
         .btn-large {
-        padding: var(--spacing-md) var(--spacing-xl);
-   font-size: var(--font-size-lg);
-   }
+            padding: var(--spacing-md) var(--spacing-xl);
+            font-size: var(--font-size-lg);
+        }
 
-/* Responsive Adjustments */
+        /* Responsive Adjustments */
         @@media (max-width: 640px) {
-   .registration-card {
-            padding: var(--spacing-lg);
+            .registration-card {
+                padding: var(--spacing-lg);
             }
 
-    .progress-steps {
-     margin-bottom: var(--spacing-xl);
-     }
-
-   .step-label {
-     font-size: var(--font-size-xs);
+            .progress-steps {
+                margin-bottom: var(--spacing-xl);
             }
 
-   .form-navigation {
-        flex-direction: column;
-       gap: var(--spacing-md);
-    }
+            .step-label {
+                font-size: var(--font-size-xs);
+            }
 
-          .form-navigation .btn {
-          width: 100%;
-          }
-   }
+            .form-navigation {
+                flex-direction: column;
+                gap: var(--spacing-md);
+            }
+
+            .form-navigation .btn {
+                width: 100%;
+            }
+        }
 
         .form-check {
-       display: flex;
-     align-items: start;
-  gap: var(--spacing-sm);
-  }
+            display: flex;
+            align-items: start;
+            gap: var(--spacing-sm);
+        }
 
         .form-check-input {
             width: 20px;
-    height: 20px;
-  margin-top: 2px;
+            height: 20px;
+            margin-top: 2px;
         }
 
         .form-check-label {
-      flex: 1;
-  }
+            flex: 1;
+        }
 
         .text-danger {
-        color: var(--error-color);
+            color: var(--error-color);
         }
 
         .alert {
-    padding: var(--spacing-md);
-        margin-bottom: var(--spacing-lg);
-    border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-lg);
+            border-radius: var(--radius-md);
         }
 
         .alert-danger {
-       background-color: #f8d7da;
-       border: 1px solid #f5c6cb;
-          color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
         }
 
-.alert-success {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
             color: #155724;
- }
+        }
     </style>
 }
 
 <!-- Registration Page Content -->
 <main class="registration-page">
     <div class="container">
-      <div class="page-header">
-            <h1 class="page-title">تسجيل ورشة عمل جديدة</h1>
-  <p class="page-subtitle">املأ المعلومات أدناه لإكمال تسجيل ورشتك في منصة تفصيلك</p>
+        <div class="page-header">
+            <h1 class="page-title">Register New Workshop</h1>
+            <p class="page-subtitle">Fill the information below to complete your workshop registration on Tafsilk</p>
         </div>
 
-     <div class="registration-container">
-    <div class="registration-card">
-          @if (!ViewData.ModelState.IsValid)
-     {
-     <div class="alert alert-danger" role="alert">
-        <strong>حدث خطأ!</strong>
-                @Html.ValidationSummary(false, "", new { @class = "text-danger" })
-   </div>
-      }
+        <div class="registration-container">
+            <div class="registration-card">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        <strong>Error!</strong>
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </div>
+                }
 
-         @if (TempData["SuccessMessage"] != null)
-     {
-        <div class="alert alert-success" role="alert">
-         <strong>@TempData["SuccessMessage"]</strong>
-         </div>
-            }
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success" role="alert">
+                        <strong>@TempData["SuccessMessage"]</strong>
+                    </div>
+                }
 
-     <!-- Progress Steps -->
-        <div class="progress-steps">
-       <div class="progress-bar" id="progressBar"></div>
-   <div class="step active" data-step="1">
-       <div class="step-circle">1</div>
-      <div class="step-label">المعلومات الأساسية</div>
-           </div>
-            <div class="step" data-step="2">
-     <div class="step-circle">2</div>
-         <div class="step-label">التحقق والمراجعة</div>
-       </div>
-   </div>
+                <!-- Progress Steps -->
+                <div class="progress-steps">
+                    <div class="progress-bar" id="progressBar"></div>
+                    <div class="step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Basic Information</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Verification & Review</div>
+                    </div>
+                </div>
 
- <!-- Form -->
-        <form asp-action="CompleteTailorProfile" asp-controller="Account" method="post" enctype="multipart/form-data" id="registrationForm">
-    @Html.AntiForgeryToken()
-         <input type="hidden" asp-for="UserId" />
-         <input type="hidden" asp-for="Email" />
-        <input type="hidden" asp-for="FullName" />
+                <!-- Form -->
+                <form asp-action="CompleteTailorProfile" asp-controller="Account" method="post" enctype="multipart/form-data" id="registrationForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="UserId" />
+                    <input type="hidden" asp-for="Email" />
+                    <input type="hidden" asp-for="FullName" />
 
-     <!-- Step 1: Basic Information -->
-               <div class="form-step active" id="step1">
-  <h2 class="step-title">المعلومات الأساسية</h2>
+                    <!-- Step 1: Basic Information -->
+                    <div class="form-step active" id="step1">
+                        <h2 class="step-title">Basic Information</h2>
 
-    @* Workshop Information *@
-    <div class="form-grid">
-     <div class="form-group">
-     <label asp-for="WorkshopName" class="form-label">اسم الورشة *</label>
-    <input asp-for="WorkshopName" class="form-control" id="workshopName" required />
-   <span asp-validation-for="WorkshopName" class="error-message show"></span>
-       </div>
-  <div class="form-group">
-  <label asp-for="WorkshopType" class="form-label">نوع الورشة *</label>
-  <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
-   <option value="">اختر نوع الورشة</option>
-        <option value="tailoring">تفصيل وخياطة</option>
-     <option value="design">تصميم أزياء</option>
-    <option value="embroidery">تطريز وزخرفة</option>
-       <option value="repair">تصليح وتعديل الملابس</option>
- <option value="other">أخرى</option>
-       </select>
-  <span asp-validation-for="WorkshopType" class="error-message show"></span>
-</div>
-      
-      @* Optional Business Registration *@
-   <div class="form-group">
-     <label asp-for="CommercialRegistrationNumber" class="form-label">رقم السجل التجاري (اختياري)</label>
- <input asp-for="CommercialRegistrationNumber" class="form-control" />
-      <span asp-validation-for="CommercialRegistrationNumber" class="error-message show"></span>
-   </div>
-         <div class="form-group">
-        <label asp-for="ProfessionalLicenseNumber" class="form-label">رقم الرخصة المهنية (اختياري)</label>
- <input asp-for="ProfessionalLicenseNumber" class="form-control" />
-     <span asp-validation-for="ProfessionalLicenseNumber" class="error-message show"></span>
-  </div>
+                        @* Workshop Information *@
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label asp-for="WorkshopName" class="form-label">Workshop Name *</label>
+                                <input asp-for="WorkshopName" class="form-control" id="workshopName" required />
+                                <span asp-validation-for="WorkshopName" class="error-message show"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="WorkshopType" class="form-label">Workshop Type *</label>
+                                <select asp-for="WorkshopType" class="form-control" id="workshopType" required>
+                                    <option value="">Select Workshop Type</option>
+                                    <option value="tailoring">Tailoring & Sewing</option>
+                                    <option value="design">Fashion Design</option>
+                                    <option value="embroidery">Embroidery</option>
+                                    <option value="repair">Clothing Repair</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <span asp-validation-for="WorkshopType" class="error-message show"></span>
+                            </div>
 
-       <div class="form-group">
-    <label class="form-label">اسم صاحب الورشة</label>
-      <input type="text" class="form-control" value="@Model?.FullName" readonly />
- </div>
-        <div class="form-group">
-   <label asp-for="PhoneNumber" class="form-label">رقم الهاتف *</label>
-   <input asp-for="PhoneNumber" class="form-control" id="phone" required />
-   <span asp-validation-for="PhoneNumber" class="error-message show"></span>
-   </div>
-          <div class="form-group">
-      <label class="form-label">البريد الإلكتروني</label>
-   <input type="email" class="form-control" value="@Model?.Email" readonly />
-  </div>
-         <div class="form-group">
-             <label asp-for="City" class="form-label">المدينة</label>
-  <select asp-for="City" class="form-control">
-     <option value="">اختر المدينة</option>
-          <option value="Cairo">القاهرة</option>
-       <option value="Alexandria">الإسكندرية</option>
-      <option value="Giza">الجيزة</option>
-         <option value="Shubra El-Kheima">شبرا الخيمة</option>
- <option value="Port Said">بورسعيد</option>
-   <option value="Suez">السويس</option>
- <option value="Luxor">الأقصر</option>
-        <option value="Mansoura">المنصورة</option>
-        <option value="El-Mahalla El-Kubra">المحلة الكبرى</option>
- <option value="Tanta">طنطا</option>
-      <option value="Asyut">أسيوط</option>
-       <option value="Ismailia">الإسماعيلية</option>
-      <option value="Faiyum">الفيوم</option>
-      <option value="Zagazig">الزقازيق</option>
-         <option value="Aswan">أسوان</option>
-    <option value="Damietta">دمياط</option>
-  <option value="Damanhur">دمنهور</option>
-     <option value="Minya">المنيا</option>
-  <option value="Beni Suef">بني سويف</option>
-    <option value="Qena">قنا</option>
-     <option value="Sohag">سوهاج</option>
- <option value="Hurghada">الغردقة</option>
- <option value="6th of October City">مدينة 6 أكتوبر</option>
-   <option value="Shibin El Kom">شبين الكوم</option>
-        <option value="Banha">بنها</option>
- <option value="Kafr el-Sheikh">كفر الشيخ</option>
-     <option value="Arish">العريش</option>
-       <option value="Mallawi">ملوي</option>
-     </select>
-       <span asp-validation-for="City" class="error-message show"></span>
-      </div>
-      <div class="form-group full-width">
-         <label asp-for="Address" class="form-label">عنوان الورشة *</label>
-      <textarea asp-for="Address" class="form-control" id="address" rows="3" required></textarea>
-           <span asp-validation-for="Address" class="error-message show"></span>
-           </div>
-       <div class="form-group full-width">
-  <label asp-for="Description" class="form-label">وصف الورشة والخدمات المقدمة *</label>
-              <textarea asp-for="Description" class="form-control" id="description" rows="4" required></textarea>
-  <span asp-validation-for="Description" class="error-message show"></span>
- </div>
-         <div class="form-group">
-          <label asp-for="ExperienceYears" class="form-label">سنوات الخبرة (اختياري)</label>
-      <input asp-for="ExperienceYears" type="number" class="form-control" min="0" max="100" />
-      <span asp-validation-for="ExperienceYears" class="error-message show"></span>
-  </div>
-   </div>
-          <div class="form-navigation">
-        <div></div>
-     <button type="button" class="btn btn-primary" id="nextToStep2">التالي</button>
-       </div>
-      </div>
+                            @* Optional Business Registration *@
+                            <div class="form-group">
+                                <label asp-for="CommercialRegistrationNumber" class="form-label">Commercial Registration No. (Optional)</label>
+                                <input asp-for="CommercialRegistrationNumber" class="form-control" />
+                                <span asp-validation-for="CommercialRegistrationNumber" class="error-message show"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ProfessionalLicenseNumber" class="form-label">Professional License No. (Optional)</label>
+                                <input asp-for="ProfessionalLicenseNumber" class="form-control" />
+                                <span asp-validation-for="ProfessionalLicenseNumber" class="error-message show"></span>
+                            </div>
 
-       <!-- Step 2: Review and Submit (formerly Step 3) -->
- <div class="form-step" id="step2">
-       <h2 class="step-title">التحقق والمراجعة</h2>
+                            <div class="form-group">
+                                <label class="form-label">Owner Name</label>
+                                <input type="text" class="form-control" value="@Model?.FullName" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="PhoneNumber" class="form-label">Phone Number *</label>
+                                <input asp-for="PhoneNumber" class="form-control" id="phone" required />
+                                <span asp-validation-for="PhoneNumber" class="error-message show"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="@Model?.Email" readonly />
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="City" class="form-label">City</label>
+                                <select asp-for="City" class="form-control">
+                                    <option value="">Select City</option>
+                                    <option value="Cairo">Cairo</option>
+                                    <option value="Alexandria">Alexandria</option>
+                                    <option value="Giza">Giza</option>
+                                    <option value="Shubra El-Kheima">Shubra El-Kheima</option>
+                                    <option value="Port Said">Port Said</option>
+                                    <option value="Suez">Suez</option>
+                                    <option value="Luxor">Luxor</option>
+                                    <option value="Mansoura">Mansoura</option>
+                                    <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
+                                    <option value="Tanta">Tanta</option>
+                                    <option value="Asyut">Asyut</option>
+                                    <option value="Ismailia">Ismailia</option>
+                                    <option value="Faiyum">Faiyum</option>
+                                    <option value="Zagazig">Zagazig</option>
+                                    <option value="Aswan">Aswan</option>
+                                    <option value="Damietta">Damietta</option>
+                                    <option value="Damanhur">Damanhur</option>
+                                    <option value="Minya">Minya</option>
+                                    <option value="Beni Suef">Beni Suef</option>
+                                    <option value="Qena">Qena</option>
+                                    <option value="Sohag">Sohag</option>
+                                    <option value="Hurghada">Hurghada</option>
+                                    <option value="6th of October City">6th of October City</option>
+                                    <option value="Shibin El Kom">Shibin El Kom</option>
+                                    <option value="Banha">Banha</option>
+                                    <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
+                                    <option value="Arish">Arish</option>
+                                    <option value="Mallawi">Mallawi</option>
+                                </select>
+                                <span asp-validation-for="City" class="error-message show"></span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label asp-for="Address" class="form-label">Workshop Address *</label>
+                                <textarea asp-for="Address" class="form-control" id="address" rows="3" required></textarea>
+                                <span asp-validation-for="Address" class="error-message show"></span>
+                            </div>
+                            <div class="form-group full-width">
+                                <label asp-for="Description" class="form-label">Workshop Description and Services *</label>
+                                <textarea asp-for="Description" class="form-control" id="description" rows="4" required></textarea>
+                                <span asp-validation-for="Description" class="error-message show"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="ExperienceYears" class="form-label">Years of Experience (Optional)</label>
+                                <input asp-for="ExperienceYears" type="number" class="form-control" min="0" max="100" />
+                                <span asp-validation-for="ExperienceYears" class="error-message show"></span>
+                            </div>
+                        </div>
+                        <div class="form-navigation">
+                            <div></div>
+                            <button type="button" class="btn btn-primary" id="nextToStep2">Next</button>
+                        </div>
+                    </div>
 
-    <div class="summary-section">
-            <h3 class="summary-title">
-         <i class="fas fa-check-circle"></i>
-   ملخص المعلومات
-       </h3>
-         <div class="summary-item">
-    <span class="summary-label">اسم الورشة:</span>
-  <span class="summary-value" id="summaryWorkshopName">-</span>
-       </div>
-       <div class="summary-item">
-     <span class="summary-label">نوع الورشة:</span>
-   <span class="summary-value" id="summaryWorkshopType">-</span>
-       </div>
-      <div class="summary-item">
-         <span class="summary-label">صاحب الورشة:</span>
-<span class="summary-value" id="summaryOwnerName">@Model?.FullName</span>
-         </div>
- <div class="summary-item">
-   <span class="summary-label">الهاتف:</span>
-        <span class="summary-value" id="summaryPhone">-</span>
-    </div>
-     <div class="summary-item">
-      <span class="summary-label">البريد الإلكتروني:</span>
-  <span class="summary-value" id="summaryEmail">@Model?.Email</span>
- </div>
-     <div class="summary-item">
-       <span class="summary-label">المدينة:</span>
-   <span class="summary-value" id="summaryCity">-</span>
-  </div>
-          <div class="summary-item">
-       <span class="summary-label">العنوان:</span>
-    <span class="summary-value" id="summaryAddress">-</span>
-</div>
-        </div>
+                    <!-- Step 2: Verification & Review -->
+                    <div class="form-step" id="step2">
+                        <h2 class="step-title">Verification & Review</h2>
 
-      <div class="form-group">
-     <div class="form-check">
-     <input asp-for="AgreeToTerms" class="form-check-input" id="agreeTerms" />
-   <label asp-for="AgreeToTerms" class="form-check-label">
-     أوافق على <a href="@Url.Action("Privacy", "Home")" target="_blank">شروط الخدمة</a> و <a href="@Url.Action("Privacy", "Home")" target="_blank">سياسة الخصوصية</a> لمنصة تفصيلك
-        </label>
-          </div>
-          <span asp-validation-for="AgreeToTerms" class="error-message show" id="termsError"></span>
-      </div>
+                        <div class="verification-section">
+                            <h3 class="verification-title">
+                                <i class="fas fa-shield-alt"></i>
+                                Verification Steps
+                            </h3>
+                            <div class="verification-steps">
+                                <div class="verification-step">
+                                    <div class="step-number">1</div>
+                                    <div class="step-content">
+                                        <h4>Identity Verification</h4>
+                                        <p class="step-description">We will review your information to ensure platform security.</p>
+                                    </div>
+                                </div>
+                                <div class="verification-step">
+                                    <div class="step-number">2</div>
+                                    <div class="step-content">
+                                        <h4>Workshop Activation</h4>
+                                        <p class="step-description">Once approved, your workshop will be activated and visible to customers.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="form-navigation">
-<button type="button" class="btn btn-outline" id="backToStep1">السابق</button>
-       <button type="submit" class="btn btn-success" id="submitRegistration">
-       <i class="fas fa-check"></i>
-            تسجيل الورشة
-   </button>
-     </div>
-      </div>
-</form>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // DOM Elements
-            const steps = document.querySelectorAll('.step');
-       const formSteps = document.querySelectorAll('.form-step');
-         const progressBar = document.getElementById('progressBar');
-   const nextToStep2Btn = document.getElementById('nextToStep2');
-  const backToStep1Btn = document.getElementById('backToStep1');
-        const submitRegistrationBtn = document.getElementById('submitRegistration');
-       const registrationForm = document.getElementById('registrationForm');
-   const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toast-message');
+                        <div class="summary-section">
+                            <h3 class="summary-title">
+                                <i class="fas fa-file-alt"></i>
+                                Information Summary
+                            </h3>
+                            <div class="summary-item">
+                                <span class="summary-label">Workshop Name:</span>
+                                <span class="summary-value" id="summaryName"></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Type:</span>
+                                <span class="summary-value" id="summaryType"></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">Phone:</span>
+                                <span class="summary-value" id="summaryPhone"></span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">City:</span>
+                                <span class="summary-value" id="summaryCity"></span>
+                            </div>
+                        </div>
 
- // State
-   let currentStep = 1;
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="termsCheck" required />
+                                <label class="form-check-label" for="termsCheck">
+                                    I agree to the <a href="#">Terms and Conditions</a> and verify that all provided information is correct.
+                                </label>
+                            </div>
+                        </div>
 
-       // Initialize Page
-  function initializePage() {
-      updateProgressBar();
- setupEventListeners();
-         }
-
-   // Setup Event Listeners
-      function setupEventListeners() {
-        // Navigation buttons
-       nextToStep2Btn.addEventListener('click', validateStep1);
-     backToStep1Btn.addEventListener('click', () => navigateToStep(1));
-     }
-
-// Navigate To Step
-            function navigateToStep(step) {
-    // Hide all steps
-      formSteps.forEach(formStep => {
-    formStep.classList.remove('active');
-    });
-
-  // Update steps
-      steps.forEach(stepElement => {
-       const stepNumber = parseInt(stepElement.getAttribute('data-step'));
-    stepElement.classList.remove('active', 'completed');
-
-  if (stepNumber < step) {
-      stepElement.classList.add('completed');
-       } else if (stepNumber === step) {
-         stepElement.classList.add('active');
-    }
-      });
-
-  // Show target step
-    document.getElementById(`step${step}`).classList.add('active');
-
-       // Update current step and progress bar
-       currentStep = step;
-   updateProgressBar();
-
-   // Update summary if going to step 2
-     if (step === 2) {
-       updateSummary();
-       }
-
- // Scroll to top
-     window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-      // Update Progress Bar
-     function updateProgressBar() {
-       const progressPercentage = ((currentStep - 1) / (steps.length - 1)) * 100;
-  progressBar.style.width = `${progressPercentage}%`;
-    }
-
-            // Validate Step 1
-        function validateStep1() {
-        let isValid = true;
-
-    // Validate workshop name
-           const workshopName = document.getElementById('workshopName').value.trim();
-       if (!workshopName) {
-   isValid = false;
-     }
-
-     // Validate workshop type
-      const workshopType = document.getElementById('workshopType').value;
-        if (!workshopType) {
-  isValid = false;
-       }
-
-       // Validate phone
- const phone = document.getElementById('phone').value.trim();
-   if (!phone) {
-     isValid = false;
-  }
-
- // Validate address
-           const address = document.getElementById('address').value.trim();
-      if (!address) {
-           isValid = false;
-   }
-
-     // Validate description
-   const description = document.getElementById('description').value.trim();
-       if (!description) {
-  isValid = false;
-   }
-
-       if (isValid) {
-         navigateToStep(2);
-    } else {
-  showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
-        }
-      }
-
-      // Update Summary
-function updateSummary() {
-         document.getElementById('summaryWorkshopName').textContent = document.getElementById('workshopName').value || '-';
-      const workshopTypeSelect = document.getElementById('workshopType');
-    document.getElementById('summaryWorkshopType').textContent = workshopTypeSelect.options[workshopTypeSelect.selectedIndex].text || '-';
-   document.getElementById('summaryPhone').textContent = document.getElementById('phone').value || '-';
-  
-     const citySelect = document.querySelector('[name="City"]');
-       if (citySelect && citySelect.value) {
- document.getElementById('summaryCity').textContent = citySelect.options[citySelect.selectedIndex].text;
-      } else {
-   document.getElementById('summaryCity').textContent = '-';
-           }
-         
-     document.getElementById('summaryAddress').textContent = document.getElementById('address').value || '-';
-  }
-
-     // Show Toast Notification
-     function showToast(message, type = 'success') {
-   toastMessage.textContent = message;
- toast.className = 'toast';
-
-         if (type === 'error') {
- toast.classList.add('error');
-         } else if (type === 'warning') {
-       toast.classList.add('warning');
-     }
-
-       toast.classList.add('show');
-
-    setTimeout(() => {
-         toast.classList.remove('show');
-        }, 3000);
-  }
-
-       // Initialize the page
-  initializePage();
-
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            // On successful profile completion, redirect to tailor dashboard
-            // This should be handled server-side, but ensure client-side expectation
-        });
-    });
-</script>
-</div>
+                        <div class="form-navigation">
+                            <button type="button" class="btn btn-outline" id="backToStep1">Back</button>
+                            <button type="submit" class="btn btn-success btn-large">Complete Registration</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </main>
 
-<!-- Toast Notification -->
-<div class="toast" id="toast">
-    <i class="fas fa-check-circle"></i>
-    <span id="toast-message">تم تنفيذ العملية بنجاح</span>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const nextBtn = document.getElementById('nextToStep2');
+            const backBtn = document.getElementById('backToStep1');
+            const progressBar = document.getElementById('progressBar');
+            const steps = document.querySelectorAll('.step');
+            
+            // Update Summary
+            function updateSummary() {
+                document.getElementById('summaryName').textContent = document.getElementById('workshopName').value;
+                
+                const typeSelect = document.getElementById('workshopType');
+                document.getElementById('summaryType').textContent = typeSelect.options[typeSelect.selectedIndex].text;
+                
+                document.getElementById('summaryPhone').textContent = document.getElementById('phone').value;
+                
+                const citySelect = document.querySelector('select[name="City"]');
+                document.getElementById('summaryCity').textContent = citySelect.options[citySelect.selectedIndex].text;
+            }
+
+            nextBtn.addEventListener('click', function() {
+                // Simple validation check
+                const requiredInputs = step1.querySelectorAll('input[required], select[required], textarea[required]');
+                let isValid = true;
+                
+                requiredInputs.forEach(input => {
+                    if (!input.value) {
+                        isValid = false;
+                        input.classList.add('error');
+                        // Show error message logic here if needed
+                    } else {
+                        input.classList.remove('error');
+                    }
+                });
+
+                if (isValid) {
+                    updateSummary();
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    progressBar.style.width = '50%'; // Adjusted for 2 steps
+                    steps[0].classList.add('completed');
+                    steps[0].classList.remove('active');
+                    steps[1].classList.add('active');
+                    window.scrollTo(0, 0);
+                } else {
+                    alert('Please fill all required fields');
+                }
+            });
+
+            backBtn.addEventListener('click', function() {
+                step2.classList.remove('active');
+                step1.classList.add('active');
+                progressBar.style.width = '0%';
+                steps[1].classList.remove('active');
+                steps[0].classList.add('active');
+                steps[0].classList.remove('completed');
+                window.scrollTo(0, 0);
+            });
+        });
+    </script>
 }

@@ -1,7 +1,7 @@
 @model TafsilkPlatform.Models.ViewModels.CompleteGoogleRegistrationViewModel
 
 @{
-    ViewData["Title"] = "إكمال التسجيل - تفصيلك";
+    ViewData["Title"] = "Complete Registration - Tafsilk";
     var provider = "Google";
     var providerName = "Google";
     var providerIcon = "fab fa-google";
@@ -238,14 +238,14 @@ width: 100%;
     <div class="container registration-container">
      <div class="card">
    <div class="page-header">
-    <h1 class="page-title">مرحباً في تفصيلك!</h1>
-     <p class="page-subtitle">قم بإكمال معلومات حسابك للمتابعة</p>
+    <h1 class="page-title">Welcome to Tafsilk!</h1>
+     <p class="page-subtitle">Complete your account information to continue</p>
   </div>
 
        <div class="@(provider.ToLower())-info">
        @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
        {
-         <img src="@Model.ProfilePictureUrl" alt="صورة الملف الشخصي" />
+         <img src="@Model.ProfilePictureUrl" alt="Profile Picture" />
     }
   else
    {
@@ -272,27 +272,27 @@ width: 100%;
        <input type="hidden" asp-for="ProfilePictureUrl" />
 
      <div class="form-group">
-     <label asp-for="FullName" class="form-label">الاسم الكامل</label>
-<input asp-for="FullName" class="form-control" placeholder="أدخل اسمك الكامل" />
+     <label asp-for="FullName" class="form-label">Full Name</label>
+<input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
         <span asp-validation-for="FullName" class="text-danger"></span>
   </div>
 
    <div class="form-group">
-      <label asp-for="PhoneNumber" class="form-label">رقم الهاتف (اختياري)</label>
-       <input asp-for="PhoneNumber" class="form-control" placeholder="أدخل رقم هاتفك" />
+      <label asp-for="PhoneNumber" class="form-label">Phone Number (Optional)</label>
+       <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
      <span asp-validation-for="PhoneNumber" class="text-danger"></span>
  </div>
 
     <div class="form-group">
-   <label class="form-label">اختر نوع الحساب</label>
+   <label class="form-label">Select Account Type</label>
      <div class="user-type-toggle" id="userTypeToggle">
   <div class="user-type-option" data-type="customer">
 <i class="fas fa-user"></i>
-<span>عميل</span>
+<span>Customer</span>
   </div>
      <div class="user-type-option active" data-type="tailor">
 <i class="fas fa-cut"></i>
-     <span>خياط</span>
+     <span>Tailor</span>
       </div>
     </div>
   <input type="hidden" asp-for="UserType" id="userTypeInput" value="tailor" />
@@ -300,7 +300,7 @@ width: 100%;
 
         <button type="submit" class="btn-submit">
   <i class="fas fa-check me-2"></i>
- إنشاء الحساب
+ Create Account
    </button>
   </form>
 <script>

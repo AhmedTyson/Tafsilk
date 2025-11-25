@@ -1,4 +1,3 @@
-using TafsilkPlatform.Models.Models;
 namespace TafsilkPlatform.Models.ViewModels.Store
 {
     /// <summary>

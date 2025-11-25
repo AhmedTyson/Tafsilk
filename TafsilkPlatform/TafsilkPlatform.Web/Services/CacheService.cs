@@ -14,11 +14,11 @@ public interface ICacheService
     Task<T?> GetAsync<T>(string key);
     Task SetAsync<T>(string key, T value, TimeSpan? expiration = null);
     Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null);
-    
+
     // Remove operations
     Task RemoveAsync(string key);
     Task RemoveByPrefixAsync(string prefix);
-    
+
     // Existence check
     Task<bool> ExistsAsync(string key);
 }
@@ -35,7 +35,7 @@ public class MemoryCacheService : ICacheService
 
     public MemoryCacheService(IMemoryCache cache, ILogger<MemoryCacheService> logger)
     {
-   _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -43,18 +43,18 @@ public class MemoryCacheService : ICacheService
     {
         try
         {
-         if (_cache.TryGetValue(key, out T? value))
-         {
-    _logger.LogDebug("[CacheService] Cache HIT for key: {Key}", key);
-    return Task.FromResult(value);
-  }
+            if (_cache.TryGetValue(key, out T? value))
+            {
+                _logger.LogDebug("[CacheService] Cache HIT for key: {Key}", key);
+                return Task.FromResult(value);
+            }
 
             _logger.LogDebug("[CacheService] Cache MISS for key: {Key}", key);
             return Task.FromResult<T?>(default);
         }
         catch (Exception ex)
         {
-       _logger.LogError(ex, "[CacheService] Error getting cache value for key: {Key}", key);
+            _logger.LogError(ex, "[CacheService] Error getting cache value for key: {Key}", key);
             return Task.FromResult<T?>(default);
         }
     }
@@ -63,53 +63,53 @@ public class MemoryCacheService : ICacheService
     {
         try
         {
-     var options = new MemoryCacheEntryOptions();
-            
-        if (expiration.HasValue)
-        {
-       options.AbsoluteExpirationRelativeToNow = expiration.Value;
-            }
-       else
-         {
-    options.SlidingExpiration = TimeSpan.FromMinutes(30);
-       }
+            var options = new MemoryCacheEntryOptions();
 
-         _cache.Set(key, value, options);
-
-      // Track key for prefix-based removal
-       await _keyLock.WaitAsync();
-    try
+            if (expiration.HasValue)
             {
- _keys.Add(key);
+                options.AbsoluteExpirationRelativeToNow = expiration.Value;
             }
-          finally
- {
-          _keyLock.Release();
-    }
+            else
+            {
+                options.SlidingExpiration = TimeSpan.FromMinutes(30);
+            }
+
+            _cache.Set(key, value, options);
+
+            // Track key for prefix-based removal
+            await _keyLock.WaitAsync();
+            try
+            {
+                _keys.Add(key);
+            }
+            finally
+            {
+                _keyLock.Release();
+            }
 
             _logger.LogDebug("[CacheService] Cached key: {Key} with expiration: {Expiration}",
  key, expiration?.ToString() ?? "30 minutes (sliding)");
         }
-      catch (Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "[CacheService] Error setting cache value for key: {Key}", key);
-     }
+        }
     }
 
- public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null)
+    public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null)
     {
-  var cachedValue = await GetAsync<T>(key);
-        
-if (cachedValue != null)
-    return cachedValue;
+        var cachedValue = await GetAsync<T>(key);
 
-    _logger.LogDebug("[CacheService] Cache MISS for key: {Key}, calling factory", key);
-var value = await factory();
-        
+        if (cachedValue != null)
+            return cachedValue;
+
+        _logger.LogDebug("[CacheService] Cache MISS for key: {Key}, calling factory", key);
+        var value = await factory();
+
         if (value != null)
         {
-      await SetAsync(key, value, expiration);
-     }
+            await SetAsync(key, value, expiration);
+        }
 
         return value;
     }
@@ -118,23 +118,23 @@ var value = await factory();
     {
         try
         {
-     _cache.Remove(key);
-            
-   _keyLock.Wait();
-          try
- {
+            _cache.Remove(key);
+
+            _keyLock.Wait();
+            try
+            {
                 _keys.Remove(key);
             }
             finally
-      {
-            _keyLock.Release();
+            {
+                _keyLock.Release();
             }
 
-     _logger.LogDebug("[CacheService] Removed key: {Key}", key);
+            _logger.LogDebug("[CacheService] Removed key: {Key}", key);
         }
         catch (Exception ex)
         {
-  _logger.LogError(ex, "[CacheService] Error removing cache key: {Key}", key);
+            _logger.LogError(ex, "[CacheService] Error removing cache key: {Key}", key);
         }
 
         return Task.CompletedTask;
@@ -143,30 +143,30 @@ var value = await factory();
     public async Task RemoveByPrefixAsync(string prefix)
     {
         try
-      {
-      await _keyLock.WaitAsync();
-      List<string> keysToRemove;
-          try
+        {
+            await _keyLock.WaitAsync();
+            List<string> keysToRemove;
+            try
             {
-           keysToRemove = _keys.Where(k => k.StartsWith(prefix)).ToList();
+                keysToRemove = _keys.Where(k => k.StartsWith(prefix)).ToList();
             }
-       finally
+            finally
             {
-       _keyLock.Release();
-        }
+                _keyLock.Release();
+            }
 
-    foreach (var key in keysToRemove)
-     {
-   await RemoveAsync(key);
+            foreach (var key in keysToRemove)
+            {
+                await RemoveAsync(key);
             }
 
             _logger.LogInformation("[CacheService] Removed {Count} keys with prefix: {Prefix}",
                 keysToRemove.Count, prefix);
-      }
+        }
         catch (Exception ex)
         {
-    _logger.LogError(ex, "[CacheService] Error removing keys by prefix: {Prefix}", prefix);
-     }
+            _logger.LogError(ex, "[CacheService] Error removing keys by prefix: {Prefix}", prefix);
+        }
     }
 
     public Task<bool> ExistsAsync(string key)
@@ -191,28 +191,28 @@ public class DistributedCacheService : ICacheService
     public DistributedCacheService(IDistributedCache cache, ILogger<DistributedCacheService> logger)
     {
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-_logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<T?> GetAsync<T>(string key)
     {
         try
         {
-          var json = await _cache.GetStringAsync(key);
-      
-  if (string.IsNullOrEmpty(json))
-   {
-     _logger.LogDebug("[DistributedCache] Cache MISS for key: {Key}", key);
-   return default;
+            var json = await _cache.GetStringAsync(key);
+
+            if (string.IsNullOrEmpty(json))
+            {
+                _logger.LogDebug("[DistributedCache] Cache MISS for key: {Key}", key);
+                return default;
             }
 
             _logger.LogDebug("[DistributedCache] Cache HIT for key: {Key}", key);
-          return JsonSerializer.Deserialize<T>(json, _jsonOptions);
-   }
+            return JsonSerializer.Deserialize<T>(json, _jsonOptions);
+        }
         catch (Exception ex)
-   {
+        {
             _logger.LogError(ex, "[DistributedCache] Error getting cache value for key: {Key}", key);
-       return default;
+            return default;
         }
     }
 
@@ -221,42 +221,42 @@ _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         try
         {
             var json = JsonSerializer.Serialize(value, _jsonOptions);
-            
-  var options = new DistributedCacheEntryOptions();
-         
-    if (expiration.HasValue)
+
+            var options = new DistributedCacheEntryOptions();
+
+            if (expiration.HasValue)
             {
-    options.AbsoluteExpirationRelativeToNow = expiration.Value;
-     }
+                options.AbsoluteExpirationRelativeToNow = expiration.Value;
+            }
             else
-     {
-        options.SlidingExpiration = TimeSpan.FromMinutes(30);
+            {
+                options.SlidingExpiration = TimeSpan.FromMinutes(30);
             }
 
-      await _cache.SetStringAsync(key, json, options);
+            await _cache.SetStringAsync(key, json, options);
 
-     _logger.LogDebug("[DistributedCache] Cached key: {Key} with expiration: {Expiration}",
-            key, expiration?.ToString() ?? "30 minutes (sliding)");
-     }
-      catch (Exception ex)
- {
-    _logger.LogError(ex, "[DistributedCache] Error setting cache value for key: {Key}", key);
+            _logger.LogDebug("[DistributedCache] Cached key: {Key} with expiration: {Expiration}",
+                   key, expiration?.ToString() ?? "30 minutes (sliding)");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[DistributedCache] Error setting cache value for key: {Key}", key);
         }
     }
 
     public async Task<T> GetOrSetAsync<T>(string key, Func<Task<T>> factory, TimeSpan? expiration = null)
     {
         var cachedValue = await GetAsync<T>(key);
-        
-if (cachedValue != null)
+
+        if (cachedValue != null)
             return cachedValue;
 
-    _logger.LogDebug("[DistributedCache] Cache MISS for key: {Key}, calling factory", key);
-    var value = await factory();
- 
+        _logger.LogDebug("[DistributedCache] Cache MISS for key: {Key}, calling factory", key);
+        var value = await factory();
+
         if (value != null)
-    {
-    await SetAsync(key, value, expiration);
+        {
+            await SetAsync(key, value, expiration);
         }
 
         return value;
@@ -265,21 +265,21 @@ if (cachedValue != null)
     public async Task RemoveAsync(string key)
     {
         try
-    {
-    await _cache.RemoveAsync(key);
-       _logger.LogDebug("[DistributedCache] Removed key: {Key}", key);
-    }
+        {
+            await _cache.RemoveAsync(key);
+            _logger.LogDebug("[DistributedCache] Removed key: {Key}", key);
+        }
         catch (Exception ex)
         {
-   _logger.LogError(ex, "[DistributedCache] Error removing cache key: {Key}", key);
+            _logger.LogError(ex, "[DistributedCache] Error removing cache key: {Key}", key);
         }
     }
 
     public Task RemoveByPrefixAsync(string prefix)
     {
         // Distributed cache doesn't support prefix-based removal out of the box
-   // Would require Redis SCAN command or tracking keys separately
-      _logger.LogWarning("[DistributedCache] RemoveByPrefix not fully supported for distributed cache: {Prefix}", prefix);
+        // Would require Redis SCAN command or tracking keys separately
+        _logger.LogWarning("[DistributedCache] RemoveByPrefix not fully supported for distributed cache: {Prefix}", prefix);
         return Task.CompletedTask;
     }
 
@@ -296,22 +296,22 @@ if (cachedValue != null)
 public static class CacheKeys
 {
     // User cache keys
-  public static string User(Guid userId) => $"user:{userId}";
-  public static string UserProfile(Guid userId) => $"user:profile:{userId}";
-    
+    public static string User(Guid userId) => $"user:{userId}";
+    public static string UserProfile(Guid userId) => $"user:profile:{userId}";
+
     // Tailor cache keys
-  public static string Tailor(Guid tailorId) => $"tailor:{tailorId}";
-public static string TailorList(string city = "all", int page = 1) => $"tailor:list:{city}:page:{page}";
+    public static string Tailor(Guid tailorId) => $"tailor:{tailorId}";
+    public static string TailorList(string city = "all", int page = 1) => $"tailor:list:{city}:page:{page}";
     public static string TailorReviews(Guid tailorId) => $"tailor:reviews:{tailorId}";
-    
+
     // Order cache keys
     public static string Order(Guid orderId) => $"order:{orderId}";
     public static string UserOrders(Guid userId) => $"user:orders:{userId}";
-    
+
     // Notification cache keys
     public static string UserNotifications(Guid userId) => $"notifications:{userId}";
     public static string SystemAnnouncements() => "announcements:system";
-    
+
     // Statistics cache keys
     public static string DashboardStats() => "dashboard:stats";
     public static string TailorStats(Guid tailorId) => $"tailor:stats:{tailorId}";

@@ -3,157 +3,157 @@
 @if (Model != null && Model.CompletionPercentage < 100)
 {
     <div class="profile-completion-card card border-0 shadow-sm mb-4">
-  <div class="card-body p-4">
-     <div class="d-flex align-items-center justify-content-between mb-3">
-         <h5 class="mb-0 fw-bold">
-         <i class="fas fa-chart-line text-primary me-2"></i>
-            إكمال الملف الشخصي
-      </h5>
-        <span class="badge bg-@(Model.CompletionPercentage >= 80 ? "success" : Model.CompletionPercentage >= 50 ? "warning" : "danger") fs-6">
- @Model.CompletionPercentage%
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-chart-line text-primary me-2"></i>
+                    Profile Completion
+                </h5>
+                <span class="badge bg-@(Model.CompletionPercentage >= 80 ? "success" : Model.CompletionPercentage >= 50 ? "warning" : "danger") fs-6">
+                    @Model.CompletionPercentage%
                 </span>
-        </div>
-
-<div class="progress mb-3" style="height: 12px;">
-      <div class="progress-bar @(Model.CompletionPercentage >= 80 ? "bg-success" : Model.CompletionPercentage >= 50 ? "bg-warning" : "bg-danger")"
-   role="progressbar"
-        style="width: @Model.CompletionPercentage%"
-          aria-valuenow="@Model.CompletionPercentage"
-         aria-valuemin="0"
-  aria-valuemax="100">
-         </div>
             </div>
 
-      @if (Model.CompletionPercentage < 100)
-   {
-            <div class="completion-message mb-3">
-        <p class="text-muted mb-2">
-    <i class="fas fa-info-circle me-2"></i>
-          أكمل ملفك الشخصي للحصول على تجربة أفضل
-         </p>
-      </div>
+            <div class="progress mb-3" style="height: 12px;">
+                <div class="progress-bar @(Model.CompletionPercentage >= 80 ? "bg-success" : Model.CompletionPercentage >= 50 ? "bg-warning" : "bg-danger")"
+                     role="progressbar"
+                     style="width: @Model.CompletionPercentage%"
+                     aria-valuenow="@Model.CompletionPercentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
 
-       <div class="completion-checklist">
-        @foreach (var item in Model.Items.Where(i => !i.IsCompleted).Take(5))
-     {
-      <div class="checklist-item d-flex align-items-center justify-content-between py-2 border-bottom">
-     <div class="d-flex align-items-center">
-        <i class="fas @item.Icon text-muted me-3"></i>
-          <span>@item.Label</span>
-        </div>
-          @if (!string.IsNullOrEmpty(item.ActionUrl))
-     {
-         <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">
-      <i class="fas fa-plus"></i>
-  إضافة
-    </a>
-         }
-        </div>
-      }
-         </div>
+            @if (Model.CompletionPercentage < 100)
+            {
+                <div class="completion-message mb-3">
+                    <p class="text-muted mb-2">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Complete your profile for a better experience
+                    </p>
+                </div>
 
-    @if (Model.Items.Count(i => !i.IsCompleted) > 5)
-         {
-         <div class="text-center mt-3">
-  <button class="btn btn-link text-decoration-none" 
-          type="button" 
-       data-bs-toggle="collapse" 
-          data-bs-target="#moreItems">
-    <i class="fas fa-chevron-down me-2"></i>
-            عرض المزيد (@(Model.Items.Count(i => !i.IsCompleted) - 5) عناصر)
-      </button>
-    
-     <div class="collapse" id="moreItems">
-     @foreach (var item in Model.Items.Where(i => !i.IsCompleted).Skip(5))
-                 {
-      <div class="checklist-item d-flex align-items-center justify-content-between py-2 border-bottom">
-         <div class="d-flex align-items-center">
-              <i class="fas @item.Icon text-muted me-3"></i>
-              <span>@item.Label</span>
-         </div>
-            @if (!string.IsNullOrEmpty(item.ActionUrl))
-  {
-      <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">
-         <i class="fas fa-plus"></i>
-   إضافة
-     </a>
-           }
-   </div>
-           }
-  </div>
-     </div>
-          }
-  }
+                <div class="completion-checklist">
+                    @foreach (var item in Model.Items.Where(i => !i.IsCompleted).Take(5))
+                    {
+                        <div class="checklist-item d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <i class="fas @item.Icon text-muted me-3"></i>
+                                <span>@item.Label</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(item.ActionUrl))
+                            {
+                                <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Add
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                @if (Model.Items.Count(i => !i.IsCompleted) > 5)
+                {
+                    <div class="text-center mt-3">
+                        <button class="btn btn-link text-decoration-none"
+                                type="button"
+                                data-bs-toggle="collapse"
+                                data-bs-target="#moreItems">
+                            <i class="fas fa-chevron-down me-2"></i>
+                            Show More (@(Model.Items.Count(i => !i.IsCompleted) - 5) items)
+                        </button>
+
+                        <div class="collapse" id="moreItems">
+                            @foreach (var item in Model.Items.Where(i => !i.IsCompleted).Skip(5))
+                            {
+                                <div class="checklist-item d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas @item.Icon text-muted me-3"></i>
+                                        <span>@item.Label</span>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(item.ActionUrl))
+                                    {
+                                        <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-plus"></i>
+                                            Add
+                                        </a>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
         </div>
     </div>
 }
 else if (Model != null && Model.CompletionPercentage >= 100)
 {
     <div class="profile-completion-card card border-0 shadow-sm mb-4 bg-success bg-opacity-10">
-      <div class="card-body p-4 text-center">
- <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
-            <h5 class="fw-bold text-success mb-2">ملفك الشخصي مكتمل!</h5>
-<p class="text-muted mb-0">
- أحسنت! لقد أكملت جميع معلومات ملفك الشخصي
-   </p>
-   </div>
+        <div class="card-body p-4 text-center">
+            <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+            <h5 class="fw-bold text-success mb-2">Profile Completed!</h5>
+            <p class="text-muted mb-0">
+                Well done! You have completed all your profile information
+            </p>
+        </div>
     </div>
 }
 
-@@section Styles {
+@section Styles {
     <style>
-   .profile-completion-card {
-      border-radius: 12px;
-   transition: all 0.3s ease;
+        .profile-completion-card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
         }
 
-    .profile-completion-card:hover {
-       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+        .profile-completion-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
         }
 
-   .progress {
-    border-radius: 10px;
-        background-color: #f3f4f6;
-  }
+        .progress {
+            border-radius: 10px;
+            background-color: #f3f4f6;
+        }
 
         .progress-bar {
-    border-radius: 10px;
- transition: width 0.6s ease;
+            border-radius: 10px;
+            transition: width 0.6s ease;
         }
 
-   .checklist-item {
+        .checklist-item {
             transition: background-color 0.2s ease;
         }
 
         .checklist-item:hover {
             background-color: #f9fafb;
- padding-right: 8px;
-  padding-left: 8px;
-       border-radius: 8px;
- }
+            padding-right: 8px;
+            padding-left: 8px;
+            border-radius: 8px;
+        }
 
         .checklist-item:last-child {
             border-bottom: none !important;
         }
 
-      .badge {
+        .badge {
             font-weight: 600;
             padding: 8px 12px;
         }
 
         @@media (max-width: 768px) {
-     .profile-completion-card {
-     margin-bottom: 1rem;
-         }
+            .profile-completion-card {
+                margin-bottom: 1rem;
+            }
 
             .checklist-item {
- flex-direction: column;
-           align-items: flex-start !important;
-       gap: 10px;
-       }
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 10px;
+            }
 
             .checklist-item .btn {
-        width: 100%;
+                width: 100%;
             }
         }
     </style>

@@ -1,273 +1,273 @@
 @using TafsilkPlatform.Models.Models
 @model TafsilkPlatform.Models.ViewModels.Orders.OrderDetailsViewModel
 @{
-    ViewData["Title"] = $"تفاصيل الطلب - {Model.OrderNumber}";
+    ViewData["Title"] = $"Order Details - {Model.OrderNumber}";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5" dir="rtl">
+<div class="container py-5" dir="ltr">
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-<nav aria-label="breadcrumb">
-       <ol class="breadcrumb">
-                 <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
- @if (Model.IsCustomer)
-           {
-       <li class="breadcrumb-item"><a asp-action="MyOrders" asp-controller="Orders">طلباتي</a></li>
-    }
-      else if (Model.IsTailor)
-         {
-      <li class="breadcrumb-item"><a asp-action="TailorOrders" asp-controller="Orders">الطلبات</a></li>
-  }
-         <li class="breadcrumb-item active">@Model.OrderNumber</li>
-          </ol>
-      </nav>
-<div class="d-flex justify-content-between align-items-center">
-            <div>
-     <h2 class="display-6 fw-bold mb-2">
-      <i class="fas fa-shopping-bag text-primary me-2"></i>
-        طلب رقم @Model.OrderNumber
-          </h2>
-      <p class="text-muted">تم الإنشاء في @Model.CreatedAt.ToString("dd MMMM yyyy")</p>
-   </div>
-              <div>
-           @{
-              var statusClass = Model.Status switch
-      {
-  TafsilkPlatform.Models.Models.OrderStatus.Pending => "bg-warning",
-      TafsilkPlatform.Models.Models.OrderStatus.Processing => "bg-info",
-  TafsilkPlatform.Models.Models.OrderStatus.Shipped => "bg-primary",
-      TafsilkPlatform.Models.Models.OrderStatus.Delivered => "bg-success",
-        TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "bg-danger",
-     _ => "bg-secondary"
-       };
-       }
-      <span class="badge @statusClass fs-6 px-4 py-2">
-   <i class="fas fa-circle me-2" style="font-size: 0.5rem;"></i>
-             @Model.StatusDisplay
-    </span>
-           </div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    @if (Model.IsCustomer)
+                    {
+                        <li class="breadcrumb-item"><a asp-action="MyOrders" asp-controller="Orders">My Orders</a></li>
+                    }
+                    else if (Model.IsTailor)
+                    {
+                        <li class="breadcrumb-item"><a asp-action="TailorOrders" asp-controller="Orders">Orders</a></li>
+                    }
+                    <li class="breadcrumb-item active">@Model.OrderNumber</li>
+                </ol>
+            </nav>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="display-6 fw-bold mb-2">
+                        <i class="fas fa-shopping-bag text-primary me-2"></i>
+                        Order #@Model.OrderNumber
+                    </h2>
+                    <p class="text-muted">Created on @Model.CreatedAt.ToString("dd MMMM yyyy")</p>
+                </div>
+                <div>
+                    @{
+                        var statusClass = Model.Status switch
+                        {
+                            TafsilkPlatform.Models.Models.OrderStatus.Pending => "bg-warning",
+                            TafsilkPlatform.Models.Models.OrderStatus.Processing => "bg-info",
+                            TafsilkPlatform.Models.Models.OrderStatus.Shipped => "bg-primary",
+                            TafsilkPlatform.Models.Models.OrderStatus.Delivered => "bg-success",
+                            TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+                    }
+                    <span class="badge @statusClass fs-6 px-4 py-2">
+                        <i class="fas fa-circle me-2" style="font-size: 0.5rem;"></i>
+                        @Model.StatusDisplay
+                    </span>
+                </div>
             </div>
-     </div>
+        </div>
     </div>
 
     <div class="row">
         <!-- Main Content -->
-      <div class="col-lg-8">
-       <!-- Status Timeline -->
+        <div class="col-lg-8">
+            <!-- Status Timeline -->
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
-         <h5 class="mb-0">
-        <i class="fas fa-tasks me-2"></i>
-      حالة الطلب
-        </h5>
-     </div>
-      <div class="card-body">
-            <div class="order-timeline">
-   @{
-               var statuses = new List<(OrderStatus Status, string Display, string Icon)>
-    {
-    (TafsilkPlatform.Models.Models.OrderStatus.Pending, "قيد الانتظار", "fa-clock"),
-     (TafsilkPlatform.Models.Models.OrderStatus.Processing, "قيد التنفيذ", "fa-cog"),
-    (TafsilkPlatform.Models.Models.OrderStatus.Shipped, "قيد الشحن", "fa-truck"),
-           (TafsilkPlatform.Models.Models.OrderStatus.Delivered, "تم التسليم", "fa-check-circle")
-   };
+                    <h5 class="mb-0">
+                        <i class="fas fa-tasks me-2"></i>
+                        Order Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="order-timeline">
+                        @{
+                            var statuses = new List<(OrderStatus Status, string Display, string Icon)>
+                            {
+                                (TafsilkPlatform.Models.Models.OrderStatus.Pending, "Pending", "fa-clock"),
+                                (TafsilkPlatform.Models.Models.OrderStatus.Processing, "In Progress", "fa-cog"),
+                                (TafsilkPlatform.Models.Models.OrderStatus.Shipped, "Shipped", "fa-truck"),
+                                (TafsilkPlatform.Models.Models.OrderStatus.Delivered, "Delivered", "fa-check-circle")
+                            };
 
-       var currentStatusIndex = statuses.FindIndex(s => s.Status == Model.Status);
-         var isCancelled = Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Cancelled;
-         }
+                            var currentStatusIndex = statuses.FindIndex(s => s.Status == Model.Status);
+                            var isCancelled = Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Cancelled;
+                        }
 
-     <div class="timeline">
-         @for (int i = 0; i < statuses.Count; i++)
-      {
-        var status = statuses[i];
-   var isCompleted = i <= currentStatusIndex && !isCancelled;
-               var isCurrent = i == currentStatusIndex && !isCancelled;
+                        <div class="timeline">
+                            @for (int i = 0; i < statuses.Count; i++)
+                            {
+                                var status = statuses[i];
+                                var isCompleted = i <= currentStatusIndex && !isCancelled;
+                                var isCurrent = i == currentStatusIndex && !isCancelled;
 
-         <div class="timeline-item @(isCompleted ? "completed" : "") @(isCurrent ? "active" : "")">
-       <div class="timeline-marker">
-         <i class="fas @status.Icon"></i>
-           </div>
-        <div class="timeline-content">
-     <h6 class="mb-0">@status.Display</h6>
-       @if (isCompleted && Model.StatusHistory.Any())
-              {
-     var history = Model.StatusHistory.FirstOrDefault(h => h.Status == status.Status);
-     if (history != null)
-       {
-            <small class="text-muted">@history.Timestamp.ToString("dd/MM/yyyy HH:mm")</small>
-              }
-     }
-   </div>
-       </div>
-    }
+                                <div class="timeline-item @(isCompleted ? "completed" : "") @(isCurrent ? "active" : "")">
+                                    <div class="timeline-marker">
+                                        <i class="fas @status.Icon"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-0">@status.Display</h6>
+                                        @if (isCompleted && Model.StatusHistory.Any())
+                                        {
+                                            var history = Model.StatusHistory.FirstOrDefault(h => h.Status == status.Status);
+                                            if (history != null)
+                                            {
+                                                <small class="text-muted">@history.Timestamp.ToString("dd/MM/yyyy HH:mm")</small>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
 
-        @if (isCancelled)
-       {
-          <div class="timeline-item completed active">
-   <div class="timeline-marker bg-danger">
-             <i class="fas fa-times-circle"></i>
-               </div>
-    <div class="timeline-content">
-        <h6 class="mb-0 text-danger">ملغي</h6>
-   <small class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
-      </div>
-       </div>
-      }
-       </div>
-        </div>
-          </div>
-       </div>
+                            @if (isCancelled)
+                            {
+                                <div class="timeline-item completed active">
+                                    <div class="timeline-marker bg-danger">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <h6 class="mb-0 text-danger">Cancelled</h6>
+                                        <small class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Order Details -->
-         <div class="card shadow-sm mb-4">
-       <div class="card-header bg-light">
-           <h5 class="mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-             تفاصيل الطلب
-               </h5>
-     </div>
-    <div class="card-body">
-        <div class="row mb-3">
-          <div class="col-md-6">
-  <h6 class="text-muted mb-1">نوع الخدمة</h6>
-                 <p class="fw-bold">@Model.ServiceType</p>
-        </div>
-   <div class="col-md-6">
-   <h6 class="text-muted mb-1">تاريخ التسليم المتوقع</h6>
-        <p class="fw-bold">
-@if (Model.DueDate.HasValue)
-       {
-     @Model.DueDate.Value.ToString("dd MMMM yyyy")
-             }
-              else
-               {
-            <span class="text-muted">غير محدد</span>
-          }
-               </p>
-      </div>
-               </div>
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Order Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Service Type</h6>
+                            <p class="fw-bold">@Model.ServiceType</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-1">Expected Delivery Date</h6>
+                            <p class="fw-bold">
+                                @if (Model.DueDate.HasValue)
+                                {
+                                    @Model.DueDate.Value.ToString("dd MMMM yyyy")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Not Set</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
 
-         <div class="mb-3">
-     <h6 class="text-muted mb-2">الوصف</h6>
-         <p class="border-start border-primary border-4 ps-3">@Model.Description</p>
-       </div>
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Description</h6>
+                        <p class="border-start border-primary border-4 ps-3">@Model.Description</p>
+                    </div>
 
-           @if (Model.Items.Any())
-          {
-    <div>
-            <h6 class="text-muted mb-2">بنود الطلب</h6>
-        <div class="table-responsive">
-             <table class="table table-hover">
-   <thead>
-        <tr>
-    <th>الخدمة</th>
-       <th>الكمية</th>
-     <th>السعر</th>
-        <th>الملاحظات</th>
-      </tr>
-             </thead>
-   <tbody>
-             @foreach (var item in Model.Items)
-     {
-     <tr>
-                   <td>@item.ServiceName</td>
-     <td>@item.Quantity</td>
-            <td>@item.Price.ToString("N2") ريال</td>
-           <td>@(item.Notes ?? "-")</td>
-              </tr>
-    }
-       </tbody>
-     </table>
-  </div>
-       </div>
-      }
-    </div>
-         </div>
-
-    <!-- Reference Images -->
-  @if (Model.ReferenceImages.Any())
-    {
-      <div class="card shadow-sm mb-4">
-  <div class="card-header bg-light">
-        <h5 class="mb-0">
-             <i class="fas fa-images me-2"></i>
-         الصور المرجعية
-                </h5>
-       </div>
-       <div class="card-body">
-                <div class="row g-2">
-   @foreach (var image in Model.ReferenceImages)
-                  {
-         <div class="col-md-3">
-      <a href="@Url.Action("GetOrderImage", "Orders", new { imageId = image.ImageId })" 
-          data-lightbox="order-images" 
-         data-title="صورة الطلب">
-     <img src="@Url.Action("GetOrderImage", "Orders", new { imageId = image.ImageId })" 
-         class="img-fluid rounded shadow-sm hover-zoom" 
-            style="height: 150px; object-fit: cover; width: 100%;" 
-     alt="صورة الطلب" />
-        </a>
+                    @if (Model.Items.Any())
+                    {
+                        <div>
+                            <h6 class="text-muted mb-2">Order Items</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.Items)
+                                        {
+                                            <tr>
+                                                <td>@item.ServiceName</td>
+                                                <td>@item.Quantity</td>
+                                                <td>@item.Price.ToString("N2") EGP</td>
+                                                <td>@(item.Notes ?? "-")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
-               }
-              </div>
-        </div>
-   </div>
- }
+
+            <!-- Reference Images -->
+            @if (Model.ReferenceImages.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-images me-2"></i>
+                            Reference Images
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            @foreach (var image in Model.ReferenceImages)
+                            {
+                                <div class="col-md-3">
+                                    <a href="@Url.Action("GetOrderImage", "Orders", new { imageId = image.ImageId })" 
+                                       data-lightbox="order-images" 
+                                       data-title="Order Image">
+                                        <img src="@Url.Action("GetOrderImage", "Orders", new { imageId = image.ImageId })" 
+                                             class="img-fluid rounded shadow-sm hover-zoom" 
+                                             style="height: 150px; object-fit: cover; width: 100%;" 
+                                             alt="Order Image" />
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
 
             <!-- Tailor Actions (if user is tailor) -->
             @if (Model.IsTailor && Model.Status != TafsilkPlatform.Models.Models.OrderStatus.Delivered && Model.Status != TafsilkPlatform.Models.Models.OrderStatus.Cancelled)
-{
-             <div class="card shadow-sm mb-4 border-primary">
-        <div class="card-header bg-primary text-white">
-       <h5 class="mb-0">
-       <i class="fas fa-tasks me-2"></i>
-        إجراءات الطلب
-     </h5>
-         </div>
-        <div class="card-body">
-       <form asp-action="UpdateOrderStatus" asp-controller="Orders" method="post">
-             @Html.AntiForgeryToken()
-                <input type="hidden" name="id" value="@Model.OrderId" />
+            {
+                <div class="card shadow-sm mb-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-tasks me-2"></i>
+                            Order Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateOrderStatus" asp-controller="Orders" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@Model.OrderId" />
             
-          <div class="mb-3">
-    <label class="form-label fw-bold">تحديث حالة الطلب</label>
-              <select name="newStatus" class="form-select" required>
-     <option value="">-- اختر الحالة الجديدة --</option>
-     @if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending)
-     {
- <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Processing)">بدء التنفيذ</option>
-   <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">إلغاء الطلب</option>
-          }
-    else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
-  {
-       <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Shipped)">جاهز للشحن</option>
-          <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">إلغاء الطلب</option>
-              }
-     else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Shipped)
-    {
-        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Delivered)">تم التسليم</option>
-    }
-        </select>
-     </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Update Order Status</label>
+                                <select name="newStatus" class="form-select" required>
+                                    <option value="">-- Select New Status --</option>
+                                    @if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending)
+                                    {
+                                        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Processing)">Start Processing</option>
+                                        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">Cancel Order</option>
+                                    }
+                                    else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
+                                    {
+                                        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Shipped)">Ready for Shipping</option>
+                                        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Cancelled)">Cancel Order</option>
+                                    }
+                                    else if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Shipped)
+                                    {
+                                        <option value="@((int)TafsilkPlatform.Models.Models.OrderStatus.Delivered)">Delivered</option>
+                                    }
+                                </select>
+                            </div>
 
-              <div class="mb-3">
-<label class="form-label">ملاحظات (اختياري)</label>
-       <textarea name="notes" class="form-control" rows="3" 
-        placeholder="أضف أي ملاحظات حول تحديث الحالة..."></textarea>
-</div>
+                            <div class="mb-3">
+                                <label class="form-label">Notes (Optional)</label>
+                                <textarea name="notes" class="form-control" rows="3" 
+                                          placeholder="Add any notes about the status update..."></textarea>
+                            </div>
 
-      <button type="submit" class="btn btn-primary">
- <i class="fas fa-save me-2"></i>
-       تحديث الحالة
-      </button>
-        </form>
-    </div>
-       </div>
-   }
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Update Status
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
 
- <!-- Customer Actions -->
+            <!-- Customer Actions -->
             @if (Model.IsCustomer)
             {
                 <div class="card shadow-sm mb-4">
@@ -276,17 +276,17 @@
                             @if (Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending || Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Confirmed)
                             {
                                 <form action="/orders/@Model.OrderId/cancel" method="post" 
-                                      onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
+                                      onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn btn-outline-danger w-100">
                                         <i class="fas fa-times-circle me-2"></i>
-                                        إلغاء الطلب
+                                        Cancel Order
                                     </button>
                                 </form>
                             }
                             <a href="/orders/my-orders" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-arrow-right me-2"></i>
-                                العودة إلى قائمة الطلبات
+                                Back to Orders
                             </a>
                         </div>
                     </div>
@@ -295,140 +295,140 @@
         </div>
 
         <!-- Sidebar -->
-      <div class="col-lg-4">
-  <!-- Tailor Info -->
-      <div class="card shadow-sm mb-4">
-          <div class="card-header bg-light">
-              <h5 class="mb-0">
-       <i class="fas fa-user-tie me-2"></i>
-               معلومات الخياط
-               </h5>
-        </div>
-       <div class="card-body">
-        <div class="text-center mb-3">
-         @if (Model.TailorProfilePictureData != null)
-      {
-               <img src="data:@Model.TailorProfilePictureContentType;base64,@Convert.ToBase64String(Model.TailorProfilePictureData)" 
-    class="rounded-circle shadow" 
- style="width: 100px; height: 100px; object-fit: cover;" 
-       alt="@Model.TailorName" />
-            }
-   else
-           {
-      <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow" 
-             style="width: 100px; height: 100px;">
-  <i class="fas fa-user fa-3x"></i>
-        </div>
-    }
-        </div>
-          <h5 class="text-center mb-1">@Model.TailorShopName</h5>
-      <p class="text-center text-muted mb-3">@Model.TailorName</p>
-       
-           @if (!string.IsNullOrEmpty(Model.TailorPhone))
- {
-        <div class="d-grid gap-2">
-      <a href="tel:@Model.TailorPhone" class="btn btn-outline-primary">
-   <i class="fas fa-phone me-2"></i>
-    اتصل الآن
-              </a>
-    <a href="https://wa.me/@Model.TailorPhone.Replace("+", "")" 
-           class="btn btn-outline-success" 
-          target="_blank">
-            <i class="fab fa-whatsapp me-2"></i>
-  واتساب
-        </a>
-      <a asp-action="ViewPublicTailorProfile" asp-controller="TailorPortfolio" 
-        asp-route-id="@Model.TailorId" 
-       class="btn btn-outline-secondary">
-            <i class="fas fa-eye me-2"></i>
-              عرض الملف الشخصي
-       </a>
-   </div>
-             }
-                </div>
-            </div>
-
-    <!-- Payment Summary -->
+        <div class="col-lg-4">
+            <!-- Tailor Info -->
             <div class="card shadow-sm mb-4">
-    <div class="card-header bg-light">
-    <h5 class="mb-0">
-        <i class="fas fa-money-bill-wave me-2"></i>
-    ملخص الدفع
-            </h5>
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i>
+                        Tailor Information
+                    </h5>
                 </div>
-        <div class="card-body">
-      <div class="d-flex justify-content-between mb-2">
-               <span>إجمالي الطلب:</span>
-            <strong class="text-primary">@Model.TotalPrice.ToString("C") EGP</strong>
-              </div>
-    <hr />
-    <div class="d-flex justify-content-between mb-3">
-               <span class="fw-bold">حالة الدفع:</span>
-     @if (Model.IsPaid)
-             {
-                 <span class="badge bg-success">
-      <i class="fas fa-check-circle me-1"></i>
-   مدفوع
-     </span>
-         }
-               else
-  {
-          <span class="badge bg-warning text-dark">
-       <i class="fas fa-clock me-1"></i>
-  في انتظار الدفع
-         </span>
-                  }
-   </div>
-
-            @if (Model.IsPaid)
-      {
-      <p class="text-success small mb-0">
-         <i class="fas fa-check-circle me-1"></i>
-    تم دفع @Model.PaymentAmount.ToString("C") EGP
-   </p>
-      }
-   else if (Model.IsCustomer && Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
-              {
-             <div class="d-grid">
-                <a asp-action="ProcessPayment" asp-controller="Payments" 
-      asp-route-orderId="@Model.OrderId" 
-          class="btn btn-success">
-             <i class="fas fa-credit-card me-2"></i>
-         ادفع الآن
-    </a>
-     </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        @if (Model.TailorProfilePictureData != null)
+                        {
+                            <img src="data:@Model.TailorProfilePictureContentType;base64,@Convert.ToBase64String(Model.TailorProfilePictureData)" 
+                                 class="rounded-circle shadow" 
+                                 style="width: 100px; height: 100px; object-fit: cover;" 
+                                 alt="@Model.TailorName" />
+                        }
+                        else
+                        {
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow" 
+                                 style="width: 100px; height: 100px;">
+                                <i class="fas fa-user fa-3x"></i>
+                            </div>
+                        }
+                    </div>
+                    <h5 class="text-center mb-1">@Model.TailorShopName</h5>
+                    <p class="text-center text-muted mb-3">@Model.TailorName</p>
+       
+                    @if (!string.IsNullOrEmpty(Model.TailorPhone))
+                    {
+                        <div class="d-grid gap-2">
+                            <a href="tel:@Model.TailorPhone" class="btn btn-outline-primary">
+                                <i class="fas fa-phone me-2"></i>
+                                Call Now
+                            </a>
+                            <a href="https://wa.me/@Model.TailorPhone.Replace("+", "")" 
+                               class="btn btn-outline-success" 
+                               target="_blank">
+                                <i class="fab fa-whatsapp me-2"></i>
+                                WhatsApp
+                            </a>
+                            <a asp-action="ViewPublicTailorProfile" asp-controller="TailorPortfolio" 
+                               asp-route-id="@Model.TailorId" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-eye me-2"></i>
+                                View Profile
+                            </a>
+                        </div>
                     }
-    </div>
+                </div>
             </div>
 
-     <!-- Customer Info (for tailor view) -->
-       @if (Model.IsTailor)
+            <!-- Payment Summary -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Payment Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Order Total:</span>
+                        <strong class="text-primary">@Model.TotalPrice.ToString("C") EGP</strong>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold">Payment Status:</span>
+                        @if (Model.IsPaid)
+                        {
+                            <span class="badge bg-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Paid
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i>
+                                Pending Payment
+                            </span>
+                        }
+                    </div>
+
+                    @if (Model.IsPaid)
+                    {
+                        <p class="text-success small mb-0">
+                            <i class="fas fa-check-circle me-1"></i>
+                            Paid @Model.PaymentAmount.ToString("C") EGP
+                        </p>
+                    }
+                    else if (Model.IsCustomer && Model.Status == TafsilkPlatform.Models.Models.OrderStatus.Processing)
+                    {
+                        <div class="d-grid">
+                            <a asp-action="ProcessPayment" asp-controller="Payments" 
+                               asp-route-orderId="@Model.OrderId" 
+                               class="btn btn-success">
+                                <i class="fas fa-credit-card me-2"></i>
+                                Pay Now
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Customer Info (for tailor view) -->
+            @if (Model.IsTailor)
             {
-             <div class="card shadow-sm mb-4">
-          <div class="card-header bg-light">
-    <h5 class="mb-0">
-    <i class="fas fa-user me-2"></i>
-    معلومات العميل
-                  </h5>
-       </div>
-             <div class="card-body">
-      <h6 class="mb-2">@Model.CustomerName</h6>
-         @if (!string.IsNullOrEmpty(Model.CustomerPhone))
-             {
-      <p class="text-muted mb-3">
-    <i class="fas fa-phone me-2"></i>
-   @Model.CustomerPhone
-          </p>
-                   <div class="d-grid gap-2">
-       <a href="tel:@Model.CustomerPhone" class="btn btn-sm btn-outline-primary">
-   <i class="fas fa-phone me-2"></i>
-      اتصل
-            </a>
-   </div>
-         }
-   </div>
-   </div>
-     }
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>
+                            Customer Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-2">@Model.CustomerName</h6>
+                        @if (!string.IsNullOrEmpty(Model.CustomerPhone))
+                        {
+                            <p class="text-muted mb-3">
+                                <i class="fas fa-phone me-2"></i>
+                                @Model.CustomerPhone
+                            </p>
+                            <div class="d-grid gap-2">
+                                <a href="tel:@Model.CustomerPhone" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-phone me-2"></i>
+                                    Call
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -441,22 +441,22 @@
 
 <style>
     .timeline {
-     position: relative;
+        position: relative;
         padding: 20px 0;
     }
 
-  .timeline-item {
+    .timeline-item {
         display: flex;
-     margin-bottom: 30px;
+        margin-bottom: 30px;
         position: relative;
     }
 
     .timeline-item::before {
-    content: '';
+        content: '';
         position: absolute;
         left: 20px;
         top: 30px;
-      bottom: -30px;
+        bottom: -30px;
         width: 2px;
         background: #dee2e6;
     }
@@ -470,10 +470,10 @@
         height: 40px;
         border-radius: 50%;
         background: #dee2e6;
-      display: flex;
+        display: flex;
         align-items: center;
         justify-content: center;
-  color: white;
+        color: white;
         z-index: 1;
         flex-shrink: 0;
     }
@@ -483,12 +483,12 @@
     }
 
     .timeline-item.active .timeline-marker {
-      background: var(--bs-primary);
+        background: var(--bs-primary);
         box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.2);
     }
 
     .timeline-content {
-        margin-right: 20px;
+        margin-left: 20px;
         margin-top: 5px;
     }
 

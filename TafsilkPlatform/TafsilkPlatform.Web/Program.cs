@@ -13,7 +13,6 @@ using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Web.Controllers; // For IdempotencyCleanupService
 using TafsilkPlatform.Web.Middleware;
 using TafsilkPlatform.Web.Services;
-using Microsoft.AspNetCore.Hosting;
 
 // Configure Serilog early
 Log.Logger = new LoggerConfiguration()
@@ -254,7 +253,11 @@ Array.Empty<string>()
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
         // If connection string points to a SQLite file (development), use SQLite provider
-        if (!string.IsNullOrEmpty(connectionString) && connectionString.Trim().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
+        // Check for specific SQLite markers or file extensions
+        if (!string.IsNullOrEmpty(connectionString) && 
+            (connectionString.Contains(".db", StringComparison.OrdinalIgnoreCase) || 
+             connectionString.Contains(".sqlite", StringComparison.OrdinalIgnoreCase) ||
+             connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase)))
         {
             options.UseSqlite(connectionString, sqliteOpt => sqliteOpt.MigrationsAssembly("TafsilkPlatform.DataAccess"));
         }
@@ -271,6 +274,11 @@ Array.Empty<string>()
                         errorNumbersToAdd: null);
                 });
         }
+
+        // Suppress PendingModelChangesWarning because we are manually managing schema updates
+        // This is necessary because we added PrimaryImageUrl to Product entity without an EF migration
+        options.ConfigureWarnings(warnings => 
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 
         // Enable sensitive data logging only when explicitly allowed in config AND in Development
         var enableSensitive = builder.Configuration.GetValue<bool>("Database:EnableSensitiveDataLogging", false);
@@ -417,9 +425,9 @@ Array.Empty<string>()
     {
         options.AddPolicy("AdminPolicy", policy =>
           {
-               policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
-               policy.RequireRole("Admin");
-           });
+              policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
+              policy.RequireRole("Admin");
+          });
 
         options.AddPolicy("TailorPolicy", policy =>
        {
@@ -648,9 +656,9 @@ Array.Empty<string>()
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into SQLite database");
@@ -673,9 +681,9 @@ Array.Empty<string>()
                 if (!await db.Roles.AnyAsync())
                 {
                     db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into database");

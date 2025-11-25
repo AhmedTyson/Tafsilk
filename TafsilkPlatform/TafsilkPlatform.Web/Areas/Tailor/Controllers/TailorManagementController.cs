@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
 
@@ -52,7 +52,7 @@ public class TailorManagementController : Controller
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             var portfolioImages = await _context.PortfolioImages
               .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
@@ -63,7 +63,7 @@ public class TailorManagementController : Controller
             var model = new ManagePortfolioViewModel
             {
                 TailorId = tailor.Id,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 Images = portfolioImages.Select(p => new PortfolioItemDto
                 {
                     Id = p.PortfolioImageId,
@@ -82,13 +82,13 @@ public class TailorManagementController : Controller
                 MaxAllowedImages = 50 // Configure as needed
             };
 
-            ViewData["Title"] = "إدارة معرض الأعمال";
+            ViewData["Title"] = "Manage Portfolio";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading portfolio management");
-            TempData["Error"] = "حدث خطأ أثناء تحميل معرض الأعمال";
+            TempData["Error"] = "An error occurred while loading portfolio";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -134,7 +134,7 @@ public class TailorManagementController : Controller
             {
                 _logger.LogWarning("Model binding failed - model is null");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "فشل تحميل البيانات. يرجى المحاولة مرة أخرى";
+                TempData["Error"] = "Failed to load data. Please try again.";
                 return View(new AddPortfolioImageViewModel());
             }
 
@@ -147,14 +147,14 @@ public class TailorManagementController : Controller
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor not found for user {UserId}", userId);
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Tailor", "Dashboards");
             }
 
             if (tailor.Id != model.TailorId)
             {
                 _logger.LogWarning("Unauthorized access attempt. UserId: {UserId}, TailorId: {TailorId}", userId, model.TailorId);
-                TempData["Error"] = "غير مصرح لك بإضافة الصور";
+                TempData["Error"] = "You are not authorized to add images";
                 return RedirectToAction("Tailor", "Dashboards");
             }
 
@@ -163,7 +163,7 @@ public class TailorManagementController : Controller
             {
                 _logger.LogWarning("Model state invalid for AddPortfolioImage");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "يرجى التحقق من البيانات المدخلة وإصلاح الأخطاء";
+                TempData["Error"] = "Please check input data and fix errors";
                 return View(model);
             }
 
@@ -171,9 +171,9 @@ public class TailorManagementController : Controller
             if (model.ImageFile == null || model.ImageFile.Length == 0)
             {
                 _logger.LogWarning("Image file is null or empty");
-                ModelState.AddModelError(nameof(model.ImageFile), "يرجى اختيار صورة");
+                ModelState.AddModelError(nameof(model.ImageFile), "Please select an image");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "يرجى اختيار صورة";
+                TempData["Error"] = "Please select an image";
                 return View(model);
             }
 
@@ -183,9 +183,9 @@ public class TailorManagementController : Controller
             {
                 _logger.LogWarning("Image validation failed: {FileName}, Error: {Error}",
                     model.ImageFile.FileName, validationError);
-                ModelState.AddModelError(nameof(model.ImageFile), validationError ?? "نوع الملف غير صالح");
+                ModelState.AddModelError(nameof(model.ImageFile), validationError ?? "Invalid file type");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = validationError ?? "نوع الملف غير صالح";
+                TempData["Error"] = validationError ?? "Invalid file type";
                 return View(model);
             }
 
@@ -195,9 +195,9 @@ public class TailorManagementController : Controller
                 _logger.LogWarning("Image file too large: {Size} bytes, Max: {MaxSize} bytes",
                     model.ImageFile.Length, maxFileSize);
                 ModelState.AddModelError(nameof(model.ImageFile),
-                    $"حجم الصورة يجب أن يكون أقل من {maxFileSize / 1024 / 1024} ميجابايت");
+                    $"Image size must be less than {maxFileSize / 1024 / 1024} MB");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "حجم الصورة كبير جداً";
+                TempData["Error"] = "Image size is too large";
                 return View(model);
             }
 
@@ -208,7 +208,7 @@ public class TailorManagementController : Controller
             if (currentImageCount >= 50)
             {
                 _logger.LogWarning("Image limit reached for tailor {TailorId}. Current count: {Count}", tailor.Id, currentImageCount);
-                TempData["Error"] = "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)";
+                TempData["Error"] = "You have reached the maximum image limit (50 images)";
                 return RedirectToAction(nameof(ManagePortfolio));
             }
 
@@ -224,7 +224,7 @@ public class TailorManagementController : Controller
 
                 if (imageData == null || imageData.Length == 0)
                 {
-                    throw new InvalidOperationException("فشل قراءة بيانات الصورة. الملف فارغ أو تالف");
+                    throw new InvalidOperationException("Failed to read image data. File is empty or corrupt");
                 }
 
                 _logger.LogInformation("Image processed successfully. Size: {Size} bytes", imageData.Length);
@@ -232,9 +232,9 @@ public class TailorManagementController : Controller
             catch (OutOfMemoryException oomEx)
             {
                 _logger.LogError(oomEx, "Out of memory while reading image. File size: {Size} bytes", model.ImageFile.Length);
-                ModelState.AddModelError(nameof(model.ImageFile), "الصورة كبيرة جداً. يرجى اختيار صورة أصغر (أقل من 5 ميجابايت)");
+                ModelState.AddModelError(nameof(model.ImageFile), "Image is too large. Please choose a smaller image (less than 5MB)");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر (أقل من 5 ميجابايت)";
+                TempData["Error"] = "Image is too large. Please choose a smaller image (less than 5MB)";
                 return View(model);
             }
             catch (InvalidOperationException ioEx)
@@ -248,18 +248,18 @@ public class TailorManagementController : Controller
             catch (IOException ioEx)
             {
                 _logger.LogError(ioEx, "IO error while reading image. File size: {Size} bytes", model.ImageFile.Length);
-                ModelState.AddModelError(nameof(model.ImageFile), "حدث خطأ أثناء قراءة الملف. يرجى المحاولة مرة أخرى");
+                ModelState.AddModelError(nameof(model.ImageFile), "Error reading file. Please try again");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "حدث خطأ أثناء قراءة الملف";
+                TempData["Error"] = "Error reading file";
                 return View(model);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error reading image data. File size: {Size} bytes, Error: {Error}",
                     model.ImageFile.Length, ex.Message);
-                ModelState.AddModelError(nameof(model.ImageFile), "حدث خطأ غير متوقع أثناء قراءة الصورة. يرجى المحاولة مرة أخرى");
+                ModelState.AddModelError(nameof(model.ImageFile), "Unexpected error reading image. Please try again");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "حدث خطأ غير متوقع أثناء قراءة الصورة";
+                TempData["Error"] = "Unexpected error reading image";
                 return View(model);
             }
 
@@ -307,7 +307,7 @@ public class TailorManagementController : Controller
                     {
                         _logger.LogError("CRITICAL: Failed to save portfolio image - SaveChangesAsync returned 0");
                         await transaction.RollbackAsync();
-                        throw new InvalidOperationException("فشل حفظ الصورة في قاعدة البيانات. لم يتم حفظ أي بيانات.");
+                        throw new InvalidOperationException("Failed to save image to database. No data saved.");
                     }
 
                     await transaction.CommitAsync();
@@ -322,13 +322,13 @@ public class TailorManagementController : Controller
                     {
                         _logger.LogError("CRITICAL: Portfolio image was not found in database after commit. ImageId: {ImageId}",
                             portfolioImage.PortfolioImageId);
-                        throw new InvalidOperationException("فشل التحقق من حفظ الصورة في قاعدة البيانات");
+                        throw new InvalidOperationException("Failed to verify image save in database");
                     }
 
                     _logger.LogInformation("✅ Portfolio image {ImageId} added and verified successfully for tailor {TailorId}. ImageSize: {Size} bytes",
                         portfolioImage.PortfolioImageId, tailor.Id, savedImage.ImageData?.Length ?? 0);
 
-                    TempData["Success"] = "تم إضافة الصورة بنجاح إلى معرض الأعمال";
+                    TempData["Success"] = "Image added successfully to portfolio";
                     return (IActionResult)RedirectToAction("Tailor", "Dashboards");
                 }
                 catch (DbUpdateException dbEx)
@@ -345,8 +345,8 @@ public class TailorManagementController : Controller
                     _logger.LogError(dbEx, "Database update exception during portfolio image save");
 
                     ViewBag.Categories = GetPortfolioCategories();
-                    ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
-                    TempData["Error"] = "حدث خطأ في قاعدة البيانات. يرجى التحقق من البيانات والمحاولة مرة أخرى.";
+                    ModelState.AddModelError("", "Database error. Please try again.");
+                    TempData["Error"] = "Database error. Please check data and try again.";
                     return (IActionResult)View(model);
                 }
                 catch (InvalidOperationException ioEx)
@@ -381,8 +381,8 @@ public class TailorManagementController : Controller
                     _logger.LogError(ex, "Unexpected error during portfolio image save transaction");
 
                     ViewBag.Categories = GetPortfolioCategories();
-                    ModelState.AddModelError("", "حدث خطأ غير متوقع أثناء حفظ الصورة. يرجى المحاولة مرة أخرى.");
-                    TempData["Error"] = $"حدث خطأ: {ex.Message}";
+                    ModelState.AddModelError("", "Unexpected error while saving image. Please try again.");
+                    TempData["Error"] = $"An error occurred: {ex.Message}";
                     return (IActionResult)View(model);
                 }
             });
@@ -391,24 +391,24 @@ public class TailorManagementController : Controller
         {
             _logger.LogError(oomEx, "Out of memory exception while adding portfolio image");
             ViewBag.Categories = GetPortfolioCategories();
-            ModelState.AddModelError("", "الصورة كبيرة جداً. يرجى اختيار صورة أصغر");
-            TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر";
+            ModelState.AddModelError("", "Image is too large. Please choose a smaller image");
+            TempData["Error"] = "Image is too large. Please choose a smaller image";
             return View(model ?? new AddPortfolioImageViewModel());
         }
         catch (DbUpdateException dbEx)
         {
             _logger.LogError(dbEx, "Database error while adding portfolio image");
             ViewBag.Categories = GetPortfolioCategories();
-            ModelState.AddModelError("", "حدث خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى.");
-            TempData["Error"] = "حدث خطأ في قاعدة البيانات";
+            ModelState.AddModelError("", "Database error. Please try again.");
+            TempData["Error"] = "Database error";
             return View(model ?? new AddPortfolioImageViewModel());
         }
         catch (Microsoft.AspNetCore.Http.BadHttpRequestException badReqEx)
         {
             _logger.LogError(badReqEx, "[UPLOAD] BadHttpRequestException during image upload (likely request too large)");
             ViewBag.Categories = GetPortfolioCategories();
-            ModelState.AddModelError("", "حجم الملف أو الطلب كبير جداً. يرجى اختيار صورة أصغر أو تقليل عدد الملفات.");
-            TempData["Error"] = "حجم الملف أو الطلب كبير جداً. يرجى اختيار صورة أصغر أو تقليل عدد الملفات.";
+            ModelState.AddModelError("", "File or request size too large. Please choose a smaller image.");
+            TempData["Error"] = "File or request size too large. Please choose a smaller image.";
             return View(model ?? new AddPortfolioImageViewModel());
         }
         catch (Exception ex)
@@ -416,8 +416,8 @@ public class TailorManagementController : Controller
             _logger.LogError(ex, "[UPLOAD] Unexpected error while adding portfolio image. Exception type: {ExceptionType}, Message: {Message}, StackTrace: {StackTrace}",
                 ex.GetType().Name, ex.Message, ex.StackTrace);
             ViewBag.Categories = GetPortfolioCategories();
-            ModelState.AddModelError("", "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.");
-            TempData["Error"] = $"حدث خطأ: {ex.Message}";
+            ModelState.AddModelError("", "Unexpected error. Please try again.");
+            TempData["Error"] = $"An error occurred: {ex.Message}";
             return View(model ?? new AddPortfolioImageViewModel());
         }
     }
@@ -441,7 +441,7 @@ public class TailorManagementController : Controller
                   .FirstOrDefaultAsync(p => p.PortfolioImageId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
             if (image == null)
-                return NotFound("الصورة غير موجودة");
+                return NotFound("Image not found");
 
             var model = new EditPortfolioImageViewModel
             {
@@ -463,7 +463,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading portfolio image for editing");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الصورة";
+            TempData["Error"] = "Error loading image";
             return RedirectToAction(nameof(ManagePortfolio));
         }
     }
@@ -511,20 +511,20 @@ public class TailorManagementController : Controller
             // Update image data if new file provided
             if (model.NewImageFile != null && model.NewImageFile.Length > 0)
             {
-                if (!_fileUploadService.IsValidImage(model.NewImageFile))
+                if (!await _fileUploadService.IsValidImageAsync(model.NewImageFile))
                 {
-                    ModelState.AddModelError(nameof(model.NewImageFile), "نوع الملف غير صالح");
+                    ModelState.AddModelError(nameof(model.NewImageFile), "Invalid file type");
                     ViewBag.Categories = GetPortfolioCategories();
-                    TempData["Error"] = "نوع الملف غير صالح";
+                    TempData["Error"] = "Invalid file type";
                     return View(model);
                 }
 
                 var maxFileSize = _fileUploadService.GetMaxFileSizeInBytes();
                 if (model.NewImageFile.Length > maxFileSize)
                 {
-                    ModelState.AddModelError(nameof(model.NewImageFile), $"حجم الملف كبير جداً. الحد الأقصى {maxFileSize / 1024 / 1024} ميجابايت");
+                    ModelState.AddModelError(nameof(model.NewImageFile), $"File size too large. Maximum {maxFileSize / 1024 / 1024} MB");
                     ViewBag.Categories = GetPortfolioCategories();
-                    TempData["Error"] = "حجم الملف كبير جداً";
+                    TempData["Error"] = "File size too large";
                     return View(model);
                 }
 
@@ -547,18 +547,18 @@ public class TailorManagementController : Controller
                 {
                     _logger.LogError(oomEx, "Out of memory while reading image for portfolio image {ImageId}. File size: {Size} bytes",
                         id, model.NewImageFile.Length);
-                    ModelState.AddModelError(nameof(model.NewImageFile), "الصورة كبيرة جداً. يرجى اختيار صورة أصغر");
+                    ModelState.AddModelError(nameof(model.NewImageFile), "Image is too large. Please choose a smaller image");
                     ViewBag.Categories = GetPortfolioCategories();
-                    TempData["Error"] = "الصورة كبيرة جداً. يرجى اختيار صورة أصغر";
+                    TempData["Error"] = "Image is too large. Please choose a smaller image";
                     return View(model);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error reading image data for portfolio image {ImageId}. File size: {Size} bytes",
                         id, model.NewImageFile.Length);
-                    ModelState.AddModelError(nameof(model.NewImageFile), "حدث خطأ أثناء قراءة الصورة. يرجى المحاولة مرة أخرى");
+                    ModelState.AddModelError(nameof(model.NewImageFile), "Error reading image. Please try again");
                     ViewBag.Categories = GetPortfolioCategories();
-                    TempData["Error"] = "حدث خطأ أثناء قراءة الصورة";
+                    TempData["Error"] = "Error reading image";
                     return View(model);
                 }
             }
@@ -566,14 +566,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} updated for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم تحديث الصورة بنجاح";
+            TempData["Success"] = "Image updated successfully";
 
             return RedirectToAction(nameof(ManagePortfolio));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating portfolio image");
-            ModelState.AddModelError("", "حدث خطأ أثناء تحديث الصورة");
+            ModelState.AddModelError("", "Error updating image");
             ViewBag.Categories = GetPortfolioCategories();
             return View(model);
         }
@@ -606,14 +606,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} deleted for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم حذف الصورة بنجاح";
+            TempData["Success"] = "Image deleted successfully";
 
             return RedirectToAction(nameof(ManagePortfolio));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting portfolio image");
-            TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
+            TempData["Error"] = "Error deleting image";
             return RedirectToAction(nameof(ManagePortfolio));
         }
     }
@@ -704,7 +704,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling featured status");
-            return Json(new { success = false, message = "حدث خطأ" });
+            return Json(new { success = false, message = "An error occurred" });
         }
     }
 
@@ -725,7 +725,7 @@ public class TailorManagementController : Controller
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             var services = await _context.TailorServices
             .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
@@ -735,7 +735,7 @@ public class TailorManagementController : Controller
             var model = new ManageServicesViewModel
             {
                 TailorId = tailor.Id,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 Services = services.Select(s => new ServiceItemDto
                 {
                     Id = s.TailorServiceId,
@@ -748,13 +748,13 @@ public class TailorManagementController : Controller
                 AveragePrice = services.Any() ? services.Average(s => s.BasePrice) : 0
             };
 
-            ViewData["Title"] = "إدارة الخدمات";
+            ViewData["Title"] = "Manage Services";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading services management");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الخدمات";
+            TempData["Error"] = "Error loading services";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -809,7 +809,7 @@ public class TailorManagementController : Controller
 
             if (existingService)
             {
-                ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
+                ModelState.AddModelError(nameof(model.ServiceName), "Service with this name already exists");
                 ViewBag.ServiceTypes = GetServiceTypes();
                 return View(model);
             }
@@ -830,14 +830,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service added for tailor {TailorId}", tailor.Id);
-            TempData["Success"] = "تم إضافة الخدمة بنجاح";
+            TempData["Success"] = "Service added successfully";
 
             return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding service");
-            ModelState.AddModelError("", "حدث خطأ أثناء إضافة الخدمة");
+            ModelState.AddModelError("", "Error adding service");
             ViewBag.ServiceTypes = GetServiceTypes();
             return View(model);
         }
@@ -862,7 +862,7 @@ public class TailorManagementController : Controller
         .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
 
             if (service == null)
-                return NotFound("الخدمة غير موجودة");
+                return NotFound("Service not found");
 
             var model = new EditServiceViewModel
             {
@@ -880,7 +880,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading service for editing");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الخدمة";
+            TempData["Error"] = "Error loading service";
             return RedirectToAction(nameof(ManageServices));
         }
     }
@@ -922,7 +922,7 @@ public class TailorManagementController : Controller
 
             if (existingService)
             {
-                ModelState.AddModelError(nameof(model.ServiceName), "يوجد خدمة بنفس الاسم بالفعل");
+                ModelState.AddModelError(nameof(model.ServiceName), "Service with this name already exists");
                 ViewBag.ServiceTypes = GetServiceTypes();
                 return View(model);
             }
@@ -936,14 +936,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service {ServiceId} updated for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم تحديث الخدمة بنجاح";
+            TempData["Success"] = "Service updated successfully";
 
             return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating service");
-            ModelState.AddModelError("", "حدث خطأ أثناء تحديث الخدمة");
+            ModelState.AddModelError("", "Error updating service");
             ViewBag.ServiceTypes = GetServiceTypes();
             return View(model);
         }
@@ -976,14 +976,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service {ServiceId} deleted for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم حذف الخدمة بنجاح";
+            TempData["Success"] = "Service deleted successfully";
 
             return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting service");
-            TempData["Error"] = "حدث خطأ أثناء حذف الخدمة";
+            TempData["Error"] = "Error deleting service";
             return RedirectToAction(nameof(ManageServices));
         }
     }
@@ -1005,7 +1005,7 @@ public class TailorManagementController : Controller
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             var services = await _context.TailorServices
      .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
@@ -1015,7 +1015,7 @@ public class TailorManagementController : Controller
             var model = new ManagePricingViewModel
             {
                 TailorId = tailor.Id,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 ServicePrices = services.Select(s => new ServicePriceDto
                 {
                     ServiceId = s.TailorServiceId,
@@ -1025,13 +1025,13 @@ public class TailorManagementController : Controller
                 }).ToList()
             };
 
-            ViewData["Title"] = "إدارة الأسعار";
+            ViewData["Title"] = "Manage Pricing";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading pricing management");
-            TempData["Error"] = "حدث خطأ أثناء تحميل إدارة الأسعار";
+            TempData["Error"] = "Error loading pricing management";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -1070,14 +1070,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Prices updated for tailor {TailorId}", tailor.Id);
-            TempData["Success"] = "تم تحديث الأسعار بنجاح";
+            TempData["Success"] = "Prices updated successfully";
 
             return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating pricing");
-            ModelState.AddModelError("", "حدث خطأ أثناء تحديث الأسعار");
+            ModelState.AddModelError("", "Error updating prices");
             return View(model);
         }
     }
@@ -1099,7 +1099,7 @@ public class TailorManagementController : Controller
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             var products = await _context.Products
                 .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
@@ -1109,7 +1109,7 @@ public class TailorManagementController : Controller
             var model = new ManageProductsViewModel
             {
                 TailorId = tailor.Id,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 Products = products.Select(p => new ProductItemDto
                 {
                     ProductId = p.ProductId,
@@ -1132,13 +1132,13 @@ public class TailorManagementController : Controller
                 TotalInventoryValue = products.Sum(p => p.Price * p.StockQuantity)
             };
 
-            ViewData["Title"] = "إدارة المنتجات";
+            ViewData["Title"] = "Manage Products";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading products management");
-            TempData["Error"] = "حدث خطأ أثناء تحميل المنتجات";
+            TempData["Error"] = "Error loading products";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -1182,14 +1182,14 @@ public class TailorManagementController : Controller
             if (model == null)
             {
                 PopulateProductFormViewBag();
-                TempData["Error"] = "فشل تحميل البيانات. يرجى المحاولة مرة أخرى";
+                TempData["Error"] = "Failed to load data. Please try again.";
                 return View(new AddProductViewModel());
             }
             var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
             if (tailor == null)
             {
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Tailor", "Dashboards");
             }
             if (tailor.Id != model.TailorId)
@@ -1199,7 +1199,7 @@ public class TailorManagementController : Controller
             if (!ModelState.IsValid)
             {
                 PopulateProductFormViewBag();
-                TempData["Error"] = "يرجى التحقق من البيانات المدخلة وإصلاح الأخطاء";
+                TempData["Error"] = "Please check input data and fix errors";
                 return View(model);
             }
             int validImageCount = 0;
@@ -1220,15 +1220,15 @@ public class TailorManagementController : Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing primary image");
-                ModelState.AddModelError(nameof(model.PrimaryImage), "حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى");
+                ModelState.AddModelError(nameof(model.PrimaryImage), "Error processing image. Please try again.");
                 PopulateProductFormViewBag();
-                TempData["Error"] = "حدث خطأ أثناء معالجة الصورة";
+                TempData["Error"] = "Error processing image";
                 return View(model);
             }
             var additionalImagesJson = await ProcessAdditionalImagesAsync(model.AdditionalImages);
             if (validImageCount == 0)
             {
-                TempData["Warning"] = "لم يتم قبول أي صورة من الصور المرفوعة. يرجى التأكد من نوع وحجم الصور.";
+                TempData["Warning"] = "No images were accepted. Please check image type and size.";
             }
             var product = await CreateProductEntityAsync(model, tailor, primaryImageData, additionalImagesJson);
             var strategy = _context.Database.CreateExecutionStrategy();
@@ -1242,10 +1242,10 @@ public class TailorManagementController : Controller
                     if (saveResult == 0)
                     {
                         await transaction.RollbackAsync();
-                        throw new InvalidOperationException("فشل حفظ المنتج في قاعدة البيانات. لم يتم حفظ أي بيانات.");
+                        throw new InvalidOperationException("Failed to save product to database. No data saved.");
                     }
                     await transaction.CommitAsync();
-                    TempData["Success"] = $"تم إضافة المنتج '{product.Name}' بنجاح وهو الآن متاح في المتجر";
+                    TempData["Success"] = $"Product '{product.Name}' added successfully and is now available in store";
                     return (IActionResult)RedirectToAction("Tailor", "Dashboards");
                 }
                 catch (Exception ex)
@@ -1253,8 +1253,8 @@ public class TailorManagementController : Controller
                     try { await transaction.RollbackAsync(); } catch { }
                     _logger.LogError(ex, "Error during product save transaction");
                     PopulateProductFormViewBag();
-                    ModelState.AddModelError("", "حدث خطأ غير متوقع أثناء حفظ المنتج. يرجى المحاولة مرة أخرى.");
-                    TempData["Error"] = $"حدث خطأ: {ex.Message}";
+                    ModelState.AddModelError("", "Unexpected error while saving product. Please try again.");
+                    TempData["Error"] = $"An error occurred: {ex.Message}";
                     return (IActionResult)View(model);
                 }
             });
@@ -1262,7 +1262,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Fatal error during product image upload");
-            TempData["Error"] = "حدث خطأ أثناء رفع الصورة. يرجى المحاولة مرة أخرى أو اختيار صورة أصغر.";
+            TempData["Error"] = "Error uploading image. Please try again or choose a smaller image.";
             PopulateProductFormViewBag();
             return View(model ?? new AddProductViewModel());
         }
@@ -1287,7 +1287,7 @@ public class TailorManagementController : Controller
                 .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
 
             if (product == null)
-                return NotFound("المنتج غير موجود");
+                return NotFound("Product not found");
 
             var additionalImagesCount = 0;
             if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
@@ -1318,13 +1318,13 @@ public class TailorManagementController : Controller
                 CurrentAdditionalImagesCount = additionalImagesCount
             };
 
-            PopulateProductFormViewBag("تعديل المنتج");
+            PopulateProductFormViewBag("Edit Product");
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading product for editing");
-            TempData["Error"] = "حدث خطأ أثناء تحميل المنتج";
+            TempData["Error"] = "Error loading product";
             return RedirectToAction(nameof(ManageProducts));
         }
     }
@@ -1356,7 +1356,7 @@ public class TailorManagementController : Controller
 
             if (!ModelState.IsValid)
             {
-                PopulateProductFormViewBag("تعديل المنتج");
+                PopulateProductFormViewBag("Edit Product");
                 return View(model);
             }
 
@@ -1381,10 +1381,10 @@ public class TailorManagementController : Controller
             // Update primary image if provided
             if (model.NewPrimaryImage != null && model.NewPrimaryImage.Length > 0)
             {
-                if (!_fileUploadService.IsValidImage(model.NewPrimaryImage))
+                if (!await _fileUploadService.IsValidImageAsync(model.NewPrimaryImage))
                 {
-                    ModelState.AddModelError(nameof(model.NewPrimaryImage), "نوع الملف غير صالح");
-                    PopulateProductFormViewBag("تعديل المنتج");
+                    ModelState.AddModelError(nameof(model.NewPrimaryImage), "Invalid file type");
+                    PopulateProductFormViewBag("Edit Product");
                     return View(model);
                 }
 
@@ -1407,7 +1407,7 @@ public class TailorManagementController : Controller
                 {
                     if (existingImages.Count >= 5) break; // Max 5 total
 
-                    if (_fileUploadService.IsValidImage(image))
+                    if (await _fileUploadService.IsValidImageAsync(image))
                     {
                         using var ms = new MemoryStream();
                         await image.CopyToAsync(ms);
@@ -1422,15 +1422,15 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Product {ProductId} updated by tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم تحديث المنتج بنجاح";
+            TempData["Success"] = "Product updated successfully";
 
             return RedirectToAction(nameof(ManageProducts));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating product");
-            ModelState.AddModelError("", "حدث خطأ أثناء تحديث المنتج");
-            PopulateProductFormViewBag("تعديل المنتج");
+            ModelState.AddModelError("", "Error updating product");
+            PopulateProductFormViewBag("Edit Product");
             return View(model);
         }
     }
@@ -1465,7 +1465,7 @@ public class TailorManagementController : Controller
 
             if (hasActiveOrders)
             {
-                TempData["Error"] = "لا يمكن حذف المنتج لأنه مرتبط بطلبات نشطة";
+                TempData["Error"] = "Cannot delete product because it is linked to active orders";
                 return RedirectToAction(nameof(ManageProducts));
             }
 
@@ -1476,14 +1476,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Product {ProductId} deleted by tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "تم حذف المنتج بنجاح";
+            TempData["Success"] = "Product deleted successfully";
 
             return RedirectToAction(nameof(ManageProducts));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting product");
-            TempData["Error"] = "حدث خطأ أثناء حذف المنتج";
+            TempData["Error"] = "Error deleting product";
             return RedirectToAction(nameof(ManageProducts));
         }
     }
@@ -1519,7 +1519,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling product availability");
-            return Json(new { success = false, message = "حدث خطأ" });
+            return Json(new { success = false, message = "An error occurred" });
         }
     }
 
@@ -1546,7 +1546,7 @@ public class TailorManagementController : Controller
                 return NotFound();
 
             if (newStock < 0 || newStock > 10000)
-                return BadRequest("الكمية غير صالحة");
+                return BadRequest("Invalid quantity");
 
             product.StockQuantity = newStock;
             product.UpdatedAt = DateTimeOffset.UtcNow;
@@ -1564,7 +1564,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating stock");
-            return Json(new { success = false, message = "حدث خطأ" });
+            return Json(new { success = false, message = "An error occurred" });
         }
     }
 
@@ -1579,12 +1579,28 @@ public class TailorManagementController : Controller
         try
         {
             var product = await _context.Products
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.ProductId == id && !p.IsDeleted);
 
-            if (product == null || product.PrimaryImageData == null)
+            if (product == null)
                 return NotFound();
 
-            return File(product.PrimaryImageData, product.PrimaryImageContentType ?? "image/jpeg");
+            // Check if we have a file-based image URL
+            if (!string.IsNullOrEmpty(product.PrimaryImageUrl))
+            {
+                // If it's a relative path starting with Attachments/, map it to absolute URL path
+                var url = product.PrimaryImageUrl.Replace("\\", "/");
+                if (!url.StartsWith("/")) url = "/" + url;
+                return Redirect(url);
+            }
+
+            // Fallback to BLOB if available
+            if (product.PrimaryImageData != null)
+            {
+                return File(product.PrimaryImageData, product.PrimaryImageContentType ?? "image/jpeg");
+            }
+
+            return NotFound();
         }
         catch (Exception ex)
         {
@@ -1592,10 +1608,6 @@ public class TailorManagementController : Controller
             return NotFound();
         }
     }
-
-    #endregion
-
-    #region Getting Started
 
     /// <summary>
     /// Getting started guide for new tailors
@@ -1620,58 +1632,53 @@ public class TailorManagementController : Controller
         .Include(t => t.User)
        .FirstOrDefaultAsync(t => t.UserId == userId.Value);
     }
+    private List<string> GetServiceTypes()
+    {
+        return new List<string>
+        {
+        "Tailoring Men's Thobe",
+        "Tailoring Women's Dress",
+        "Tailoring Formal Suit",
+        "Tailoring Abaya",
+        "Tailoring Jalabiya",
+        "Alteration & Repair",
+        "Fashion Design",
+        "Custom Tailoring",
+        "Embroidery",
+        "Home Sewing"
+ };
+    }
 
     private List<string> GetPortfolioCategories()
     {
         return new List<string>
-  {
-            "ثوب رجالي",
-   "فستان نسائي",
-            "بدلة رسمية",
-     "عباءة",
-            "جلابية",
-    "قميص",
-        "تنورة",
-     "بنطلون",
-    "معطف",
-      "أخرى"
-   };
-    }
-
-    private List<string> GetServiceTypes()
-    {
-        return new List<string>
-    {
-      "تفصيل ثوب رجالي",
-        "تفصيل فستان نسائي",
-    "تفصيل بدلة رسمية",
-     "تفصيل عباءة",
-        "تفصيل جلابية",
-    "تعديل وإصلاح ملابس",
-          "تصميم أزياء",
-     "خياطة على المقاس",
-          "تطريز وزخرفة",
-  "خياطة منزلية"
- };
+        {
+            "Wedding",
+            "Casual",
+            "Formal",
+            "Traditional",
+            "Modern",
+            "Other"
+        };
     }
 
     private List<string> GetProductCategories()
     {
         return new List<string>
         {
-            "ثوب رجالي",
-            "فستان نسائي",
-            "بدلة رسمية",
-            "عباءة",
-            "جلابية",
-            "قميص",
-            "تنورة",
-            "بنطلون",
-            "معطف",
-            "فستان سهرة",
-            "ملابس أطفال",
-            "اكسسوارات",
-            "أخرى"
+            "Men's Thobe",
+            "Women's Dress",
+            "Formal Suit",
+            "Abaya",
+            "Jalabiya",
+            "Shirt",
+            "Skirt",
+            "Trousers",
+            "Coat",
+            "Evening Dress",
+            "Kids Wear",
+            "Accessories",
+            "Other"
         };
     }
 
@@ -1679,14 +1686,14 @@ public class TailorManagementController : Controller
     {
         return new List<string>
         {
-            "رجالي",
-            "نسائي",
-            "أطفال",
-            "رسمي",
-            "كاجوال",
-            "رياضي",
-            "تقليدي",
-            "عصري"
+            "Men",
+            "Women",
+            "Kids",
+            "Formal",
+            "Casual",
+            "Sports",
+            "Traditional",
+            "Modern"
         };
     }
 
@@ -1701,7 +1708,7 @@ public class TailorManagementController : Controller
             "XL",
             "XXL",
             "XXXL",
-            "مقاس حر"
+            "Free Size"
         };
     }
 
@@ -1709,16 +1716,16 @@ public class TailorManagementController : Controller
     {
         return new List<string>
         {
-            "قطن 100%",
-            "بوليستر",
-            "حرير",
-            "صوف",
-            "كتان",
-            "مخلوط",
-            "جينز",
-            "شيفون",
-            "ساتان",
-            "قطيفة"
+            "Cotton 100%",
+            "Polyester",
+            "Silk",
+            "Wool",
+            "Linen",
+            "Mixed",
+            "Jeans",
+            "Chiffon",
+            "Satin",
+            "Velvet"
         };
     }
 
@@ -1752,7 +1759,7 @@ public class TailorManagementController : Controller
         ViewBag.SubCategories = GetProductSubCategories();
         ViewBag.Sizes = GetProductSizes();
         ViewBag.Materials = GetProductMaterials();
-        ViewData["Title"] = title ?? "إضافة منتج جديد";
+        ViewData["Title"] = title ?? "Add New Product";
     }
 
     /// <summary>
@@ -1762,20 +1769,20 @@ public class TailorManagementController : Controller
     {
         if (image == null || image.Length == 0)
         {
-            return (false, "الصورة الأساسية مطلوبة");
+            return (false, "Primary image is required");
         }
 
         // Use ImageUploadService for thorough validation (mime + signature)
         var (isValid, error) = await _imageUploadService.ValidateImageAsync(image)
             .ConfigureAwait(false);
         if (!isValid)
-            return (false, error ?? "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)");
+            return (false, error ?? "Invalid file type. Please choose an image (JPG, PNG, GIF, WEBP)");
 
         var maxSize = _fileUploadService.GetMaxFileSizeInBytes();
         if (image.Length > maxSize)
         {
             var maxSizeMB = maxSize / 1024 / 1024;
-            return (false, $"حجم الصورة كبير جداً. الحد الأقصى {maxSizeMB} ميجابايت");
+            return (false, $"Image size is too large. Maximum {maxSizeMB} MB");
         }
 
         return (true, null);
@@ -1806,14 +1813,14 @@ public class TailorManagementController : Controller
             totalRead += read;
             if (totalRead > maxSize)
             {
-                throw new ArgumentException($"حجم الصورة كبير جداً. الحد الأقصى {maxSize / 1024 / 1024} ميجابايت");
+                throw new ArgumentException($"Image size is too large. Maximum {maxSize / 1024 / 1024} MB");
             }
             await memoryStream.WriteAsync(buffer, 0, read);
         }
 
         var imageData = memoryStream.ToArray();
         if (imageData == null || imageData.Length == 0)
-            throw new InvalidOperationException("فشل قراءة بيانات الصورة. الملف قد يكون تالفاً");
+            throw new InvalidOperationException("Failed to read image data. File might be corrupt");
 
         return imageData;
     }

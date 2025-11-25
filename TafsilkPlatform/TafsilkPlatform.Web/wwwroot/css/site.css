@@ -78,8 +78,8 @@ body {
   line-height: 1.6;
   color: var(--text-primary);
   background-color: var(--background-white);
-  direction: rtl;
-  text-align: right;
+  direction: ltr;
+  text-align: left;
 }
 
 /* Container */
@@ -156,4 +156,93 @@ body {
 .py-5 {
   padding-top: var(--spacing-3xl);
   padding-bottom: var(--spacing-3xl);
+}
+
+/* Navbar Styles */
+.glass-nav {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+}
+
+.glass-nav.scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 0.5rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    color: var(--primary-color, #1a1a1a);
+}
+
+.nav-link {
+    font-weight: 500;
+    color: #555;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color, #1a1a1a);
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f8f9fa;
+    color: #333;
+    transition: all 0.2s;
+}
+
+.btn-icon:hover {
+    background: #e9ecef;
+    color: var(--primary-color, #1a1a1a);
+}
+
+/* Dropdown Animation */
+.animate {
+    animation-duration: 0.3s;
+    -webkit-animation-duration: 0.3s;
+    animation-fill-mode: both;
+    -webkit-animation-fill-mode: both;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(1rem);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0rem);
+        opacity: 1;
+    }
+}
+
+.slideIn {
+    -webkit-animation-name: slideIn;
+    animation-name: slideIn;
+}
+
+/* Adjust main content for fixed navbar */
+body {
+    padding-top: 76px;
+}
+
+@media (max-width: 991.98px) {
+    .offcanvas-body {
+        padding: 2rem 1rem;
+    }
+    
+    .nav-link {
+        font-size: 1.1rem;
+        padding: 0.75rem 0 !important;
+        border-bottom: 1px solid #f8f9fa;
+    }
 }

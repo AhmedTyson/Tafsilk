@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-
 namespace TafsilkPlatform.Web.Middleware;
 
 /// <summary>
@@ -21,7 +19,7 @@ public class SecurityHeadersMiddleware
         context.Response.Headers.Append("X-Frame-Options", "DENY");
         context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
         context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-        
+
         // ✅ Content Security Policy
         if (!context.Response.Headers.ContainsKey("Content-Security-Policy"))
         {

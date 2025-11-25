@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
-using System.Linq;
 using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.DataAccess.Data;
@@ -85,8 +83,19 @@ public partial class ApplicationDbContext : DbContext
         string utcNowDefaultSql = "(getutcdate())";
         string blobColumnType = "varbinary(max)";
 
-        // Apply DateTimeOffset converters when using SQLite provider
+        // Check if using SQLite
         var isSqlite = Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true;
+        
+        if (isSqlite)
+        {
+            // SQLite defaults
+            guidDefaultSql = null; // Let EF Core generate GUIDs client-side
+            utcNowDefaultSql = "(strftime('%s', 'now') * 1000)"; // Unix milliseconds for DateTimeOffset converter
+            blobColumnType = "BLOB";
+        }
+
+        // Apply DateTimeOffset converters when using SQLite provider
+        // isSqlite is already defined above
         if (isSqlite)
         {
             // SQLite does not support DateTimeOffset natively. Store as INTEGER (Unix ms).

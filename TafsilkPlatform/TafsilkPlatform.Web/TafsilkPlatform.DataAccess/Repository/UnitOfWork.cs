@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.DataAccess.Repository;
 
 namespace TafsilkPlatform.DataAccess.Repository;
 
@@ -29,7 +28,7 @@ public sealed class UnitOfWork : IUnitOfWork
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        
+
         Users = users ?? throw new ArgumentNullException(nameof(users));
         Tailors = tailors ?? throw new ArgumentNullException(nameof(tailors));
         Customers = customers ?? throw new ArgumentNullException(nameof(customers));
@@ -53,7 +52,7 @@ public sealed class UnitOfWork : IUnitOfWork
     public IPortfolioRepository PortfolioImages { get; }
     public ITailorServiceRepository TailorServices { get; }
     public IAddressRepository Addresses { get; }
-    
+
     // ✅ NEW: E-commerce repositories
     public IProductRepository Products { get; }
     public IShoppingCartRepository ShoppingCarts { get; }

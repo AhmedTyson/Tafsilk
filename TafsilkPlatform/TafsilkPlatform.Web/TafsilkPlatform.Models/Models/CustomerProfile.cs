@@ -55,19 +55,19 @@ namespace TafsilkPlatform.Models.Models
 
         public List<Order> orders { get; set; } = new();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
-        
+
         // ✅ NEW: Shopping cart
         public virtual ShoppingCart? ShoppingCart { get; set; }
-        
+
         // ✅ NEW: Loyalty and rewards
         public virtual CustomerLoyalty? Loyalty { get; set; }
-     
+
         // ✅ NEW: Saved measurements for faster rebooking
         public virtual ICollection<CustomerMeasurement> SavedMeasurements { get; set; } = new List<CustomerMeasurement>();
- 
+
         // ✅ NEW: Complaints and support
         public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
-        
+
         // ✅ NEW: Product reviews
         public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
 

@@ -39,7 +39,7 @@ namespace TafsilkPlatform.Models.ViewModels.Store
 
         [Required(ErrorMessage = "Shipping address is required")]
         public CheckoutAddressViewModel ShippingAddress { get; set; } = new(); // ✅ FIXED: Not nullable, initialized
-        
+
         public CheckoutAddressViewModel? BillingAddress { get; set; }
         public string? DeliveryNotes { get; set; }
 

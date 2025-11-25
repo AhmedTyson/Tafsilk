@@ -1,11 +1,9 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.Store;
+using TafsilkPlatform.Web.Interfaces;
 
 namespace TafsilkPlatform.Web.Services
 {
@@ -24,12 +22,12 @@ namespace TafsilkPlatform.Web.Services
         }
 
         public async Task<ProductListViewModel> GetProductsAsync(
-            string? category, 
-            string? searchQuery, 
-            int pageNumber, 
-            int pageSize, 
-            string? sortBy, 
-            decimal? minPrice, 
+            string? category,
+            string? searchQuery,
+            int pageNumber,
+            int pageSize,
+            string? sortBy,
+            decimal? minPrice,
             decimal? maxPrice)
         {
             // ✅ Use UnitOfWork.Context for complex queries
@@ -136,8 +134,8 @@ namespace TafsilkPlatform.Web.Services
                 AverageRating = product.AverageRating,
                 ReviewCount = product.ReviewCount,
                 PrimaryImageBase64 = product.PrimaryImageData != null ? Convert.ToBase64String(product.PrimaryImageData) : null,
-                AdditionalImages = !string.IsNullOrEmpty(product.AdditionalImagesJson) 
-                    ? JsonSerializer.Deserialize<List<string>>(product.AdditionalImagesJson) ?? new() 
+                AdditionalImages = !string.IsNullOrEmpty(product.AdditionalImagesJson)
+                    ? JsonSerializer.Deserialize<List<string>>(product.AdditionalImagesJson) ?? new()
                     : new(),
                 TailorName = product.Tailor?.ShopName ?? product.Tailor?.FullName,
                 TailorId = product.TailorId
@@ -148,7 +146,7 @@ namespace TafsilkPlatform.Web.Services
         {
             // ✅ Use UnitOfWork repository
             var products = await _unitOfWork.Products.GetFeaturedProductsAsync(count);
-            
+
             return products.Select(p => new ProductViewModel
             {
                 ProductId = p.ProductId,
@@ -195,13 +193,13 @@ namespace TafsilkPlatform.Web.Services
                     _logger.LogInformation(
                         "Adjusting cart item {CartItemId} quantity from {OldQty} to {NewQty} due to stock limit",
                         cartItem.CartItemId, cartItem.Quantity, availableQuantity);
-                    
+
                     if (availableQuantity <= 0)
                     {
                         itemsToRemove.Add(cartItem);
                         continue;
                     }
-                    
+
                     cartItem.Quantity = availableQuantity;
                     cartItem.UpdatedAt = DateTimeOffset.UtcNow;
                 }
@@ -211,8 +209,8 @@ namespace TafsilkPlatform.Web.Services
                     CartItemId = cartItem.CartItemId,
                     ProductId = cartItem.ProductId,
                     ProductName = product.Name,
-                    ProductImageBase64 = product.PrimaryImageData != null 
-                        ? Convert.ToBase64String(product.PrimaryImageData) 
+                    ProductImageBase64 = product.PrimaryImageData != null
+                        ? Convert.ToBase64String(product.PrimaryImageData)
                         : null,
                     UnitPrice = cartItem.UnitPrice,
                     Quantity = cartItem.Quantity,
@@ -268,7 +266,7 @@ namespace TafsilkPlatform.Web.Services
                 // ✅ Get product with lock to prevent race conditions
                 var product = await _unitOfWork.Context.Products
                     .FirstOrDefaultAsync(p => p.ProductId == request.ProductId && !p.IsDeleted);
-            
+
                 if (product == null)
                 {
                     _logger.LogWarning("Product {ProductId} not found", request.ProductId);
@@ -311,8 +309,8 @@ namespace TafsilkPlatform.Web.Services
                     request.SelectedColor);
 
                 // ✅ Calculate new total quantity
-                var newQuantity = existingItem != null 
-                    ? existingItem.Quantity + request.Quantity 
+                var newQuantity = existingItem != null
+                    ? existingItem.Quantity + request.Quantity
                     : request.Quantity;
 
                 // ✅ Validate stock availability (CRITICAL - prevent overselling)
@@ -359,14 +357,14 @@ namespace TafsilkPlatform.Web.Services
 
                 // ✅ Update cart timestamp
                 cart.UpdatedAt = DateTimeOffset.UtcNow;
-                
+
                 // ✅ Save all changes in transaction
                 await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation(
                     "Successfully added product {ProductId} to cart for customer {CustomerId}",
                     request.ProductId, customerId);
-                
+
                 return true;
             });
         }
@@ -636,42 +634,42 @@ namespace TafsilkPlatform.Web.Services
 
                      // Create payment record
                      var payment = new TafsilkPlatform.Models.Models.Payment
-                    {
-                        PaymentId = Guid.NewGuid(),
-                        OrderId = order.OrderId,
-                        Order = order,
-                        CustomerId = customerId,
-                        Customer = customer,
-                        TailorId = systemTailor.Id,
-                        Tailor = systemTailor,
-                        Amount = total,
-                        PaymentType = request.PaymentMethod == "CreditCard" 
-                            ? Enums.PaymentType.Card 
+                     {
+                         PaymentId = Guid.NewGuid(),
+                         OrderId = order.OrderId,
+                         Order = order,
+                         CustomerId = customerId,
+                         Customer = customer,
+                         TailorId = systemTailor.Id,
+                         Tailor = systemTailor,
+                         Amount = total,
+                         PaymentType = request.PaymentMethod == "CreditCard"
+                            ? Enums.PaymentType.Card
                             : Enums.PaymentType.Cash,
-                        PaymentStatus = paymentStatus,
-                        TransactionType = Enums.TransactionType.Credit,
-                        PaidAt = DateTimeOffset.UtcNow,
-                        Currency = "SAR",
-                        Provider = "Internal",
-                        Notes = request.PaymentMethod == "CashOnDelivery" 
-                            ? "Payment will be collected on delivery" 
+                         PaymentStatus = paymentStatus,
+                         TransactionType = Enums.TransactionType.Credit,
+                         PaidAt = DateTimeOffset.UtcNow,
+                         Currency = "SAR",
+                         Provider = "Internal",
+                         Notes = request.PaymentMethod == "CashOnDelivery"
+                            ? "Payment will be collected on delivery"
                             : null
-                    };
+                     };
 
-                    // Use Context to add payment
-                    _unitOfWork.Context.Payment.Add(payment);
+                     // Use Context to add payment
+                     _unitOfWork.Context.Payment.Add(payment);
 
-                    // Clear cart ONLY after successful order creation
-                    await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                     // Clear cart ONLY after successful order creation
+                     await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
 
-                    // Save all changes
-                    await _unitOfWork.SaveChangesAsync();
+                     // Save all changes
+                     await _unitOfWork.SaveChangesAsync();
 
-                    _logger.LogInformation(
-                        "Checkout completed successfully for customer {CustomerId}. OrderId: {OrderId}",
-                        customerId, order.OrderId);
+                     _logger.LogInformation(
+                         "Checkout completed successfully for customer {CustomerId}. OrderId: {OrderId}",
+                         customerId, order.OrderId);
 
-                    return (true, order.OrderId, (string?)null);
+                     return (true, order.OrderId, (string?)null);
                  }
                  catch (Exception ex)
                  {
@@ -704,7 +702,7 @@ namespace TafsilkPlatform.Web.Services
                 // ✅ Add retry logic for timing issues
                 const int maxRetries = 3;
                 const int delayMs = 200;
-                
+
                 for (int attempt = 1; attempt <= maxRetries; attempt++)
                 {
                     // Get customer to verify ownership
@@ -740,17 +738,17 @@ namespace TafsilkPlatform.Web.Services
                             }).ToList()
                         };
                     }
-                    
+
                     // If order not found and not last attempt, wait and retry
                     if (attempt < maxRetries)
                     {
-                        _logger.LogInformation("Order {OrderId} not found on attempt {Attempt}, retrying in {Delay}ms...", 
+                        _logger.LogInformation("Order {OrderId} not found on attempt {Attempt}, retrying in {Delay}ms...",
                             orderId, attempt, delayMs);
                         await Task.Delay(delayMs);
                     }
                 }
 
-                _logger.LogWarning("Order {OrderId} not found for customer {CustomerId} after {Retries} attempts", 
+                _logger.LogWarning("Order {OrderId} not found for customer {CustomerId} after {Retries} attempts",
                     orderId, customerId, maxRetries);
                 return null;
             }

@@ -1,15 +1,11 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Data;
-using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
-using TafsilkPlatform.Utility.Security;
 using TafsilkPlatform.Models.ViewModels;
-using TafsilkPlatform.Utility;
+using TafsilkPlatform.Utility.Security;
+using TafsilkPlatform.Web.Interfaces;
 
 namespace TafsilkPlatform.Web.Services
 {
@@ -770,14 +766,14 @@ namespace TafsilkPlatform.Web.Services
             {
                 Id = Guid.NewGuid(),
                 Email = request.Email,
-     PhoneNumber = request.PhoneNumber,
-     PasswordHash = PasswordHasher.Hash(request.Password),
-    CreatedAt = _dateTime.Now,
+                PhoneNumber = request.PhoneNumber,
+                PasswordHash = PasswordHasher.Hash(request.Password),
+                CreatedAt = _dateTime.Now,
                 // Tailors: inactive until evidence provided
                 IsActive = request.Role == RegistrationRole.Tailor ? false : true,
                 IsDeleted = false,
                 // Notification preferences removed - system simplified
- EmailVerified = false,
+                EmailVerified = false,
                 RoleId = EnsureRoleAsync(request.Role).Result
             };
         }

@@ -1,12 +1,12 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.AddProductViewModel
 @{
-    ViewData["Title"] = "إضافة منتج جديد";
+    ViewData["Title"] = "Add New Product";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("إدارة المنتجات", Url.Action("ManageProducts", "TailorManagement")),
-        ("إضافة منتج", "")
+        ("Dashboard", Url.Action("Tailor", "Dashboards")),
+        ("Manage Products", Url.Action("ManageProducts", "TailorManagement")),
+        ("Add Product", "")
     };
 }
 
@@ -18,9 +18,9 @@
             <!-- Header -->
             <div class="mb-4">
                 <h1 class="h3 mb-2">
-                    <i class="fas fa-plus-circle"></i> إضافة منتج جديد
+                    <i class="fas fa-plus-circle"></i> Add New Product
                 </h1>
-                <p class="text-muted">أضف منتجك إلى المتجر ليراه العملاء</p>
+                <p class="text-muted">Add your product to the store for customers to see</p>
             </div>
 
             <form asp-action="AddProduct" asp-controller="TailorManagement" method="post" enctype="multipart/form-data" id="productForm">
@@ -32,7 +32,7 @@
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <h5 class="alert-heading">
-                            <i class="fas fa-exclamation-triangle"></i> يرجى إصلاح الأخطاء التالية:
+                            <i class="fas fa-exclamation-triangle"></i> Please fix the following errors:
                         </h5>
                         <ul class="mb-0">
                             @foreach (var state in ViewData.ModelState)
@@ -50,7 +50,7 @@
                 @if (TempData["Error"] != null)
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+                        <i class="fas fa-exclamation-circle"></i> <strong>Error:</strong> @TempData["Error"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
@@ -58,7 +58,7 @@
                 @if (TempData["Success"] != null)
                 {
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+                        <i class="fas fa-check-circle"></i> <strong>Success:</strong> @TempData["Success"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
@@ -67,7 +67,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-info-circle"></i> المعلومات الأساسية
+                            <i class="fas fa-info-circle"></i> Basic Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -81,7 +81,7 @@
                             <div class="col-md-4">
                                 <label asp-for="Category" class="form-label"></label>
                                 <select asp-for="Category" class="form-select" id="categorySelect">
-                                    <option value="">اختر التصنيف</option>
+                                    <option value="">Select Category</option>
                                     @foreach (var category in ViewBag.Categories as List<string>)
                                     {
                                         <option value="@category">@category</option>
@@ -94,7 +94,7 @@
                                 <label asp-for="Description" class="form-label"></label>
                                 <textarea asp-for="Description" class="form-control" id="Description" rows="4"></textarea>
                                 <span asp-validation-for="Description" class="text-danger" data-valmsg-for="Description"></span>
-                                <small class="text-muted">وصف تفصيلي للمنتج، المميزات، الخامات، وما يميزه</small>
+                                <small class="text-muted">Detailed description of the product, features, materials, etc.</small>
                             </div>
                         </div>
                     </div>
@@ -104,7 +104,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-success text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-tag"></i> السعر والمخزون
+                            <i class="fas fa-tag"></i> Price and Stock
                         </h5>
                     </div>
                     <div class="card-body">
@@ -113,7 +113,7 @@
                                 <label asp-for="Price" class="form-label"></label>
                                 <div class="input-group">
                                     <input asp-for="Price" type="number" step="0.01" class="form-control" id="Price" />
-                                    <span class="input-group-text">ريال</span>
+                                    <span class="input-group-text">SAR</span>
                                 </div>
                                 <span asp-validation-for="Price" class="text-danger" data-valmsg-for="Price"></span>
                             </div>
@@ -122,10 +122,10 @@
                                 <label asp-for="DiscountedPrice" class="form-label"></label>
                                 <div class="input-group">
                                     <input asp-for="DiscountedPrice" type="number" step="0.01" class="form-control" id="DiscountedPrice" />
-                                    <span class="input-group-text">ريال</span>
+                                    <span class="input-group-text">SAR</span>
                                 </div>
                                 <span asp-validation-for="DiscountedPrice" class="text-danger" data-valmsg-for="DiscountedPrice"></span>
-                                <small class="text-muted d-block">اتركه فارغاً إذا لم يكن هناك خصم</small>
+                                <small class="text-muted d-block">Leave empty if no discount</small>
                             </div>
 
                             <div class="col-md-4">
@@ -141,7 +141,7 @@
                                     <input asp-for="IsAvailable" class="form-check-input" type="checkbox" id="IsAvailable" />
                                     <label asp-for="IsAvailable" class="form-check-label"></label>
                                 </div>
-                                <small class="text-muted d-block">إذا كان المنتج متاحاً للشراء الآن</small>
+                                <small class="text-muted d-block">If the product is available for purchase now</small>
                             </div>
 
                             <div class="col-md-6">
@@ -149,7 +149,7 @@
                                     <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeatured" />
                                     <label asp-for="IsFeatured" class="form-check-label"></label>
                                 </div>
-                                <small class="text-muted d-block">المنتجات المميزة تظهر في الصفحة الرئيسية</small>
+                                <small class="text-muted d-block">Featured products appear on the homepage</small>
                             </div>
                         </div>
                     </div>
@@ -159,7 +159,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-info text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-th-list"></i> تفاصيل المنتج
+                            <i class="fas fa-th-list"></i> Product Details
                         </h5>
                     </div>
                     <div class="card-body">
@@ -167,7 +167,7 @@
                             <div class="col-md-3">
                                 <label asp-for="SubCategory" class="form-label"></label>
                                 <select asp-for="SubCategory" class="form-select" id="SubCategory">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var sub in ViewBag.SubCategories as List<string>)
                                     {
                                         <option value="@sub">@sub</option>
@@ -178,7 +178,7 @@
                             <div class="col-md-3">
                                 <label asp-for="Size" class="form-label"></label>
                                 <select asp-for="Size" class="form-select" id="Size">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var size in ViewBag.Sizes as List<string>)
                                     {
                                         <option value="@size">@size</option>
@@ -188,13 +188,13 @@
 
                             <div class="col-md-3">
                                 <label asp-for="Color" class="form-label"></label>
-                                <input asp-for="Color" class="form-control" placeholder="مثال: أبيض، أسود" id="Color" />
+                                <input asp-for="Color" class="form-control" placeholder="e.g. White, Black" id="Color" />
                             </div>
 
                             <div class="col-md-3">
                                 <label asp-for="Material" class="form-label"></label>
                                 <select asp-for="Material" class="form-select" id="Material">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var material in ViewBag.Materials as List<string>)
                                     {
                                         <option value="@material">@material</option>
@@ -204,7 +204,7 @@
 
                             <div class="col-md-6">
                                 <label asp-for="Brand" class="form-label"></label>
-                                <input asp-for="Brand" class="form-control" placeholder="اسم العلامة التجارية (اختياري)" id="Brand" />
+                                <input asp-for="Brand" class="form-control" placeholder="Brand Name (Optional)" id="Brand" />
                             </div>
                         </div>
                     </div>
@@ -214,7 +214,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0">
-                            <i class="fas fa-images"></i> صور المنتج
+                            <i class="fas fa-images"></i> Product Images
                         </h5>
                     </div>
                     <div class="card-body">
@@ -223,7 +223,7 @@
                                 <label asp-for="PrimaryImage" class="form-label"></label>
                                 <input asp-for="PrimaryImage" type="file" class="form-control" accept="image/*" id="primaryImageInput" />
                                 <span asp-validation-for="PrimaryImage" class="text-danger" data-valmsg-for="PrimaryImage"></span>
-                                <small class="text-muted d-block mt-1">الصورة الرئيسية للمنتج (مطلوبة)</small>
+                                <small class="text-muted d-block mt-1">Primary Product Image (Required)</small>
                                 
 
                                 <div id="primaryImagePreview" class="mt-3" style="display: none;">
@@ -234,7 +234,7 @@
                             <div class="col-md-6">
                                 <label asp-for="AdditionalImages" class="form-label"></label>
                                 <input asp-for="AdditionalImages" type="file" class="form-control" accept="image/*" multiple id="additionalImagesInput" />
-                                <small class="text-muted d-block mt-1">يمكنك إضافة حتى 5 صور إضافية (اختياري)</small>
+                                <small class="text-muted d-block mt-1">You can add up to 5 additional images (Optional)</small>
                                 
                                 <div id="additionalImagesPreview" class="mt-3 row g-2"></div>
                             </div>
@@ -242,19 +242,19 @@
 
                         <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle"></i>
-                            <strong>نصائح للصور:</strong>
+                            <strong>Image Tips:</strong>
                             <ul class="mb-0 mt-2">
-                                <li>استخدم صوراً واضحة وعالية الجودة</li>
-                                <li>اعرض المنتج من زوايا مختلفة</li>
-                                <li>الحجم الأقصى للصورة: 5 ميجابايت</li>
-                                <li>الصيغ المقبولة: JPG, PNG, GIF, WEBP</li>
+                                <li>Use clear, high-quality images</li>
+                                <li>Show product from different angles</li>
+                                <li>Max size: 5MB</li>
+                                <li>Accepted formats: JPG, PNG, GIF, WEBP</li>
                             </ul>
                         </div>
 
                         <!-- Compression & Upload Progress -->
                         <div id="imageCompressProgressContainer" class="mt-3" style="display:none;">
                             <div class="d-flex align-items-center mb-2">
-                                <strong class="me-2">جارٍ ضغط/تحضير الصور...</strong>
+                                <strong class="me-2">Compressing/Preparing images...</strong>
                                 <div id="compressSpinner" class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></div>
                                 <small id="compressStatusText" class="text-muted">0%</small>
                             </div>
@@ -270,21 +270,21 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-secondary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-search"></i> تحسين محركات البحث (SEO)
-                            <small class="text-white-50">(اختياري)</small>
+                            <i class="fas fa-search"></i> SEO
+                            <small class="text-white-50">(Optional)</small>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label asp-for="MetaTitle" class="form-label"></label>
-                                <input asp-for="MetaTitle" class="form-control" placeholder="سيتم استخدام اسم المنتج إذا ترك فارغاً" id="MetaTitle" />
+                                <input asp-for="MetaTitle" class="form-control" placeholder="Product name will be used if left empty" id="MetaTitle" />
                                 <span asp-validation-for="MetaTitle" class="text-danger" data-valmsg-for="MetaTitle"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label asp-for="MetaDescription" class="form-label"></label>
-                                <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="سيتم استخدام وصف المنتج إذا ترك فارغاً" id="MetaDescription"></textarea>
+                                <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="Product description will be used if left empty" id="MetaDescription"></textarea>
                                 <span asp-validation-for="MetaDescription" class="text-danger" data-valmsg-for="MetaDescription"></span>
                             </div>
                         </div>
@@ -296,10 +296,10 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between">
                             <a href="@Url.Action("ManageProducts")" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> إلغاء
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                <i class="fas fa-save"></i> حفظ ونشر المنتج
+                                <i class="fas fa-save"></i> Save and Publish Product
                             </button>
                         </div>
                     </div>
@@ -343,8 +343,8 @@
                 }
                 switch (type) {
                     case 'success': toastr.success(message, title || ''); break;
-                    case 'error': toastr.error(message, title || 'خطأ'); break;
-                    case 'warning': toastr.warning(message, title || 'تحذير'); break;
+                    case 'error': toastr.error(message, title || 'Error'); break;
+                    case 'warning': toastr.warning(message, title || 'Warning'); break;
                     default: toastr.info(message, title || '');
                 }
             }
@@ -478,13 +478,13 @@
                 if (!file) return;
 
                 if (!isAllowedImage(file)) {
-                    showToastr('error', 'نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)');
+                    showToastr('error', 'Invalid file type. Please choose an image (JPG, PNG, GIF, WEBP)');
                     $primaryInput.val('');
                     return;
                 }
 
                 if (!isWithinSize(file)) {
-                    showToastr('error', `حجم الصورة كبير جداً. الحد الأقصى ${formatBytes(MAX_FILE_BYTES)}`);
+                    showToastr('error', `Image size too large. Max ${formatBytes(MAX_FILE_BYTES)}`);
                     $primaryInput.val('');
                     return;
                 }
@@ -503,17 +503,17 @@
                 if (!files.length) return;
 
                 if (files.length > MAX_ADDITIONAL_IMAGES) {
-                    showToastr('warning', `يمكنك إضافة ${MAX_ADDITIONAL_IMAGES} صور كحد أقصى. سيتم استخدام أول ${MAX_ADDITIONAL_IMAGES} صور.`);
+                    showToastr('warning', `You can add max ${MAX_ADDITIONAL_IMAGES} images. First ${MAX_ADDITIONAL_IMAGES} images will be used.`);
                 }
 
                 const allowed = [];
                 files.slice(0, MAX_ADDITIONAL_IMAGES).forEach((file, index) => {
                     if (!isAllowedImage(file)) {
-                        showToastr('error', `تم تجاهل ملف غير صالح: ${file.name}`);
+                        showToastr('error', `Ignored invalid file: ${file.name}`);
                         return;
                     }
                     if (!isWithinSize(file)) {
-                        showToastr('error', `تم تجاهل ملف كبير جداً: ${file.name} (${formatBytes(file.size)})`);
+                        showToastr('error', `Ignored file too large: ${file.name} (${formatBytes(file.size)})`);
                         return;
                     }
                     allowed.push(file);
@@ -574,25 +574,25 @@
                 const errors = [];
 
                 const name = $('#Name').val() ? $('#Name').val().toString().trim() : '';
-                if (!name) { errors.push('اسم المنتج مطلوب'); $('[data-valmsg-for="Name"]').text('اسم المنتج مطلوب'); }
+                if (!name) { errors.push('Product name is required'); $('[data-valmsg-for="Name"]').text('Product name is required'); }
 
                 const description = $('#Description').val() ? $('#Description').val().toString().trim() : '';
-                if (!description) { errors.push('وصف المنتج مطلوب'); $('[data-valmsg-for="Description"]').text('وصف المنتج مطلوب'); }
+                if (!description) { errors.push('Product description is required'); $('[data-valmsg-for="Description"]').text('Product description is required'); }
 
                 const price = parseFloat($('#Price').val());
-                if (isNaN(price) || price <= 0) { errors.push('السعر مطلوب ويجب أن يكون أكبر من صفر'); $('[data-valmsg-for="Price"]').text('السعر مطلوب ويجب أن يكون أكبر من صفر'); }
+                if (isNaN(price) || price <= 0) { errors.push('Price is required and must be greater than zero'); $('[data-valmsg-for="Price"]').text('Price is required and must be greater than zero'); }
 
                 const category = $('#categorySelect').val();
-                if (!category) { errors.push('التصنيف مطلوب'); $('[data-valmsg-for="Category"]').text('التصنيف مطلوب'); }
+                if (!category) { errors.push('Category is required'); $('[data-valmsg-for="Category"]').text('Category is required'); }
 
                 const stock = parseInt($('#StockQuantity').val());
-                if (isNaN(stock) || stock < 0) { errors.push('الكمية المتوفرة مطلوبة'); $('[data-valmsg-for="StockQuantity"]').text('الكمية المتوفرة مطلوبة'); }
+                if (isNaN(stock) || stock < 0) { errors.push('Stock quantity is required'); $('[data-valmsg-for="StockQuantity"]').text('Stock quantity is required'); }
 
                 const primaryFile = $primaryInput[0] && $primaryInput[0].files ? $primaryInput[0].files[0] : null;
-                if (!primaryFile) { errors.push('الصورة الأساسية مطلوبة'); $('[data-valmsg-for="PrimaryImage"]').text('الصورة الأساسية مطلوبة'); }
+                if (!primaryFile) { errors.push('Primary image is required'); $('[data-valmsg-for="PrimaryImage"]').text('Primary image is required'); }
                 else {
-                    if (!isAllowedImage(primaryFile)) { errors.push('نوع الصورة غير صالح'); $('[data-valmsg-for="PrimaryImage"]').text('نوع الصورة غير صالح'); }
-                    if (!isWithinSize(primaryFile)) { errors.push('حجم الصورة كبير جداً (أكثر من 5 ميجابايت)'); $('[data-valmsg-for="PrimaryImage"]').text('حجم الصورة كبير جداً'); }
+                    if (!isAllowedImage(primaryFile)) { errors.push('Invalid image type'); $('[data-valmsg-for="PrimaryImage"]').text('Invalid image type'); }
+                    if (!isWithinSize(primaryFile)) { errors.push('Image size too large (more than 5MB)'); $('[data-valmsg-for="PrimaryImage"]').text('Image size too large'); }
                 }
 
                 return errors;
@@ -601,15 +601,15 @@
             // NEW: Intercept submit to compress images then submit
             $form.on('submit', async function (e) {
                 try {
-                    if (window.formIsSubmitting) { e.preventDefault(); showToastr('warning', 'جاري معالجة الطلب، يرجى الانتظار...'); return false; }
+                    if (window.formIsSubmitting) { e.preventDefault(); showToastr('warning', 'Processing request, please wait...'); return false; }
 
                     const errors = validateForm();
-                    if (errors.length) { e.preventDefault(); showToastr('error', 'يرجى إصلاح الأخطاء المشار إليها باللون الأحمر'); const $first = $('.text-danger').filter(function() { return $(this).text().trim() !== ''; }).first(); if ($first.length && $first.offset()) { $('html, body').animate({ scrollTop: $first.offset().top - 100 }, 400); } return false; }
+                    if (errors.length) { e.preventDefault(); showToastr('error', 'Please fix errors highlighted in red'); const $first = $('.text-danger').filter(function() { return $(this).text().trim() !== ''; }).first(); if ($first.length && $first.offset()) { $('html, body').animate({ scrollTop: $first.offset().top - 100 }, 400); } return false; }
 
                     // Start compression process
                     e.preventDefault(); // we'll submit programmatically after compression
                     window.formIsSubmitting = true;
-                    $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>جارٍ الحفظ...');
+                    $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
 
                     // Build list of files to compress: primary + additional
                     const primaryFile = $primaryInput[0] && $primaryInput[0].files ? $primaryInput[0].files[0] : null;
@@ -691,7 +691,7 @@
 
                 } catch (err) {
                     console.error('Submit/compression error', err);
-                    showToastr('error', 'حدث خطأ أثناء تجهيز الصور. سيتم محاولة الإرسال بدون ضغط.');
+                    showToastr('error', 'Error preparing images. Trying to submit without compression.');
                     // fallback: submit original files
                     try { $form.off('submit'); $form.submit(); } catch (e) { console.error(e); }
                     return false;
@@ -715,10 +715,10 @@
             // Show TempData messages via toastr (if present)
             $(function () {
                 @if (TempData["Success"] != null) {
-                    <text>showToastr('success', '@Html.Raw(TempData["Success"])', 'نجح!');</text>
+                    <text>showToastr('success', '@Html.Raw(TempData["Success"])', 'Success!');</text>
                 }
                 @if (TempData["Error"] != null) {
-                    <text>showToastr('error', '@Html.Raw(TempData["Error"])', 'خطأ!');</text>
+                    <text>showToastr('error', '@Html.Raw(TempData["Error"])', 'Error!');</text>
                 }
             });
 

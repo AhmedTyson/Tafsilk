@@ -1,13 +1,13 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.AddServiceViewModel
 
 @{
-    ViewData["Title"] = "إضافة خدمة جديدة";
+    ViewData["Title"] = "Add New Service";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("الخدمات", Url.Action("ManageServices", "TailorManagement")),
-      ("إضافة خدمة", "")
+        ("Dashboard", Url.Action("Tailor", "Dashboards")),
+        ("Services", Url.Action("ManageServices", "TailorManagement")),
+        ("Add Service", "")
     };
 }
 
@@ -15,149 +15,149 @@
 
 <div class="container tailor-management-container" dir="rtl">
     <div class="row justify-content-center">
- <div class="col-lg-8">
-         <!-- Page Header -->
-      <div class="page-header">
-     <div class="d-flex justify-content-between align-items-center">
-    <div>
-          <h1 class="page-title">
-               <i class="fas fa-plus-circle"></i>
-   إضافة خدمة جديدة
-    </h1>
-        <p class="page-description">أضف خدمة جديدة تقدمها للعملاء</p>
-       </div>
-       <a asp-action="ManageServices" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-right"></i>
-        رجوع
-       </a>
-  </div>
-        </div>
-
-     <!-- Form Card -->
-     <div class="card">
-        <div class="card-body">
-  <form asp-action="AddService" method="post">
-         @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="TailorId" />
-       
-    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-              <!-- Service Name -->
-      <div class="mb-3">
-  <label asp-for="ServiceName" class="form-label">
- <i class="fas fa-tag text-primary"></i>
-     اسم الخدمة
-       <span class="text-danger">*</span>
-         </label>
-          <input asp-for="ServiceName" class="form-control" placeholder="مثال: تفصيل ثوب رجالي">
-             <span asp-validation-for="ServiceName" class="invalid-feedback"></span>
-  </div>
-
-            <!-- Service Type Helper -->
-  <div class="mb-3">
-   <label class="form-label">
-    <i class="fas fa-magic text-primary"></i>
-     نوع الخدمة (مساعد سريع)
-     </label>
-        <select class="form-control" id="serviceTypeHelper">
-      <option value="">-- اختر نوع الخدمة للملء التلقائي --</option>
-  @foreach (var serviceType in ViewBag.ServiceTypes as List<string> ?? new List<string>())
-            {
-      <option value="@serviceType">@serviceType</option>
-    }
-      </select>
-    <div class="form-text">
-           <i class="fas fa-info-circle text-primary"></i>
-    اختر نوع الخدمة لملء الاسم تلقائياً
-          </div>
-     </div>
-
-             <!-- Description -->
-   <div class="mb-3">
-        <label asp-for="Description" class="form-label">
-           <i class="fas fa-align-right text-primary"></i>
-                 وصف الخدمة
-           <span class="text-danger">*</span>
-       </label>
-             <textarea asp-for="Description" class="form-control" rows="5" 
-  placeholder="اكتب وصفاً تفصيلياً للخدمة، مثل: نوع القماش، التصميم، الإضافات المتوفرة..."></textarea>
-<span asp-validation-for="Description" class="invalid-feedback"></span>
-           <div class="form-text">
-   <i class="fas fa-lightbulb text-primary"></i>
-           اذكر التفاصيل المهمة لمساعدة العملاء على فهم الخدمة
-    </div>
-   </div>
-
-     <!-- Pricing & Duration Grid -->
-           <div class="row g-3 mb-4">
-  <!-- Base Price -->
-        <div class="col-md-6">
-      <label asp-for="BasePrice" class="form-label">
-     <i class="fas fa-dollar-sign text-success"></i>
-          السعر الأساسي
-      <span class="text-danger">*</span>
-            </label>
-     <div class="input-group">
-         <input asp-for="BasePrice" type="number" class="form-control" 
-     placeholder="0.00" step="0.01" min="1">
-                   <span class="input-group-text">ريال</span>
-      </div>
-  <span asp-validation-for="BasePrice" class="invalid-feedback"></span>
-<div class="form-text">
-         <i class="fas fa-info-circle text-primary"></i>
-             السعر الأساسي للخدمة
-          </div>
-     </div>
-
-               <!-- Estimated Duration -->
- <div class="col-md-6">
-          <label asp-for="EstimatedDuration" class="form-label">
-      <i class="fas fa-clock text-warning"></i>
-     المدة التقديرية
-      <span class="text-danger">*</span>
-          </label>
- <div class="input-group">
-  <input asp-for="EstimatedDuration" type="number" class="form-control" 
-   placeholder="7" min="1" max="365">
-    <span class="input-group-text">يوم</span>
-    </div>
-      <span asp-validation-for="EstimatedDuration" class="invalid-feedback"></span>
-        <div class="form-text">
-            <i class="fas fa-info-circle text-primary"></i>
-          المدة التقريبية للإنجاز
-      </div>
-       </div>
-           </div>
-
-     <!-- Info Box -->
-    <div class="alert alert-info d-flex align-items-start gap-3 mb-4">
-       <i class="fas fa-info-circle fa-2x"></i>
-      <div>
-         <strong>ملاحظة مهمة:</strong>
-          <ul class="mb-0 mt-2">
-         <li>يمكنك تعديل السعر والمدة لاحقاً من صفحة إدارة الخدمات</li>
-          <li>الوصف الجيد يساعد في جذب المزيد من العملاء</li>
-        <li>تأكد من دقة المدة التقديرية لتجنب المشاكل</li>
-          </ul>
- </div>
-       </div>
-
-       <!-- Action Buttons -->
-      <div class="d-flex justify-content-between gap-2">
-     <button type="submit" class="btn btn-primary btn-lg">
-         <i class="fas fa-save"></i>
-         حفظ الخدمة
-           </button>
-               <a asp-action="ManageServices" class="btn btn-outline-secondary btn-lg">
-               <i class="fas fa-times"></i>
-   إلغاء
-       </a>
-       </div>
-    </form>
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="page-title">
+                            <i class="fas fa-plus-circle"></i>
+                            Add New Service
+                        </h1>
+                        <p class="page-description">Add a new service for customers</p>
+                    </div>
+                    <a asp-action="ManageServices" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-right"></i>
+                        Back
+                    </a>
                 </div>
+            </div>
+
+            <!-- Form Card -->
+            <div class="card">
+                <div class="card-body">
+                    <form asp-action="AddService" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="TailorId" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Service Name -->
+                        <div class="mb-3">
+                            <label asp-for="ServiceName" class="form-label">
+                                <i class="fas fa-tag text-primary"></i>
+                                Service Name
+                                <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="ServiceName" class="form-control" placeholder="e.g. Men's Thobe Tailoring">
+                            <span asp-validation-for="ServiceName" class="invalid-feedback"></span>
+                        </div>
+
+                        <!-- Service Type Helper -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-magic text-primary"></i>
+                                Service Type (Quick Helper)
+                            </label>
+                            <select class="form-control" id="serviceTypeHelper">
+                                <option value="">-- Select Service Type to Auto-fill --</option>
+                                @foreach (var serviceType in ViewBag.ServiceTypes as List<string> ?? new List<string>())
+                                {
+                                    <option value="@serviceType">@serviceType</option>
+                                }
+                            </select>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle text-primary"></i>
+                                Select service type to auto-fill name
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fas fa-align-right text-primary"></i>
+                                Service Description
+                                <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="5"
+                                      placeholder="Write a detailed description, e.g. fabric type, design, available extras..."></textarea>
+                            <span asp-validation-for="Description" class="invalid-feedback"></span>
+                            <div class="form-text">
+                                <i class="fas fa-lightbulb text-primary"></i>
+                                Mention important details to help customers understand the service
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Duration Grid -->
+                        <div class="row g-3 mb-4">
+                            <!-- Base Price -->
+                            <div class="col-md-6">
+                                <label asp-for="BasePrice" class="form-label">
+                                    <i class="fas fa-dollar-sign text-success"></i>
+                                    Base Price
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="BasePrice" type="number" class="form-control"
+                                           placeholder="0.00" step="0.01" min="1">
+                                    <span class="input-group-text">SAR</span>
+                                </div>
+                                <span asp-validation-for="BasePrice" class="invalid-feedback"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle text-primary"></i>
+                                    Base price for the service
+                                </div>
+                            </div>
+
+                            <!-- Estimated Duration -->
+                            <div class="col-md-6">
+                                <label asp-for="EstimatedDuration" class="form-label">
+                                    <i class="fas fa-clock text-warning"></i>
+                                    Estimated Duration
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input asp-for="EstimatedDuration" type="number" class="form-control"
+                                           placeholder="7" min="1" max="365">
+                                    <span class="input-group-text">Days</span>
+                                </div>
+                                <span asp-validation-for="EstimatedDuration" class="invalid-feedback"></span>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle text-primary"></i>
+                                    Approximate completion time
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Info Box -->
+                        <div class="alert alert-info d-flex align-items-start gap-3 mb-4">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                            <div>
+                                <strong>Important Note:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>You can edit price and duration later</li>
+                                    <li>Good description helps attract more customers</li>
+                                    <li>Ensure accurate estimated duration to avoid issues</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i>
+                                Save Service
+                            </button>
+                            <a asp-action="ManageServices" class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times"></i>
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        </div>
-</div>
+    </div>
 </div>
 
 @section Scripts {
@@ -165,18 +165,18 @@
     
     <script>
         // Helper to auto-fill service name from service type
-     document.addEventListener('DOMContentLoaded', function() {
-    var helper = document.getElementById('serviceTypeHelper');
- var serviceName = document.getElementById('@Html.IdFor(m => m.ServiceName)');
+        document.addEventListener('DOMContentLoaded', function() {
+            var helper = document.getElementById('serviceTypeHelper');
+            var serviceName = document.getElementById('@Html.IdFor(m => m.ServiceName)');
         
-if (helper && serviceName) {
-    helper.addEventListener('change', function() {
-    if (this.value) {
-             serviceName.value = this.value;
-           serviceName.focus();
-      }
+            if (helper && serviceName) {
+                helper.addEventListener('change', function() {
+                    if (this.value) {
+                        serviceName.value = this.value;
+                        serviceName.focus();
+                    }
                 });
-    }
- });
+            }
+        });
     </script>
 }

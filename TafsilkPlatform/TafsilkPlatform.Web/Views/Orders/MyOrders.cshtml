@@ -1,23 +1,23 @@
 @model TafsilkPlatform.Models.ViewModels.Orders.CustomerOrdersViewModel
 @using TafsilkPlatform.Models.Models
 @{
-    ViewData["Title"] = "طلباتي";
+    ViewData["Title"] = "My Orders";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5" dir="rtl">
+<div class="container py-5" dir="ltr">
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
-                    <li class="breadcrumb-item active">طلباتي</li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">My Orders</li>
                 </ol>
             </nav>
             <h2 class="display-5 fw-bold mb-3">
                 <i class="fas fa-shopping-bag text-primary me-2"></i>
-                طلباتي
+                My Orders
             </h2>
         </div>
     </div>
@@ -29,7 +29,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">إجمالي الطلبات</h6>
+                            <h6 class="text-white-50 mb-1">Total Orders</h6>
                             <h2 class="mb-0 fw-bold">@Model.TotalOrders</h2>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -45,7 +45,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-dark mb-1">قيد الانتظار</h6>
+                            <h6 class="text-dark mb-1">Pending</h6>
                             <h2 class="mb-0 fw-bold">@Model.PendingOrders</h2>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -61,7 +61,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">قيد التنفيذ</h6>
+                            <h6 class="text-white-50 mb-1">In Progress</h6>
                             <h2 class="mb-0 fw-bold">@Model.ProcessingOrders</h2>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -77,7 +77,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">مكتمل</h6>
+                            <h6 class="text-white-50 mb-1">Completed</h6>
                             <h2 class="mb-0 fw-bold">@Model.CompletedOrders</h2>
                         </div>
                         <div class="fs-1 opacity-50">
@@ -96,16 +96,16 @@
             <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">
                     <i class="fas fa-list me-2"></i>
-                    قائمة الطلبات
+                    Order List
                 </h5>
                 <div>
                     <a href="/Store" class="btn btn-primary btn-sm me-2">
                         <i class="fas fa-shopping-bag me-2"></i>
-                        متجر المنتجات
+                        Product Store
                     </a>
-                    <a asp-action="SearchTailors" asp-controller="Profiles" class="btn btn-outline-primary btn-sm">
+                    <a asp-action="Index" asp-controller="Tailors" class="btn btn-outline-primary btn-sm">
                         <i class="fas fa-plus me-2"></i>
-                        طلب جديد من خياط
+                        New Tailor Order
                     </a>
                 </div>
             </div>
@@ -114,13 +114,13 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>رقم الطلب</th>
-                                <th>النوع</th>
-                                <th>التفاصيل</th>
-                                <th>الحالة</th>
-                                <th>التاريخ</th>
-                                <th>السعر</th>
-                                <th>الإجراءات</th>
+                                <th>Order #</th>
+                                <th>Type</th>
+                                <th>Details</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -149,14 +149,14 @@
                                         {
                                             <span class="badge bg-success">
                                                 <i class="fas fa-shopping-bag me-1"></i>
-                                                طلب متجر
+                                                Store Order
                                             </span>
                                         }
                                         else
                                         {
                                             <span class="badge bg-primary">
                                                 <i class="fas fa-cut me-1"></i>
-                                                طلب خياط
+                                                Tailor Order
                                             </span>
                                         }
                                     </td>
@@ -166,16 +166,16 @@
                                             <div>
                                                 <div class="fw-bold">
                                                     <i class="fas fa-store text-muted me-1"></i>
-                                                    طلب من المتجر
+                                                    Store Order
                                                 </div>
-                                                <small class="text-muted">منتجات متنوعة</small>
+                                                <small class="text-muted">Various Products</small>
                                             </div>
                                         }
                                         else
                                         {
                                             <div>
-                                                <div class="fw-bold">@(order.TailorShopName ?? "خياط")</div>
-                                                <small class="text-muted">@(order.TailorName ?? "خياط")</small>
+                                                <div class="fw-bold">@(order.TailorShopName ?? "Tailor")</div>
+                                                <small class="text-muted">@(order.TailorName ?? "Tailor")</small>
                                                 @if (!string.IsNullOrEmpty(order.ServiceType) && order.ServiceType != "StoreOrder")
                                                 {
                                                     <div>
@@ -200,12 +200,12 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <strong class="text-primary">@order.TotalPrice.ToString("N2") ريال</strong>
+                                        <strong class="text-primary">@order.TotalPrice.ToString("N2") SAR</strong>
                                         @if (order.IsPaid)
                                         {
                                             <div>
                                                 <span class="badge bg-success small">
-                                                    <i class="fas fa-check-circle"></i> مدفوع
+                                                    <i class="fas fa-check-circle"></i> Paid
                                                 </span>
                                             </div>
                                         }
@@ -213,7 +213,7 @@
                                         {
                                             <div>
                                                 <span class="badge bg-warning small">
-                                                    <i class="fas fa-clock"></i> غير مدفوع
+                                                    <i class="fas fa-clock"></i> Unpaid
                                                 </span>
                                             </div>
                                         }
@@ -222,15 +222,15 @@
                                         <div class="btn-group" role="group">
                                             <a href="/orders/@order.OrderId" 
                                                class="btn btn-sm btn-outline-primary" 
-                                               title="عرض التفاصيل">
+                                               title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             @if ((order.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending || order.Status == TafsilkPlatform.Models.Models.OrderStatus.Confirmed) && !isStoreOrder)
                                             {
                                                 <form action="/orders/@order.OrderId/cancel" method="post" class="d-inline"
-                                                      onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');">
+                                                      onsubmit="return confirm('Are you sure you want to cancel this order?');">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="إلغاء">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 </form>
@@ -253,16 +253,16 @@
                 <div class="mb-4">
                     <i class="fas fa-shopping-bag text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
                 </div>
-                <h4 class="mb-3">لا توجد طلبات حتى الآن</h4>
-                <p class="text-muted mb-4">ابدأ بتصفح المنتجات أو الخياطين وإنشاء طلبك الأول</p>
+                <h4 class="mb-3">No orders yet</h4>
+                <p class="text-muted mb-4">Start browsing products or tailors and create your first order</p>
                 <div>
                     <a href="/Store" class="btn btn-primary btn-lg me-2">
                         <i class="fas fa-shopping-bag me-2"></i>
-                        تصفح المتجر
+                        Browse Store
                     </a>
-                    <a asp-action="SearchTailors" asp-controller="Profiles" class="btn btn-outline-primary btn-lg">
+                    <a asp-action="Index" asp-controller="Tailors" class="btn btn-outline-primary btn-lg">
                         <i class="fas fa-search me-2"></i>
-                        تصفح الخياطين
+                        Find Tailors
                     </a>
                 </div>
             </div>

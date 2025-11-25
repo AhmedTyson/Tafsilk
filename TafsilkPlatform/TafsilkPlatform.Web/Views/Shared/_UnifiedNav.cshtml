@@ -4,9 +4,9 @@
     ===================================================
     Modern, responsive navigation for all user types
     - Unauthenticated users
-    - Customers (عميل)
-    - Tailors (خياط)
-  - Admins (مسؤول)
+    - Customers
+    - Tailors
+  - Admins
     
     Features:
     - Sticky header
@@ -24,15 +24,15 @@
                 ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value 
         ?? User.Identity?.Name 
     ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
-                ?? "مستخدم";
+                ?? "User";
     var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
     
     var roleDisplayName = userRole switch
     {
-        "Admin" => "مسؤول النظام",
-        "Tailor" => "خياط",
-        "Customer" => "عميل",
-        _ => "مستخدم"
+        "Admin" => "System Admin",
+        "Tailor" => "Tailor",
+        "Customer" => "Customer",
+        _ => "User"
     };
 }
 
@@ -47,19 +47,19 @@
             <!-- Logo/Brand -->
   <a href="@Url.Action("Index", "Home")" class="taf-brand">
       <i class="fas fa-cut"></i>
-                <span>تفصيلك</span>
+                <span>Tafsilk</span>
     </a>
 
             <!-- Main Navigation Links (Desktop) -->
     <ul class="taf-nav-links" id="tafNavLinks">
-    <li><a href="@Url.Action("Index", "Home")#home" class="taf-link">الرئيسية</a></li>
-           <li><a href="@Url.Action("Index", "Home")#how-it-works" class="taf-link">كيف تعمل</a></li>
-     <li><a href="@Url.Action("Index", "Home")#tailors" class="taf-link">الخياطين</a></li>
+    <li><a href="@Url.Action("Index", "Home")#home" class="taf-link">Home</a></li>
+           <li><a href="@Url.Action("Index", "Home")#how-it-works" class="taf-link">How it Works</a></li>
+     <li><a href="@Url.Action("Index", "Home")#tailors" class="taf-link">Tailors</a></li>
     <!-- ✅ NEW: Store Link -->
            <li><a href="@Url.Action("Index", "Store")" class="taf-link">
-           <i class="fas fa-store"></i> المتجر
+           <i class="fas fa-store"></i> Store
         </a></li>
-    <li><a href="@Url.Action("Index", "Home")#contact" class="taf-link">اتصل بنا</a></li>
+    <li><a href="@Url.Action("Index", "Home")#contact" class="taf-link">Contact Us</a></li>
        </ul>
 
    <!-- Right Actions -->
@@ -68,7 +68,7 @@
      <!-- ✅ NEW: Shopping Cart (for Customers only) -->
             @if (isAuthenticated && userRole == "Customer")
 {
-       <a href="@Url.Action("Cart", "Store")" class="taf-icon-btn" id="cartButton" title="سلة التسوق">
+       <a href="@Url.Action("Cart", "Store")" class="taf-icon-btn" id="cartButton" title="Shopping Cart">
        <i class="fas fa-shopping-cart"></i>
       <span class="taf-badge" id="cart-badge" style="display: none;">0</span>
      </a>
@@ -81,21 +81,21 @@
         {
           <a href="@Url.Action("Index", "AdminDashboard")" class="taf-btn taf-btn-dashboard">
      <i class="fas fa-tachometer-alt"></i>
-    <span>لوحة المسؤول</span>
+    <span>Admin Panel</span>
       </a>
      }
   else if (userRole == "Customer")
 {
         <a href="@Url.Action("Customer", "Dashboards")" class="taf-btn taf-btn-dashboard">
    <i class="fas fa-tachometer-alt"></i>
- <span>لوحة التحكم</span>
+ <span>Dashboard</span>
   </a>
          }
    else if (userRole == "Tailor")
      {
             <a href="@Url.Action("Tailor", "Dashboards")" class="taf-btn taf-btn-dashboard">
        <i class="fas fa-tachometer-alt"></i>
-         <span>لوحة التحكم</span>
+         <span>Dashboard</span>
     </a>
        }
 
@@ -130,21 +130,21 @@
             {
              <a href="@Url.Action("Index", "AdminDashboard")" class="taf-dropdown-item taf-mobile-only">
        <i class="fas fa-tachometer-alt"></i>
-      <span>لوحة المسؤول</span>
+      <span>Admin Panel</span>
           </a>
    }
    else if (userRole == "Customer")
      {
   <a href="@Url.Action("Customer", "Dashboards")" class="taf-dropdown-item taf-mobile-only">
 <i class="fas fa-tachometer-alt"></i>
-        <span>لوحة التحكم</span>
+        <span>Dashboard</span>
  </a>
     }
      else if (userRole == "Tailor")
          {
             <a href="@Url.Action("Tailor", "Dashboards")" class="taf-dropdown-item taf-mobile-only">
    <i class="fas fa-tachometer-alt"></i>
-        <span>لوحة التحكم</span>
+        <span>Dashboard</span>
     </a>
          }
 
@@ -153,21 +153,21 @@
         {
   <a href="@Url.Action("TailorProfile", "Profiles")" class="taf-dropdown-item">
   <i class="fas fa-user"></i>
-          <span>الملف الشخصي</span>
+          <span>Profile</span>
   </a>
   }
               else if (userRole == "Customer")
                 {
          <a href="@Url.Action("CustomerProfile", "Profiles")" class="taf-dropdown-item">
           <i class="fas fa-user"></i>
-        <span>الملف الشخصي</span>
+        <span>Profile</span>
         </a>
       }
        else if (userRole == "Admin")
         {
          <a href="@Url.Action("Index", "AdminDashboard")" class="taf-dropdown-item">
         <i class="fas fa-user-shield"></i>
-     <span>لوحة الإدارة</span>
+     <span>Admin Panel</span>
                </a>
      }
 
@@ -176,32 +176,32 @@
        {
            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts" class="taf-dropdown-item">
                <i class="fas fa-box"></i>
-               <span>إدارة المنتجات</span>
+               <span>Manage Products</span>
            </a>
            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="AddProduct" class="taf-dropdown-item">
                <i class="fas fa-plus"></i>
-               <span>إضافة منتج</span>
+               <span>Add Product</span>
            </a>
            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageServices" class="taf-dropdown-item">
                <i class="fas fa-concierge-bell"></i>
-               <span>إدارة الخدمات</span>
+               <span>Manage Services</span>
            </a>
            <a asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManagePortfolio" class="taf-dropdown-item">
                <i class="fas fa-images"></i>
-               <span>معرض الأعمال</span>
+               <span>Portfolio</span>
            </a>
        }
 
        <!-- Settings -->
                <a href="#" class="taf-dropdown-item">
      <i class="fas fa-cog"></i>
-    <span>الإعدادات</span>
+    <span>Settings</span>
          </a>
 
           <!-- Help -->
          <a href="@Url.Action("Privacy", "Home")" class="taf-dropdown-item">
   <i class="fas fa-question-circle"></i>
-       <span>المساعدة</span>
+       <span>Help</span>
         </a>
       </div>
 
@@ -211,7 +211,7 @@
          @Html.AntiForgeryToken()
    <button type="submit" class="taf-btn-logout">
      <i class="fas fa-sign-out-alt"></i>
-             <span>تسجيل الخروج</span>
+             <span>Logout</span>
         </button>
          </form>
    </div>
@@ -223,21 +223,21 @@
       <!-- Unauthenticated Actions -->
         <a href="@Url.Action("Login", "Account")" class="taf-btn taf-btn-outline">
 <i class="fas fa-sign-in-alt"></i>
-<span>تسجيل دخول</span>
+<span>Login</span>
          </a>
    <a href="@Url.Action("Register", "Account")" class="taf-btn taf-btn-primary">
    <i class="fas fa-user-plus"></i>
-           <span>انضم الآن</span>
+           <span>Join Now</span>
        </a>
                 }
 
         <!-- Language Toggle -->
-       <button class="taf-icon-btn" id="tafLangToggle" title="تغيير اللغة">
+       <button class="taf-icon-btn" id="tafLangToggle" title="Change Language">
            <i class="fas fa-globe"></i>
     </button>
 
        <!-- Mobile Menu Toggle -->
-       <button class="taf-menu-toggle" id="tafMenuToggle" aria-label="القائمة">
+       <button class="taf-menu-toggle" id="tafMenuToggle" aria-label="Menu">
              <span></span>
             <span></span>
        <span></span>
@@ -460,7 +460,7 @@ height: 20px;
 .taf-user-info {
     display: flex;
     flex-direction: column;
-    text-align: right;
+    text-align: left;
 }
 
 .taf-user-name {
@@ -480,7 +480,7 @@ height: 20px;
 .taf-dropdown {
   position: absolute;
 top: calc(100% + 0.75rem);
-    left: 0;
+    right: 0;
     width: 280px;
     background: white;
 border: 1px solid var(--taf-gray-200);
@@ -798,18 +798,15 @@ function updateCartCount() {
        } else if (badge) {
      badge.style.display = 'none';
           }
-     })
+    })
     .catch(error => console.error('Error fetching cart count:', error));
-            }
-    
-     // Update on page load
-  updateCartCount();
-   
- // Update every 30 seconds
-      setInterval(updateCartCount, 30000);
-        </text>
+}
+
+// Update cart count on load and every 30 seconds
+updateCartCount();
+setInterval(updateCartCount, 30000);
+            </text>
         }
     });
 })();
 </script>
-

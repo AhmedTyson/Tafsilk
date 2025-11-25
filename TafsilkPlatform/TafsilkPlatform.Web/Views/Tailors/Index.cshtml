@@ -1,9 +1,9 @@
 @model List<TafsilkPlatform.Models.Models.TailorProfile>
 
 @{
-    ViewData["Title"] = "تصفح الخياطين | تفصيلك";
+    ViewData["Title"] = "Browse Tailors | Tafsilk";
     Layout = "~/Views/Shared/_Layout.cshtml";
- var currentCity = ViewBag.CurrentCity as string;
+    var currentCity = ViewBag.CurrentCity as string;
     var currentSpec = ViewBag.CurrentSpecialization as string;
     var cities = ViewBag.Cities as List<string> ?? new List<string>();
     var specializations = ViewBag.Specializations as List<string> ?? new List<string>();
@@ -14,145 +14,145 @@
 
 @section Styles {
     <style>
- .tailors-page {
-    padding: 40px 0;
- }
+        .tailors-page {
+            padding: 40px 0;
+        }
 
         .page-header {
             text-align: center;
             margin-bottom: 40px;
         }
 
-.page-header h1 {
-font-size: 2.5rem;
-   color: #2c3e50;
-      margin-bottom: 10px;
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
         }
 
         .page-header p {
             color: #7f8c8d;
             font-size: 1.1rem;
-   }
+        }
 
-   .filters-section {
-    background: #fff;
-         padding: 25px;
+        .filters-section {
+            background: #fff;
+            padding: 25px;
             border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 30px;
-  }
+        }
 
         .filter-row {
-       display: flex;
-    gap: 15px;
- align-items: center;
-   flex-wrap: wrap;
-      }
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
 
-   .filter-group {
+        .filter-group {
             flex: 1;
             min-width: 200px;
         }
 
         .filter-group label {
- display: block;
+            display: block;
             font-weight: 600;
             margin-bottom: 8px;
-  color: #2c3e50;
+            color: #2c3e50;
         }
 
         .filter-group select {
-   width: 100%;
-     padding: 10px 15px;
- border: 2px solid #e0e0e0;
-      border-radius: 8px;
+            width: 100%;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             font-size: 1rem;
-  }
+        }
 
         .btn-filter {
- padding: 10px 30px;
-          background: #3498db;
-        color: white;
+            padding: 10px 30px;
+            background: #3498db;
+            color: white;
             border: none;
-       border-radius: 8px;
-  cursor: pointer;
-        align-self: flex-end;
+            border-radius: 8px;
+            cursor: pointer;
+            align-self: flex-end;
         }
 
         .btn-filter:hover {
-   background: #2980b9;
-      }
+            background: #2980b9;
+        }
 
-   .results-header {
-   display: flex;
-   justify-content: space-between;
+        .results-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-margin-bottom: 20px;
+            margin-bottom: 20px;
         }
 
         .tailors-grid {
             display: grid;
-         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-       gap: 25px;
-        margin-bottom: 40px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
- .tailor-card {
-       background: #fff;
-  border-radius: 12px;
-   overflow: hidden;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-         transition: transform 0.3s, box-shadow 0.3s;
-     text-decoration: none;
+        .tailor-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
             color: inherit;
-     display: block;
+            display: block;
         }
 
-     .tailor-card:hover {
-        transform: translateY(-5px);
-         box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-  }
+        .tailor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
 
         .tailor-image {
-   width: 100%;
- height: 200px;
- object-fit: cover;
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .tailor-content {
-    padding: 20px;
+            padding: 20px;
         }
 
         .tailor-header {
             display: flex;
-   justify-content: space-between;
+            justify-content: space-between;
             align-items: start;
-       margin-bottom: 15px;
-      }
+            margin-bottom: 15px;
+        }
 
-  .tailor-name {
-   font-size: 1.3rem;
-      font-weight: 700;
-   color: #2c3e50;
-        margin-bottom: 5px;
+        .tailor-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
         }
 
         .tailor-specialization {
             color: #7f8c8d;
- font-size: 0.9rem;
-    }
+            font-size: 0.9rem;
+        }
 
         .verification-badge {
-         background: #27ae60;
-    color: white;
+            background: #27ae60;
+            color: white;
             padding: 5px 10px;
             border-radius: 20px;
- font-size: 0.8rem;
- display: inline-flex;
-   align-items: center;
-    gap: 5px;
- }
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
 
         .tailor-rating {
             display: flex;
@@ -162,9 +162,9 @@ margin-bottom: 20px;
         }
 
         .stars {
-color: #f39c12;
+            color: #f39c12;
             font-size: 1.1rem;
-   }
+        }
 
         .rating-text {
             color: #7f8c8d;
@@ -172,244 +172,244 @@ color: #f39c12;
         }
 
         .tailor-location {
-   display: flex;
-    align-items: center;
+            display: flex;
+            align-items: center;
             gap: 8px;
             color: #7f8c8d;
-         margin-bottom: 15px;
- }
+            margin-bottom: 15px;
+        }
 
         .tailor-stats {
             display: flex;
-      justify-content: space-between;
-  padding-top: 15px;
- border-top: 1px solid #ecf0f1;
+            justify-content: space-between;
+            padding-top: 15px;
+            border-top: 1px solid #ecf0f1;
         }
 
         .stat {
             text-align: center;
-    }
+        }
 
         .stat-value {
-    font-size: 1.2rem;
-   font-weight: 700;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: #2c3e50;
         }
 
         .stat-label {
             font-size: 0.8rem;
             color: #7f8c8d;
- }
+        }
 
         .no-results {
             text-align: center;
-  padding: 60px 20px;
-        background: #fff;
-        border-radius: 12px;
+            padding: 60px 20px;
+            background: #fff;
+            border-radius: 12px;
         }
 
         .no-results i {
- font-size: 4rem;
+            font-size: 4rem;
             color: #bdc3c7;
             margin-bottom: 20px;
         }
 
         .pagination {
             display: flex;
-        justify-content: center;
-         gap: 10px;
-  margin-top: 30px;
-  }
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
 
         .pagination a, .pagination span {
             padding: 10px 15px;
-         border: 2px solid #e0e0e0;
-     border-radius: 8px;
-     text-decoration: none;
-color: #2c3e50;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #2c3e50;
         }
 
-  .pagination a:hover {
-     background: #3498db;
-   color: white;
-          border-color: #3498db;
+        .pagination a:hover {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
         }
 
         .pagination .current {
-   background: #3498db;
+            background: #3498db;
             color: white;
-     border-color: #3498db;
+            border-color: #3498db;
         }
     </style>
 }
 
 <main class="tailors-page">
     <div class="container">
-     <div class="page-header">
-  <h1>تصفح الخياطين المحترفين</h1>
-   <p>اكتشف أفضل الخياطين الموثوقين في مدينتك</p>
+        <div class="page-header">
+            <h1>Browse Professional Tailors</h1>
+            <p>Discover the best trusted tailors in your city</p>
         </div>
 
         <div class="filters-section">
-        <form method="get" action="@Url.Action("Index", "Tailors")">
-           <div class="filter-row">
-             <div class="filter-group">
-               <label>المدينة</label>
-      <select name="city">
-    <option value="">جميع المدن</option>
-       @foreach (var city in cities)
-             {
-     <option value="@city" selected="@(city == currentCity)">@city</option>
-                }
-           </select>
-        </div>
+            <form method="get" action="@Url.Action("Index", "Tailors")">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label>City</label>
+                        <select name="city">
+                            <option value="">All Cities</option>
+                            @foreach (var city in cities)
+                            {
+                                <option value="@city" selected="@(city == currentCity)">@city</option>
+                            }
+                        </select>
+                    </div>
 
-   <div class="filter-group">
-    <label>التخصص</label>
-               <select name="specialization">
-         <option value="">جميع التخصصات</option>
- @foreach (var spec in specializations)
-        {
-          <option value="@spec" selected="@(spec == currentSpec)">@spec</option>
-        }
-          </select>
-     </div>
+                    <div class="filter-group">
+                        <label>Specialization</label>
+                        <select name="specialization">
+                            <option value="">All Specializations</option>
+                            @foreach (var spec in specializations)
+                            {
+                                <option value="@spec" selected="@(spec == currentSpec)">@spec</option>
+                            }
+                        </select>
+                    </div>
 
-      <button type="submit" class="btn-filter">
-          <i class="fas fa-search"></i> بحث
-         </button>
-     </div>
- </form>
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
         </div>
 
         <div class="results-header">
-       <h3>@totalCount خياط متاح</h3>
-         @if (!string.IsNullOrEmpty(currentCity))
+            <h3>@totalCount Tailors Available</h3>
+            @if (!string.IsNullOrEmpty(currentCity))
             {
-    <span class="badge bg-info">المدينة: @currentCity</span>
+                <span class="badge bg-info">City: @currentCity</span>
             }
         </div>
 
         @if (Model != null && Model.Any())
-   {
-       <div class="tailors-grid">
-    @foreach (var tailor in Model)
-                {
-    <a href="@Url.Action("Details", "Tailors", new { id = tailor.Id })" class="tailor-card">
-       @if (tailor.ProfilePictureData != null)
-       {
-             <img src="@Url.Action("GetProfilePicture", "Tailors", new { id = tailor.Id })" 
-      alt="@tailor.ShopName" 
-        class="tailor-image" />
-        }
-     else
-      {
-             <div class="tailor-image" style="display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
-        <i class="fas fa-cut"></i>
-    </div>
-      }
-
-          <div class="tailor-content">
-  <div class="tailor-header">
-   <div>
-     <h3 class="tailor-name">@tailor.ShopName</h3>
-  <p class="tailor-specialization">@tailor.Specialization</p>
-           </div>
-       @if (tailor.IsVerified)
- {
-   <span class="verification-badge">
-        <i class="fas fa-check-circle"></i> موثق
-</span>
-           }
-      </div>
-
-           <div class="tailor-rating">
-         <div class="stars">
-   @for (int i = 0; i < 5; i++)
-                 {
-        if (i < Math.Floor(tailor.AverageRating))
         {
-    <i class="fas fa-star"></i>
-     }
-        else if (i < tailor.AverageRating)
-      {
-   <i class="fas fa-star-half-alt"></i>
-    }
-          else
-       {
-      <i class="far fa-star"></i>
-      }
-       }
+            <div class="tailors-grid">
+                @foreach (var tailor in Model)
+                {
+                    <a href="@Url.Action("Details", "Tailors", new { id = tailor.Id })" class="tailor-card">
+                        @if (tailor.ProfilePictureData != null)
+                        {
+                            <img src="@Url.Action("GetProfilePicture", "Tailors", new { id = tailor.Id })" 
+                                 alt="@tailor.ShopName" 
+                                 class="tailor-image" />
+                        }
+                        else
+                        {
+                            <div class="tailor-image" style="display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                        }
+
+                        <div class="tailor-content">
+                            <div class="tailor-header">
+                                <div>
+                                    <h3 class="tailor-name">@tailor.ShopName</h3>
+                                    <p class="tailor-specialization">@tailor.Specialization</p>
+                                </div>
+                                @if (tailor.IsVerified)
+                                {
+                                    <span class="verification-badge">
+                                        <i class="fas fa-check-circle"></i> Verified
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="tailor-rating">
+                                <div class="stars">
+                                    @for (int i = 0; i < 5; i++)
+                                    {
+                                        if (i < Math.Floor(tailor.AverageRating))
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                        else if (i < tailor.AverageRating)
+                                        {
+                                            <i class="fas fa-star-half-alt"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star"></i>
+                                        }
+                                    }
+                                </div>
+                                <span class="rating-text">
+                                    @tailor.AverageRating.ToString("F1") ⭐
+                                </span>
+                            </div>
+
+                            <div class="tailor-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>@tailor.City @if (!string.IsNullOrEmpty(tailor.District)) {<text>, @tailor.District</text>}</span>
+                            </div>
+
+                            @if (tailor.YearsOfExperience.HasValue)
+                            {
+                                <div class="tailor-stats">
+                                    <div class="stat">
+                                        <div class="stat-value">@tailor.YearsOfExperience</div>
+                                        <div class="stat-label">Years Exp</div>
+                                    </div>
+                                    <div class="stat">
+                                        <div class="stat-value">@tailor.AverageRating.ToString("F1")</div>
+                                        <div class="stat-label">Rating</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </a>
+                }
             </div>
-            <span class="rating-text">
-    @tailor.AverageRating.ToString("F1") ⭐
-</span>
-</div>
-
-           <div class="tailor-location">
-           <i class="fas fa-map-marker-alt"></i>
-       <span>@tailor.City @if (!string.IsNullOrEmpty(tailor.District)) {<text>, @tailor.District</text>}</span>
-     </div>
-
-          @if (tailor.YearsOfExperience.HasValue)
-     {
-           <div class="tailor-stats">
-         <div class="stat">
-           <div class="stat-value">@tailor.YearsOfExperience</div>
-         <div class="stat-label">سنوات خبرة</div>
- </div>
-   <div class="stat">
-    <div class="stat-value">@tailor.AverageRating.ToString("F1")</div>
-    <div class="stat-label">تقييم</div>
-</div>
-    </div>
-            }
- </div>
-             </a>
-         }
-          </div>
 
             @if (totalPages > 1)
-    {
-           <div class="pagination">
-     @if (currentPage > 1)
-      {
-          <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage - 1 })">
-        <i class="fas fa-chevron-right"></i> السابق
-             </a>
-         }
+            {
+                <div class="pagination">
+                    @if (currentPage > 1)
+                    {
+                        <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage - 1 })">
+                            <i class="fas fa-chevron-right"></i> Previous
+                        </a>
+                    }
 
-          @for (int i = 1; i <= totalPages; i++)
-         {
-    if (i == currentPage)
-      {
-       <span class="current">@i</span>
-       }
-          else
-        {
-      <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = i })">@i</a>
- }
-             }
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <span class="current">@i</span>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = i })">@i</a>
+                        }
+                    }
 
-  @if (currentPage < totalPages)
-          {
-      <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage + 1 })">
-                التالي <i class="fas fa-chevron-left"></i>
-      </a>
-         }
-             </div>
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="@Url.Action("Index", new { city = currentCity, specialization = currentSpec, page = currentPage + 1 })">
+                            Next <i class="fas fa-chevron-left"></i>
+                        </a>
+                    }
+                </div>
             }
         }
         else
-    {
+        {
             <div class="no-results">
-        <i class="fas fa-search"></i>
-      <h3>لا توجد نتائج</h3>
-    <p>لم نعثر على خياطين مطابقين لمعايير البحث الخاصة بك</p>
-        <a href="@Url.Action("Index", "Tailors")" class="btn btn-primary">
-        عرض جميع الخياطين
-             </a>
-     </div>
-    }
+                <i class="fas fa-search"></i>
+                <h3>No results found</h3>
+                <p>We couldn't find any tailors matching your search criteria</p>
+                <a href="@Url.Action("Index", "Tailors")" class="btn btn-primary">
+                    View All Tailors
+                </a>
+            </div>
+        }
     </div>
 </main>

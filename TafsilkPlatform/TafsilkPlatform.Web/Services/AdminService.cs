@@ -1,7 +1,5 @@
 using TafsilkPlatform.DataAccess.Repository;
-using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Web.Services.Base;
-using TafsilkPlatform.Web.Common;
 
 namespace TafsilkPlatform.Web.Services
 {

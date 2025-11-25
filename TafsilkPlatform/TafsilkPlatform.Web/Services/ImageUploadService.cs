@@ -1,9 +1,5 @@
-using System.IO;
-using System.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 using BLL.Services.Interfaces;
+using System.Text;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -87,28 +83,28 @@ public class ImageUploadService : IFileUploadService
     public async Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile? file)
     {
         // 🔴 BREAKPOINT #1: Set breakpoint here to inspect incoming file (Debug mode only)
-        #if DEBUG
+#if DEBUG
         // Debugger.Break(); // Uncomment to enable breakpoint during debugging
-        #endif
-        
+#endif
+
         try
         {
             // Step 1: Basic null/empty check
             if (file == null || file.Length == 0)
             {
-                _logger.LogWarning("ValidateImageAsync: File is null or empty. IsNull: {IsNull}, Length: {Length}", 
+                _logger.LogWarning("ValidateImageAsync: File is null or empty. IsNull: {IsNull}, Length: {Length}",
                     file == null, file?.Length ?? 0);
                 return (false, "الملف فارغ أو غير موجود. الرجاء اختيار ملف صورة صالح.");
             }
 
-            _logger.LogInformation("ValidateImageAsync: Starting validation for file {FileName}, Size: {Size} bytes", 
+            _logger.LogInformation("ValidateImageAsync: Starting validation for file {FileName}, Size: {Size} bytes",
                 file.FileName, file.Length);
 
             // Step 2: File size validation
             if (file.Length > MaxFileSizeInBytes)
             {
                 var maxSizeMB = MaxFileSizeInBytes / (1024 * 1024);
-                _logger.LogWarning("ValidateImageAsync: File too large. Size: {Size}, Max: {Max}", 
+                _logger.LogWarning("ValidateImageAsync: File too large. Size: {Size}, Max: {Max}",
                     file.Length, MaxFileSizeInBytes);
                 return (false, $"حجم الملف كبير جداً ({Math.Round(file.Length / (1024d * 1024d), 2)} MB). الحد الأقصى المسموح به هو {maxSizeMB} ميجابايت.");
             }
@@ -130,10 +126,10 @@ public class ImageUploadService : IFileUploadService
             }
 
             // 🔴 BREAKPOINT #2: Set breakpoint here before file signature validation (Debug mode only)
-            #if DEBUG
+#if DEBUG
             // Debugger.Break(); // Uncomment to enable breakpoint during debugging
-            #endif
-            
+#endif
+
             // Step 5: File signature (magic bytes) validation - CRITICAL for security
             var isValidSignature = await ValidateFileSignatureAsync(file, extension);
             if (!isValidSignature)
@@ -161,10 +157,10 @@ public class ImageUploadService : IFileUploadService
     private async Task<bool> ValidateFileSignatureAsync(IFormFile file, string extension)
     {
         // 🔴 BREAKPOINT #3: Set breakpoint here to inspect signature validation (Debug mode only)
-        #if DEBUG
+#if DEBUG
         // Debugger.Break(); // Uncomment to enable breakpoint during debugging
-        #endif
-        
+#endif
+
         try
         {
             if (!ImageSignatures.TryGetValue(extension, out var signatures))
@@ -245,10 +241,10 @@ public class ImageUploadService : IFileUploadService
     public async Task<byte[]> ProcessImageAsync(IFormFile file)
     {
         // 🔴 BREAKPOINT #4: Set breakpoint here before processing image (Debug mode only)
-        #if DEBUG
+#if DEBUG
         // Debugger.Break(); // Uncomment to enable breakpoint during debugging
-        #endif
-        
+#endif
+
         if (file == null || file.Length == 0)
         {
             _logger.LogError("ProcessImageAsync: File is null or empty");
@@ -304,10 +300,10 @@ public class ImageUploadService : IFileUploadService
     public async Task<byte[]> ProcessImageWithSizeCheckAsync(IFormFile file, long maxSize = MaxFileSizeInBytes)
     {
         // 🔴 BREAKPOINT #5: Set breakpoint here before processing with size check (Debug mode only)
-        #if DEBUG
+#if DEBUG
         // Debugger.Break(); // Uncomment to enable breakpoint during debugging
-        #endif
-        
+#endif
+
         if (file == null || file.Length == 0)
         {
             throw new ArgumentException("الملف فارغ أو غير موجود. يرجى اختيار صورة صحيحة.");
@@ -405,7 +401,7 @@ public class ImageUploadService : IFileUploadService
     /// </summary>
     public string GenerateUniqueFileName(string? originalFileName = null)
     {
-        var extension = !string.IsNullOrEmpty(originalFileName) 
+        var extension = !string.IsNullOrEmpty(originalFileName)
             ? Path.GetExtension(originalFileName).ToLowerInvariant()
             : ".jpg";
 
@@ -431,10 +427,10 @@ public class ImageUploadService : IFileUploadService
     /// </summary>
     public string[] GetAllowedExtensions() => _allowedExtensions;
 
-    public bool IsValidImage(IFormFile file)
+    public async Task<bool> IsValidImageAsync(IFormFile file)
     {
-        var validationTask = ValidateImageAsync(file);
-        return validationTask.GetAwaiter().GetResult().IsValid;
+        var validationResult = await ValidateImageAsync(file);
+        return validationResult.IsValid;
     }
 }
 

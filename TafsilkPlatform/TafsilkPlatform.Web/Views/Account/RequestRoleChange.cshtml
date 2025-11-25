@@ -1,268 +1,268 @@
 @model TafsilkPlatform.Models.ViewModels.RoleChangeRequestViewModel
 
 @{
-    ViewData["Title"] = "طلب تغيير الدور";
+    ViewData["Title"] = "Request Role Change";
 }
 
 @section Styles {
     <style>
-   .role-change-page {
-    background-color: var(--background-gray);
-    min-height: calc(100vh - 200px);
-  padding: var(--spacing-3xl) 0;
+        .role-change-page {
+            background-color: var(--background-gray);
+            min-height: calc(100vh - 200px);
+            padding: var(--spacing-3xl) 0;
         }
 
-    .role-change-container {
-  max-width: 700px;
-     margin: 0 auto;
-  }
-
-   .page-header {
-     margin-bottom: var(--spacing-2xl);
-  text-align: center;
-     }
-
-  .page-title {
-     font-size: var(--font-size-3xl);
-     font-weight: 700;
-   color: var(--text-primary);
-   margin-bottom: var(--spacing-sm);
-  }
-
-      .page-subtitle {
-   color: var(--text-secondary);
-  font-size: var(--font-size-base);
+        .role-change-container {
+            max-width: 700px;
+            margin: 0 auto;
         }
 
-   .card {
-   background: var(--background-white);
-   border: 1px solid var(--border-color);
-     border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
-   box-shadow: var(--shadow-lg);
+        .page-header {
+            margin-bottom: var(--spacing-2xl);
+            text-align: center;
         }
 
-  .info-box {
-  background: var(--background-light);
-         padding: var(--spacing-md);
-     border-radius: var(--radius-md);
-   border-right: 4px solid var(--primary-color);
-  margin-bottom: var(--spacing-xl);
- }
+        .page-title {
+            font-size: var(--font-size-3xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-sm);
+        }
 
-    .info-box i {
-   color: var(--primary-color);
-  margin-left: 0.5rem;
-      }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: var(--font-size-base);
+        }
 
-   .form-group {
- margin-bottom: 1.5rem;
- }
+        .card {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            box-shadow: var(--shadow-lg);
+        }
 
-     .form-label {
-   display: block;
-    margin-bottom: 0.5rem;
-     font-weight: 600;
-      color: var(--text-primary);
-    }
+        .info-box {
+            background: var(--background-light);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color); /* Changed from border-right for LTR */
+            margin-bottom: var(--spacing-xl);
+        }
 
- .form-control {
-        width: 100%;
-       padding: 0.875rem 1rem;
-  border: 1px solid var(--border-color);
-       border-radius: var(--radius-md);
-     font-size: 1rem;
-       font-family: var(--font-family);
-      transition: all 0.2s;
-  }
+        .info-box i {
+            color: var(--primary-color);
+            margin-right: 0.5rem; /* Changed from margin-left for LTR */
+        }
 
-   .form-control:focus {
-     outline: none;
-   border-color: var(--primary-color);
- box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
- }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
 
-      .btn-group {
-     display: flex;
-gap: var(--spacing-md);
-   margin-top: var(--spacing-xl);
-      }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
 
-.btn-primary {
-  background-color: var(--primary-color);
-    color: white;
-     padding: 0.75rem 1.5rem;
-   border: none;
-   border-radius: var(--radius-md);
-    font-weight: 600;
-  cursor: pointer;
-      transition: all 0.2s;
-   flex: 1;
-   }
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            font-family: var(--font-family);
+            transition: all 0.2s;
+        }
 
-   .btn-primary:hover {
-  background-color: var(--primary-hover);
-    transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-}
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
 
-   .btn-secondary {
-  background-color: var(--background-gray);
-     color: var(--text-primary);
-   padding: 0.75rem 1.5rem;
-    border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-  font-weight: 600;
-      cursor: pointer;
-    transition: all 0.2s;
- text-decoration: none;
-      display: inline-block;
-   flex: 1;
- text-align: center;
-  }
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-xl);
+        }
 
- .btn-secondary:hover {
-  background-color: var(--border-color);
-  transform: translateY(-2px);
-   }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
 
-     .text-danger {
-   color: var(--error-color);
-   font-size: 0.85rem;
-     margin-top: 0.25rem;
-       display: block;
-      }
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
 
-   .requirements-list {
-     background: var(--background-light);
-       padding: var(--spacing-md);
-   border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-lg);
-   }
+        .btn-secondary {
+            background-color: var(--background-gray);
+            color: var(--text-primary);
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            flex: 1;
+            text-align: center;
+        }
 
-   .requirements-list h4 {
-        font-size: 1rem;
-  margin-bottom: 0.75rem;
-    color: var(--text-primary);
-       }
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+            transform: translateY(-2px);
+        }
 
-.requirements-list ul {
-       list-style: none;
-      padding: 0;
- margin: 0;
-   }
+        .text-danger {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
 
-       .requirements-list li {
-  padding: 0.5rem 0;
-     color: var(--text-secondary);
-   display: flex;
-   align-items: start;
-      gap: 0.5rem;
-      }
+        .requirements-list {
+            background: var(--background-light);
+            padding: var(--spacing-md);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+        }
 
-.requirements-list li::before {
-        content: "✓";
- color: var(--success-color);
-    font-weight: bold;
- font-size: 1.2rem;
-   }
+        .requirements-list h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
 
-  @@media (max-width: 768px) {
-  .role-change-page {
-padding: var(--spacing-xl) var(--spacing-md);
-   }
+        .requirements-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-      .card {
-  padding: var(--spacing-lg);
-   }
+        .requirements-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: start;
+            gap: 0.5rem;
+        }
 
-      .btn-group {
-   flex-direction: column;
-   }
- }
+        .requirements-list li::before {
+            content: "✓";
+            color: var(--success-color);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        @@media (max-width: 768px) {
+            .role-change-page {
+                padding: var(--spacing-xl) var(--spacing-md);
+            }
+
+            .card {
+                padding: var(--spacing-lg);
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
     </style>
 }
 
 <div class="role-change-page">
     <div class="container role-change-container">
-  <div class="page-header">
-      <h1 class="page-title">طلب التحويل إلى خياط</h1>
-   <p class="page-subtitle">قم بتعبئة المعلومات المطلوبة للتحويل من عميل إلى خياط</p>
- </div>
+        <div class="page-header">
+            <h1 class="page-title">Request to Become a Tailor</h1>
+            <p class="page-subtitle">Fill in the required information to switch from customer to tailor</p>
+        </div>
 
-     <div class="card">
-<div class="info-box">
-   <i class="fas fa-info-circle"></i>
-       <strong>معلومة مهمة:</strong>
-      <p style="margin: 0.5rem 0 0 0;">
- بعد تحويل حسابك إلى خياط، سيتم إنشاء ملف تعريف خياط جديد لك. يمكنك استكمال المعلومات الإضافية من صفحة الإعدادات بعد التحويل.
-  </p>
- </div>
+        <div class="card">
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <strong>Important Information:</strong>
+                <p style="margin: 0.5rem 0 0 0;">
+                    After switching your account to a tailor, a new tailor profile will be created for you. You can complete additional information from the settings page after the switch.
+                </p>
+            </div>
 
-        <form asp-action="RequestRoleChange" method="post" enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
- <input type="hidden" asp-for="TargetRole" value="Tailor" />
+            <form asp-action="RequestRoleChange" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TargetRole" value="Tailor" />
 
-    <div class="requirements-list">
-   <h4><i class="fas fa-clipboard-list me-2"></i>متطلبات التحويل:</h4>
-       <ul>
-        <li>اسم المتجر الخاص بك</li>
- <li>عنوان المتجر بالتفصيل</li>
-      <li>سنوات الخبرة في مجال الخياطة</li>
-     <li>سبب طلب التحويل (20 حرف على الأقل)</li>
-      <li>(اختياري) صورة رخصة العمل</li>
- </ul>
-          </div>
+                <div class="requirements-list">
+                    <h4><i class="fas fa-clipboard-list me-2"></i>Switch Requirements:</h4>
+                    <ul>
+                        <li>Your Shop Name</li>
+                        <li>Shop Address in Detail</li>
+                        <li>Years of Experience in Tailoring</li>
+                        <li>Reason for Request (at least 20 characters)</li>
+                        <li>(Optional) Business License Image</li>
+                    </ul>
+                </div>
 
-    <div class="form-group">
-   <label asp-for="ShopName" class="form-label">اسم المتجر *</label>
-   <input asp-for="ShopName" class="form-control" placeholder="أدخل اسم متجرك" required />
-     <span asp-validation-for="ShopName" class="text-danger"></span>
-      </div>
+                <div class="form-group">
+                    <label asp-for="ShopName" class="form-label">Shop Name *</label>
+                    <input asp-for="ShopName" class="form-control" placeholder="Enter your shop name" required />
+                    <span asp-validation-for="ShopName" class="text-danger"></span>
+                </div>
 
- <div class="form-group">
-        <label asp-for="Address" class="form-label">عنوان المتجر *</label>
-   <input asp-for="Address" class="form-control" placeholder="أدخل العنوان الكامل للمتجر" required />
-   <span asp-validation-for="Address" class="text-danger"></span>
-   </div>
+                <div class="form-group">
+                    <label asp-for="Address" class="form-label">Shop Address *</label>
+                    <input asp-for="Address" class="form-control" placeholder="Enter full shop address" required />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
 
-   <div class="form-group">
-  <label asp-for="ExperienceYears" class="form-label">سنوات الخبرة</label>
- <input asp-for="ExperienceYears" class="form-control" type="number" min="0" max="100" placeholder="عدد سنوات الخبرة" />
- <span asp-validation-for="ExperienceYears" class="text-danger"></span>
-      </div>
+                <div class="form-group">
+                    <label asp-for="ExperienceYears" class="form-label">Years of Experience</label>
+                    <input asp-for="ExperienceYears" class="form-control" type="number" min="0" max="100" placeholder="Number of years of experience" />
+                    <span asp-validation-for="ExperienceYears" class="text-danger"></span>
+                </div>
 
-  <div class="form-group">
-        <label asp-for="Reason" class="form-label">سبب طلب التحويل *</label>
-<textarea asp-for="Reason" class="form-control" rows="5" placeholder="اشرح لماذا تريد التحويل إلى خياط (20 حرف على الأقل)" required></textarea>
-   <span asp-validation-for="Reason" class="text-danger"></span>
-   <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
-   يرجى كتابة سبب واضح ومفصل (بين 20 و 500 حرف)
-    </small>
- </div>
+                <div class="form-group">
+                    <label asp-for="Reason" class="form-label">Reason for Request *</label>
+                    <textarea asp-for="Reason" class="form-control" rows="5" placeholder="Explain why you want to switch to a tailor (at least 20 characters)" required></textarea>
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                    <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                        Please write a clear and detailed reason (between 20 and 500 characters)
+                    </small>
+                </div>
 
-       <div class="form-group">
-       <label asp-for="BusinessLicenseImage" class="form-label">صورة رخصة العمل (اختياري)</label>
-  <input asp-for="BusinessLicenseImage" class="form-control" type="file" accept="image/*" />
-        <span asp-validation-for="BusinessLicenseImage" class="text-danger"></span>
-      <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
- يفضل رفع صورة رخصة العمل لزيادة مصداقية حسابك
-      </small>
-     </div>
+                <div class="form-group">
+                    <label asp-for="BusinessLicenseImage" class="form-label">Business License Image (Optional)</label>
+                    <input asp-for="BusinessLicenseImage" class="form-control" type="file" accept="image/*" />
+                    <span asp-validation-for="BusinessLicenseImage" class="text-danger"></span>
+                    <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                        Uploading a business license image is recommended to increase your account credibility
+                    </small>
+                </div>
 
-    <div class="btn-group">
-       <button type="submit" class="btn-primary">
- <i class="fas fa-check me-2"></i>
-     إرسال الطلب
-     </button>
-      <a asp-action="Settings" class="btn-secondary">
-    <i class="fas fa-times me-2"></i>
-     إلغاء
-  </a>
-   </div>
-     </form>
-     </div>
-   </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-check me-2"></i>
+                        Submit Request
+                    </button>
+                    <a asp-action="Settings" class="btn-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

@@ -1,32 +1,29 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TafsilkPlatform.Utility.Helpers; // Simple helper methods
-using TafsilkPlatform.Utility.Extensions; // Extension methods
-using TafsilkPlatform.DataAccess.Repository;
-using TafsilkPlatform.Models.ViewModels.Store;
 using System.Security.Claims;
+using TafsilkPlatform.Models.ViewModels.Store;
+using TafsilkPlatform.Utility.Extensions; // Extension methods
+using TafsilkPlatform.Web.Interfaces;
 
 namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
     [Route("[controller]")]
-  public class StoreController : Controller
+    public class StoreController : Controller
     {
- private readonly IStoreService _storeService;
+        private readonly IStoreService _storeService;
         private readonly TafsilkPlatform.DataAccess.Repository.ICustomerRepository _customerRepository;
- private readonly ILogger<StoreController> _logger;
+        private readonly ILogger<StoreController> _logger;
 
-     public StoreController(
-            IStoreService storeService,
- TafsilkPlatform.DataAccess.Repository.ICustomerRepository customerRepository,
-            ILogger<StoreController> logger)
-{
-          _storeService = storeService;
-         _customerRepository = customerRepository;
-  _logger = logger;
-    }
+        public StoreController(
+               IStoreService storeService,
+    TafsilkPlatform.DataAccess.Repository.ICustomerRepository customerRepository,
+               ILogger<StoreController> logger)
+        {
+            _storeService = storeService;
+            _customerRepository = customerRepository;
+            _logger = logger;
+        }
 
         // ✅ SIMPLIFIED: Use helper method for cleaner code
         private async Task<Guid> GetCustomerIdAsync()
@@ -46,27 +43,27 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             return customer.Id; // Return CustomerProfile.Id, not User.Id
         }
 
- private Guid GetCustomerId()
-      {
-       var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrEmpty(userIdClaim)) throw new UnauthorizedAccessException();
-      return Guid.Parse(userIdClaim);
-}
+        private Guid GetCustomerId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim)) throw new UnauthorizedAccessException();
+            return Guid.Parse(userIdClaim);
+        }
 
-// GET: /Store
+        // GET: /Store
         [HttpGet("")]
-public async Task<IActionResult> Index(
+        public async Task<IActionResult> Index(
     string? category,
   string? search,
  int page = 1,
       string? sortBy = null,
   decimal? minPrice = null,
             decimal? maxPrice = null)
-     {
-       var result = await _storeService.GetProductsAsync(
-   category, search, page, 12, sortBy, minPrice, maxPrice);
-      
-       return View(result);
+        {
+            var result = await _storeService.GetProductsAsync(
+        category, search, page, 12, sortBy, minPrice, maxPrice);
+
+            return View(result);
         }
 
         // GET: /Store/Product/guid
@@ -101,16 +98,16 @@ public async Task<IActionResult> Index(
             return View(product);
         }
 
-  // GET: /Store/Cart
-     [Authorize(Policy = "CustomerPolicy")]
-  [HttpGet("Cart")]
-      public async Task<IActionResult> Cart()
-  {
-     var customerId = await GetCustomerIdAsync();
-     var cart = await _storeService.GetCartAsync(customerId);
-  
-      return View(cart ?? new CartViewModel());
-    }
+        // GET: /Store/Cart
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpGet("Cart")]
+        public async Task<IActionResult> Cart()
+        {
+            var customerId = await GetCustomerIdAsync();
+            var cart = await _storeService.GetCartAsync(customerId);
+
+            return View(cart ?? new CartViewModel());
+        }
 
         // POST: /Store/AddToCart
         [Authorize(Policy = "CustomerPolicy")]
@@ -148,67 +145,67 @@ public async Task<IActionResult> Index(
         }
 
         // POST: /Store/UpdateCartItem
-   [Authorize(Policy = "CustomerPolicy")]
-[HttpPost("UpdateCartItem")]
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("UpdateCartItem")]
         [ValidateAntiForgeryToken]
-  public async Task<IActionResult> UpdateCartItem([FromForm] UpdateCartItemRequest request)
-{
-     var customerId = await GetCustomerIdAsync();
-       var success = await _storeService.UpdateCartItemAsync(customerId, request);
+        public async Task<IActionResult> UpdateCartItem([FromForm] UpdateCartItemRequest request)
+        {
+            var customerId = await GetCustomerIdAsync();
+            var success = await _storeService.UpdateCartItemAsync(customerId, request);
 
- return RedirectToAction(nameof(Cart));
+            return RedirectToAction(nameof(Cart));
         }
 
         // POST: /Store/RemoveFromCart
-      [Authorize(Policy = "CustomerPolicy")]
-  [HttpPost("RemoveFromCart")]
-  [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveFromCart(Guid cartItemId)
-{
-   var customerId = await GetCustomerIdAsync();
-await _storeService.RemoveFromCartAsync(customerId, cartItemId);
-
-      return RedirectToAction(nameof(Cart));
-   }
-
-    // POST: /Store/ClearCart
-[Authorize(Policy = "CustomerPolicy")]
-   [HttpPost("ClearCart")]
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("RemoveFromCart")]
         [ValidateAntiForgeryToken]
-  public async Task<IActionResult> ClearCart()
-      {
-  var customerId = await GetCustomerIdAsync();
-         await _storeService.ClearCartAsync(customerId);
-     TempData["Success"] = "تم إفراغ السلة بنجاح";
-     return RedirectToAction(nameof(Cart));
+        public async Task<IActionResult> RemoveFromCart(Guid cartItemId)
+        {
+            var customerId = await GetCustomerIdAsync();
+            await _storeService.RemoveFromCartAsync(customerId, cartItemId);
+
+            return RedirectToAction(nameof(Cart));
         }
 
-// GET: /Store/Checkout
-    [Authorize(Policy = "CustomerPolicy")]
- [HttpGet("Checkout")]
-      public async Task<IActionResult> Checkout()
-{
-    var customerId = await GetCustomerIdAsync();
-  var checkoutData = await _storeService.GetCheckoutDataAsync(customerId);
+        // POST: /Store/ClearCart
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("ClearCart")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClearCart()
+        {
+            var customerId = await GetCustomerIdAsync();
+            await _storeService.ClearCartAsync(customerId);
+            TempData["Success"] = "تم إفراغ السلة بنجاح";
+            return RedirectToAction(nameof(Cart));
+        }
 
-   if (checkoutData == null || !checkoutData.Cart.Items.Any())
-       {
-    _logger.LogWarning("Checkout requested but cart is empty for customer {CustomerId}", customerId);
-    TempData["Error"] = "سلة التسوق فارغة أو حدث خطأ أثناء تحميل بيانات السلة";
+        // GET: /Store/Checkout
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpGet("Checkout")]
+        public async Task<IActionResult> Checkout()
+        {
+            var customerId = await GetCustomerIdAsync();
+            var checkoutData = await _storeService.GetCheckoutDataAsync(customerId);
 
-    // Return a safe fallback CheckoutViewModel so the view can render and show friendly message
-    var fallbackCheckout = new TafsilkPlatform.Models.ViewModels.Store.CheckoutViewModel
-    {
-        Cart = new TafsilkPlatform.Models.ViewModels.Store.CartViewModel(),
-        ShippingAddress = new TafsilkPlatform.Models.ViewModels.Store.CheckoutAddressViewModel(),
-        UseSameAddressForBilling = true,
-        PaymentMethod = "CashOnDelivery"
-    };
+            if (checkoutData == null || !checkoutData.Cart.Items.Any())
+            {
+                _logger.LogWarning("Checkout requested but cart is empty for customer {CustomerId}", customerId);
+                TempData["Error"] = "سلة التسوق فارغة أو حدث خطأ أثناء تحميل بيانات السلة";
 
-return View(fallbackCheckout);
- }
+                // Return a safe fallback CheckoutViewModel so the view can render and show friendly message
+                var fallbackCheckout = new TafsilkPlatform.Models.ViewModels.Store.CheckoutViewModel
+                {
+                    Cart = new TafsilkPlatform.Models.ViewModels.Store.CartViewModel(),
+                    ShippingAddress = new TafsilkPlatform.Models.ViewModels.Store.CheckoutAddressViewModel(),
+                    UseSameAddressForBilling = true,
+                    PaymentMethod = "CashOnDelivery"
+                };
 
-      return View(checkoutData);
+                return View(fallbackCheckout);
+            }
+
+            return View(checkoutData);
         }
 
         // POST: /Store/ProcessCheckout
@@ -225,21 +222,21 @@ return View(fallbackCheckout);
                     .Select(e => e.ErrorMessage)
                     .Where(msg => !string.IsNullOrWhiteSpace(msg))
                     .ToList();
-                
-                _logger.LogWarning("Checkout validation failed. Errors: {Errors}", 
+
+                _logger.LogWarning("Checkout validation failed. Errors: {Errors}",
                     string.Join(", ", errors));
-                
+
                 // Show first 3 errors to user
-                var errorMessage = errors.Any() 
+                var errorMessage = errors.Any()
                     ? "يرجى إكمال جميع الحقول المطلوبة: " + string.Join("، ", errors.Take(3))
                     : "يرجى إكمال جميع الحقول المطلوبة";
-                
+
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = false, message = errorMessage, errors });
                 }
-                
+
                 TempData["Error"] = errorMessage;
                 return RedirectToAction(nameof(Checkout));
             }
@@ -247,24 +244,24 @@ return View(fallbackCheckout);
             try
             {
                 var customerId = await GetCustomerIdAsync();
-                
-                _logger.LogInformation("Processing checkout for customer {CustomerId}. ShippingAddress: {City}, {Street}", 
+
+                _logger.LogInformation("Processing checkout for customer {CustomerId}. ShippingAddress: {City}, {Street}",
                     customerId, request.ShippingAddress.City, request.ShippingAddress.Street);
-                
+
                 // ✅ Validate cart is not empty before processing
                 var cart = await _storeService.GetCartAsync(customerId);
                 if (cart == null || !cart.Items.Any())
                 {
                     _logger.LogWarning("Empty cart for customer {CustomerId} during checkout", customerId);
-                    
+
                     var emptyCartMessage = "السلة فارغة. يرجى إضافة منتجات قبل إتمام الطلب";
-                    
+
                     // ✅ Check if AJAX request
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         return Json(new { success = false, message = emptyCartMessage });
                     }
-                    
+
                     TempData["Error"] = emptyCartMessage;
                     return RedirectToAction(nameof(Cart));
                 }
@@ -277,13 +274,13 @@ return View(fallbackCheckout);
                 if (success && orderId.HasValue)
                 {
                     _logger.LogInformation("Cash order {OrderId} confirmed successfully for customer {CustomerId}", orderId.Value, customerId);
-                    
+
                     // ✅ NEW: Return JSON for AJAX requests
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
                         // Get order details for response
                         var order = await _storeService.GetOrderDetailsAsync(orderId.Value, customerId);
-                        
+
                         return Json(new
                         {
                             success = true,
@@ -294,7 +291,7 @@ return View(fallbackCheckout);
                             paymentMethod = "الدفع عند الاستلام"
                         });
                     }
-                    
+
                     // ✅ Traditional redirect for non-AJAX
                     TempData["OrderSuccess"] = "true";
                     TempData["OrderId"] = orderId.Value.ToString();
@@ -303,13 +300,13 @@ return View(fallbackCheckout);
 
                 // ✅ Better error messages
                 var errorMsg = errorMessage ?? "فشل إتمام الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
-                
+
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = false, message = errorMsg });
                 }
-                
+
                 TempData["Error"] = errorMsg;
                 _logger.LogWarning("Checkout failed for customer {CustomerId}: {Error}", customerId, errorMsg);
                 return RedirectToAction(nameof(Checkout));
@@ -317,30 +314,30 @@ return View(fallbackCheckout);
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogError(ex, "Unauthorized access in ProcessCheckout");
-                
+
                 var authMessage = "يرجى تسجيل الدخول أولاً";
-                
+
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = false, message = authMessage, requiresLogin = true });
                 }
-                
+
                 TempData["Error"] = authMessage;
                 return RedirectToAction("Login", "Account");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in ProcessCheckout for customer");
-                
+
                 var genericError = "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
-                
+
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     return Json(new { success = false, message = genericError });
                 }
-                
+
                 TempData["Error"] = genericError;
                 return RedirectToAction(nameof(Checkout));
             }
@@ -354,24 +351,24 @@ return View(fallbackCheckout);
             try
             {
                 var customerId = await GetCustomerIdAsync();
-                
+
                 // ✅ FIXED: Verify this is from a successful checkout (prevent direct URL access after order completion)
                 var orderSuccessFlag = TempData["OrderSuccess"]?.ToString();
                 if (orderSuccessFlag != "true")
                 {
                     _logger.LogWarning("Payment success page accessed without checkout completion for order {OrderId}", orderId);
                 }
-                
+
                 // ✅ FIXED: Try to get order details, but don't fail if order not found immediately
                 // (might be a timing issue with database transaction)
                 var order = await _storeService.GetOrderDetailsAsync(orderId, customerId);
-                
+
                 if (order == null)
                 {
                     // ✅ FIXED: If order not found, still show success page with basic info
                     // This handles cases where order was just created and might not be immediately available
                     _logger.LogWarning("Order {OrderId} not found for customer {CustomerId}, showing success page anyway", orderId, customerId);
-                    
+
                     var fallbackModel = new PaymentSuccessViewModel
                     {
                         OrderId = orderId,
@@ -381,7 +378,7 @@ return View(fallbackCheckout);
                         OrderDate = DateTimeOffset.UtcNow,
                         EstimatedDeliveryDays = 3
                     };
-                    
+
                     TempData["Info"] = "تم تأكيد طلبك بنجاح! سيتم تحديث التفاصيل قريباً.";
                     return View(fallbackModel);
                 }
@@ -400,7 +397,7 @@ return View(fallbackCheckout);
                 // ✅ Clear the success flag
                 TempData.Remove("OrderSuccess");
                 TempData.Remove("OrderId");
-                
+
                 return View(model);
             }
             catch (Exception ex)
@@ -412,14 +409,14 @@ return View(fallbackCheckout);
             }
         }
 
-  // API: Get cart item count
-   [Authorize(Policy = "CustomerPolicy")]
+        // API: Get cart item count
+        [Authorize(Policy = "CustomerPolicy")]
         [HttpGet("api/cart/count")]
         public async Task<IActionResult> GetCartCount()
         {
-  var customerId = await GetCustomerIdAsync();
- var count = await _storeService.GetCartItemCountAsync(customerId);
-      return Json(new { count });
+            var customerId = await GetCustomerIdAsync();
+            var count = await _storeService.GetCartItemCountAsync(customerId);
+            return Json(new { count });
         }
     }
 }

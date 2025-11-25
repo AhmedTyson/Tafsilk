@@ -1,8 +1,5 @@
 using System.Net;
 using System.Text.Json;
-using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace TafsilkPlatform.Web.Middleware;
 
@@ -33,9 +30,9 @@ public class GlobalExceptionHandlerMiddleware
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}, Method: {Method}", 
+            _logger.LogError(ex, "Unhandled exception occurred. Path: {Path}, Method: {Method}",
                 context.Request.Path, context.Request.Method);
-            
+
             // Check if response has already started
             if (context.Response.HasStarted)
             {
@@ -44,7 +41,7 @@ public class GlobalExceptionHandlerMiddleware
                 // But we'll log it first
                 throw;
             }
-            
+
             try
             {
                 await HandleExceptionAsync(context, ex);
@@ -67,17 +64,17 @@ public class GlobalExceptionHandlerMiddleware
             {
                 context.Response.Clear();
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                
+
                 // Check if this is an API request or MVC request
-                var isApiRequest = context.Request.Path.StartsWithSegments("/api") || 
+                var isApiRequest = context.Request.Path.StartsWithSegments("/api") ||
                                    context.Request.Headers["Accept"].ToString().Contains("application/json");
-                
+
                 if (isApiRequest)
                 {
                     context.Response.ContentType = "application/json";
-                    
+
                     object response;
-                    
+
                     if (_environment.IsDevelopment())
                     {
                         response = new

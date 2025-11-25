@@ -1,7 +1,7 @@
 @model TafsilkPlatform.Models.Models.TailorProfile
 
 @{
-    ViewData["Title"] = "الملف الشخصي";
+    ViewData["Title"] = "Profile";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -13,10 +13,10 @@
         --primary-light: #e3f2fd;
         --secondary-color: #f39c12;
         --success-color: #27ae60;
-  --text-primary: #2c3e50;
+        --text-primary: #2c3e50;
         --text-secondary: #7f8c8d;
         --border-color: #e1e8ed;
---background-white: #ffffff;
+        --background-white: #ffffff;
         --background-gray: #f8f9fa;
         --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -26,13 +26,13 @@
 
     .profile-page {
         padding: 2rem 0;
-    background: var(--background-gray);
- min-height: 100vh;
+        background: var(--background-gray);
+        min-height: 100vh;
     }
 
     .profile-header {
-    background: var(--background-white);
-   border-radius: var(--radius-lg);
+        background: var(--background-white);
+        border-radius: var(--radius-lg);
         padding: 2rem;
         margin-bottom: 2rem;
         box-shadow: var(--shadow-sm);
@@ -41,14 +41,14 @@
         gap: 2rem;
     }
 
-  .profile-avatar {
+    .profile-avatar {
         width: 120px;
-    height: 120px;
+        height: 120px;
         border-radius: 50%;
-    overflow: hidden;
+        overflow: hidden;
         border: 4px solid var(--primary-color);
         flex-shrink: 0;
-}
+    }
 
     .profile-avatar img {
         width: 100%;
@@ -57,19 +57,19 @@
     }
 
     .profile-avatar i {
-  font-size: 4rem;
+        font-size: 4rem;
         color: var(--text-secondary);
-    display: flex;
+        display: flex;
         align-items: center;
         justify-content: center;
         height: 100%;
         background: var(--background-gray);
     }
 
- .profile-info h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-color: var(--text-primary);
+    .profile-info h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
         margin-bottom: 0.5rem;
     }
 
@@ -77,29 +77,29 @@ color: var(--text-primary);
         display: flex;
         gap: 1.5rem;
         flex-wrap: wrap;
-margin-top: 1rem;
+        margin-top: 1rem;
     }
 
     .meta-item {
- display: flex;
-    align-items: center;
+        display: flex;
+        align-items: center;
         gap: 0.5rem;
-    color: var(--text-secondary);
+        color: var(--text-secondary);
     }
 
     .meta-item i {
-      color: var(--primary-color);
+        color: var(--primary-color);
     }
 
-  .verification-badge {
-    display: inline-flex;
+    .verification-badge {
+        display: inline-flex;
         align-items: center;
-      gap: 0.5rem;
-  padding: 0.5rem 1rem;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
         border-radius: var(--radius-md);
-   font-weight: 600;
+        font-weight: 600;
         font-size: 0.875rem;
-background: #d4edda;
+        background: #d4edda;
         color: #155724;
     }
 
@@ -111,21 +111,21 @@ background: #d4edda;
     }
 
     .stat-card {
-     background: var(--background-white);
-      border-radius: var(--radius-lg);
+        background: var(--background-white);
+        border-radius: var(--radius-lg);
         padding: 1.5rem;
         text-align: center;
-     box-shadow: var(--shadow-sm);
+        box-shadow: var(--shadow-sm);
     }
 
     .stat-value {
         font-size: 2rem;
         font-weight: 700;
         color: var(--primary-color);
- margin-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
     }
 
-  .stat-label {
+    .stat-label {
         font-size: 0.875rem;
         color: var(--text-secondary);
     }
@@ -133,7 +133,7 @@ background: #d4edda;
     .action-buttons {
         display: flex;
         gap: 1rem;
-    margin-top: 1.5rem;
+        margin-top: 1.5rem;
         flex-wrap: wrap;
     }
 
@@ -145,18 +145,18 @@ background: #d4edda;
         border-radius: var(--radius-md);
         font-weight: 600;
         text-decoration: none;
-   transition: all 0.3s;
+        transition: all 0.3s;
         border: none;
         cursor: pointer;
     }
 
     .btn-primary {
-    background: var(--primary-color);
+        background: var(--primary-color);
         color: white;
     }
 
     .btn-primary:hover {
-  background: var(--primary-hover);
+        background: var(--primary-hover);
         transform: translateY(-2px);
         box-shadow: var(--shadow-md);
     }
@@ -167,25 +167,25 @@ background: #d4edda;
         border: 2px solid var(--primary-color);
     }
 
-  .btn-outline:hover {
-    background: var(--primary-color);
-      color: white;
+    .btn-outline:hover {
+        background: var(--primary-color);
+        color: white;
     }
 
     .profile-section {
         background: var(--background-white);
         border-radius: var(--radius-lg);
-     padding: 2rem;
-    margin-bottom: 2rem;
-     box-shadow: var(--shadow-sm);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
     }
 
     .section-title {
-     font-size: 1.25rem;
-  font-weight: 700;
+        font-size: 1.25rem;
+        font-weight: 700;
         color: var(--text-primary);
         margin-bottom: 1.5rem;
-  display: flex;
+        display: flex;
         align-items: center;
         gap: 0.75rem;
     }
@@ -196,15 +196,15 @@ background: #d4edda;
         border-radius: 50%;
         background: var(--primary-color);
         color: white;
-    display: flex;
+        display: flex;
         align-items: center;
         justify-content: center;
     }
 
     .info-grid {
-      display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-gap: 1.5rem;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
     }
 
     .info-item {
@@ -221,23 +221,23 @@ gap: 1.5rem;
 
     .info-value {
         color: var(--text-primary);
-      font-size: 1rem;
+        font-size: 1rem;
     }
 
     @@media (max-width: 768px) {
         .profile-header {
             flex-direction: column;
- text-align: center;
+            text-align: center;
         }
 
         .profile-avatar {
-       width: 100px;
-height: 100px;
-     }
+            width: 100px;
+            height: 100px;
+        }
 
         .profile-meta {
             justify-content: center;
-     }
+        }
 
         .action-buttons {
             justify-content: center;
@@ -248,281 +248,281 @@ height: 100px;
 
 <div class="profile-page">
     <div class="container">
-   <!-- Profile Header -->
-      <div class="profile-header">
-         <div class="profile-avatar">
-      @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
- {
-     if (Uri.IsWellFormedUriString(Model.ProfileImageUrl, UriKind.Absolute))
-     {
-         <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
-     }
-     else
-     {
-         <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
-     }
- }
-    else if (Model.ProfilePictureData != null)
- {
-         <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })" 
-        alt="@Model.FullName" />
-          }
-    else
-   {
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                @if (!string.IsNullOrWhiteSpace(Model.ProfileImageUrl))
+                {
+                    if (Uri.IsWellFormedUriString(Model.ProfileImageUrl, UriKind.Absolute))
+                    {
+                        <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
+                    }
+                    else
+                    {
+                        <img src="@Model.ProfileImageUrl" alt="@Model.FullName" />
+                    }
+                }
+                else if (Model.ProfilePictureData != null)
+                {
+                    <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })" 
+                         alt="@Model.FullName" />
+                }
+                else
+                {
                     <i class="fas fa-user"></i>
-         }
-        </div>
+                }
+            </div>
   
             <div class="profile-info">
- <h1>@(Model.FullName ?? "خياط")</h1>
-      <p class="text-muted">@Model.ShopName</p>
+                <h1>@(Model.FullName ?? "Tailor")</h1>
+                <p class="text-muted">@Model.ShopName</p>
          
-    @if (Model.IsVerified)
-          {
-       <div class="verification-badge">
-     <i class="fas fa-check-circle"></i>
-            <span>حساب موثق</span>
-     </div>
-  }
+                @if (Model.IsVerified)
+                {
+                    <div class="verification-badge">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Verified Account</span>
+                    </div>
+                }
 
-    <div class="profile-meta">
-     @if (!string.IsNullOrEmpty(Model.City))
-     {
-            <div class="meta-item">
-  <i class="fas fa-map-marker-alt"></i>
-   <span>@Model.City</span>
-    </div>
-         }
-        @if (Model.YearsOfExperience.HasValue)
-        {
-        <div class="meta-item">
-                <i class="fas fa-briefcase"></i>
-            <span>@Model.YearsOfExperience سنة خبرة</span>
-             </div>
+                <div class="profile-meta">
+                    @if (!string.IsNullOrEmpty(Model.City))
+                    {
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>@Model.City</span>
+                        </div>
                     }
-               @if (Model.AverageRating > 0)
-      {
-              <div class="meta-item">
-           <i class="fas fa-star"></i>
-           <span>@Model.AverageRating.ToString("F1")</span>
-      </div>
-   }
-       </div>
-
-       <div class="action-buttons">
-         <a asp-action="EditTailorProfile" class="btn btn-primary">
-          <i class="fas fa-edit"></i>
-    <span>تعديل الملف الشخصي</span>
-</a>
-   <a asp-action="ManagePortfolio" class="btn btn-outline">
-           <i class="fas fa-images"></i>
-     <span>إدارة المعرض</span>
-             </a>
-  <a asp-action="ViewPublicTailorProfile" asp-controller="TailorPortfolio" asp-route-id="@Model.Id" class="btn btn-outline" target="_blank">
-  <i class="fas fa-eye"></i>
-    <span>عرض الملف العام</span>
-           </a>
+                    @if (Model.YearsOfExperience.HasValue)
+                    {
+                        <div class="meta-item">
+                            <i class="fas fa-briefcase"></i>
+                            <span>@Model.YearsOfExperience Years Experience</span>
+                        </div>
+                    }
+                    @if (Model.AverageRating > 0)
+                    {
+                        <div class="meta-item">
+                            <i class="fas fa-star"></i>
+                            <span>@Model.AverageRating.ToString("F1")</span>
+                        </div>
+                    }
                 </div>
-    </div>
+
+                <div class="action-buttons">
+                    <a asp-action="EditTailorProfile" class="btn btn-primary">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit Profile</span>
+                    </a>
+                    <a asp-action="ManagePortfolio" class="btn btn-outline">
+                        <i class="fas fa-images"></i>
+                        <span>Manage Gallery</span>
+                    </a>
+                    <a asp-action="ViewPublicTailorProfile" asp-controller="TailorPortfolio" asp-route-id="@Model.Id" class="btn btn-outline" target="_blank">
+                        <i class="fas fa-eye"></i>
+                        <span>View Public Profile</span>
+                    </a>
+                </div>
+            </div>
         </div>
 
-<!-- Statistics -->
+        <!-- Statistics -->
         <div class="stats-grid">
-     <div class="stat-card">
-   <div class="stat-value">@ViewBag.ServiceCount</div>
-          <div class="stat-label">الخدمات</div>
-       </div>
             <div class="stat-card">
-         <div class="stat-value">@ViewBag.PortfolioCount</div>
-      <div class="stat-label">صور المعرض</div>
-     </div>
-  <div class="stat-card">
-    <div class="stat-value">@ViewBag.ReviewCount</div>
-     <div class="stat-label">التقييمات</div>
+                <div class="stat-value">@ViewBag.ServiceCount</div>
+                <div class="stat-label">Services</div>
             </div>
-     <div class="stat-card">
-            <div class="stat-value">@Model.AverageRating.ToString("F1")</div>
-       <div class="stat-label">متوسط التقييم</div>
-  </div>
-   </div>
+            <div class="stat-card">
+                <div class="stat-value">@ViewBag.PortfolioCount</div>
+                <div class="stat-label">Gallery Images</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@ViewBag.ReviewCount</div>
+                <div class="stat-label">Reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">@Model.AverageRating.ToString("F1")</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+        </div>
 
-    <!-- Profile Information -->
+        <!-- Profile Information -->
         <div class="profile-section">
             <h2 class="section-title">
-         <div class="section-icon">
-      <i class="fas fa-info-circle"></i>
-          </div>
- المعلومات الأساسية
-       </h2>
+                <div class="section-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                Basic Information
+            </h2>
           
-       <div class="info-grid">
-   <div class="info-item">
- <div class="info-label">الاسم الكامل</div>
-   <div class="info-value">@(Model.FullName ?? "غير محدد")</div>
-         </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">@(Model.FullName ?? "Not Specified")</div>
+                </div>
       
-     <div class="info-item">
-                <div class="info-label">اسم الورشة</div>
-        <div class="info-value">@Model.ShopName</div>
+                <div class="info-item">
+                    <div class="info-label">Shop Name</div>
+                    <div class="info-value">@Model.ShopName</div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Specialization))
+                {
+                    <div class="info-item">
+                        <div class="info-label">Specialization</div>
+                        <div class="info-value">@Model.Specialization</div>
+                    </div>
+                }
+
+                @if (Model.YearsOfExperience.HasValue)
+                {
+                    <div class="info-item">
+                        <div class="info-label">Years of Experience</div>
+                        <div class="info-value">@Model.YearsOfExperience Years</div>
+                    </div>
+                }
+
+                <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value">@(Model.User?.PhoneNumber ?? "Not Specified")</div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-label">Email</div>
+                    <div class="info-value">@(Model.User?.Email ?? "Not Specified")</div>
+                </div>
             </div>
-
-     @if (!string.IsNullOrEmpty(Model.Specialization))
-     {
-     <div class="info-item">
-           <div class="info-label">التخصص</div>
-            <div class="info-value">@Model.Specialization</div>
-     </div>
-            }
-
-       @if (Model.YearsOfExperience.HasValue)
-      {
-              <div class="info-item">
-        <div class="info-label">سنوات الخبرة</div>
-       <div class="info-value">@Model.YearsOfExperience سنة</div>
-                </div>
-           }
-
-   <div class="info-item">
-  <div class="info-label">رقم الهاتف</div>
-           <div class="info-value">@(Model.User?.PhoneNumber ?? "غير محدد")</div>
-                </div>
-
-      <div class="info-item">
-    <div class="info-label">البريد الإلكتروني</div>
-          <div class="info-value">@(Model.User?.Email ?? "غير محدد")</div>
-                </div>
-      </div>
         </div>
 
         <!-- Location Information -->
-    @if (!string.IsNullOrEmpty(Model.City) || !string.IsNullOrEmpty(Model.Address))
-      {
+        @if (!string.IsNullOrEmpty(Model.City) || !string.IsNullOrEmpty(Model.Address))
+        {
             <div class="profile-section">
-        <h2 class="section-title">
-    <div class="section-icon">
-            <i class="fas fa-map-marker-alt"></i>
-         </div>
-     الموقع
-  </h2>
+                <h2 class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    Location
+                </h2>
         
-       <div class="info-grid">
-          @if (!string.IsNullOrEmpty(Model.City))
-    {
-         <div class="info-item">
-      <div class="info-label">المدينة</div>
- <div class="info-value">@Model.City</div>
-  </div>
-   }
+                <div class="info-grid">
+                    @if (!string.IsNullOrEmpty(Model.City))
+                    {
+                        <div class="info-item">
+                            <div class="info-label">City</div>
+                            <div class="info-value">@Model.City</div>
+                        </div>
+                    }
 
-          @if (!string.IsNullOrEmpty(Model.District))
-         {
-            <div class="info-item">
-     <div class="info-label">المنطقة</div>
-   <div class="info-value">@Model.District</div>
-        </div>
-        }
+                    @if (!string.IsNullOrEmpty(Model.District))
+                    {
+                        <div class="info-item">
+                            <div class="info-label">District</div>
+                            <div class="info-value">@Model.District</div>
+                        </div>
+                    }
 
-        @if (!string.IsNullOrEmpty(Model.Address))
-         {
-       <div class="info-item" style="grid-column: 1 / -1;">
-         <div class="info-label">العنوان</div>
-     <div class="info-value">@Model.Address</div>
-        </div>
-        }
-          </div>
-      </div>
+                    @if (!string.IsNullOrEmpty(Model.Address))
+                    {
+                        <div class="info-item" style="grid-column: 1 / -1;">
+                            <div class="info-label">Address</div>
+                            <div class="info-value">@Model.Address</div>
+                        </div>
+                    }
+                </div>
+            </div>
         }
 
         <!-- Bio -->
         @if (!string.IsNullOrEmpty(Model.Bio))
-    {
-      <div class="profile-section">
-             <h2 class="section-title">
-            <div class="section-icon">
-               <i class="fas fa-align-left"></i>
-       </div>
-  نبذة تعريفية
+        {
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-align-left"></i>
+                    </div>
+                    Bio
                 </h2>
-      <p>@Model.Bio</p>
-   </div>
+                <p>@Model.Bio</p>
+            </div>
         }
 
         <!-- Business Hours -->
         @if (!string.IsNullOrEmpty(Model.BusinessHours))
         {
-       <div class="profile-section">
-    <h2 class="section-title">
-      <div class="section-icon">
-<i class="fas fa-clock"></i>
-         </div>
-   ساعات العمل
-        </h2>
-       <p>@Model.BusinessHours</p>
+            <div class="profile-section">
+                <h2 class="section-title">
+                    <div class="section-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    Business Hours
+                </h2>
+                <p>@Model.BusinessHours</p>
             </div>
         }
 
         <!-- Social Media -->
         @if (!string.IsNullOrEmpty(Model.FacebookUrl) || !string.IsNullOrEmpty(Model.InstagramUrl) || 
- !string.IsNullOrEmpty(Model.TwitterUrl) || !string.IsNullOrEmpty(Model.WebsiteUrl))
+             !string.IsNullOrEmpty(Model.TwitterUrl) || !string.IsNullOrEmpty(Model.WebsiteUrl))
         {
             <div class="profile-section">
                 <h2 class="section-title">
-        <div class="section-icon">
-             <i class="fas fa-share-alt"></i>
-     </div>
- وسائل التواصل الاجتماعي
+                    <div class="section-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    Social Media
                 </h2>
               
-     <div class="info-grid">
-        @if (!string.IsNullOrEmpty(Model.FacebookUrl))
-  {
-            <div class="info-item">
-   <div class="info-label">فيسبوك</div>
-   <div class="info-value">
-  <a href="@Model.FacebookUrl" target="_blank" class="text-primary">
-       <i class="fab fa-facebook"></i> زيارة الصفحة
-  </a>
-       </div>
-   </div>
-            }
-
-   @if (!string.IsNullOrEmpty(Model.InstagramUrl))
-         {
-   <div class="info-item">
-      <div class="info-label">إنستغرام</div>
-           <div class="info-value">
- <a href="@Model.InstagramUrl" target="_blank" class="text-primary">
-      <i class="fab fa-instagram"></i> زيارة الحساب
-        </a>
-   </div>
-  </div>
-}
-
-      @if (!string.IsNullOrEmpty(Model.TwitterUrl))
+                <div class="info-grid">
+                    @if (!string.IsNullOrEmpty(Model.FacebookUrl))
                     {
-         <div class="info-item">
-            <div class="info-label">تويتر</div>
- <div class="info-value">
-          <a href="@Model.TwitterUrl" target="_blank" class="text-primary">
-         <i class="fab fa-twitter"></i> زيارة الحساب
-             </a>
-       </div>
-             </div>
-    }
+                        <div class="info-item">
+                            <div class="info-label">Facebook</div>
+                            <div class="info-value">
+                                <a href="@Model.FacebookUrl" target="_blank" class="text-primary">
+                                    <i class="fab fa-facebook"></i> Visit Page
+                                </a>
+                            </div>
+                        </div>
+                    }
 
-   @if (!string.IsNullOrEmpty(Model.WebsiteUrl))
-       {
-            <div class="info-item">
-         <div class="info-label">الموقع الإلكتروني</div>
-        <div class="info-value">
-       <a href="@Model.WebsiteUrl" target="_blank" class="text-primary">
-             <i class="fas fa-globe"></i> زيارة الموقع
-        </a>
+                    @if (!string.IsNullOrEmpty(Model.InstagramUrl))
+                    {
+                        <div class="info-item">
+                            <div class="info-label">Instagram</div>
+                            <div class="info-value">
+                                <a href="@Model.InstagramUrl" target="_blank" class="text-primary">
+                                    <i class="fab fa-instagram"></i> Visit Account
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.TwitterUrl))
+                    {
+                        <div class="info-item">
+                            <div class="info-label">Twitter</div>
+                            <div class="info-value">
+                                <a href="@Model.TwitterUrl" target="_blank" class="text-primary">
+                                    <i class="fab fa-twitter"></i> Visit Account
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.WebsiteUrl))
+                    {
+                        <div class="info-item">
+                            <div class="info-label">Website</div>
+                            <div class="info-value">
+                                <a href="@Model.WebsiteUrl" target="_blank" class="text-primary">
+                                    <i class="fas fa-globe"></i> Visit Website
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
             </div>
+        }
     </div>
-  }
-           </div>
-   </div>
-   }
-</div>
 </div>

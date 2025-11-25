@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Threading.Tasks;
-
 namespace TafsilkPlatform.Web.Services;
 
 public class FileUploadService : IFileUploadService
@@ -41,10 +36,10 @@ public class FileUploadService : IFileUploadService
         return (true, null);
     }
 
-    public bool IsValidImage(IFormFile file)
+    public async Task<bool> IsValidImageAsync(IFormFile file)
     {
-        var validationTask = ValidateImageAsync(file);
-        return validationTask.GetAwaiter().GetResult().IsValid;
+        var validationResult = await ValidateImageAsync(file);
+        return validationResult.IsValid;
     }
 
     public string[] GetAllowedExtensions() => _allowedExtensions;

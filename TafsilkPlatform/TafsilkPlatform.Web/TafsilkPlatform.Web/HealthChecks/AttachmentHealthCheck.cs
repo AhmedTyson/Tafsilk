@@ -1,11 +1,4 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Threading.Tasks;
-using System.Threading;
-using System;
 
 namespace TafsilkPlatform.Web.HealthChecks
 {

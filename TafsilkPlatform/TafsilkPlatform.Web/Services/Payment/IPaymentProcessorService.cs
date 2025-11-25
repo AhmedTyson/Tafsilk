@@ -49,11 +49,11 @@ public class PaymentProcessingRequest
     public decimal Amount { get; set; }
     public string PaymentMethod { get; set; } = "CashOnDelivery"; // CashOnDelivery, CreditCard, Stripe
     public string? Currency { get; set; } = "SAR";
-    
+
     // Stripe-specific fields
     public string? StripePaymentMethodId { get; set; }
     public string? StripeCustomerId { get; set; }
-    
+
     // Shipping info
     public string? ShippingStreet { get; set; }
     public string? ShippingCity { get; set; }

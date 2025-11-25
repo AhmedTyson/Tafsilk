@@ -1,5 +1,3 @@
-using TafsilkPlatform.Web.Interfaces;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +7,7 @@ using System.Text;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels;
+using TafsilkPlatform.Web.Interfaces;
 
 namespace TafsilkPlatform.Web.Controllers;
 

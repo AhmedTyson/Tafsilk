@@ -10,7 +10,7 @@ public class CompleteCustomerProfileRequest
 {
     [Required(ErrorMessage = "الاسم الكامل مطلوب")]
     [StringLength(255, MinimumLength = 3, ErrorMessage = "الاسم يجب أن يكون بين 3 و 255 حرف")]
-  [Display(Name = "الاسم الكامل")]
+    [Display(Name = "الاسم الكامل")]
     public string FullName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "المدينة مطلوبة")]
@@ -20,7 +20,7 @@ public class CompleteCustomerProfileRequest
 
     [Phone(ErrorMessage = "رقم الهاتف غير صالح")]
     [StringLength(20, ErrorMessage = "رقم الهاتف طويل جداً")]
-  [Display(Name = "رقم الهاتف")]
+    [Display(Name = "رقم الهاتف")]
     public string? PhoneNumber { get; set; }
 
     [StringLength(20, ErrorMessage = "قيمة الجنس غير صالحة")]

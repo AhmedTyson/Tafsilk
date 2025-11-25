@@ -1,12 +1,4 @@
 using BLL.Services.Interfaces;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace BLL.Services
 {
@@ -24,7 +16,8 @@ namespace BLL.Services
         {
             "profile",
             "order",
-            "gallery"
+            "gallery",
+            "product"
         };
 
         public const int maxAllowed = 2_000_000; // 2 MB

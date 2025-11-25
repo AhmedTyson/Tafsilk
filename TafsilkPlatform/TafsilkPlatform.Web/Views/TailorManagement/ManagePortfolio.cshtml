@@ -1,12 +1,12 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.ManagePortfolioViewModel
 
 @{
-    ViewData["Title"] = "إدارة معرض الأعمال";
+    ViewData["Title"] = "Manage Portfolio";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("معرض الأعمال", "")
+        ("Dashboard", Url.Action("Tailor", "Dashboards")),
+        ("Portfolio", "")
     };
 
     // Safety: ensure model is not null to avoid NRE in views
@@ -20,168 +20,168 @@
     <!-- Page Header -->
     <div class="page-header">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-     <div>
-  <h1 class="page-title">
-    <i class="fas fa-images"></i>
-             معرض الأعمال
-       </h1>
-            <p class="page-description">إدارة صور أعمالك السابقة لجذب المزيد من العملاء</p>
-       </div>
-   <div class="d-flex gap-2">
-   <a asp-action="AddPortfolioImage" class="btn btn-primary">
+            <div>
+                <h1 class="page-title">
+                    <i class="fas fa-images"></i>
+                    Portfolio
+                </h1>
+                <p class="page-description">Manage photos of your previous work to attract more customers</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="AddPortfolioImage" class="btn btn-primary">
                     <i class="fas fa-plus-circle"></i>
-         إضافة صورة جديدة
-     </a>
-         <a asp-controller="Dashboards" asp-action="Tailor" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-right"></i>
-  العودة
-        </a>
-  </div>
+                    Add New Image
+                </a>
+                <a asp-controller="Dashboards" asp-action="Tailor" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-right"></i>
+                    Back
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="row g-4 mb-4">
-    <div class="col-md-4">
-            <div class="stat-card">
-        <div class="stat-icon primary">
- <i class="fas fa-images"></i>
-    </div>
-     <div class="stat-value">@(safeModel.TotalImages)</div>
-                <div class="stat-label">إجمالي الصور</div>
-  </div>
-        </div>
-  <div class="col-md-4">
- <div class="stat-card">
-              <div class="stat-icon success">
-        <i class="fas fa-star"></i>
-         </div>
- <div class="stat-value">@(safeModel.FeaturedCount)</div>
-     <div class="stat-label">صور مميزة</div>
-            </div>
-      </div>
         <div class="col-md-4">
-   <div class="stat-card">
-      <div class="stat-icon info">
-       <i class="fas fa-percentage"></i>
-    </div>
-      <div class="stat-value">@(safeModel.TotalImages) / @(safeModel.MaxAllowedImages)</div>
-<div class="stat-label">الصور المستخدمة</div>
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div class="stat-value">@(safeModel.TotalImages)</div>
+                <div class="stat-label">Total Images</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-value">@(safeModel.FeaturedCount)</div>
+                <div class="stat-label">Featured Images</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon info">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-value">@(safeModel.TotalImages) / @(safeModel.MaxAllowedImages)</div>
+                <div class="stat-label">Used Images</div>
             </div>
         </div>
     </div>
 
- <!-- Portfolio Grid -->
+    <!-- Portfolio Grid -->
     @if (images.Any())
     {
-  <div class="portfolio-grid">
-         @foreach (var image in images)
-          {
-      <div class="portfolio-card">
-                    <div class="position-relative">
-       <img src="@Url.Action("GetPortfolioImage", new { id = image.Id })" 
-          class="portfolio-image" 
-         alt="@(image.Title ?? "صورة")">
-      
-              @if (image.IsFeatured)
+        <div class="portfolio-grid">
+            @foreach (var image in images)
             {
-     <span class="position-absolute top-0 start-0 m-2 badge badge-warning">
-           <i class="fas fa-star"></i> مميزة
-   </span>
-              }
-        
- @if (image.IsBeforeAfter)
-         {
-           <span class="position-absolute top-0 end-0 m-2 badge badge-info">
-             قبل/بعد
-       </span>
-         }
-      </div>
+                <div class="portfolio-card">
+                    <div class="position-relative">
+                        <img src="@Url.Action("GetPortfolioImage", new { id = image.Id })" 
+                             class="portfolio-image" 
+                             alt="@(image.Title ?? "Image")">
+                        
+                        @if (image.IsFeatured)
+                        {
+                            <span class="position-absolute top-0 start-0 m-2 badge badge-warning">
+                                <i class="fas fa-star"></i> Featured
+                            </span>
+                        }
+                        
+                        @if (image.IsBeforeAfter)
+                        {
+                            <span class="position-absolute top-0 end-0 m-2 badge badge-info">
+                                Before/After
+                            </span>
+                        }
+                    </div>
 
-        <div class="portfolio-content">
-           <h6 class="portfolio-title">@(image.Title ?? "بدون عنوان")</h6>
-         
-      @if (!string.IsNullOrEmpty(image.Category))
-      {
-         <span class="badge badge-secondary mb-2">@image.Category</span>
-  }
-      
-      @if (!string.IsNullOrEmpty(image.Description))
-   {
-     <p class="portfolio-description">@image.Description</p>
-       }
-         
-             @if (image.EstimatedPrice.HasValue)
-         {
-           <p class="mb-2">
-         <strong>السعر التقديري:</strong> 
-   <span class="text-primary">@image.EstimatedPrice.Value.ToString("N0") ريال</span>
-           </p>
-         }
+                    <div class="portfolio-content">
+                        <h6 class="portfolio-title">@(image.Title ?? "Untitled")</h6>
+                        
+                        @if (!string.IsNullOrEmpty(image.Category))
+                        {
+                            <span class="badge badge-secondary mb-2">@image.Category</span>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(image.Description))
+                        {
+                            <p class="portfolio-description">@image.Description</p>
+                        }
+                        
+                        @if (image.EstimatedPrice.HasValue)
+                        {
+                            <p class="mb-2">
+                                <strong>Estimated Price:</strong> 
+                                <span class="text-primary">@image.EstimatedPrice.Value.ToString("N0") SAR</span>
+                            </p>
+                        }
 
-           <small class="text-muted d-block mb-3">
-   <i class="fas fa-calendar"></i>
-            @image.UploadedAt.ToString("dd/MM/yyyy")
-  </small>
+                        <small class="text-muted d-block mb-3">
+                            <i class="fas fa-calendar"></i>
+                            @image.UploadedAt.ToString("dd/MM/yyyy")
+                        </small>
 
-  <div class="portfolio-actions">
-      <a asp-action="EditPortfolioImage" asp-route-id="@image.Id" 
-            class="btn btn-sm btn-outline-primary flex-fill">
-            <i class="fas fa-edit"></i> تعديل
- </a>
-          <form asp-action="ToggleFeatured" asp-route-id="@image.Id" method="post" class="flex-fill">
-            @Html.AntiForgeryToken()
-                      <button type="submit" class="btn btn-sm btn-outline-warning w-100">
-           <i class="fas fa-star"></i> @(image.IsFeatured ? "إلغاء" : "تمييز")
-          </button>
-            </form>
-         <button type="button" class="btn btn-sm btn-outline-danger" 
-    data-bs-toggle="modal" data-bs-target="#deleteModal-@image.Id">
-<i class="fas fa-trash"></i>
-    </button>
- </div>
-  </div>
-    </div>
-     
-     <!-- Delete Confirmation Modal -->
-       <div class="modal fade" id="deleteModal-@image.Id" tabindex="-1">
-         <div class="modal-dialog modal-dialog-centered">
-       <div class="modal-content">
-     <div class="modal-header">
-          <h5 class="modal-title">تأكيد الحذف</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-         </div>
-    <div class="modal-body">
-           <p>هل أنت متأكد من حذف هذه الصورة؟</p>
-                <p class="text-muted"><strong>@(image.Title ?? "بدون عنوان")</strong></p>
-         </div>
-     <div class="modal-footer">
-       <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">إلغاء</button>
-    <form asp-action="DeletePortfolioImage" asp-route-id="@image.Id" method="post" class="d-inline">
-      @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger">
-        <i class="fas fa-trash"></i> حذف
-              </button>
-    </form>
-              </div>
-          </div>
-          </div>
-         </div>
+                        <div class="portfolio-actions">
+                            <a asp-action="EditPortfolioImage" asp-route-id="@image.Id" 
+                               class="btn btn-sm btn-outline-primary flex-fill">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form asp-action="ToggleFeatured" asp-route-id="@image.Id" method="post" class="flex-fill">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-warning w-100">
+                                    <i class="fas fa-star"></i> @(image.IsFeatured ? "Unfeature" : "Feature")
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal-@image.Id">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" id="deleteModal-@image.Id" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Confirm Delete</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Are you sure you want to delete this image?</p>
+                                <p class="text-muted"><strong>@(image.Title ?? "Untitled")</strong></p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form asp-action="DeletePortfolioImage" asp-route-id="@image.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
         </div>
     }
     else
     {
         <div class="empty-state">
-  <div class="empty-state-icon">
-     <i class="fas fa-images"></i>
+            <div class="empty-state-icon">
+                <i class="fas fa-images"></i>
             </div>
-     <h4 class="empty-state-title">لا توجد صور في معرض الأعمال</h4>
-        <p class="empty-state-description">ابدأ بإضافة صور من أعمالك السابقة لجذب المزيد من العملاء</p>
- <a asp-action="AddPortfolioImage" class="btn btn-primary btn-lg">
-         <i class="fas fa-plus-circle"></i>
-                إضافة أول صورة
+            <h4 class="empty-state-title">No images in portfolio</h4>
+            <p class="empty-state-description">Start adding photos of your previous work to attract more customers</p>
+            <a asp-action="AddPortfolioImage" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle"></i>
+                Add First Image
             </a>
-    </div>
+        </div>
     }
 </div>

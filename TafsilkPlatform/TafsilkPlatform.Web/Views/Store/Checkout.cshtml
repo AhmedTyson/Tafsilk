@@ -1,10 +1,10 @@
 @model TafsilkPlatform.Models.ViewModels.Store.CheckoutViewModel
 @{
-    ViewData["Title"] = "إتمام الطلب";
+    ViewData["Title"] = "Checkout";
     var selectedCity = Model.ShippingAddress.City ?? "";
 }
 
-<div class="container py-5" dir="rtl">
+<div class="container py-5">
     <!-- ✅ SUCCESS SECTION (Hidden by default) -->
     <div id="successSection" class="d-none">
         <div class="row justify-content-center">
@@ -20,29 +20,29 @@
                         </div>
                     </div>
                     <h1 class="text-success mt-4 mb-2">
-                        <i class="fas fa-check-circle"></i> تم تأكيد طلبك بنجاح!
+                        <i class="fas fa-check-circle"></i> Order Confirmed Successfully!
                     </h1>
-                    <p class="text-muted lead">شكراً لك على طلبك من منصة تفصيلك</p>
+                    <p class="text-muted lead">Thank you for your order from Tafsilk Platform</p>
                 </div>
 
                 <!-- Order Summary Card -->
                 <div class="card shadow-lg mb-4">
                     <div class="card-header bg-success text-white">
                         <h4 class="mb-0">
-                            <i class="fas fa-receipt"></i> تفاصيل الطلب
+                            <i class="fas fa-receipt"></i> Order Details
                         </h4>
                     </div>
                     <div class="card-body">
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <div class="info-item">
-                                    <small class="text-muted d-block">رقم الطلب</small>
+                                    <small class="text-muted d-block">Order Number</small>
                                     <strong class="h5 text-primary" id="successOrderNumber">#---</strong>
                                 </div>
                             </div>
                             <div class="col-md-6 text-md-end">
                                 <div class="info-item">
-                                    <small class="text-muted d-block">تاريخ الطلب</small>
+                                    <small class="text-muted d-block">Order Date</small>
                                     <strong id="successOrderDate">---</strong>
                                 </div>
                             </div>
@@ -54,17 +54,17 @@
                             <div class="col-md-6">
                                 <div class="info-item mb-3">
                                     <small class="text-muted d-block">
-                                        <i class="fas fa-money-bill-wave"></i> طريقة الدفع
+                                        <i class="fas fa-money-bill-wave"></i> Payment Method
                                     </small>
-                                    <strong class="text-success">الدفع عند الاستلام</strong>
+                                    <strong class="text-success">Cash On Delivery</strong>
                                 </div>
                             </div>
                             <div class="col-md-6 text-md-end">
                                 <div class="info-item mb-3">
                                     <small class="text-muted d-block">
-                                        <i class="fas fa-dollar-sign"></i> المبلغ الإجمالي
+                                        <i class="fas fa-dollar-sign"></i> Total Amount
                                     </small>
-                                    <strong class="h4 text-primary" id="successTotalAmount">@Model.Cart.Total.ToString("N2") ريال</strong>
+                                    <strong class="h4 text-primary" id="successTotalAmount">@Model.Cart.Total.ToString("N2") SAR</strong>
                                 </div>
                             </div>
                         </div>
@@ -73,9 +73,9 @@
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-info-circle fa-2x me-3"></i>
                                 <div>
-                                    <strong>ملاحظة هامة:</strong>
+                                    <strong>Important Note:</strong>
                                     <p class="mb-0">
-                                        يرجى تجهيز المبلغ المستحق (<span id="successAmount">@Model.Cart.Total.ToString("N2")</span> ريال) نقداً عند استلام الطلب من المندوب.
+                                        Please prepare the due amount (<span id="successAmount">@Model.Cart.Total.ToString("N2")</span> SAR) in cash upon receiving the order from the courier.
                                     </p>
                                 </div>
                             </div>
@@ -87,7 +87,7 @@
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
                         <h5 class="mb-0">
-                            <i class="fas fa-truck"></i> معلومات التوصيل
+                            <i class="fas fa-truck"></i> Delivery Information
                         </h5>
                     </div>
                     <div class="card-body">
@@ -98,8 +98,8 @@
                                         <i class="fas fa-clock"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">الوقت المتوقع للتوصيل</small>
-                                        <strong>3-5 أيام عمل</strong>
+                                        <small class="text-muted d-block">Estimated Delivery Time</small>
+                                        <strong>3-5 Business Days</strong>
                                     </div>
                                 </div>
                             </div>
@@ -109,20 +109,20 @@
                                         <i class="fas fa-box"></i>
                                     </div>
                                     <div>
-                                        <small class="text-muted d-block">حالة الطلب</small>
-                                        <strong class="text-success">تم التأكيد</strong>
+                                        <small class="text-muted d-block">Order Status</small>
+                                        <strong class="text-success">Confirmed</strong>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="alert alert-light border mt-3">
-                            <h6><i class="fas fa-shipping-fast"></i> خطوات التوصيل:</h6>
+                            <h6><i class="fas fa-shipping-fast"></i> Delivery Steps:</h6>
                             <ol class="mb-0 ps-3">
-                                <li>تم تأكيد طلبك وجاري المعالجة</li>
-                                <li>سيتم تحضير طلبك وتعبئته</li>
-                                <li>سيتم شحن الطلب للتوصيل</li>
-                                <li>سيقوم المندوب بالاتصال بك لتحديد موعد التسليم</li>
+                                <li>Order confirmed and processing</li>
+                                <li>Order preparation and packing</li>
+                                <li>Order shipped for delivery</li>
+                                <li>Courier will contact you for delivery</li>
                             </ol>
                         </div>
                     </div>
@@ -131,12 +131,12 @@
                 <!-- Action Buttons -->
                 <div class="card shadow-sm">
                     <div class="card-body text-center">
-                        <h5 class="mb-4">ماذا تريد أن تفعل الآن؟</h5>
+                        <h5 class="mb-4">What would you like to do now?</h5>
                         
                         <div class="mb-4">
                             <a href="@Url.Action("MyOrders", "Orders")" class="btn btn-success btn-lg px-5 py-3" style="font-size: 1.1rem;">
                                 <i class="fas fa-list me-2"></i>
-                                عرض جميع الطلبات
+                                View All Orders
                             </a>
                         </div>
                         
@@ -146,13 +146,13 @@
                             <div class="col-md-6">
                                 <a href="#" id="viewOrderDetailsLink" class="btn btn-outline-primary btn-lg w-100">
                                     <i class="fas fa-eye"></i><br/>
-                                    <small>تفاصيل هذا الطلب</small>
+                                    <small>Order Details</small>
                                 </a>
                             </div>
                             <div class="col-md-6">
                                 <a href="@Url.Action("Index", "Store")" class="btn btn-outline-secondary btn-lg w-100">
                                     <i class="fas fa-shopping-bag"></i><br/>
-                                    <small>متابعة التسوق</small>
+                                    <small>Continue Shopping</small>
                                 </a>
                             </div>
                         </div>
@@ -162,11 +162,11 @@
                         <div class="text-muted">
                             <p class="mb-1">
                                 <i class="fas fa-envelope"></i> 
-                                سيتم إرسال تفاصيل الطلب إلى بريدك الإلكتروني
+                                Order details will be sent to your email
                             </p>
                             <p class="mb-0">
                                 <i class="fas fa-question-circle"></i> 
-                                لأي استفسار، يمكنك التواصل معنا
+                                Contact us for any inquiries
                             </p>
                         </div>
                     </div>
@@ -175,7 +175,7 @@
                 <div class="text-center mt-4">
                     <p class="text-muted">
                         <i class="fas fa-heart text-danger"></i>
-                        نشكرك على ثقتك بمنصة تفصيلك
+                        Thank you for trusting Tafsilk
                     </p>
                 </div>
             </div>
@@ -187,7 +187,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h1 class="mb-3">
-                    <i class="fas fa-shopping-bag"></i> إتمام الطلب
+                    <i class="fas fa-shopping-bag"></i> Checkout
                 </h1>
                 
                 <!-- Progress Steps -->
@@ -196,10 +196,10 @@
                         <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
                     </div>
                     <div class="d-flex justify-content-between mt-2">
-                        <small class="text-success"><i class="fas fa-check-circle"></i> التسوق</small>
-                        <small class="text-success"><i class="fas fa-check-circle"></i> السلة</small>
-                        <small class="text-primary fw-bold"><i class="fas fa-circle"></i> تأكيد الطلب</small>
-                        <small class="text-muted">تم</small>
+                        <small class="text-success"><i class="fas fa-check-circle"></i> Shopping</small>
+                        <small class="text-success"><i class="fas fa-check-circle"></i> Cart</small>
+                        <small class="text-primary fw-bold"><i class="fas fa-circle"></i> Confirm Order</small>
+                        <small class="text-muted">Done</small>
                     </div>
                 </div>
             </div>
@@ -216,21 +216,21 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-shipping-fast"></i> عنوان الشحن
+                                <i class="fas fa-shipping-fast"></i> Shipping Address
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="fullName" class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                                    <label for="fullName" class="form-label">Full Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="fullName" 
                                            name="ShippingAddress.FullName" 
                                            value="@Model.ShippingAddress.FullName" required>
-                                    <div class="invalid-feedback">الرجاء إدخال الاسم الكامل</div>
+                                    <div class="invalid-feedback">Please enter your full name</div>
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <label for="phone" class="form-label">رقم الجوال <span class="text-danger">*</span></label>
+                                    <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text">+966</span>
                                         <input type="tel" class="form-control" id="phone" 
@@ -238,56 +238,56 @@
                                                value="@Model.ShippingAddress.PhoneNumber" 
                                                pattern="[0-9]{9}" placeholder="5xxxxxxxx" required>
                                     </div>
-                                    <div class="invalid-feedback">الرجاء إدخال رقم جوال مكون من 9 أرقام</div>
-                                    <small class="text-muted">أدخل 9 أرقام بدون الصفر (مثال: 512345678)</small>
+                                    <div class="invalid-feedback">Please enter a valid 9-digit phone number</div>
+                                    <small class="text-muted">Enter 9 digits without leading zero (e.g., 512345678)</small>
                                 </div>
                                 
                                 <div class="col-12">
-                                    <label for="street" class="form-label">العنوان <span class="text-danger">*</span></label>
+                                    <label for="street" class="form-label">Address <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" id="street" 
                                            name="ShippingAddress.Street" 
                                            value="@Model.ShippingAddress.Street" 
-                                           placeholder="الشارع، رقم المبنى، الطابق" required>
-                                    <div class="invalid-feedback">الرجاء إدخال العنوان</div>
+                                           placeholder="Street, Building No, Floor" required>
+                                    <div class="invalid-feedback">Please enter your address</div>
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <label for="city" class="form-label">المدينة <span class="text-danger">*</span></label>
+                                    <label for="city" class="form-label">City <span class="text-danger">*</span></label>
                                     <select class="form-select" id="city" name="ShippingAddress.City" required>
-                                        <option value="">اختر المدينة</option>
-                                        <option value="الرياض" selected="@(selectedCity == "الرياض")">الرياض</option>
-                                        <option value="جدة" selected="@(selectedCity == "جدة")">جدة</option>
-                                        <option value="مكة" selected="@(selectedCity == "مكة")">مكة</option>
-                                        <option value="المدينة" selected="@(selectedCity == "المدينة")">المدينة المنورة</option>
-                                        <option value="الدمام" selected="@(selectedCity == "الدمام")">الدمام</option>
-                                        <option value="الخبر" selected="@(selectedCity == "الخبر")">الخبر</option>
-                                        <option value="الطائف" selected="@(selectedCity == "الطائف")">الطائف</option>
-                                        <option value="أخرى" selected="@(selectedCity == "أخرى")">أخرى</option>
+                                        <option value="">Select City</option>
+                                        <option value="Riyadh" selected="@(selectedCity == "Riyadh" || selectedCity == "الرياض")">Riyadh</option>
+                                        <option value="Jeddah" selected="@(selectedCity == "Jeddah" || selectedCity == "جدة")">Jeddah</option>
+                                        <option value="Makkah" selected="@(selectedCity == "Makkah" || selectedCity == "مكة")">Makkah</option>
+                                        <option value="Madinah" selected="@(selectedCity == "Madinah" || selectedCity == "المدينة")">Madinah</option>
+                                        <option value="Dammam" selected="@(selectedCity == "Dammam" || selectedCity == "الدمام")">Dammam</option>
+                                        <option value="Khobar" selected="@(selectedCity == "Khobar" || selectedCity == "الخبر")">Khobar</option>
+                                        <option value="Taif" selected="@(selectedCity == "Taif" || selectedCity == "الطائف")">Taif</option>
+                                        <option value="Other" selected="@(selectedCity == "Other" || selectedCity == "أخرى")">Other</option>
                                     </select>
-                                    <div class="invalid-feedback">الرجاء اختيار المدينة</div>
+                                    <div class="invalid-feedback">Please select a city</div>
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <label for="district" class="form-label">الحي</label>
+                                    <label for="district" class="form-label">District</label>
                                     <input type="text" class="form-control" id="district" 
                                            name="ShippingAddress.District" 
                                            value="@Model.ShippingAddress.District">
                                 </div>
                                 
                                 <div class="col-md-6">
-                                    <label for="postalCode" class="form-label">الرمز البريدي</label>
+                                    <label for="postalCode" class="form-label">Postal Code</label>
                                     <input type="text" class="form-control" id="postalCode" 
                                            name="ShippingAddress.PostalCode" 
                                            value="@Model.ShippingAddress.PostalCode"
                                            pattern="[0-9]{5}" placeholder="12345">
-                                    <small class="text-muted">اختياري - 5 أرقام</small>
+                                    <small class="text-muted">Optional - 5 digits</small>
                                 </div>
                                 
                                 <div class="col-12">
-                                    <label for="additionalInfo" class="form-label">معلومات إضافية</label>
+                                    <label for="additionalInfo" class="form-label">Additional Information</label>
                                     <textarea class="form-control" id="additionalInfo" rows="2"
                                               name="ShippingAddress.AdditionalInfo"
-                                              placeholder="رقم الشقة، معلومات الوصول، إلخ...">@Model.ShippingAddress.AdditionalInfo</textarea>
+                                              placeholder="Apartment number, access details, etc...">@Model.ShippingAddress.AdditionalInfo</textarea>
                                 </div>
                             </div>
                         </div>
@@ -297,7 +297,7 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-money-bill-wave"></i> طريقة الدفع
+                                <i class="fas fa-money-bill-wave"></i> Payment Method
                             </h5>
                         </div>
                         <div class="card-body">
@@ -305,11 +305,11 @@
                                 <div class="d-flex align-items-center">
                                     <i class="fas fa-money-bill fa-3x text-success me-3"></i>
                                     <div>
-                                        <h5 class="mb-1"><strong>الدفع عند الاستلام</strong></h5>
-                                        <p class="mb-0">سيتم الدفع نقداً عند استلام طلبك من المندوب</p>
+                                        <h5 class="mb-1"><strong>Cash On Delivery</strong></h5>
+                                        <p class="mb-0">Payment will be made in cash upon receiving your order from the courier</p>
                                         <small class="text-muted">
                                             <i class="fas fa-info-circle"></i> 
-                                            يرجى تجهيز المبلغ المستحق عند الاستلام
+                                            Please prepare the due amount upon delivery
                                         </small>
                                     </div>
                                 </div>
@@ -321,12 +321,12 @@
                     <div class="card shadow-sm mb-4">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-comment"></i> ملاحظات التوصيل (اختياري)
+                                <i class="fas fa-comment"></i> Delivery Notes (Optional)
                             </h5>
                         </div>
                         <div class="card-body">
                             <textarea class="form-control" name="DeliveryNotes" rows="3"
-                                      placeholder="أي تعليمات خاصة للتوصيل..."></textarea>
+                                      placeholder="Any special delivery instructions..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -336,12 +336,12 @@
                     <div class="card shadow-sm sticky-top" style="top: 20px;">
                         <div class="card-header bg-dark text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-receipt"></i> ملخص الطلب
+                                <i class="fas fa-receipt"></i> Order Summary
                             </h5>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <strong>المنتجات (@Model.Cart.TotalItems):</strong>
+                                <strong>Products (@Model.Cart.TotalItems):</strong>
                                 <div class="mt-2" style="max-height: 200px; overflow-y: auto;">
                                     @foreach (var item in Model.Cart.Items)
                                     {
@@ -353,9 +353,9 @@
                                                     <span class="text-muted"> (@item.SelectedSize)</span>
                                                 }
                                                 <br/>
-                                                <small class="text-muted">@item.Quantity × @item.UnitPrice.ToString("N2") ريال</small>
+                                                <small class="text-muted">@item.Quantity × @item.UnitPrice.ToString("N2") SAR</small>
                                             </span>
-                                            <span class="fw-bold">@item.TotalPrice.ToString("N2") ريال</span>
+                                            <span class="fw-bold">@item.TotalPrice.ToString("N2") SAR</span>
                                         </div>
                                     }
                                 </div>
@@ -364,61 +364,61 @@
                             <hr class="my-3"/>
                             
                             <div class="d-flex justify-content-between mb-2">
-                                <span>المجموع الفرعي:</span>
-                                <span>@Model.Cart.SubTotal.ToString("N2") ريال</span>
+                                <span>Subtotal:</span>
+                                <span>@Model.Cart.SubTotal.ToString("N2") SAR</span>
                             </div>
                             
                             <div class="d-flex justify-content-between mb-2">
-                                <span>الشحن:</span>
+                                <span>Shipping:</span>
                                 <span class="@(Model.Cart.ShippingCost == 0 ? "text-success fw-bold" : "")">
                                     @if (Model.Cart.ShippingCost == 0)
                                     {
-                                        <text><i class="fas fa-gift"></i> مجاني</text>
+                                        <text><i class="fas fa-gift"></i> Free</text>
                                     }
                                     else
                                     {
-                                        <text>@Model.Cart.ShippingCost.ToString("N2") ريال</text>
+                                        <text>@Model.Cart.ShippingCost.ToString("N2") SAR</text>
                                     }
                                 </span>
                             </div>
                             
                             <div class="d-flex justify-content-between mb-3">
-                                <span>ضريبة القيمة المضافة (15%):</span>
-                                <span>@Model.Cart.Tax.ToString("N2") ريال</span>
+                                <span>VAT (15%):</span>
+                                <span>@Model.Cart.Tax.ToString("N2") SAR</span>
                             </div>
                             
                             <hr class="my-3"/>
                             
                             <div class="d-flex justify-content-between mb-2">
-                                <strong class="h5">الإجمالي:</strong>
-                                <strong class="h4 text-primary">@Model.Cart.Total.ToString("N2") ريال</strong>
+                                <strong class="h5">Total:</strong>
+                                <strong class="h4 text-primary">@Model.Cart.Total.ToString("N2") SAR</strong>
                             </div>
                             
                             <div class="alert alert-info small mb-3">
                                 <i class="fas fa-hand-holding-usd"></i>
-                                <strong>سيتم الدفع نقداً عند الاستلام</strong>
+                                <strong>Cash on Delivery</strong>
                             </div>
                             
                             <button type="submit" class="btn btn-success btn-lg w-100 mb-2" id="submitBtn">
-                                <i class="fas fa-check-circle"></i> تأكيد الطلب
+                                <i class="fas fa-check-circle"></i> Confirm Order
                             </button>
                             
                             <a href="@Url.Action("Cart", "Store")" class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-arrow-right"></i> العودة للسلة
+                                <i class="fas fa-arrow-right"></i> Back to Cart
                             </a>
 
                             <div class="mt-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="agreeTerms" required>
                                     <label class="form-check-label small" for="agreeTerms">
-                                        أوافق على <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">الشروط والأحكام</a>
+                                        I agree to <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Terms and Conditions</a>
                                     </label>
                                 </div>
                             </div>
 
                             <div class="text-center mt-3">
                                 <small class="text-muted">
-                                    <i class="fas fa-shield-alt"></i> عملية آمنة ومضمونة 100%
+                                    <i class="fas fa-shield-alt"></i> 100% Secure Transaction
                                 </small>
                             </div>
                         </div>
@@ -430,15 +430,15 @@
                             <div class="row text-center small g-2">
                                 <div class="col-4">
                                     <i class="fas fa-money-bill-wave text-success"></i>
-                                    <p class="mb-0 small">نقدي</p>
+                                    <p class="mb-0 small">Cash</p>
                                 </div>
                                 <div class="col-4">
                                     <i class="fas fa-truck text-primary"></i>
-                                    <p class="mb-0 small">توصيل سريع</p>
+                                    <p class="mb-0 small">Fast Delivery</p>
                                 </div>
                                 <div class="col-4">
                                     <i class="fas fa-undo text-info"></i>
-                                    <p class="mb-0 small">إرجاع مجاني</p>
+                                    <p class="mb-0 small">Free Returns</p>
                                 </div>
                             </div>
                         </div>
@@ -454,22 +454,22 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">الشروط والأحكام</h5>
+                <h5 class="modal-title">Terms and Conditions</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <h6>شروط الشراء والتوصيل</h6>
-                <p>بالموافقة على هذه الشروط، فإنك توافق على:</p>
+                <h6>Purchase and Delivery Terms</h6>
+                <p>By agreeing to these terms, you accept:</p>
                 <ul>
-                    <li>صحة المعلومات المقدمة</li>
-                    <li>سياسة الإرجاع والاستبدال</li>
-                    <li>شروط التوصيل والشحن</li>
-                    <li>سياسة الخصوصية</li>
-                    <li>الدفع نقداً عند الاستلام</li>
+                    <li>Accuracy of provided information</li>
+                    <li>Return and Exchange Policy</li>
+                    <li>Delivery and Shipping Terms</li>
+                    <li>Privacy Policy</li>
+                    <li>Cash on Delivery Payment</li>
                 </ul>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -649,7 +649,7 @@
                 
                 // Validate terms
                 if (!agreeTerms.checked) {
-                    showNotification('الرجاء الموافقة على الشروط والأحكام', 'warning');
+                    showNotification('Please agree to Terms and Conditions', 'warning');
                     agreeTerms.focus();
                     agreeTerms.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
@@ -672,7 +672,7 @@
                 });
                 
                 if (!isValid) {
-                    showNotification('الرجاء ملء جميع الحقول المطلوبة المميزة بعلامة *', 'danger');
+                    showNotification('Please fill all required fields marked with *', 'danger');
                     const firstInvalid = checkoutForm.querySelector('.is-invalid');
                     if (firstInvalid) {
                         firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -683,7 +683,7 @@
                 
                 // Show loading state
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جارٍ تأكيد الطلب...';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Confirming Order...';
                 
                 // ✅ Submit form via AJAX
                 const formData = new FormData(checkoutForm);
@@ -721,11 +721,11 @@
                 })
                 .catch(error => {
                     console.error('❌ Error submitting order:', error);
-                    showNotification('حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى.', 'danger');
+                    showNotification('Error processing order. Please try again.', 'danger');
                     
                     // Re-enable button
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> تأكيد الطلب';
+                    submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order';
                 });
             });
             
@@ -798,45 +798,26 @@
                         this.classList.add('is-valid');
                     }
                 });
-                
-                field.addEventListener('input', function() {
-                    if (this.classList.contains('is-invalid') && this.value.trim()) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    }
-                });
             });
-
-            // ===== TERMS CHECKBOX VALIDATION =====
-            if (agreeTerms) {
-                agreeTerms.addEventListener('change', function() {
-                    if (this.checked) {
-                        this.classList.remove('is-invalid');
-                        this.classList.add('is-valid');
-                    } else {
-                        this.classList.remove('is-valid');
-                    }
-                });
+            
+            // ===== NOTIFICATION HELPER =====
+            function showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+                notification.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px;';
+                notification.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Auto-remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
             }
         });
-        
-        // ===== NOTIFICATION HELPER =====
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            notification.style.cssText = 'top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; min-width: 300px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => notification.remove(), 300);
-            }, 4000);
-        }
     </script>
 }

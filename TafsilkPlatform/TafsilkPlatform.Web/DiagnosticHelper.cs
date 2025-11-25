@@ -1,5 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using System.Diagnostics;
 using System.Text;
 
 namespace TafsilkPlatform.Web;
@@ -16,10 +14,10 @@ public static class DiagnosticHelper
     public static void InspectFormFile(IFormFile? file, ILogger logger, string context = "Unknown")
     {
         // BREAKPOINT: Uncomment next line to enable breakpoint during debugging
-        #if DEBUG
+#if DEBUG
         // Debugger.Break();
-        #endif
-        
+#endif
+
         if (file == null)
         {
             logger.LogWarning("[{Context}] IFormFile is NULL", context);
@@ -34,7 +32,7 @@ public static class DiagnosticHelper
             info.AppendLine($"  ContentType: {file.ContentType ?? "NULL"}");
             info.AppendLine($"  Length: {file.Length} bytes");
             info.AppendLine($"  Name: {file.Name ?? "NULL"}");
-            
+
             // Try to get headers if available
             if (file.Headers != null && file.Headers.Count > 0)
             {
@@ -55,11 +53,11 @@ public static class DiagnosticHelper
                     using var stream = file.OpenReadStream();
                     var buffer = new byte[Math.Min(16, (int)file.Length)];
                     var bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    
+
                     var hexString = BitConverter.ToString(buffer, 0, bytesRead);
-                    logger.LogInformation("[{Context}] First {BytesRead} bytes (hex): {HexString}", 
+                    logger.LogInformation("[{Context}] First {BytesRead} bytes (hex): {HexString}",
                         context, bytesRead, hexString);
-                    
+
                     // IMPORTANT: Reset stream position for subsequent operations
                     stream.Position = 0;
                 }
@@ -82,10 +80,10 @@ public static class DiagnosticHelper
     public static bool ValidateStream(Stream? stream, ILogger logger, string context = "Unknown")
     {
         // BREAKPOINT: Uncomment next line to enable breakpoint during debugging
-        #if DEBUG
+#if DEBUG
         // Debugger.Break();
-        #endif
-        
+#endif
+
         if (stream == null)
         {
             logger.LogError("[{Context}] Stream is NULL", context);
@@ -95,8 +93,8 @@ public static class DiagnosticHelper
         try
         {
             logger.LogInformation("[{Context}] Stream validation - CanRead: {CanRead}, CanSeek: {CanSeek}, Position: {Position}, Length: {Length}",
-                context, stream.CanRead, stream.CanSeek, 
-                stream.CanSeek ? stream.Position : -1, 
+                context, stream.CanRead, stream.CanSeek,
+                stream.CanSeek ? stream.Position : -1,
                 stream.CanSeek ? stream.Length : -1);
 
             if (!stream.CanRead)
@@ -121,10 +119,10 @@ public static class DiagnosticHelper
     public static bool TestMemoryAllocation(long sizeBytes, ILogger logger, string context = "Unknown")
     {
         // BREAKPOINT: Uncomment next line to enable breakpoint during debugging
-        #if DEBUG
+#if DEBUG
         // Debugger.Break();
-        #endif
-        
+#endif
+
         try
         {
             var gc = GC.GetGCMemoryInfo();
@@ -133,7 +131,7 @@ public static class DiagnosticHelper
 
             if (sizeBytes > gc.TotalAvailableMemoryBytes / 2)
             {
-                logger.LogWarning("[{Context}] Requested allocation ({Size:N0} bytes) is more than 50% of available memory", 
+                logger.LogWarning("[{Context}] Requested allocation ({Size:N0} bytes) is more than 50% of available memory",
                     context, sizeBytes);
                 return false;
             }

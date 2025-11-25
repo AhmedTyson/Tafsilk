@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Diagnostics;
-using System.Diagnostics;
 
 namespace TafsilkPlatform.Web.Middleware;
 
@@ -22,9 +21,9 @@ public class GlobalExceptionHandler : IExceptionHandler
         CancellationToken cancellationToken)
     {
         // 🔴 BREAKPOINT: Uncomment next line to catch ALL unhandled exceptions during debugging
-        #if DEBUG
+#if DEBUG
         // Debugger.Break();
-        #endif
+#endif
 
         _logger.LogError(exception,
             "🚨 UNHANDLED EXCEPTION 🚨\n" +

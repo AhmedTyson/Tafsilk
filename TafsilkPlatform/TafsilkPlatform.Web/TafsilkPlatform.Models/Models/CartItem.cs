@@ -9,16 +9,16 @@ namespace TafsilkPlatform.Models.Models
     public class CartItem
     {
         [Key]
- public Guid CartItemId { get; set; } = Guid.NewGuid();
-
-  [Required]
-        public Guid CartId { get; set; }
-
-     [ForeignKey("CartId")]
-  public required ShoppingCart Cart { get; set; }
+        public Guid CartItemId { get; set; } = Guid.NewGuid();
 
         [Required]
- public Guid ProductId { get; set; }
+        public Guid CartId { get; set; }
+
+        [ForeignKey("CartId")]
+        public required ShoppingCart Cart { get; set; }
+
+        [Required]
+        public Guid ProductId { get; set; }
 
         [ForeignKey("ProductId")]
         public required Product Product { get; set; }
@@ -29,13 +29,13 @@ namespace TafsilkPlatform.Models.Models
 
         [Required]
         [Column(TypeName = "decimal(18,2)")]
-  public decimal UnitPrice { get; set; }
+        public decimal UnitPrice { get; set; }
 
         [MaxLength(50)]
         public string? SelectedSize { get; set; }
 
-  [MaxLength(50)]
-    public string? SelectedColor { get; set; }
+        [MaxLength(50)]
+        public string? SelectedColor { get; set; }
 
         [MaxLength(500)]
         public string? SpecialInstructions { get; set; }
@@ -45,6 +45,6 @@ namespace TafsilkPlatform.Models.Models
 
         // Calculated property
         [NotMapped]
-public decimal TotalPrice => UnitPrice * Quantity;
+        public decimal TotalPrice => UnitPrice * Quantity;
     }
 }

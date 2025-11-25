@@ -1,4 +1,3 @@
-using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.TailorManagement;
 
 namespace TafsilkPlatform.Web.Services;
@@ -17,7 +16,7 @@ public interface IProductManagementService
     /// Add a new product
     /// </summary>
     Task<(bool Success, Guid? ProductId, string? ErrorMessage)> AddProductAsync(
-        Guid tailorId, 
+        Guid tailorId,
         AddProductViewModel model);
 
     /// <summary>
@@ -29,8 +28,8 @@ public interface IProductManagementService
     /// Update an existing product
     /// </summary>
     Task<(bool Success, string? ErrorMessage)> UpdateProductAsync(
-        Guid productId, 
-        Guid tailorId, 
+        Guid productId,
+        Guid tailorId,
         EditProductViewModel model);
 
     /// <summary>
@@ -42,15 +41,15 @@ public interface IProductManagementService
     /// Toggle product availability
     /// </summary>
     Task<(bool Success, bool IsAvailable, string? ErrorMessage)> ToggleProductAvailabilityAsync(
-        Guid productId, 
+        Guid productId,
         Guid tailorId);
 
     /// <summary>
     /// Update product stock quantity
     /// </summary>
     Task<(bool Success, int NewStock, bool IsAvailable, string? ErrorMessage)> UpdateStockAsync(
-        Guid productId, 
-        Guid tailorId, 
+        Guid productId,
+        Guid tailorId,
         int newStock);
 
     /// <summary>

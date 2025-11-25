@@ -11,21 +11,21 @@ namespace TafsilkPlatform.Utility.Helpers
         /// <summary>
         /// Check if user is admin or tester (has full access)
         /// </summary>
-    public static bool IsAdminOrTester(ClaimsPrincipal user)
-     {
+        public static bool IsAdminOrTester(ClaimsPrincipal user)
+        {
             if (user?.Identity?.IsAuthenticated != true)
-         return false;
+                return false;
 
-       return user.IsInRole("Admin");
+            return user.IsInRole("Admin");
         }
 
         /// <summary>
-     /// Check if user can access customer pages (Customer role OR Admin)
-  /// </summary>
-      public static bool CanAccessCustomerPages(ClaimsPrincipal user)
+        /// Check if user can access customer pages (Customer role OR Admin)
+        /// </summary>
+        public static bool CanAccessCustomerPages(ClaimsPrincipal user)
         {
             if (user?.Identity?.IsAuthenticated != true)
-            return false;
+                return false;
 
             return user.IsInRole("Customer") || user.IsInRole("Admin");
         }
@@ -35,37 +35,37 @@ namespace TafsilkPlatform.Utility.Helpers
         /// </summary>
         public static bool CanAccessTailorPages(ClaimsPrincipal user)
         {
-    if (user?.Identity?.IsAuthenticated != true)
-      return false;
+            if (user?.Identity?.IsAuthenticated != true)
+                return false;
 
-   return user.IsInRole("Tailor") || user.IsInRole("Admin");
+            return user.IsInRole("Tailor") || user.IsInRole("Admin");
         }
 
         /// <summary>
         /// Check if user can access admin pages (Admin role only)
-      /// </summary>
+        /// </summary>
         public static bool CanAccessAdminPages(ClaimsPrincipal user)
         {
-     if (user?.Identity?.IsAuthenticated != true)
- return false;
+            if (user?.Identity?.IsAuthenticated != true)
+                return false;
 
-     return user.IsInRole("Admin");
-}
+            return user.IsInRole("Admin");
+        }
 
-   /// <summary>
+        /// <summary>
         /// Get user's role for display purposes
-/// </summary>
+        /// </summary>
         public static string GetUserRole(ClaimsPrincipal user)
         {
-  if (user?.Identity?.IsAuthenticated != true)
-          return "Anonymous";
+            if (user?.Identity?.IsAuthenticated != true)
+                return "Anonymous";
 
             if (user.IsInRole("Admin"))
-           return "Admin";
+                return "Admin";
             if (user.IsInRole("Tailor"))
-     return "Tailor";
-     if (user.IsInRole("Customer"))
-        return "Customer";
+                return "Tailor";
+            if (user.IsInRole("Customer"))
+                return "Customer";
 
             return "Unknown";
         }
@@ -78,39 +78,39 @@ namespace TafsilkPlatform.Utility.Helpers
             if (user?.Identity?.IsAuthenticated != true)
                 return "Guest";
 
-          return user.FindFirst("FullName")?.Value 
-                ?? user.FindFirst(ClaimTypes.Name)?.Value 
-              ?? user.FindFirst(ClaimTypes.Email)?.Value 
-      ?? "User";
-   }
+            return user.FindFirst("FullName")?.Value
+                  ?? user.FindFirst(ClaimTypes.Name)?.Value
+                ?? user.FindFirst(ClaimTypes.Email)?.Value
+        ?? "User";
+        }
 
         /// <summary>
- /// Check if user is in testing mode (tester account)
+        /// Check if user is in testing mode (tester account)
         /// </summary>
-   public static bool IsTesterAccount(ClaimsPrincipal user)
+        public static bool IsTesterAccount(ClaimsPrincipal user)
         {
-         if (user?.Identity?.IsAuthenticated != true)
-       return false;
+            if (user?.Identity?.IsAuthenticated != true)
+                return false;
 
             var email = user.FindFirst(ClaimTypes.Email)?.Value;
-   return email?.Contains("tester@", StringComparison.OrdinalIgnoreCase) == true;
-      }
+            return email?.Contains("tester@", StringComparison.OrdinalIgnoreCase) == true;
+        }
 
         /// <summary>
-      /// Check if feature is accessible by current user
+        /// Check if feature is accessible by current user
         /// Admins can access everything
-   /// </summary>
+        /// </summary>
         public static bool CanAccessFeature(ClaimsPrincipal user, string requiredRole)
         {
-          if (user?.Identity?.IsAuthenticated != true)
-    return false;
+            if (user?.Identity?.IsAuthenticated != true)
+                return false;
 
- // Admins can access everything
+            // Admins can access everything
             if (user.IsInRole("Admin"))
-         return true;
+                return true;
 
-  // Otherwise check specific role
-        return user.IsInRole(requiredRole);
-     }
+            // Otherwise check specific role
+            return user.IsInRole(requiredRole);
+        }
     }
 }
