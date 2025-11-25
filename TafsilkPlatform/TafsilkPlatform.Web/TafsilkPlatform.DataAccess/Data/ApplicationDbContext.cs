@@ -74,6 +74,15 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Determine provider so we can emit provider-specific SQL for defaults/column types
+        var provider = Database.ProviderName ?? string.Empty;
+        var isSqlite = provider.Contains("Sqlite", StringComparison.OrdinalIgnoreCase);
+
+        // Helper locals for provider-specific SQL
+        string guidDefaultSql = isSqlite ? "lower(hex(randomblob(16)))" : "(newid())";
+        string utcNowDefaultSql = isSqlite ? "CURRENT_TIMESTAMP" : "(getutcdate())";
+        string blobColumnType = isSqlite ? "BLOB" : "varbinary(max)";
+
         // User Entity
         modelBuilder.Entity<User>(entity =>
         {
@@ -83,8 +92,8 @@ public partial class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.RoleId, "IX_Users_RoleId");
             entity.HasIndex(e => e.Email, "UQ__Users__A9D10534975288F0").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
@@ -102,8 +111,8 @@ public partial class ApplicationDbContext : DbContext
  {
      entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC07CB85E41E");
 
-     entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-     entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+     entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
+     entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
      entity.Property(e => e.Description).HasMaxLength(255);
      entity.Property(e => e.Name).HasMaxLength(50);
      entity.Property(e => e.Permissions).HasMaxLength(2000); // JSON permissions
@@ -118,9 +127,9 @@ public partial class ApplicationDbContext : DbContext
                  entity.HasIndex(e => e.UserId, "IX_CustomerProfiles_UserId");
                  entity.HasIndex(e => e.UserId, "UQ__Customer__1788CC4D90808B91").IsUnique();
 
-                 entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+                 entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
                  entity.Property(e => e.City).HasMaxLength(100);
-                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+                 entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
                  entity.Property(e => e.FullName).HasMaxLength(255);
                  entity.Property(e => e.Gender).HasMaxLength(20);
                  entity.Property(e => e.Bio).HasMaxLength(1000);
@@ -128,7 +137,7 @@ public partial class ApplicationDbContext : DbContext
                  entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
 #pragma warning restore CS0618
                  entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-                 entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+                 entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
                  entity.HasOne(d => d.User)
            .WithOne(p => p.CustomerProfile)
@@ -145,12 +154,12 @@ public partial class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.UserId, "IX_TailorProfiles_UserId");
             entity.HasIndex(e => e.UserId, "UQ__TailorPr__1788CC4D37A4BF4A").IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
             entity.Property(e => e.FullName).HasMaxLength(255);
             entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.Address).HasMaxLength(500);
             entity.Property(e => e.Bio).HasMaxLength(1000);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
             entity.Property(e => e.IsVerified).HasDefaultValue(false);
             entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
             entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
@@ -160,7 +169,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
 #pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-            entity.Property(e => e.ProfilePictureData).HasColumnType("varbinary(max)");
+            entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
             entity.HasOne(d => d.User)
         .WithOne(p => p.TailorProfile)
@@ -176,9 +185,9 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.UserId, "IX_UserAddresses_UserId");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).HasDefaultValueSql(guidDefaultSql);
             entity.Property(e => e.City).HasMaxLength(100);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
             entity.Property(e => e.IsDefault).HasDefaultValue(false);
             entity.Property(e => e.Label).HasMaxLength(100);
             entity.Property(e => e.Latitude).HasColumnType("decimal(10, 8)");
@@ -266,7 +275,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.PortfolioImageId).ValueGeneratedOnAdd();
             entity.Property(e => e.ImageUrl).HasMaxLength(500);
-            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UploadedAt).HasDefaultValueSql(utcNowDefaultSql);
             entity.Property(e => e.IsDeleted).HasDefaultValue(false);
 
             // FIXED: Add decimal precision for EstimatedPrice
@@ -322,7 +331,7 @@ public partial class ApplicationDbContext : DbContext
 
               entity.Property(e => e.Key).IsRequired().HasMaxLength(128);
               entity.Property(e => e.Status).HasDefaultValue(IdempotencyStatus.InProgress);
-              entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql("(getutcdate())");
+              entity.Property(e => e.CreatedAtUtc).HasDefaultValueSql(utcNowDefaultSql);
               entity.Property(e => e.ContentType).HasMaxLength(100);
               entity.Property(e => e.Endpoint).HasMaxLength(500);
               entity.Property(e => e.Method).HasMaxLength(10);
@@ -342,7 +351,7 @@ public partial class ApplicationDbContext : DbContext
                entity.Property(e => e.Id).ValueGeneratedOnAdd();
                entity.Property(e => e.Tier).HasMaxLength(50).HasDefaultValue("Bronze");
                entity.Property(e => e.ReferralCode).HasMaxLength(20);
-               entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+               entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
                entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerLoyalty_CustomerId").IsUnique();
                entity.HasIndex(e => e.ReferralCode).HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
@@ -362,7 +371,7 @@ public partial class ApplicationDbContext : DbContext
           entity.Property(e => e.Id).ValueGeneratedOnAdd();
           entity.Property(e => e.Type).IsRequired().HasMaxLength(20);
           entity.Property(e => e.Description).HasMaxLength(200);
-          entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+          entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
           entity.HasIndex(e => e.CustomerLoyaltyId).HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
           entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
@@ -384,7 +393,7 @@ public partial class ApplicationDbContext : DbContext
        entity.Property(e => e.GarmentType).HasMaxLength(50);
        entity.Property(e => e.CustomMeasurementsJson).HasMaxLength(2000);
        entity.Property(e => e.Notes).HasMaxLength(500);
-       entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+       entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
        // Decimal precision for measurements
        entity.Property(e => e.Chest).HasColumnType("decimal(5,2)");
@@ -422,7 +431,7 @@ public partial class ApplicationDbContext : DbContext
               entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
               entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Medium");
               entity.Property(e => e.AdminResponse).HasMaxLength(2000);
-              entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+              entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
               entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Complaints_OrderId");
               entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Complaints_CustomerId");
@@ -452,10 +461,10 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.FileData).HasColumnType("varbinary(max)");
+            entity.Property(e => e.FileData).HasColumnType(blobColumnType);
             entity.Property(e => e.ContentType).HasMaxLength(100);
             entity.Property(e => e.FileName).HasMaxLength(255);
-            entity.Property(e => e.UploadedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.UploadedAt).HasDefaultValueSql(utcNowDefaultSql);
 
             entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
 
@@ -471,7 +480,7 @@ public partial class ApplicationDbContext : DbContext
               entity.HasKey(e => e.ProductId);
               entity.Property(e => e.Price).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
               entity.Property(e => e.DiscountedPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-              entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+              entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
               entity.HasIndex(e => e.Category);
               entity.HasIndex(e => e.Slug).IsUnique();
@@ -488,7 +497,7 @@ public partial class ApplicationDbContext : DbContext
         modelBuilder.Entity<ShoppingCart>(entity =>
         {
             entity.HasKey(e => e.CartId);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
             entity.HasIndex(e => e.CustomerId).IsUnique();
 
@@ -503,7 +512,7 @@ public partial class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.CartItemId);
             entity.Property(e => e.UnitPrice).HasColumnType("decimal(18,2)").HasPrecision(18, 2);
-            entity.Property(e => e.AddedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.AddedAt).HasDefaultValueSql(utcNowDefaultSql);
 
             entity.HasIndex(e => e.CartId);
             entity.HasIndex(e => e.ProductId);
@@ -523,7 +532,7 @@ public partial class ApplicationDbContext : DbContext
         modelBuilder.Entity<ProductReview>(entity =>
         {
             entity.HasKey(e => e.ReviewId);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
             entity.HasIndex(e => e.ProductId);
             entity.HasIndex(e => e.CustomerId);

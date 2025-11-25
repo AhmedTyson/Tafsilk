@@ -248,22 +248,38 @@ Array.Empty<string>()
     }
 
     // Database context
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     builder.Services.AddDbContext<ApplicationDbContext>(options =>
     {
-        options.UseSqlServer(
-     builder.Configuration.GetConnectionString("DefaultConnection"),
-     sqlOptions =>
+        // Support SQLite for local development (if connection string points to a file) or SQL Server otherwise
+        if (!string.IsNullOrEmpty(connectionString) && connectionString.Trim().StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase))
         {
-              sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
-              sqlOptions.EnableRetryOnFailure(
-      maxRetryCount: 3,
-        maxRetryDelay: TimeSpan.FromSeconds(5),
-             errorNumbersToAdd: null);
-          });
+            options.UseSqlite(connectionString);
+        }
+        else
+        {
+            options.UseSqlServer(
+         connectionString,
+         sqlOptions =>
+            {
+                  sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
+                  sqlOptions.EnableRetryOnFailure(
+          maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+                 errorNumbersToAdd: null);
+              });
+        }
 
-        if (builder.Environment.IsDevelopment())
+        // Enable sensitive data logging only when explicitly allowed in config AND in Development
+        var enableSensitive = builder.Configuration.GetValue<bool>("Database:EnableSensitiveDataLogging", false);
+        if (builder.Environment.IsDevelopment() && enableSensitive)
         {
             options.EnableSensitiveDataLogging();
+            options.EnableDetailedErrors();
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            // Still allow detailed errors in development without sensitive data
             options.EnableDetailedErrors();
         }
     });
@@ -616,20 +632,72 @@ Array.Empty<string>()
     {
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var canConnect = await db.Database.CanConnectAsync();
-        if (canConnect)
+        var providerName = db.Database.ProviderName ?? string.Empty;
+
+        // If using SQLite in development, prefer EnsureCreated to avoid running SQL Server-specific migrations
+        if (providerName.Contains("Sqlite", StringComparison.OrdinalIgnoreCase))
         {
-            Log.Information("✓ Database connection verified successfully");
+            try
+            {
+                await db.Database.EnsureCreatedAsync();
+                Log.Information("✓ SQLite database ensured/created successfully");
+
+                // Seed minimal data required for application to operate (roles)
+                if (!await db.Roles.AnyAsync())
+                {
+                    db.Roles.AddRange(
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                    );
+                    await db.SaveChangesAsync();
+                    Log.Information("✓ Seeded default roles into SQLite database");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to ensure/create SQLite database during startup");
+                if (!app.Environment.IsDevelopment()) throw;
+            }
         }
         else
         {
-            Log.Warning("⚠ Database connection check returned false");
+            // For SQL Server and other providers, attempt to apply migrations (more realistic for production/dev with migrations)
+            try
+            {
+                await db.Database.MigrateAsync();
+                Log.Information("✓ Database migrations applied successfully");
+
+                // Seed minimal data required for application to operate (roles)
+                if (!await db.Roles.AnyAsync())
+                {
+                    db.Roles.AddRange(
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator" , CreatedAt = DateTime.UtcNow},
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role" , CreatedAt = DateTime.UtcNow},
+                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role" , CreatedAt = DateTime.UtcNow}
+                    );
+                    await db.SaveChangesAsync();
+                    Log.Information("✓ Seeded default roles into database");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "❌ Applying migrations failed. Please ensure the database is available and migrations are compatible.");
+                throw;
+            }
         }
     }
     catch (Exception ex)
     {
-        Log.Fatal(ex, "❌ Cannot connect to database. Please check connection string and ensure SQL Server is running.");
-        throw;
+        if (app.Environment.IsDevelopment())
+        {
+            Log.Warning(ex, "Database initialization failed during startup but continuing because environment is Development");
+        }
+        else
+        {
+            Log.Fatal(ex, "❌ Cannot initialize database. Application will stop.");
+            throw;
+        }
     }
 
     // ✅ STARTUP HEALTH CHECKS - fail fast if attachments folder not writable

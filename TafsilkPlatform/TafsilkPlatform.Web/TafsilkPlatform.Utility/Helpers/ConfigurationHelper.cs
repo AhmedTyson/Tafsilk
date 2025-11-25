@@ -45,15 +45,33 @@ public static class ConfigurationHelper
     {
         var issues = new List<string>();
 
+        // Determine environment (default to Production when not set)
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        var isDevelopment = string.Equals(environment, "Development", StringComparison.OrdinalIgnoreCase);
+
         // Check JWT Key
         var jwtKey = config["Jwt:Key"] ?? Environment.GetEnvironmentVariable("JWT_KEY");
         if (string.IsNullOrEmpty(jwtKey))
         {
-            issues.Add("JWT Key is missing. Run: dotnet user-secrets set \"Jwt:Key\" \"YourKeyHere\"");
+            if (isDevelopment)
+            {
+                logger.LogWarning("JWT Key is not configured. In Development this is allowed but you should set a key for realistic testing. Run: dotnet user-secrets set \"Jwt:Key\" \"YourKeyHere\"");
+            }
+            else
+            {
+                issues.Add("JWT Key is missing. Run: dotnet user-secrets set \"Jwt:Key\" \"YourKeyHere\"");
+            }
         }
         else if (jwtKey.Length < 32)
         {
-            issues.Add("JWT Key must be at least 32 characters long");
+            if (isDevelopment)
+            {
+                logger.LogWarning("Configured JWT Key is shorter than 32 characters. Use a stronger key in production.");
+            }
+            else
+            {
+                issues.Add("JWT Key must be at least 32 characters long");
+            }
         }
 
         // Check Connection String
