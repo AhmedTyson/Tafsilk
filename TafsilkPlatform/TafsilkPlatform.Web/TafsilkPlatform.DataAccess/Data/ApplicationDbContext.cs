@@ -58,14 +58,15 @@ public partial class ApplicationDbContext : DbContext
     {
         if (!optionsBuilder.IsConfigured)
         {
-            // Fallback to named connection string (resolved from IConfiguration when available)
+            // Use the named connection string key that exists in appsettings.json
+            // (was incorrectly pointing to a non-existent key before)
             optionsBuilder.UseSqlServer(
-          "Name=ConnectionStrings:TafsilkPlatform",
-    sqlOptions =>
-    {
-        // OPTIMIZATION: Enable query splitting to avoid cartesian explosion
-        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-    });
+                "Name=ConnectionStrings:DefaultConnection",
+                sqlOptions =>
+                {
+                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                    sqlOptions.MigrationsAssembly("TafsilkPlatform.DataAccess");
+                });
         }
 
         // OPTIMIZATION: Only enable sensitive data logging in Development environment
