@@ -1,278 +1,684 @@
 @model TafsilkPlatform.Models.ViewModels.Store.ProductListViewModel
+
 @{
-    ViewData["Title"] = "المتجر - تصفح المنتجات";
+    ViewData["Title"] = "Store - Shop Ready-to-Wear Garments | Tafsilk";
+    ViewData["Description"] = "Browse our collection of handcrafted ready-to-wear garments by talented tailors. Find unique clothing for men, women, and kids.";
+    ViewData["Keywords"] = "ready-to-wear, tailored clothing, handcrafted garments, custom apparel, men's wear, women's wear, kids clothing";
 }
 
-<div class="container-fluid py-4">
-    <div class="row">
-        <!-- Sidebar Filters -->
-        <div class="col-lg-3 col-md-4 mb-4">
-    <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white">
-  <h5 class="mb-0">
-            <i class="fas fa-filter"></i> تصفية المنتجات
-</h5>
-       </div>
-          <div class="card-body">
-      <form method="get" asp-action="Index" id="filterForm">
-       <!-- Category Filter -->
- <div class="mb-3">
-           <label class="form-label fw-bold">التصنيف</label>
-          <select name="category" class="form-select" onchange="this.form.submit()">
-    <option value="">جميع التصنيفات</option>
-     <option value="Thobe" selected="@(Model.Category == "Thobe")">ثوب</option>
-                 <option value="Abaya" selected="@(Model.Category == "Abaya")">عباية</option>
-     <option value="Suit" selected="@(Model.Category == "Suit")">بدلة</option>
-     <option value="Traditional" selected="@(Model.Category == "Traditional")">تقليدي</option>
-            <option value="Accessories" selected="@(Model.Category == "Accessories")">إكسسوارات</option>
-            </select>
-  </div>
+@section Meta {
+    <meta name="description" content="@ViewData["Description"]">
+    <meta name="keywords" content="@ViewData["Keywords"]">
+    <meta property="og:title" content="@ViewData["Title"]">
+    <meta property="og:description" content="@ViewData["Description"]">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@ViewData["Title"]">
+    <meta name="twitter:description" content="@ViewData["Description"]">
+}
 
-   <!-- Price Range -->
-    <div class="mb-3">
-              <label class="form-label fw-bold">نطاق السعر (ريال)</label>
-    <div class="row g-2">
-        <div class="col-6">
-      <input type="number" name="minPrice" class="form-control form-control-sm" 
-   placeholder="الأدنى" value="@Model.MinPrice" />
-    </div>
-      <div class="col-6">
-          <input type="number" name="maxPrice" class="form-control form-control-sm" 
-                 placeholder="الأعلى" value="@Model.MaxPrice" />
-     </div>
-  </div>
-     </div>
+@section Styles {
+    <link rel="stylesheet" href="~/css/store.css" asp-append-version="true" />
+}
 
-<!-- Search -->
-    <div class="mb-3">
-            <label class="form-label fw-bold">البحث</label>
-    <input type="text" name="search" class="form-control" 
-   placeholder="ابحث عن منتج..." value="@Model.SearchQuery" />
+<div class="store-layout">
+    <!-- Filter Sidebar -->
+    <aside class="filter-sidebar">
+        <div id="filterPanel">
+            <!-- Category Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    Category
+                    <button type="button" class="clear-btn" onclick="clearCategoryFilter()">Clear</button>
+                </div>
+                <div class="filter-options">
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="" checked onchange="applyFilters()">
+                        <span class="option-label">All Categories</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="Men" onchange="applyFilters()">
+                        <span class="option-label">Men's Wear</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="Women" onchange="applyFilters()">
+                        <span class="option-label">Women's Wear</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="Kids" onchange="applyFilters()">
+                        <span class="option-label">Kids' Wear</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="radio" name="category" value="Accessories" onchange="applyFilters()">
+                        <span class="option-label">Accessories</span>
+                    </label>
+                </div>
             </div>
 
-        <!-- Sort By -->
-             <div class="mb-3">
-           <label class="form-label fw-bold">ترتيب حسب</label>
-   <select name="sortBy" class="form-select">
-     <option value="">الأحدث</option>
-    <option value="price_asc" selected="@(Model.SortBy == "price_asc")">السعر: من الأقل للأعلى</option>
-     <option value="price_desc" selected="@(Model.SortBy == "price_desc")">السعر: من الأعلى للأقل</option>
- <option value="name" selected="@(Model.SortBy == "name")">الاسم أ-ي</option>
-        <option value="rating" selected="@(Model.SortBy == "rating")">الأعلى تقييماً</option>
-            <option value="popular" selected="@(Model.SortBy == "popular")">الأكثر مبيعاً</option>
-                  </select>
-    </div>
+            <!-- Price Range Filter -->
+            <div class="filter-section">
+                <div class="filter-title">
+                    Price Range
+                    <button type="button" class="clear-btn" onclick="clearPriceFilter()">Clear</button>
+                </div>
+                <div class="price-inputs">
+                    <input type="number" id="minPrice" class="price-input" placeholder="Min" min="0" onchange="applyFilters()">
+                    <input type="number" id="maxPrice" class="price-input" placeholder="Max" min="0" onchange="applyFilters()">
+                </div>
+            </div>
 
-     <button type="submit" class="btn btn-primary w-100">
-  <i class="fas fa-search"></i> تطبيق الفلاتر
-     </button>
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100 mt-2">
-           <i class="fas fa-redo"></i> إعادة تعيين
-      </a>
-  </form>
-      </div>
- </div>
+            <!-- Active Filters Display -->
+            <div id="activeFilters" style="margin-top: 1rem; display: none;">
+                <div style="font-size: 0.75rem; font-weight: 600; color: #6b7280; margin-bottom: 0.5rem;">ACTIVE FILTERS</div>
+                <div id="activeFiltersList" style="display: flex; flex-wrap: wrap; gap: 0.5rem;"></div>
+            </div>
+
+            <!-- Clear All Button -->
+            <button type="button" class="btn btn-outline" onclick="clearAllFilters()" style="width: 100%; margin-top: 1rem;">
+                <i class="fas fa-times-circle me-2"></i>
+                Clear All Filters
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="store-main">
+        <!-- Page Header with Search -->
+        <div class="page-header">
+            <h1 class="page-title">Ready-to-Wear Store</h1>
+            <p class="page-subtitle">Discover handcrafted garments from talented tailors</p>
+            
+            <!-- Search Bar -->
+            <div style="max-width: 500px; margin: 1.5rem auto 0; position: relative;">
+                <input type="text" 
+                       id="searchInput" 
+                       class="form-control" 
+                       placeholder="Search products by name or description..."
+                       style="padding: 0.875rem 3rem 0.875rem 1rem; border-radius: 0.5rem; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.15); color: white; font-size: 1rem;"
+                       oninput="debounce(applyFilters, 300)()"
+                       aria-label="Search products">
+                <i class="fas fa-search" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.7); font-size: 1.125rem;"></i>
+            </div>
+        </div>
+
+        <!-- Products Header with Sort and Count -->
+        <div class="products-header">
+            <h2 class="section-title">
+                <span id="productCount">@Model.Products.Count() Products</span>
+            </h2>
+            <div class="sort-options">
+                <label for="sortSelect" style="font-size: 0.875rem; color: #6b7280;">Sort by:</label>
+                <select id="sortSelect" class="sort-select" onchange="applyFilters()">
+                    <option value="">Featured</option>
+                    <option value="price-asc">Price: Low to High</option>
+                    <option value="price-desc">Price: High to Low</option>
+                    <option value="name-asc">Name: A to Z</option>
+                   <option value="name-desc">Name: Z to A</option>
+                </select>
+            </div>
         </div>
 
         <!-- Products Grid -->
-      <div class="col-lg-9 col-md-8">
-         <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">
- @if (!string.IsNullOrEmpty(Model.Category))
-              {
-           <text>@Model.Category</text>
-               }
-          else if (!string.IsNullOrEmpty(Model.SearchQuery))
+        @if (Model.Products.Any())
+        {
+            <div class="products-grid">
+                @foreach (var product in Model.Products)
                 {
-  <text>نتائج البحث: "@Model.SearchQuery"</text>
-         }
-       else
- {
-      <text>جميع المنتجات</text>
-        }
-          </h2>
-         <span class="text-muted">@Model.TotalCount منتج</span>
-        </div>
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            @if (!string.IsNullOrEmpty(product.PrimaryImageBase64))
+                            {
+                                <img src="@product.PrimaryImageBase64" alt="@product.Name" class="product-image" loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="product-image" style="display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #9ca3af;">
+                                    <i class="fas fa-image" style="font-size: 3rem;"></i>
+                                </div>
+                            }
+                            
+                            @if (product.DiscountedPrice.HasValue && product.DiscountedPrice < product.Price)
+                            {
+                                var discountPercent = (int)((product.Price - product.DiscountedPrice.Value) / product.Price * 100);
+                                <span class="product-badge">@discountPercent% OFF</span>
+                            }
+                        </div>
 
-            @if (Model.Products.Any())
-      {
-    <div class="row g-4">
-       @foreach (var product in Model.Products)
-       {
-    <div class="col-lg-4 col-md-6">
-        <div class="card product-card h-100 shadow-sm hover-lift">
-    <a asp-action="ProductDetails" asp-route-id="@product.ProductId" class="text-decoration-none">
-        @if (!string.IsNullOrEmpty(product.PrimaryImageBase64))
-   {
-         <img src="data:image/jpeg;base64,@product.PrimaryImageBase64" 
-     class="card-img-top" alt="@product.Name" style="height: 250px; object-fit: cover;">
-        }
-    else
-       {
-            <div class="bg-light d-flex align-items-center justify-content-center" 
-          style="height: 250px;">
-  <i class="fas fa-image fa-3x text-muted"></i>
-    </div>
-           }
-        </a>
-       
-   <div class="card-body">
-     <span class="badge bg-info mb-2">@product.Category</span>
-    
-        @if (product.IsFeatured)
-   {
- <span class="badge bg-warning text-dark mb-2">
-  <i class="fas fa-star"></i> مميز
-             </span>
-       }
-             
-    <h5 class="card-title">
-<a asp-action="ProductDetails" asp-route-id="@product.ProductId" 
-                   class="text-dark text-decoration-none">
-     @product.Name
-          </a>
-          </h5>
- 
-      <p class="card-text text-muted small">
-    @(product.Description.Length > 80 
-      ? product.Description.Substring(0, 80) + "..." 
-          : product.Description)
-         </p>
-    
-     <div class="d-flex justify-content-between align-items-center mb-2">
-      @if (product.DiscountedPrice.HasValue)
-           {
-         <div>
-               <span class="text-muted text-decoration-line-through">
-     @product.Price.ToString("N2") ريال
-               </span>
-     <span class="h5 text-danger mb-0 ms-2">
-       @product.DiscountedPrice.Value.ToString("N2") ريال
-            </span>
-             </div>
-   }
-    else
-          {
-            <span class="h5 text-primary mb-0">
-         @product.Price.ToString("N2") ريال
-         </span>
-        }
-    </div>
-               
-         <div class="d-flex align-items-center mb-3">
-            <div class="text-warning">
-           @for (int i = 0; i < 5; i++)
-       {
-    @if (i < Math.Floor(product.AverageRating))
-           {
-  <i class="fas fa-star"></i>
-                }
-   else if (i < product.AverageRating)
-          {
-          <i class="fas fa-star-half-alt"></i>
-                }
-            else
-   {
-  <i class="far fa-star"></i>
-           }
- }
-  </div>
-              <small class="text-muted ms-2">(@product.ReviewCount)</small>
-       </div>
-   
-         @if (product.StockQuantity > 0)
-                 {
-        <a asp-action="ProductDetails" asp-route-id="@product.ProductId" 
-       class="btn btn-primary w-100">
-     <i class="fas fa-eye"></i> عرض التفاصيل
-        </a>
-    }
-      else
-        {
-   <button class="btn btn-secondary w-100" disabled>
-          <i class="fas fa-times"></i> غير متوفر
-          </button>
-   }
-        </div>
-       </div>
-        </div>
-          }
-     </div>
+                        <div class="product-info">
+                            <div class="product-category">@product.Category</div>
+                            <h3 class="product-title">@product.Name</h3>
+                            
+                            @if (!string.IsNullOrEmpty(product.Description))
+                            {
+                                <p class="product-description">@product.Description</p>
+                            }
 
-        <!-- Pagination -->
-      @if (Model.TotalPages > 1)
-             {
-       <nav aria-label="تنقل بين الصفحات" class="mt-4">
-       <ul class="pagination justify-content-center">
-        @if (Model.HasPrevious)
-        {
-      <li class="page-item">
-          <a class="page-link" asp-action="Index" 
-  asp-route-page="@(Model.PageNumber - 1)"
-      asp-route-category="@Model.Category"
-          asp-route-search="@Model.SearchQuery"
-     asp-route-sortBy="@Model.SortBy">السابق</a>
-         </li>
-}
-        
-       @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
-        {
-       <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-       <a class="page-link" asp-action="Index" 
-         asp-route-page="@i"
-asp-route-category="@Model.Category"
-         asp-route-search="@Model.SearchQuery"
-                   asp-route-sortBy="@Model.SortBy">@i</a>
-              </li>
-    }
-          
-      @if (Model.HasNext)
-          {
-             <li class="page-item">
-       <a class="page-link" asp-action="Index" 
-           asp-route-page="@(Model.PageNumber + 1)"
-      asp-route-category="@Model.Category"
-              asp-route-search="@Model.SearchQuery"
-   asp-route-sortBy="@Model.SortBy">التالي</a>
-     </li>
-      }
-     </ul>
-   </nav>
-        }
-      }
- else
-      {
-            <div class="text-center py-5">
-     <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
-          <h3 class="text-muted">لا توجد منتجات</h3>
-         <p class="text-muted">جرب تغيير الفلاتر أو مصطلحات البحث</p>
- <a asp-action="Index" class="btn btn-primary">
-<i class="fas fa-redo"></i> إعادة تعيين الفلاتر
-        </a>
+                            <div class="product-price">
+                                @if (product.DiscountedPrice.HasValue && product.DiscountedPrice < product.Price)
+                                {
+                                    <span class="current-price">EGP @product.DiscountedPrice.Value.ToString("N2")</span>
+                                    <span class="original-price">EGP @product.Price.ToString("N2")</span>
+                                }
+                                else
+                                {
+                                    <span class="current-price">EGP @product.Price.ToString("N2")</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(product.TailorName))
+                            {
+                                <div class="product-tailor">
+                                    <div class="tailor-avatar">
+                                        <i class="fas fa-user-circle" style="font-size: 28px; color: #d1d5db;"></i>
+                                    </div>
+                                    <div class="tailor-info">
+                                        <div class="tailor-name">@product.TailorName</div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="product-actions">
+                                <button type="button" 
+                                        class="btn btn-outline"
+                                        onclick="showQuickView('@product.ProductId')"
+                                        aria-label="Quick view @product.Name"
+                                        style="flex: 0.7;">
+                                    <i class="fas fa-eye"></i>
+                                    Quick View
+                                </button>
+                                
+                                @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                                {
+                                    <button type="button" 
+                                            class="btn btn-primary" 
+                                            onclick="quickAddToCart('@product.ProductId')"
+                                            style="flex: 1;">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Add
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (Model.TotalPages > 1)
+            {
+                <div style="margin-top: 2rem; display: flex; justify-content: center; gap: 0.5rem;">
+                    @for (int i = 1; i <= Model.TotalPages; i++)
+                    {
+                        <a href="@Url.Action("Index", new { page = i })"
+                           class="btn @(i == Model.PageNumber ? "btn-primary" : "btn-outline")"
+                           style="min-width: 40px;">
+                            @i
+                        </a>
+                    }
                 </div>
-   }
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="fas fa-shopping-bag"></i>
+                <h3>No Products Found</h3>
+                <p>Try adjusting your filters or check back later for new items.</p>
+                <a href="@Url.Action("Index")" class="btn btn-primary" style="margin-top: 1rem;">
+                    Clear All Filters
+                </a>
+            </div>
+        }
+    </main>
+</div>
+
+<!-- Quick View Modal -->
+<div id="quickViewModal" class="modal fade" tabindex="-1" aria-labelledby="quickViewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 0.75rem; border: none;">
+            <div class="modal-header" style="border-bottom: 1px solid #e5e7eb;">
+                <h5 class="modal-title" id="quickViewModalLabel">Product Quick View</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="quickViewContent">
+                <!-- Content will be loaded dynamically -->
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-@section Styles {
-    <style>
-        .hover-lift {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+@section Scripts {
+    <script>
+        // Store all products data for client-side filtering
+        const allProducts = @Html.Raw(Json.Serialize(Model.Products.Select(p => new {
+            id = p.ProductId,
+            name = p.Name,
+            description = p.Description ?? "",
+            category = p.Category,
+            price = p.DiscountedPrice ?? p.Price,
+            originalPrice = p.Price,
+            discountedPrice = p.DiscountedPrice,
+            imageUrl = p.PrimaryImageBase64,
+            tailorName = p.TailorName ?? "",
+            tailorId = p.TailorId
+        })));
+
+        let filteredProducts = [...allProducts];
+        let debounceTimer;
+
+        // Debounce function for search
+        function debounce(func, delay) {
+            return function(...args) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => func.apply(this, args), delay);
+            };
         }
-        .hover-lift:hover {
-            transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important;
+
+        // Apply all filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCategory = document.querySelector('input[name="category"]:checked')?.value || '';
+            const minPrice = parseFloat(document.getElementById('minPrice').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('maxPrice').value) || Infinity;
+            const sortBy = document.getElementById('sortSelect').value;
+
+            // Filter products
+            filteredProducts = allProducts.filter(product => {
+                // Search filter
+                const matchesSearch = !searchTerm || 
+                    product.name.toLowerCase().includes(searchTerm) ||
+                    product.description.toLowerCase().includes(searchTerm) ||
+                    product.category.toLowerCase().includes(searchTerm);
+
+                // Category filter
+                const matchesCategory = !selectedCategory || product.category === selectedCategory;
+
+                // Price filter
+                const matchesPrice = product.price >= minPrice && product.price <= maxPrice;
+
+                return matchesSearch && matchesCategory && matchesPrice;
+            });
+
+            // Sort products
+            sortProducts(sortBy);
+
+            // Update display
+            updateProductGrid();
+            updateProductCount();
+            updateActiveFilters(searchTerm, selectedCategory, minPrice, maxPrice);
         }
-      .product-card {
-       border-radius: 10px;
-  overflow: hidden;
+
+        // Sort products
+        function sortProducts(sortBy) {
+            switch(sortBy) {
+                case 'price-asc':
+                    filteredProducts.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-desc':
+                    filteredProducts.sort((a, b) => b.price - a.price);
+                    break;
+                case 'name-asc':
+                    filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+                case 'name-desc':
+                    filteredProducts.sort((a, b) => b.name.localeCompare(a.name));
+                    break;
+            }
         }
-   .product-card .card-img-top {
-transition: transform 0.3s ease;
+
+        // Update product grid with smooth scroll
+        function updateProductGrid() {
+            const grid = document.querySelector('.products-grid');
+            const emptyState = document.querySelector('.empty-state');
+
+            // Add loading state
+            if (grid) {
+                grid.style.opacity = '0.5';
+                grid.style.transition = 'opacity 0.2s ease';
+            }
+
+            // Smooth scroll to top of results
+            const productsHeader = document.querySelector('.products-header');
+            if (productsHeader && window.scrollY > productsHeader.offsetTop) {
+                productsHeader.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            setTimeout(() => {
+                if (filteredProducts.length === 0) {
+                    if (grid) grid.style.display = 'none';
+                    if (!emptyState) {
+                        const emptyMsg = `
+                            <div class="empty-state" role="status" aria-live="polite">
+                                <i class="fas fa-shopping-bag"></i>
+                                <h3>No Products Found</h3>
+                                <p>Try adjusting your filters or search query.</p>
+                                <button onclick="clearAllFilters()" class="btn btn-primary" style="margin-top: 1rem;">
+                                    Clear All Filters
+                                </button>
+                            </div>
+                        `;
+                        grid.insertAdjacentHTML('afterend', emptyMsg);
+                    }
+                    return;
+                }
+
+                if (emptyState) emptyState.remove();
+                if (grid) {
+                    grid.style.display = 'grid';
+                    grid.innerHTML = filteredProducts.map(product => createProductCard(product)).join('');
+                    grid.style.opacity = '1';
+                }
+            }, 100);
         }
-        .product-card:hover .card-img-top {
- transform: scale(1.05);
+
+        // Create product card HTML with lazy loading
+        function createProductCard(product) {
+            const hasDiscount = product.discountedPrice && product.discountedPrice < product.originalPrice;
+            const discountPercent = hasDiscount ? Math.round((product.originalPrice - product.discountedPrice) / product.originalPrice * 100) : 0;
+            
+            return `
+                <div class="product-card" itemscope itemtype="https://schema.org/Product">
+                    <div class="product-image-container">
+                        ${product.imageUrl ? 
+                            `<img src="${product.imageUrl}" 
+                                  alt="${product.name}" 
+                                  class="product-image" 
+                                  loading="lazy"
+                                  itemprop="image" />` :
+                            `<div class="product-image" style="display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #9ca3af;">
+                                <i class="fas fa-image" style="font-size: 3rem;"></i>
+                            </div>`
+                        }
+                        ${hasDiscount ? `<span class="product-badge">${discountPercent}% OFF</span>` : ''}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-category">${product.category}</div>
+                        <h3 class="product-title" itemprop="name">${product.name}</h3>
+                        ${product.description ? `<p class="product-description" itemprop="description">${product.description}</p>` : ''}
+                        <div class="product-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                            <span class="current-price" itemprop="price" content="${product.price}">EGP ${product.price.toFixed(2)}</span>
+                            <meta itemprop="priceCurrency" content="EGP">
+                            ${hasDiscount ? `<span class="original-price">EGP ${product.originalPrice.toFixed(2)}</span>` : ''}
+                        </div>
+                        ${product.tailorName ? `
+                            <div class="product-tailor">
+                                <div class="tailor-avatar">
+                                    <i class="fas fa-user-circle" style="font-size: 28px; color: #d1d5db;"></i>
+                                </div>
+                                <div class="tailor-info">
+                                    <div class="tailor-name" itemprop="brand">${product.tailorName}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="product-actions">
+                            <button type="button" 
+                                    class="btn btn-outline"
+                                    onclick="showQuickView('${product.id}')"
+                                    aria-label="Quick view ${product.name}"
+                                    style="flex: 0.7;">
+                                <i class="fas fa-eye"></i>
+                                Quick View
+                            </button>
+                            @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                            {
+                                <text>
+                                    <button type="button" 
+                                            class="btn btn-primary" 
+                                            onclick="quickAddToCart('${product.id}')"
+                                            aria-label="Add ${product.name} to cart"
+                                            style="flex: 1;">
+                                        <i class="fas fa-shopping-cart"></i>
+                                        Add
+                                    </button>
+                                </text>
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
         }
- </style>
+
+        // Update product count
+        function updateProductCount() {
+            document.getElementById('productCount').textContent = `${filteredProducts.length} Products`;
+        }
+
+        // Update active filters display
+        function updateActiveFilters(search, category, minPrice, maxPrice) {
+            const container = document.getElementById('activeFilters');
+            const list = document.getElementById('activeFiltersList');
+            const filters = [];
+
+            if (search) filters.push({ label: `Search: "${search}"`, clear: () => { document.getElementById('searchInput').value = ''; applyFilters(); } });
+            if (category) filters.push({ label: `Category: ${category}`, clear: clearCategoryFilter });
+            if (minPrice > 0 || maxPrice < Infinity) {
+                const priceLabel = minPrice > 0 && maxPrice < Infinity ? 
+                    `Price: ${minPrice} - ${maxPrice}` :
+                    minPrice > 0 ? `Min Price: ${minPrice}` : `Max Price: ${maxPrice}`;
+                filters.push({ label: priceLabel, clear: clearPriceFilter });
+            }
+
+            if (filters.length > 0) {
+                container.style.display = 'block';
+                list.innerHTML = filters.map(f => `
+                    <span style="background: #e0e7ff; color: #3730a3; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+                        ${f.label}
+                        <i class="fas fa-times" style="cursor: pointer;" onclick="event.stopPropagation(); (${f.clear.toString()})()"></i>
+                    </span>
+                `).join('');
+            } else {
+                container.style.display = 'none';
+            }
+        }
+
+        // Clear filters
+        function clearCategoryFilter() {
+            document.querySelector('input[name="category"][value=""]').checked = true;
+            applyFilters();
+        }
+
+        function clearPriceFilter() {
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            applyFilters();
+        }
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.querySelector('input[name="category"][value=""]').checked = true;
+            document.getElementById('minPrice').value = '';
+            document.getElementById('maxPrice').value = '';
+            document.getElementById('sortSelect').value = '';
+            applyFilters();
+        }
+
+        // Quick add to cart with better UX
+        function quickAddToCart(productId) {
+            // Show loading state
+            const btn = event.target.closest('button');
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+
+            fetch('@Url.Action("AddToCart", "Store", new { area = "Customer" })', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'ProductId': productId,
+                    'Quantity': 1,
+                    '__RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]')?.value || ''
+                })
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    // Success - show toastr notification
+                    toastr.success('Product added to cart successfully!', 'Success', {
+                        closeButton: true,
+                        progressBar: true,
+                        positionClass: 'toast-top-right',
+                        timeOut: 3000
+                    });
+                    
+                    // Update cart count in navbar (if exists)
+                    updateCartCount();
+                    
+                    // Reset button
+                    btn.disabled = false;
+                    btn.innerHTML = originalHtml;
+                }
+            })
+            .catch(error => {
+                console.error('Error adding to cart:', error);
+                toastr.error('Error adding product to cart. Please try again.', 'Error', {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: 'toast-top-right'
+                });
+                
+                // Reset button
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            });
+        }
+
+        // Update cart count badge
+        function updateCartCount() {
+            fetch('/Customer/Store/api/cart/count')
+                .then(response => response.json())
+                .then(data => {
+                    const cartBadge = document.querySelector('.cart-count');
+                    if (cartBadge && data.count !== undefined) {
+                        cartBadge.textContent = data.count;
+                        
+                        // Animate the badge
+                        cartBadge.style.transform = 'scale(1.3)';
+                        setTimeout(() => {
+                            cartBadge.style.transform = 'scale(1)';
+                        }, 200);
+                    }
+                })
+                .catch(error => console.error('Error updating cart count:', error));
+        }
+
+        // Quick view modal
+        function showQuickView(productId) {
+            const modal = new bootstrap.Modal(document.getElementById('quickViewModal'));
+            const content = document.getElementById('quickViewContent');
+            
+            // Show loading
+            content.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `;
+            
+            modal.show();
+            
+            // Find product in allProducts
+            const product = allProducts.find(p => p.id === productId);
+            
+            if (!product) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">Product not found</div>
+                `;
+                return;
+            }
+            
+            const hasDiscount = product.discountedPrice && product.discountedPrice < product.originalPrice;
+            const discountPercent = hasDiscount ? Math.round((product.originalPrice - product.discountedPrice) / product.originalPrice * 100) : 0;
+            
+            // Build quick view content
+            content.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div style="position: relative; border-radius: 0.75rem; overflow: hidden; background: #f3f4f6;">
+                            ${product.imageUrl ? 
+                                `<img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; height: auto; display: block;">` :
+                                `<div style="aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center; color: #9ca3af;">
+                                    <i class="fas fa-image" style="font-size: 4rem;"></i>
+                                </div>`
+                            }
+                            ${hasDiscount ? `
+                                <span style="position: absolute; top: 1rem; right: 1rem; background: #f59e0b; color: white; padding: 0.5rem 0.75rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem;">
+                                    ${discountPercent}% OFF
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="padding: 1rem 0;">
+                            <span style="font-size: 0.75rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">
+                                ${product.category}
+                            </span>
+                            <h3 style="font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0 1rem; color: #1f2937;">
+                                ${product.name}
+                            </h3>
+                            
+                            ${product.description ? `
+                                <p style="color: #6b7280; line-height: 1.6; margin-bottom: 1.5rem;">
+                                    ${product.description}
+                                </p>
+                            ` : ''}
+                            
+                            <div style="margin-bottom: 1.5rem;">
+                                <div style="display: flex; align-items: baseline; gap: 0.75rem;">
+                                    <span style="font-size: 1.75rem; font-weight: 700; color: #2563eb;">
+                                        EGP ${product.price.toFixed(2)}
+                                    </span>
+                                    ${hasDiscount ? `
+                                        <span style="font-size: 1.125rem; color: #9ca3af; text-decoration: line-through;">
+                                            EGP ${product.originalPrice.toFixed(2)}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            ${product.tailorName ? `
+                                <div style="padding: 1rem; background: #f9fafb; border-radius: 0.5rem; margin-bottom: 1.5rem;">
+                                    <div style="font-size: 0.75rem; color: #6b7280; margin-bottom: 0.25rem; font-weight: 600;">
+                                        CRAFTED BY
+                                    </div>
+                                    <div style="font-size: 1rem; font-weight: 600; color: #1f2937;">
+                                        ${product.tailorName}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div style="display: flex; gap: 0.75rem;">
+                                <a href="/Customer/Store/Product/${product.id}" class="btn btn-outline" style="flex: 1;">
+                                    <i class="fas fa-eye me-2"></i>
+                                    Full Details
+                                </a>
+                                @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+                                {
+                                    <text>
+                                        <button type="button" class="btn btn-primary" style="flex: 1;" onclick="quickAddToCart('${product.id}'); bootstrap.Modal.getInstance(document.getElementById('quickViewModal')).hide();">
+                                            <i class="fas fa-shopping-cart me-2"></i>
+                                            Add to Cart
+                                        </button>
+                                    </text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProductCount();
+        });
+    </script>
 }

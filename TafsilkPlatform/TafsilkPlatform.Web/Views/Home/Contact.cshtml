@@ -1,0 +1,454 @@
+@{
+    ViewData["Title"] = "Contact Us";
+}
+
+@section Styles {
+    <style>
+        /* Contact Page Specific Styles */
+        .contact-page {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            min-height: calc(100vh - 56px);
+            padding: 4rem 0;
+        }
+
+        .contact-card {
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            border-radius: 1.25rem;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @@media (min-width: 768px) {
+            .contact-card {
+                flex-direction: row;
+            }
+        }
+
+        .contact-form-section {
+            flex: 1;
+            padding: 3rem;
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-form-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .contact-info-section {
+            width: 100%;
+            padding: 3rem;
+            background: #ffffff;
+        }
+
+        @@media (min-width: 768px) {
+            .contact-info-section {
+                width: 420px;
+            }
+        }
+
+        .contact-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: #ffffff;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input,
+        .form-textarea {
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 0.75rem;
+            font-family: 'Cairo', 'Inter', sans-serif;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        .contact-info-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+
+        .contact-info-subtitle {
+            color: #64748b;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .contact-detail {
+            margin-bottom: 2.5rem;
+            padding-bottom: 2.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .contact-detail:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .contact-detail-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .contact-detail-title i {
+            color: #2563eb;
+            font-size: 1.25rem;
+        }
+
+        .contact-phone,
+        .contact-email {
+            font-weight: 600;
+            color: #2563eb;
+            font-size: 1.05rem;
+            margin: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+        }
+
+        .contact-phone:hover,
+        .contact-email:hover {
+            color: #1e40af;
+            transform: translateX(4px);
+        }
+
+        .contact-phone i,
+        .contact-email i {
+            font-size: 1.125rem;
+        }
+
+        .contact-address {
+            color: #64748b;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.25rem;
+        }
+
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: #f1f5f9;
+            border-radius: 0.75rem;
+            color: #64748b;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .social-link:hover {
+            background: #2563eb;
+            color: #ffffff;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .contact-page .btn-primary {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: none;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-page .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .contact-page .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .contact-page .btn-primary:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.5);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            font-size: 1.25rem;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            color: #ffffff;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @@media (max-width: 767px) {
+            .contact-page {
+                padding: 2rem 1rem;
+            }
+
+            .contact-form-section,
+            .contact-info-section {
+                padding: 2.5rem 1.5rem;
+            }
+
+            .section-title {
+                font-size: 2.25rem;
+            }
+
+            .contact-card {
+                margin: 0 1rem;
+            }
+
+            .contact-title {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+}
+
+<main class="contact-page">
+    <div class="container section-header">
+        <h1 class="section-title">Get In Touch</h1>
+        <p class="section-subtitle">
+            We're here to help! Reach out to us for any questions, feedback, or support.
+        </p>
+    </div>
+
+    <div class="container">
+        <div class="contact-card">
+            <!-- Left: Form Section -->
+            <div class="contact-form-section">
+                <h2 class="contact-title">Send Us a Message</h2>
+                <p class="contact-subtitle">Fill out the form below and we'll get back to you as soon as possible.</p>
+                
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="success-message">
+                        <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong>Success!</strong><br/>
+                            @TempData["SuccessMessage"]
+                        </div>
+                    </div>
+                }
+
+                <form class="contact-form" asp-action="Contact" asp-controller="Home" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label class="form-label" for="name">Full Name *</label>
+                        <input class="form-input" type="text" id="name" name="name" placeholder="John Doe" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email Address *</label>
+                        <input class="form-input" type="email" id="email" name="email" placeholder="john@example.com" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="subject">Subject</label>
+                        <input class="form-input" type="text" id="subject" name="subject" placeholder="How can we help you?" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="message">Your Message</label>
+                        <textarea class="form-textarea" id="message" name="message" placeholder="Tell us more about your inquiry..."></textarea>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-paper-plane me-2"></i>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+
+            <!-- Right: Info Section -->
+            <div class="contact-info-section">
+                <h3 class="contact-info-title">Contact Information</h3>
+                <p class="contact-info-subtitle">
+                    Have a question or want to work together? We'd love to hear from you!
+                </p>
+
+                <div class="contact-detail">
+                    <h4 class="contact-detail-title">
+                        <i class="fas fa-phone-alt"></i>
+                        Phone
+                    </h4>
+                    <div class="contact-phone">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>+20 123 456 7890</span>
+                    </div>
+                </div>
+
+                <div class="contact-detail">
+                    <h4 class="contact-detail-title">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </h4>
+                    <div class="contact-email">
+                        <i class="fas fa-at"></i>
+                        <span>support@tafsilk.com</span>
+                    </div>
+                </div>
+
+                <div class="contact-detail">
+                    <h4 class="contact-detail-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Location
+                    </h4>
+                    <p class="contact-address">Cairo, Egypt</p>
+                </div>
+
+                <div class="contact-detail">
+                    <h4 class="contact-detail-title">
+                        <i class="fas fa-share-alt"></i>
+                        Follow Us
+                    </h4>
+                    <div class="social-links">
+                        <a href="#" class="social-link" aria-label="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - لوحة تحكم تفصيلك</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Core CSS (New Design System) -->
+    <link rel="stylesheet" href="~/css/admin-core.css" asp-append-version="true" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar Partial -->
+        <partial name="_AdminSidebar" />
+
+        <!-- Header Partial -->
+        <partial name="_AdminHeader" />
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success mb-4" style="background: var(--success-bg); color: var(--success-text); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(0,0,0,0.05);">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger mb-4" style="background: var(--danger-bg); color: var(--danger-text); padding: 1rem; border-radius: var(--radius-md); border: 1px solid rgba(0,0,0,0.05);">
+                    <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Scripts -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Mobile Menu Toggle Script -->
+    <script>
+        (function() {
+            const menuToggle = document.getElementById('mobileMenuToggle');
+            const sidebar = document.querySelector('.admin-sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (menuToggle && sidebar && overlay) {
+                // Toggle sidebar on button click
+                menuToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+                
+                // Close sidebar when clicking overlay
+                overlay.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+                
+                // Close sidebar on window resize if screen becomes large
+                window.addEventListener('resize', function() {
+                    if (window.innerWidth > 1024) {
+                        sidebar.classList.remove('active');
+                        overlay.classList.remove('active');
+                    }
+                });
+            }
+        })();
+    </script>
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

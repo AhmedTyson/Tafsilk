@@ -603,6 +603,12 @@ Array.Empty<string>()
         name: "areas",
         pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
+    // ✅ FIX: Legacy route for AdminDashboard (redirects /AdminDashboard/... to Area: Admin)
+    app.MapControllerRoute(
+        name: "admin_legacy",
+        pattern: "AdminDashboard/{action=Index}/{id?}",
+        defaults: new { area = "Admin", controller = "AdminDashboard" });
+
     // Default route
     app.MapControllerRoute(
         name: "default",
@@ -662,6 +668,11 @@ Array.Empty<string>()
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into SQLite database");
+                    
+                    // ✅ Seed admin user
+                    var adminConfig = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                    var adminLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    TafsilkPlatform.DataAccess.Data.Seed.AdminSeeder.Seed(db, adminConfig, adminLogger);
                 }
             }
             catch (Exception ex)
@@ -687,7 +698,15 @@ Array.Empty<string>()
                     );
                     await db.SaveChangesAsync();
                     Log.Information("✓ Seeded default roles into database");
+                    
+                    await db.SaveChangesAsync();
+                    Log.Information("✓ Seeded default roles into database");
                 }
+                
+                // ✅ Seed admin user (Run every time to ensure admin exists/updates)
+                var adminConfig = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+                var adminLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                TafsilkPlatform.DataAccess.Data.Seed.AdminSeeder.Seed(db, adminConfig, adminLogger);
             }
             catch (Exception ex)
             {

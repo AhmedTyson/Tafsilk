@@ -104,57 +104,15 @@ function closeSidebar() {
     document.body.style.overflow = '';
 }
 
-// Navigation Functions
+// Navigation Functions - Removed SPA logic to support server-side routing
 function initializeNavigation() {
+    // Highlight active link based on current URL
+    const currentPath = window.location.pathname;
     navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.getAttribute('data-page');
-            
-            // Update active state
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+        if (link.getAttribute('href') && currentPath.includes(link.getAttribute('href'))) {
             link.parentElement.classList.add('active');
-
-            // Show page
-            showPage(pageId);
-            
-            // Update breadcrumb
-            const navText = link.querySelector('.nav-text');
-            if (navText) {
-                updateBreadcrumb(navText.textContent.trim());
-            }
-            
-            // Close sidebar on mobile
-            if (window.innerWidth <= 768) {
-                closeSidebar();
-            }
-        });
+        }
     });
-}
-
-function showPage(pageId) {
-    pages.forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    const targetPage = document.getElementById(pageId);
-    if (targetPage) {
-        targetPage.classList.add('active');
-        loadPageData(pageId);
-    }
-}
-
-function updateBreadcrumb(pageName) {
-    const breadcrumb = document.querySelector('.breadcrumb');
-    if (breadcrumb) {
-        breadcrumb.innerHTML = `
-            <i class="fas fa-home"></i>
-            <span class="breadcrumb-separator">/</span>
-            <span class="breadcrumb-item active">${pageName}</span>
-        `;
-    }
 }
 
 // User Menu Functions

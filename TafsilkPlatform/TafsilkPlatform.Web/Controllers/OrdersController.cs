@@ -178,7 +178,9 @@ public class OrdersController : Controller
                 DueDate = model.DueDate,
                 TotalPrice = (double)model.EstimatedPrice,
                 Customer = customer,
-                Tailor = tailor
+                Tailor = tailor,
+                CommissionRate = 0.10, // Default 10%
+                CommissionAmount = (double)model.EstimatedPrice * 0.10
             };
 
             _db.Orders.Add(order);

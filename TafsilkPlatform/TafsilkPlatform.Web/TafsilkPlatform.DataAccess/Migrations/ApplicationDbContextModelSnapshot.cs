@@ -528,6 +528,12 @@ namespace TafsilkPlatform.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<double>("CommissionAmount")
+                        .HasColumnType("float");
+
+                    b.Property<double>("CommissionRate")
+                        .HasColumnType("float");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -916,6 +922,10 @@ namespace TafsilkPlatform.DataAccess.Migrations
 
                     b.Property<byte[]>("PrimaryImageData")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<string>("PrimaryImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("ReviewCount")
                         .HasColumnType("int");

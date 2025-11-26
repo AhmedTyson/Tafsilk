@@ -16,6 +16,10 @@ namespace TafsilkPlatform.Models.Models
         public required string OrderType { get; set; }
         public OrderStatus Status { get; set; }
 
+        // ✅ NEW: Commission Tracking
+        public double CommissionAmount { get; set; }
+        public double CommissionRate { get; set; } = 0.10; // Default 10%
+
         // ✅ NEW: Quote/pricing from tailor
         public double? TailorQuote { get; set; }
         public string? TailorQuoteNotes { get; set; }

@@ -1,0 +1,70 @@
+<aside class="admin-sidebar">
+    <div class="sidebar-brand">
+        <i class="fas fa-cut me-2 text-primary"></i>
+        <span>Tafsilk Admin</span>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <!-- Dashboard -->
+        <div class="nav-group">
+            <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                <i class="fas fa-home"></i>
+                <span>لوحة التحكم</span>
+            </a>
+        </div>
+
+        <!-- Management -->
+        <div class="nav-group-label">الإدارة</div>
+        <div class="nav-group">
+            <a href="@Url.Action("Orders", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
+                <i class="fas fa-shopping-bag"></i>
+                <span>الطلبات</span>
+            </a>
+            <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" ? "active" : "")">
+                <i class="fas fa-users"></i>
+                <span>المستخدمين</span>
+            </a>
+            <a href="@Url.Action("Products", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
+                <i class="fas fa-box"></i>
+                <span>المنتجات</span>
+            </a>
+            <a href="@Url.Action("PortfolioReview", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PortfolioReview" ? "active" : "")">
+                <i class="fas fa-images"></i>
+                <span>مراجعة الصور</span>
+            </a>
+        </div>
+
+        <!-- System -->
+        <div class="nav-group-label">النظام</div>
+        <div class="nav-group">
+            <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")">
+                <i class="fas fa-history"></i>
+                <span>سجلات النظام</span>
+            </a>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+            </div>
+            <div class="d-flex flex-column">
+                <span class="text-sm font-medium">@User.Identity?.Name</span>
+                <span class="text-xs text-muted">مسؤول النظام</span>
+            </div>
+        </div>
+        <form asp-controller="Account" asp-action="Logout" asp-area="" method="post">
+            <button type="submit" class="btn btn-outline w-100 justify-content-center">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+            </button>
+        </form>
+    </div>
+</aside>

@@ -1102,7 +1102,7 @@ public class AccountController(
         roleName?.ToLowerInvariant() switch
         {
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
-            "admin" => RedirectToAction("Index", "Admin"),
+            "admin" => RedirectToAction("Index", "AdminDashboard", new { area = "Admin" }),
             _ => RedirectToAction("Customer", "Dashboards")
         };
 

@@ -87,7 +87,6 @@ body {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-md);
 }
 
 @media (min-width: 768px) {
@@ -228,11 +227,6 @@ body {
 .slideIn {
     -webkit-animation-name: slideIn;
     animation-name: slideIn;
-}
-
-/* Adjust main content for fixed navbar */
-body {
-    padding-top: 76px;
 }
 
 @media (max-width: 991.98px) {

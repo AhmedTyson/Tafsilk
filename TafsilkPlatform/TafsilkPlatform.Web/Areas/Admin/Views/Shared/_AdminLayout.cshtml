@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - لوحة تحكم تفصيلك</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- Bootstrap (if needed for grid/utilities inside content) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Admin Dashboard CSS (Premium Theme) -->
+    <link rel="stylesheet" href="~/css/admin-dashboard-new.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-theme-premium.css" asp-append-version="true" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="admin-dashboard">
+
+<!-- Sidebar Backdrop for Mobile -->
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+<!-- Sidebar Navigation -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-cut"></i>
+            </div>
+            <span class="logo-text">تفصيلك</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose" aria-label="إغلاق القائمة">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span class="nav-text">لوحة التحكم</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" || ViewContext.RouteData.Values["Action"]?.ToString() == "UserDetails" ? "active" : "")">
+                <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">إدارة المستخدمين</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PortfolioReview" ? "active" : "")">
+                <a href="@Url.Action("PortfolioReview", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-images"></i>
+                    <span class="nav-text">مراجعة الصور</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
+                <a href="@Url.Action("Orders", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="nav-text">الطلبات</span>
+                </a>
+            </li>
+             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
+                <a href="@Url.Action("Products", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-box-open"></i>
+                    <span class="nav-text">المنتجات</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Disputes" ? "active" : "")">
+                <a href="@Url.Action("Disputes", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span class="nav-text">حل النزاعات</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Refunds" ? "active" : "")">
+                <a href="@Url.Action("Refunds", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-money-bill-wave"></i>
+                    <span class="nav-text">طلبات الاسترداد</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reviews" ? "active" : "")">
+                <a href="@Url.Action("Reviews", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-star"></i>
+                    <span class="nav-text">مراجعة التقييمات</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
+                <a href="@Url.Action("Analytics", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span class="nav-text">التقارير والإحصائيات</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Notifications" ? "active" : "")">
+                <a href="@Url.Action("Notifications", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-bell"></i>
+                    <span class="nav-text">مركز الإشعارات</span>
+                </a>
+            </li>
+            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")">
+                <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="nav-link">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="nav-text">سجلات التدقيق</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-outline-light btn-block">
+            <i class="fas fa-home"></i>
+            <span class="nav-text">العودة للموقع</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Main Wrapper -->
+<div class="main-wrapper">
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="فتح القائمة">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="breadcrumb">
+                <i class="fas fa-home"></i>
+                <span class="breadcrumb-separator">/</span>
+                <span class="breadcrumb-item active">@ViewData["Title"]</span>
+            </div>
+        </div>
+        
+        <div class="topbar-right">
+            <!-- Quick Search -->
+            <div class="topbar-search">
+                <input type="text" placeholder="بحث سريع..." aria-label="بحث" />
+                <i class="fas fa-search"></i>
+            </div>
+
+            <!-- Notifications -->
+            <div class="topbar-item">
+                <button class="topbar-btn" id="notificationBtn" aria-label="الإشعارات">
+                    <i class="fas fa-bell"></i>
+                    <span class="badge-dot"></span>
+                </button>
+            </div>
+
+            <!-- User Menu -->
+            <div class="topbar-item user-menu">
+                <button class="user-menu-toggle" id="userMenuToggle">
+                    <div class="user-avatar">
+                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="المسؤول" />
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">@(User.Identity?.Name ?? "المسؤول")</span>
+                        <span class="user-role">مسؤول النظام</span>
+                    </div>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+
+                <div class="user-menu-dropdown" id="userMenuDropdown">
+                    <div class="user-menu-header">
+                        <div class="user-avatar-large">
+                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="المسؤول" />
+                        </div>
+                        <div class="user-details">
+                            <strong>@(User.Identity?.Name ?? "المسؤول")</strong>
+                            <span>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@tafsilk.com")</span>
+                        </div>
+                    </div>
+                    <div class="user-menu-body">
+                        <a href="#" class="user-menu-item">
+                            <i class="fas fa-user"></i>
+                            <span>الملف الشخصي</span>
+                        </a>
+                        <a href="#" class="user-menu-item">
+                            <i class="fas fa-cog"></i>
+                            <span>الإعدادات</span>
+                        </a>
+                    </div>
+                    <div class="user-menu-footer">
+                        <form asp-controller="Account" asp-action="Logout" asp-area="" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-logout btn-block">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>تسجيل الخروج</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i> @TempData["Info"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </main>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Scripts -->
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
+
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

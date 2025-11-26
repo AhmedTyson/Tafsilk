@@ -61,7 +61,9 @@ namespace TafsilkPlatform.Web.Services
                         Status = OrderStatus.Pending,
                         CreatedAt = DateTimeOffset.UtcNow,
                         Customer = customer,
-                        Tailor = tailor
+                        Tailor = tailor,
+                        CommissionRate = 0.10, // Default 10%
+                        CommissionAmount = (double)model.EstimatedPrice * 0.10
                     };
 
                     _db.Orders.Add(order);
@@ -119,7 +121,9 @@ namespace TafsilkPlatform.Web.Services
                         Status = OrderStatus.Pending,
                         CreatedAt = DateTimeOffset.UtcNow,
                         Customer = customer,
-                        Tailor = tailor
+                        Tailor = tailor,
+                        CommissionRate = 0.10, // Default 10%
+                        CommissionAmount = (double)model.EstimatedPrice * 0.10
                     };
 
                     _db.Orders.Add(order);

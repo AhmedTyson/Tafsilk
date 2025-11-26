@@ -21,6 +21,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TafsilkPlatform.Web.styles.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
@@ -31,26 +32,18 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background-color: #f8f9fa;
         }
 
         main {
             flex: 1;
+            padding-bottom: 2rem;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1.5rem;
-        }
-
-        a.navbar-brand {
-            white-space: normal;
-            text-align: center;
-            word-break: break-all;
-        }
-
-        a {
-            color: #0077cc;
         }
 
         .btn-primary {

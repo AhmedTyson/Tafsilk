@@ -1164,6 +1164,7 @@ public class TailorManagementController : Controller
         };
 
         PopulateProductFormViewBag();
+        
         return View(model);
     }
 
@@ -1179,6 +1180,12 @@ public class TailorManagementController : Controller
     {
         try
         {
+            _logger.LogCritical("AddProduct POST started. Model state valid: {IsValid}", ModelState.IsValid);
+            if (model != null)
+            {
+                _logger.LogCritical("Model received. PrimaryImage: {ImageName}, Size: {Size}", 
+                    model.PrimaryImage?.FileName, model.PrimaryImage?.Length);
+            }
             if (model == null)
             {
                 PopulateProductFormViewBag();

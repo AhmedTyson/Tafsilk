@@ -24,7 +24,8 @@ public class DashboardHomeViewModel
     public int PendingOrders { get; set; }
 
     // Revenue Metrics
-    public decimal TotalRevenue { get; set; }
+    public decimal TotalSales { get; set; } // Gross Sales
+    public decimal TotalRevenue { get; set; } // Net Commission
     public decimal RevenueToday { get; set; }
     public decimal RevenueThisWeek { get; set; }
     public decimal RevenueThisMonth { get; set; }

@@ -23,6 +23,24 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult Contact()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Contact(string name, string email, string subject, string message)
+    {
+        // TODO: Implement email sending logic here
+        // For now, just show success message
+        TempData["SuccessMessage"] = "Thank you for contacting us! We'll get back to you shortly.";
+        _logger.LogInformation("Contact form submitted: {Name}, {Email}, Subject: {Subject}", name, email, subject);
+        
+        return RedirectToAction(nameof(Contact));
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error(int? statusCode = null)
     {

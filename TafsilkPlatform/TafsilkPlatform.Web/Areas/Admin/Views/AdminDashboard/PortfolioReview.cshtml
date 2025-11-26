@@ -1,0 +1,66 @@
+@model IEnumerable<TafsilkPlatform.Models.Models.PortfolioImage>
+@{
+    ViewData["Title"] = "مراجعة الصور";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
+}
+
+<div class="page-header">
+    <h1 class="page-title">مراجعة الصور</h1>
+    <div class="page-actions">
+        <button class="btn btn-outline">
+            <i class="fas fa-filter"></i>
+            <span>تصفية</span>
+        </button>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card p-5 text-center">
+        <div class="d-flex flex-column align-items-center justify-content-center text-secondary">
+            <i class="fas fa-images fa-3x mb-3 opacity-25"></i>
+            <p class="font-medium">لا توجد صور للمراجعة حالياً</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var image in Model)
+        {
+            <div class="col-md-4 col-lg-3">
+                <div class="card h-100 overflow-hidden group">
+                    <div class="position-relative" style="height: 200px;">
+                        <img src="@image.ImageUrl" class="w-100 h-100 object-fit-cover" alt="Portfolio Image">
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <span class="badge badge-secondary bg-surface-1 text-primary shadow-sm">
+                                <i class="fas fa-clock me-1"></i> @image.UploadedAt.ToString("dd/MM")
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="p-3">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="avatar bg-brand-light text-brand-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                @(image.Tailor?.ShopName?.Substring(0, 1).ToUpper() ?? "T")
+                            </div>
+                            <div class="d-flex flex-column overflow-hidden">
+                                <span class="font-medium text-primary text-truncate">@image.Tailor?.ShopName</span>
+                                <span class="text-xs text-secondary">خياط</span>
+                            </div>
+                        </div>
+
+                        <form asp-action="DeletePortfolioImage" asp-route-id="@image.PortfolioImageId" method="post" 
+                              onsubmit="return confirm('هل أنت متأكد من حذف هذه الصورة؟');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline text-danger border-danger w-100 justify-content-center hover:bg-danger hover:text-white transition-colors">
+                                <i class="fas fa-trash-alt me-2"></i>
+                                <span>حذف الصورة</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

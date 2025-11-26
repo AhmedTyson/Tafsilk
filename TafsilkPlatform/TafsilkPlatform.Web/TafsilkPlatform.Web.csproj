@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
-	<RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;linux-x64;osx-x64</RuntimeIdentifiers>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>53d19473-2fd6-4a7c-906f-dda85cf58376</UserSecretsId>
@@ -32,19 +32,18 @@
     <Compile Remove="TafsilkPlatform.Models\**" />
     <Compile Remove="TafsilkPlatform.DataAccess\**" />
     <Compile Remove="TafsilkPlatform.Utility\**" />
-    <Content Remove="Views\Reviews\**" />
-    <Content Remove="wwwroot\Tafsilk-v3-\**" />
-    <EmbeddedResource Remove="Views\Reviews\**" />
-    <EmbeddedResource Remove="wwwroot\Tafsilk-v3-\**" />
-    <None Remove="Views\Reviews\**" />
-    <None Remove="wwwroot\Tafsilk-v3-\**" />
   </ItemGroup>
 
-  <!-- Project References -->
   <ItemGroup>
     <ProjectReference Include="TafsilkPlatform.Models\TafsilkPlatform.Models.csproj" />
     <ProjectReference Include="TafsilkPlatform.DataAccess\TafsilkPlatform.DataAccess.csproj" />
     <ProjectReference Include="TafsilkPlatform.Utility\TafsilkPlatform.Utility.csproj" />
+  </ItemGroup>
+
+  <!-- Prevent dotnet watch from restarting the app when attachments are uploaded -->
+  <ItemGroup>
+    <Watch Remove="wwwroot\Attachments\**" />
+    <Watch Remove="wwwroot\uploads\**" />
   </ItemGroup>
 
   <!-- All dependencies consolidated here -->

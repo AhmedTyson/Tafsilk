@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تفصيلك — اتصل بنا</title>
+
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+      /* Contact Page Specific Styles */
+      .contact-page {
+        background-color: var(--background-gray);
+        min-height: 100vh;
+        padding: var(--spacing-lg) 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .contact-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--background-white);
+        border-radius: var(--radius-xl);
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      @media (min-width: 768px) {
+        .contact-card {
+          flex-direction: row;
+        }
+      }
+
+      .contact-form-section {
+        flex: 1;
+        padding: var(--spacing-2xl);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--primary-hover) 100%
+        );
+        color: var(--text-white);
+        box-sizing: border-box;
+      }
+
+      .contact-info-section {
+        width: 100%;
+        padding: var(--spacing-2xl);
+        background: var(--background-white);
+        box-sizing: border-box;
+      }
+
+      @media (min-width: 768px) {
+        .contact-info-section {
+          width: 380px;
+        }
+      }
+
+      .contact-title {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--spacing-lg);
+        color: var(--text-white);
+      }
+
+      .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-label {
+        margin-bottom: var(--spacing-xs);
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .form-input,
+      .form-textarea {
+        padding: var(--spacing-sm);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: var(--radius-md);
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-white);
+        transition: all var(--transition-fast);
+      }
+
+      .form-input::placeholder,
+      .form-textarea::placeholder {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      .form-input:focus,
+      .form-textarea:focus {
+        outline: none;
+        border-color: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      .form-textarea {
+        resize: vertical;
+        min-height: 120px;
+      }
+
+      .captcha-container {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+        background: rgba(255, 255, 255, 0.15);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-md);
+        margin-bottom: var(--spacing-md);
+      }
+
+      .captcha-checkbox {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--secondary-color);
+      }
+
+      .captcha-label {
+        font-size: var(--font-size-sm);
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .contact-info-title {
+        font-size: var(--font-size-xl);
+        font-weight: 700;
+        margin-bottom: var(--spacing-md);
+        color: var(--text-primary);
+      }
+
+      .contact-info-subtitle {
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .contact-detail {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .contact-detail-title {
+        font-size: var(--font-size-lg);
+        font-weight: 600;
+        margin-bottom: var(--spacing-sm);
+        color: var(--text-primary);
+      }
+
+      .contact-phone {
+        font-weight: 700;
+        color: var(--primary-color);
+        font-size: var(--font-size-lg);
+        margin: var(--spacing-sm) 0;
+      }
+
+      .contact-address {
+        color: var(--text-secondary);
+        line-height: 1.6;
+      }
+
+      .social-links {
+        display: flex;
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-lg);
+      }
+
+      .social-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background: var(--background-gray);
+        border-radius: var(--radius-md);
+        color: var(--text-secondary);
+        transition: all var(--transition-fast);
+      }
+
+      .social-link:hover {
+        background: var(--primary-color);
+        color: var(--text-white);
+        transform: translateY(-2px);
+      }
+
+      .contact-page .btn-primary {
+        background: var(--secondary-color);
+        border: none;
+      }
+
+      .contact-page .btn-primary:hover {
+        background: var(--secondary-hover);
+      }
+
+      /* Header adjustments for contact page */
+      .contact-header {
+        margin-bottom: var(--spacing-2xl);
+      }
+
+      /* Responsive styles */
+      @media (max-width: 767px) {
+        .contact-page {
+          padding: var(--spacing-md) 0;
+        }
+
+        .contact-card {
+          margin: 0 var(--spacing-md);
+        }
+      }
+    </style>
+  </head>
+  <body>
+     <header class="header" role="banner">
+        <nav class="navbar" role="navigation" aria-label="التنقل الرئيسي">
+            <div class="container">
+                <div class="brand">
+                    <div class="brand-icon" aria-hidden="true">
+                        <i class="fas fa-cut"></i>
+                    </div>
+                    <h1 class="logo">تفصيلك</h1>
+                </div>
+                <ul id="nav-menu" class="nav-menu" aria-label="روابط الموقع">
+                    <li><a href="#home" class="nav-link" data-translate="nav.home">الرئيسية</a></li>
+                    <li><a href="#how-it-works" class="nav-link" data-translate="nav.howItWorks">كيف تعمل المنصة</a></li>
+                    <li><a href="#tailors" class="nav-link" data-translate="nav.tailors">الخياطين</a></li>
+                    <li><a href="#contact" class="nav-link" data-translate="nav.contact">تواصل معنا</a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="#" class="btn btn-outline" data-translate="nav.login">تسجيل دخول</a>
+                    <a href="register.html" class="btn btn-primary" data-translate="nav.joinTailor">انضم كخياط</a>
+                    <button class="lang-toggle">
+                        <i class="fas fa-globe"></i>
+                        <span data-translate="langToggle">العربية / English</span>
+                    </button>
+                </div>
+                <button class="nav-toggle" aria-label="فتح القائمة" data-translate-aria="nav.menu.open">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Header -->
+    <div data-include="partials/header.html"></div>
+
+    <main class="contact-page">
+      <div class="container contact-header">
+        <h1 class="section-title">اتصل بنا</h1>
+        <p class="section-subtitle">
+          نحن هنا لمساعدتك. تواصل معنا لأي استفسارات أو ملاحظات
+        </p>
+      </div>
+
+      <div class="container">
+        <div class="contact-card">
+          <!-- Left: Form Section -->
+          <div class="contact-form-section">
+            <h2 class="contact-title">املأ النموذج أدناه للبدء</h2>
+            <form class="contact-form" action="#" method="post">
+              <div class="form-group">
+                <label class="form-label" for="name">الاسم الكامل*</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="name"
+                  name="name"
+                  placeholder="أدخل اسمك الكامل"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="email">البريد الإلكتروني*</label>
+                <input
+                  class="form-input"
+                  type="email"
+                  id="email"
+                  name="email"
+                  placeholder="example@email.com"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="subject">الموضوع</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  id="subject"
+                  name="subject"
+                  placeholder="موضوع رسالتك (اختياري)"
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="message">نص الرسالة</label>
+                <textarea
+                  class="form-textarea"
+                  id="message"
+                  name="message"
+                  placeholder="اكتب رسالتك هنا..."
+                ></textarea>
+              </div>
+
+              <!-- reCAPTCHA Placeholder -->
+              <div class="captcha-container">
+                <input
+                  type="checkbox"
+                  class="captcha-checkbox"
+                  id="captcha"
+                  aria-label="أنا لست روبوت"
+                />
+                <label class="captcha-label" for="captcha">أنا لست روبوت</label>
+              </div>
+
+              <button class="btn btn-primary" type="submit">
+                إرسال الرسالة
+              </button>
+            </form>
+          </div>
+
+          <!-- Right: Info Section -->
+          <div class="contact-info-section">
+            <h3 class="contact-info-title">استفسارات عامة</h3>
+            <p class="contact-info-subtitle">
+              هل لديك سؤال أو ترغب بالسلام؟ تواصل معنا:
+            </p>
+
+            <div class="contact-detail">
+              <h4 class="contact-detail-title">اتصل بنا</h4>
+              <p class="contact-phone">📞 +1 800 555 0123</p>
+            </div>
+
+            <div class="contact-detail">
+              <h4 class="contact-detail-title">موقعنا</h4>
+              <p class="contact-address">شارع النيل 12<br />القاهرة، مصر</p>
+              <a
+                href="#"
+                class="btn btn-outline"
+                style="margin-top: var(--spacing-sm)"
+                >احصل على الاتجاهات</a
+              >
+            </div>
+
+            <div class="contact-detail">
+              <h4 class="contact-detail-title">تابعنا</h4>
+              <div class="social-links">
+                <a href="#" class="social-link" aria-label="فيسبوك">
+                  <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="إنستغرام">
+                  <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="تويتر">
+                  <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="يوتيوب">
+                  <i class="fab fa-youtube"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <div data-include="partials/footer.html"></div>
+
+    <script src="js/include-partials.js" defer></script>
+    <script src="js/script.js" defer></script>
+  </body>
+</html>

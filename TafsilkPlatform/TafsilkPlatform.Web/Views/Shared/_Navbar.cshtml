@@ -15,7 +15,7 @@
     {
         dashboardController = "AdminDashboard";
         dashboardAction = "Index";
-        dashboardArea = "";
+        dashboardArea = "Admin";
     }
     else if (userRole == "Tailor")
     {
@@ -31,133 +31,133 @@
     }
 }
 
-<nav class="navbar navbar-expand-lg fixed-top glass-nav">
-    <div class="container">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
+    <div class="container-fluid px-3">
         <!-- Brand -->
-        <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
-            <i class="fas fa-cut text-warning"></i>
-            <span class="fw-bold">Tafsilk</span>
+        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+            <i class="fas fa-cut me-2"></i>Tafsilk
         </a>
 
         <!-- Mobile Toggle -->
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar">
-            <i class="fas fa-bars"></i>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- Navbar Content -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-            <div class="offcanvas-header border-bottom">
-                <h5 class="offcanvas-title fw-bold" id="offcanvasNavbarLabel">
-                    <i class="fas fa-cut text-warning me-2"></i>Tafsilk
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-                <!-- Main Links -->
-                <ul class="navbar-nav justify-content-center flex-grow-1 pe-3 gap-lg-3">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Tailors" asp-action="Index">Tailors</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-area="Customer" asp-controller="Store" asp-action="Index">
-                            <i class="fas fa-store me-1"></i>Store
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Home" asp-action="Index" fragment="contact">Contact</a>
-                    </li>
-                </ul>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Main Links (Left/Center) -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                </li>
+                
+                <!-- Categories Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Categories
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index">All Tailors</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index" asp-route-filter="Verified">Verified Tailors</a></li>
+                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index" asp-route-filter="TopRated">Top Rated</a></li>
+                    </ul>
+                </li>
 
-                <!-- Right Side Actions -->
-                <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-                    
-                    <!-- Cart (Customer Only) -->
-                    @if (isAuthenticated && userRole == "Customer")
-                    {
-                        <a asp-area="Customer" asp-controller="Store" asp-action="Cart" class="btn btn-icon position-relative" title="Cart">
-                            <i class="fas fa-shopping-cart"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge" style="display:none;">
-                                0
-                            </span>
-                        </a>
-                    }
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="Customer" asp-controller="Store" asp-action="Index">
+                        <i class="fas fa-store me-1"></i>Store
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Home" asp-action="Contact">Contact</a>
+                </li>
+            </ul>
 
-                    @if (isAuthenticated)
-                    {
-                        <!-- User Dropdown -->
-                        <div class="dropdown">
-                            <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle user-dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(userName)&background=1a1a1a&color=fff&bold=true&size=32" class="rounded-circle" alt="@userName">
-                                <span class="d-none d-lg-block fw-medium">@userName</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end animate slideIn" aria-labelledby="userDropdown">
+            <!-- Right Side Actions -->
+            <div class="d-flex align-items-center gap-2">
+                
+                <!-- Cart (Customer Only) -->
+                @if (isAuthenticated && userRole == "Customer")
+                {
+                    <a asp-area="Customer" asp-controller="Store" asp-action="Cart" class="btn btn-sm btn-outline-light position-relative" title="Cart">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark" id="cart-badge" style="display:none; font-size: 0.65rem;">
+                            0
+                        </span>
+                    </a>
+                }
+
+                @if (isAuthenticated)
+                {
+                    <!-- User Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>@userName
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li>
+                                <div class="dropdown-header">
+                                    <div class="fw-bold">@userName</div>
+                                    <div class="small text-muted">@userRole</div>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            
+                            <!-- Dashboard Link -->
+                            <li>
+                                <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a>
+                            </li>
+
+                            <!-- Role Specific Links -->
+                            @if (userRole == "Tailor")
+                            {
                                 <li>
-                                    <div class="dropdown-header">
-                                        <div class="fw-bold text-dark">@userName</div>
-                                        <div class="small text-muted">@userRole</div>
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                
-                                <!-- Dashboard Link -->
-                                <li>
-                                    <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
-                                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard
+                                    <a class="dropdown-item" asp-controller="Profiles" asp-action="TailorProfile">
+                                        <i class="fas fa-user me-2"></i>My Profile
                                     </a>
                                 </li>
-
-                                <!-- Role Specific Links -->
-                                @if (userRole == "Tailor")
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Profiles" asp-action="TailorProfile">
-                                            <i class="fas fa-user me-2"></i>My Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts">
-                                            <i class="fas fa-box me-2"></i>My Products
-                                        </a>
-                                    </li>
-                                }
-                                else if (userRole == "Customer")
-                                {
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Profiles" asp-action="CustomerProfile">
-                                            <i class="fas fa-user me-2"></i>My Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
-                                            <i class="fas fa-shopping-bag me-2"></i>My Orders
-                                        </a>
-                                    </li>
-                                }
-
-                                <li><a class="dropdown-item" asp-controller="Account" asp-action="Settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                        </button>
-                                    </form>
+                                    <a class="dropdown-item" asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts">
+                                        <i class="fas fa-box me-2"></i>My Products
+                                    </a>
                                 </li>
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- Guest Actions -->
-                        <div class="d-flex gap-2">
-                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-dark px-4 rounded-pill">Login</a>
-                            <a asp-controller="Account" asp-action="Register" class="btn btn-dark px-4 rounded-pill">Join Now</a>
-                        </div>
-                    }
-                </div>
+                            }
+                            else if (userRole == "Customer")
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Profiles" asp-action="CustomerProfile">
+                                        <i class="fas fa-user me-2"></i>My Profile
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
+                                        <i class="fas fa-shopping-bag me-2"></i>My Orders
+                                    </a>
+                                </li>
+                            }
+
+                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    <!-- Guest Actions -->
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-light">Login</a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-warning text-dark fw-bold">Sign Up</a>
+                }
             </div>
         </div>
     </div>

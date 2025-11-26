@@ -1,398 +1,229 @@
 @model TafsilkPlatform.Models.ViewModels.Admin.DashboardHomeViewModel
 @{
-    Layout = null;
-    ViewData["Title"] = "لوحة التحكم - المسؤول";
+    ViewData["Title"] = "لوحة التحكم";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="utf-8" />
- <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - تفصيلك</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    
-<!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <!-- Admin Dashboard CSS -->
-    <link rel="stylesheet" href="~/css/admin-dashboard-new.css" asp-append-version="true" />
-</head>
-<body class="admin-dashboard">
-
-<!-- Sidebar Backdrop for Mobile -->
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-
-<!-- Sidebar Navigation -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-    <div class="logo">
-            <div class="logo-icon">
-      <i class="fas fa-cut"></i>
-            </div>
-       <span class="logo-text">تفصيلك</span>
-        </div>
-        <button class="sidebar-close" id="sidebarClose" aria-label="إغلاق القائمة">
-       <i class="fas fa-times"></i>
-   </button>
-    </div>
-    
-    <nav class="sidebar-nav">
-   <ul class="nav-list">
-        <li class="nav-item active">
- <a href="@Url.Action("Index", "AdminDashboard")" class="nav-link">
-     <i class="fas fa-home"></i>
-                 <span class="nav-text">لوحة التحكم</span>
-   </a>
-    </li>
-   <li class="nav-item">
-        <a href="@Url.Action("Users", "AdminDashboard")" class="nav-link">
-        <i class="fas fa-users"></i>
-         <span class="nav-text">إدارة المستخدمين</span>
-     </a>
-       </li>
-         <li class="nav-item">
-   <a href="@Url.Action("PortfolioReview", "AdminDashboard")" class="nav-link">
-            <i class="fas fa-images"></i>
-  <span class="nav-text">مراجعة الصور</span>
-           @if (Model.PendingPortfolioReviews > 0)
-         {
-               <span class="badge">@Model.PendingPortfolioReviews</span>
-   }
- </a>
-   </li>
-    <li class="nav-item">
-     <a href="@Url.Action("Orders", "AdminDashboard")" class="nav-link">
-      <i class="fas fa-shopping-cart"></i>
-     <span class="nav-text">الطلبات</span>
-       </a>
-    </li>
-     <li class="nav-item">
-            <a href="@Url.Action("Disputes", "AdminDashboard")" class="nav-link">
-            <i class="fas fa-exclamation-triangle"></i>
-                    <span class="nav-text">حل النزاعات</span>
-           @* REMOVED: Dispute feature *@ @if (false)
-          {
-          <span class="badge">0 @* REMOVED: Disputes feature *@</span>
-        }
-                </a>
-            </li>
-            <li class="nav-item">
-         <a href="@Url.Action("Refunds", "AdminDashboard")" class="nav-link">
-                    <i class="fas fa-money-bill-wave"></i>
-     <span class="nav-text">طلبات الاسترداد</span>
-    @* REMOVED: Refund feature *@ @if (false)
-           {
-     <span class="badge">0 @* REMOVED: Refunds feature *@</span>
- }
-        </a>
-            </li>
-            <li class="nav-item">
-       <a href="@Url.Action("Reviews", "AdminDashboard")" class="nav-link">
-   <i class="fas fa-star"></i>
-    <span class="nav-text">مراجعة التقييمات</span>
-    </a>
-       </li>
-        <li class="nav-item">
-      <a href="@Url.Action("Analytics", "AdminDashboard")" class="nav-link">
-         <i class="fas fa-chart-line"></i>
-       <span class="nav-text">التقارير والإحصائيات</span>
-     </a>
-      </li>
-    <li class="nav-item">
-       <a href="@Url.Action("Notifications", "AdminDashboard")" class="nav-link">
-         <i class="fas fa-bell"></i>
-          <span class="nav-text">مركز الإشعارات</span>
-             </a>
-  </li>
-  <li class="nav-item">
-             <a href="@Url.Action("AuditLogs", "AdminDashboard")" class="nav-link">
-            <i class="fas fa-clipboard-list"></i>
-         <span class="nav-text">سجلات التدقيق</span>
-        </a>
-      </li>
-        </ul>
-    </nav>
-
-    <div class="sidebar-footer">
-        <a href="@Url.Action("Index", "Home")" class="btn btn-outline-light btn-block">
-      <i class="fas fa-home"></i>
-      <span class="nav-text">العودة للموقع</span>
-        </a>
-    </div>
-</aside>
-
-<!-- Main Wrapper -->
-<div class="main-wrapper">
-    <!-- Top Navigation Bar -->
-  <header class="topbar">
-        <div class="topbar-left">
-       <button class="sidebar-toggle" id="sidebarToggle" aria-label="فتح القائمة">
-     <i class="fas fa-bars"></i>
-</button>
- <div class="breadcrumb">
-       <i class="fas fa-home"></i>
-             <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">لوحة التحكم</span>
-            </div>
-        </div>
-        
-   <div class="topbar-right">
-<!-- Quick Search -->
-<div class="topbar-search">
-      <input type="text" placeholder="بحث سريع..." aria-label="بحث" />
-    <i class="fas fa-search"></i>
-            </div>
-
-       <!-- Notifications -->
-     <div class="topbar-item">
-             <button class="topbar-btn" id="notificationBtn" aria-label="الإشعارات">
-   <i class="fas fa-bell"></i>
-      <span class="badge-dot"></span>
-    </button>
-</div>
-
-            <!-- User Menu -->
-       <div class="topbar-item user-menu">
-         <button class="user-menu-toggle" id="userMenuToggle">
-                <div class="user-avatar">
-       <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="المسؤول" />
-       </div>
-         <div class="user-info">
-          <span class="user-name">@(User.Identity?.Name ?? "المسؤول")</span>
-     <span class="user-role">مسؤول النظام</span>
- </div>
-             <i class="fas fa-chevron-down"></i>
-    </button>
-
-      <div class="user-menu-dropdown" id="userMenuDropdown">
-        <div class="user-menu-header">
-            <div class="user-avatar-large">
-                <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="المسؤول" />
-       </div>
-         <div class="user-details">
-       <strong>@(User.Identity?.Name ?? "المسؤول")</strong>
-     <span>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@tafsilk.com")</span>
-          </div>
-          </div>
-              <div class="user-menu-body">
-     <a href="#" class="user-menu-item">
-     <i class="fas fa-user"></i>
-    <span>الملف الشخصي</span>
-     </a>
-     <a href="#" class="user-menu-item">
-    <i class="fas fa-cog"></i>
-          <span>الإعدادات</span>
-   </a>
-      </div>
-           <div class="user-menu-footer">
-   <form asp-controller="Account" asp-action="Logout" method="post">
-     @Html.AntiForgeryToken()
-       <button type="submit" class="btn btn-logout btn-block">
-      <i class="fas fa-sign-out-alt"></i>
-        <span>تسجيل الخروج</span>
+<div class="page-header">
+    <h1 class="page-title">لوحة التحكم</h1>
+    <div class="page-actions">
+        <button class="btn btn-outline" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i>
+            <span>تحديث</span>
         </button>
-             </form>
-             </div>
-         </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-        <div class="page-header">
-       <div class="page-header-content">
-     <h1 class="page-title">لوحة التحكم</h1>
-     <p class="page-subtitle">نظرة عامة على أداء المنصة</p>
-            </div>
-            <div class="page-actions">
-   <button class="btn btn-primary" id="refreshData">
-  <i class="fas fa-sync-alt"></i>
-             <span>تحديث البيانات</span>
-           </button>
-   </div>
-  </div>
-
-        <!-- Stats Cards -->
-        <div class="stats-grid">
- <div class="stat-card">
-          <div class="stat-card-header">
-     <div class="stat-icon primary">
-    <i class="fas fa-users"></i>
-            </div>
-   </div>
-  <div class="stat-card-body">
-       <h3 class="stat-value">@Model.TotalUsers.ToString("N0")</h3>
-  <p class="stat-label">إجمالي المستخدمين</p>
-      </div>
-                <div class="stat-card-footer">
-          <span class="stat-info">عملاء: @Model.TotalCustomers | خياطين: @Model.TotalTailors</span>
-        </div>
-   </div>
-
-      <div class="stat-card">
-     <div class="stat-card-header">
-             <div class="stat-icon success">
-<i class="fas fa-shopping-cart"></i>
-       </div>
-          </div>
-     <div class="stat-card-body">
- <h3 class="stat-value">@Model.ActiveOrders.ToString("N0")</h3>
-         <p class="stat-label">الطلبات النشطة</p>
-          </div>
-      <div class="stat-card-footer">
-        <a href="@Url.Action("Orders", "AdminDashboard")" class="stat-info">إدارة الطلبات →</a>
-  </div>
-         </div>
-
-    <div class="stat-card">
-                <div class="stat-card-header">
-        <div class="stat-icon info">
-        <i class="fas fa-dollar-sign"></i>
-                    </div>
     </div>
-         <div class="stat-card-body">
-         <h3 class="stat-value">@Model.TotalRevenue.ToString("N0")</h3>
-        <p class="stat-label">إجمالي الإيرادات (ج.م)</p>
-      </div>
-        <div class="stat-card-footer">
-            <a href="@Url.Action("Analytics", "AdminDashboard")" class="stat-info">عرض التقارير →</a>
-           </div>
-            </div>
-        </div>
+</div>
 
-        <!-- Urgent Actions -->
-        @* REMOVED: Disputes & Refunds *@ @if (false || Model.PendingPortfolioReviews > 0)
+<!-- Stats Grid -->
+<div class="grid-cols-4 mb-4">
+    <!-- Total Users -->
+    <div class="card stat-widget">
+        <div class="flex-between">
+            <span class="stat-label">إجمالي المستخدمين</span>
+            <i class="fas fa-users text-secondary"></i>
+        </div>
+        <div class="stat-value">@Model.TotalUsers.ToString("N0")</div>
+        <div class="stat-trend up">
+            <i class="fas fa-arrow-up"></i>
+            <span>12% زيادة عن الشهر الماضي</span>
+        </div>
+    </div>
+
+    <!-- Active Orders -->
+    <div class="card stat-widget">
+        <div class="flex-between">
+            <span class="stat-label">الطلبات النشطة</span>
+            <i class="fas fa-shopping-bag text-secondary"></i>
+        </div>
+        <div class="stat-value">@Model.ActiveOrders.ToString("N0")</div>
+        <div class="stat-trend up">
+            <i class="fas fa-arrow-up"></i>
+            <span>8% زيادة في الطلبات</span>
+        </div>
+    </div>
+
+    <!-- Total Sales (Gross) -->
+    <div class="card stat-widget">
+        <div class="flex-between">
+            <span class="stat-label">إجمالي المبيعات</span>
+            <i class="fas fa-money-bill-wave text-secondary"></i>
+        </div>
+        <div class="stat-value">@Model.TotalSales.ToString("C")</div>
+        <div class="stat-trend up">
+            <i class="fas fa-arrow-up"></i>
+            <span>إجمالي قيمة الطلبات</span>
+        </div>
+    </div>
+
+    <!-- Tafsilk Revenue (Commission) -->
+    <div class="card stat-widget">
+        <div class="flex-between">
+            <span class="stat-label">أرباح تفصيلك (العمولة)</span>
+            <i class="fas fa-coins text-secondary"></i>
+        </div>
+        <div class="stat-value">@Model.TotalRevenue.ToString("C")</div>
+        <div class="stat-trend up">
+            <i class="fas fa-arrow-up"></i>
+            <span>صافي الربح (10%)</span>
+        </div>
+    </div>
+
+    <!-- Pending Reviews -->
+    <div class="card stat-widget">
+        <div class="flex-between">
+            <span class="stat-label">صور للمراجعة</span>
+            <i class="fas fa-images text-secondary"></i>
+        </div>
+        <div class="stat-value">@Model.PendingPortfolioReviews</div>
+        @if (Model.PendingPortfolioReviews > 0)
         {
-            <div class="alert-section">
-           <h2 class="section-title">
-     <i class="fas fa-exclamation-circle"></i>
-         إجراءات عاجلة تحتاج لانتباهك
-              </h2>
-
-        <div class="alert-grid">
-       @* REMOVED: Dispute feature *@ @if (false)
-     {
-          <div class="alert-card danger">
-             <div class="alert-icon">
-      <i class="fas fa-exclamation-triangle"></i>
-          </div>
-  <div class="alert-content">
-     <h3>0 @* REMOVED: Disputes feature *@ نزاع مفتوح</h3>
-    <p>هناك نزاعات تحتاج للمراجعة والحل</p>
-</div>
-            <div class="alert-action">
-      <a href="@Url.Action("Disputes", "AdminDashboard")" class="btn btn-danger btn-sm">
-      معالجة النزاعات
-    </a>
-         </div>
-      </div>
-            }
-
-       @* REMOVED: Refund feature *@ @if (false)
-          {
-        <div class="alert-card warning">
-     <div class="alert-icon">
-   <i class="fas fa-money-bill-wave"></i>
-  </div>
-  <div class="alert-content">
-     <h3>0 @* REMOVED: Refunds feature *@ طلب استرداد</h3>
-    <p>هناك طلبات استرداد بانتظار الموافقة</p>
-        </div>
-     <div class="alert-action">
-           <a href="@Url.Action("Refunds", "AdminDashboard")" class="btn btn-warning btn-sm">
-          مراجعة الطلبات
-        </a>
-          </div>
-        </div>
-          }
-
-   @if (Model.PendingPortfolioReviews > 0)
-       {
-              <div class="alert-card info">
-         <div class="alert-icon">
-    <i class="fas fa-images"></i>
-   </div>
-    <div class="alert-content">
-               <h3>@Model.PendingPortfolioReviews صورة للمراجعة</h3>
-    <p>صور من معارض أعمال الخياطين تحتاج للموافقة</p>
-          </div>
-          <div class="alert-action">
-      <a href="@Url.Action("PortfolioReview", "AdminDashboard")" class="btn btn-info btn-sm">
-       مراجعة الصور
-      </a>
-    </div>
-   </div>
-           }
-    </div>
-   </div>
-        }
-
-        <!-- Recent Activity -->
-        <div class="dashboard-card">
-       <div class="card-header">
-   <h3 class="card-title">
-             <i class="fas fa-history"></i>
-        النشاط الحديث
-         </h3>
-      <a href="@Url.Action("AuditLogs", "AdminDashboard")" class="btn btn-text btn-sm">عرض الكل</a>
+            <div class="stat-trend down">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>يحتاج لاتخاذ إجراء</span>
             </div>
-    <div class="card-body">
- @if (Model.RecentActivity.Any())
-    {
-          <div class="activity-list">
-    @foreach (var activity in Model.RecentActivity)
-       {
-       <div class="activity-item">
-  <div class="activity-icon">
-          <i class="fas fa-user-circle"></i>
-          </div>
-       <div class="activity-content">
-          <div class="activity-text">
-            <strong>@activity.UserName</strong> - @activity.Action
-         </div>
-              <div class="activity-time">
-  @activity.Timestamp.ToString("dd/MM/yyyy HH:mm")
-  @if (!string.IsNullOrEmpty(activity.IpAddress))
-          {
-   <span class="activity-ip">من @activity.IpAddress</span>
-    }
- </div>
-          </div>
-                </div>
-}
-     </div>
-           }
-  else
-           {
-   <div class="empty-state">
-              <i class="fas fa-inbox"></i>
-           <p>لا توجد أنشطة حديثة</p>
-        </div>
-           }
- </div>
-  </div>
-    </main>
+        }
+        else
+        {
+            <div class="stat-trend text-secondary">
+                <i class="fas fa-check"></i>
+                <span>لا توجد مهام معلقة</span>
+            </div>
+        }
+    </div>
 </div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
+<!-- Charts & Activity -->
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+    <!-- Revenue Chart -->
+    <div class="card">
+        <div class="flex-between mb-4">
+            <h3 class="text-lg font-bold m-0">نظرة عامة على الإيرادات</h3>
+            <select class="form-select" style="padding: 0.25rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
+                <option>هذا العام</option>
+                <option>آخر 6 أشهر</option>
+            </select>
+        </div>
+        <div style="height: 300px;">
+            <canvas id="revenueChart"></canvas>
+        </div>
+    </div>
 
-@if (TempData["Success"] != null)
-{
+    <!-- Order Status -->
+    <div class="card">
+        <h3 class="text-lg font-bold mb-4 m-0">حالة الطلبات</h3>
+        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="ordersChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-top border-subtle">
+            <div class="flex-between text-sm mb-2">
+                <span class="text-secondary">مكتمل</span>
+                <span class="font-medium">65%</span>
+            </div>
+            <div class="flex-between text-sm">
+                <span class="text-secondary">قيد التنفيذ</span>
+                <span class="font-medium">20%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="card">
+    <div class="flex-between mb-4">
+        <h3 class="text-lg font-bold m-0">النشاط الحديث</h3>
+        <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="btn btn-sm btn-outline">عرض الكل</a>
+    </div>
+    
+    @if (Model.RecentActivity.Any())
+    {
+        <table class="datagrid">
+            <thead>
+                <tr>
+                    <th>المستخدم</th>
+                    <th>النشاط</th>
+                    <th>التاريخ</th>
+                    <th>IP Address</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var activity in Model.RecentActivity)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar bg-surface-3 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="font-medium">@activity.UserName</span>
+                            </div>
+                        </td>
+                        <td>@activity.Action</td>
+                        <td>@activity.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-sm font-mono text-tertiary">@activity.IpAddress</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="text-center py-5 text-secondary">
+            <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
+            <p>لا توجد أنشطة حديثة</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            showToast('@TempData["Success"]', 'success');
+            // Chart Config
+            Chart.defaults.font.family = "'Inter', 'Cairo', sans-serif";
+            Chart.defaults.color = '#64748b';
+            
+            // Revenue Chart
+            new Chart(document.getElementById('revenueChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [12000, 19000, 15000, 25000, 22000, 30000],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { borderDash: [4, 4] }, beginAtZero: true },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Orders Chart
+            new Chart(document.getElementById('ordersChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Processing', 'Pending', 'Cancelled'],
+                    datasets: [{
+                        data: [65, 20, 10, 5],
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: { legend: { display: false } }
+                }
+            });
         });
     </script>
 }
-
-<!-- Scripts -->
-<script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
-</body>
-</html>

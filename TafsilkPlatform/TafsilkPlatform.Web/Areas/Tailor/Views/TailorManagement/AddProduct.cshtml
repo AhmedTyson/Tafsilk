@@ -82,7 +82,7 @@
                                 <label asp-for="Category" class="form-label"></label>
                                 <select asp-for="Category" class="form-select" id="categorySelect">
                                     <option value="">اختر التصنيف</option>
-                                    @foreach (var category in ViewBag.Categories as List<string>)
+                                    @foreach (var category in (ViewBag.Categories as List<string>) ?? new List<string>())
                                     {
                                         <option value="@category">@category</option>
                                     }
@@ -168,7 +168,7 @@
                                 <label asp-for="SubCategory" class="form-label"></label>
                                 <select asp-for="SubCategory" class="form-select" id="SubCategory">
                                     <option value="">اختر (اختياري)</option>
-                                    @foreach (var sub in ViewBag.SubCategories as List<string>)
+                                    @foreach (var sub in (ViewBag.SubCategories as List<string>) ?? new List<string>())
                                     {
                                         <option value="@sub">@sub</option>
                                     }
@@ -179,7 +179,7 @@
                                 <label asp-for="Size" class="form-label"></label>
                                 <select asp-for="Size" class="form-select" id="Size">
                                     <option value="">اختر (اختياري)</option>
-                                    @foreach (var size in ViewBag.Sizes as List<string>)
+                                    @foreach (var size in (ViewBag.Sizes as List<string>) ?? new List<string>())
                                     {
                                         <option value="@size">@size</option>
                                     }
@@ -195,7 +195,7 @@
                                 <label asp-for="Material" class="form-label"></label>
                                 <select asp-for="Material" class="form-select" id="Material">
                                     <option value="">اختر (اختياري)</option>
-                                    @foreach (var material in ViewBag.Materials as List<string>)
+                                    @foreach (var material in (ViewBag.Materials as List<string>) ?? new List<string>())
                                     {
                                         <option value="@material">@material</option>
                                     }
@@ -496,10 +496,34 @@
 
             // Additional images preview (existing behavior)
             $additionalInput.on('change', function () {
-                const files = Array.from(this.files || []);
+                let files = Array.from(this.files || []);
                 $additionalPreview.empty();
 
                 if (!files.length) return;
+
+                // Auto-promote: If primary is empty, move the first additional image to primary
+                if (!$primaryInput.val() && files.length > 0) {
+                    const firstFile = files[0];
+                    
+                    // Assign to primary
+                    const dtPrimary = new DataTransfer();
+                    dtPrimary.items.add(firstFile);
+                    $primaryInput[0].files = dtPrimary.files;
+                    $primaryInput.trigger('change'); // Trigger preview for primary
+                    
+                    showToastr('info', 'تم تعيين الصورة الأولى كصورة رئيسية تلقائياً');
+
+                    // Remove from additional
+                    files.shift();
+                    
+                    // Update additional input
+                    const dtAdditional = new DataTransfer();
+                    files.forEach(f => dtAdditional.items.add(f));
+                    this.files = dtAdditional.files;
+                    
+                    // If no files left, stop here
+                    if (!files.length) return;
+                }
 
                 if (files.length > MAX_ADDITIONAL_IMAGES) {
                     showToastr('warning', `يمكنك إضافة ${MAX_ADDITIONAL_IMAGES} صور كحد أقصى. سيتم استخدام أول ${MAX_ADDITIONAL_IMAGES} صور.`);

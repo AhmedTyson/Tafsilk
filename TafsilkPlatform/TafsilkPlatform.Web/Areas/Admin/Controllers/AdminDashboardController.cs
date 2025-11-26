@@ -39,9 +39,14 @@ public class AdminDashboardController : BaseController
             var activeOrders = await _db.Orders.CountAsync(o =>
                 o.Status != OrderStatus.Delivered &&
                o.Status != OrderStatus.Cancelled);
-            var totalRevenue = await _db.Orders
+            
+            var totalSales = await _db.Orders
                   .Where(o => o.Status == OrderStatus.Delivered)
                   .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+
+            var totalRevenue = await _db.Orders
+                  .Where(o => o.Status == OrderStatus.Delivered)
+                  .SumAsync(o => (decimal?)o.CommissionAmount) ?? 0;
 
             var viewModel = new DashboardHomeViewModel
             {
@@ -51,6 +56,7 @@ public class AdminDashboardController : BaseController
                 PendingTailorVerifications = 0, // Simplified - no verification
                 PendingPortfolioReviews = 0,
                 ActiveOrders = activeOrders,
+                TotalSales = totalSales,
                 TotalRevenue = totalRevenue,
                 RecentActivity = new List<ActivityLogDto>()
             };
@@ -97,12 +103,31 @@ public class AdminDashboardController : BaseController
             .Include(u => u.Role)
                .Include(u => u.CustomerProfile)
                 .Include(u => u.TailorProfile)
+                    .ThenInclude(t => t.TailorServices)
+                .Include(u => u.TailorProfile)
+                    .ThenInclude(t => t.PortfolioImages)
           .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null)
             {
                 TempData["Error"] = "المستخدم غير موجود";
                 return RedirectToAction(nameof(Users));
+            }
+
+            // Load orders for this user (either as customer or tailor)
+            if (user.Role?.Name == "Customer")
+            {
+                ViewBag.Orders = await _db.Orders
+                    .Where(o => o.CustomerId == user.CustomerProfile.Id)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ToListAsync();
+            }
+            else if (user.Role?.Name == "Tailor")
+            {
+                ViewBag.Orders = await _db.Orders
+                    .Where(o => o.TailorId == user.TailorProfile.Id)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ToListAsync();
             }
 
             return View(user);
@@ -304,18 +329,60 @@ public class AdminDashboardController : BaseController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult ApproveTailor(Guid id, string? notes)
+    public async Task<IActionResult> ApproveTailor(Guid id, string? notes)
     {
-        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-        return RedirectToAction(nameof(Users));
+        try
+        {
+            var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
+            if (tailor == null)
+            {
+                TempData["Error"] = "الخياط غير موجود";
+                return RedirectToAction(nameof(Users));
+            }
+
+            tailor.Verify(DateTime.UtcNow);
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Tailor {TailorId} verified by admin. Notes: {Notes}", id, notes ?? "None");
+            TempData["Success"] = "تم توثيق حساب الخياط بنجاح";
+            return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error approving tailor {TailorId}", id);
+            TempData["Error"] = "حدث خطأ أثناء توثيق الخياط";
+            return RedirectToAction(nameof(Users));
+        }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult RejectTailor(Guid id, string? reason)
+    public async Task<IActionResult> RejectTailor(Guid id, string? reason)
     {
-        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
-        return RedirectToAction(nameof(Users));
+        try
+        {
+            var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
+            if (tailor == null)
+            {
+                TempData["Error"] = "الخياط غير موجود";
+                return RedirectToAction(nameof(Users));
+            }
+
+            tailor.IsVerified = false;
+            tailor.VerifiedAt = null;
+            tailor.UpdatedAt = DateTime.UtcNow;
+            await _db.SaveChangesAsync();
+
+            _logger.LogInformation("Tailor {TailorId} rejected/unverified by admin. Reason: {Reason}", id, reason ?? "None");
+            TempData["Success"] = "تم إلغاء توثيق الخياط";
+            return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error rejecting tailor {TailorId}", id);
+            TempData["Error"] = "حدث خطأ أثناء إلغاء توثيق الخياط";
+            return RedirectToAction(nameof(Users));
+        }
     }
 
     [HttpGet]
@@ -623,7 +690,8 @@ public class AdminDashboardController : BaseController
     [HttpGet]
     public IActionResult Analytics()
     {
-        return View();
+        // Removed as per user request
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet]
@@ -650,4 +718,3 @@ public class AdminDashboardController : BaseController
         return RedirectToAction(nameof(Users));
     }
 }
-
