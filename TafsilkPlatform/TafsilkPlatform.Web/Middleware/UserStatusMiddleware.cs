@@ -128,7 +128,6 @@ public class UserStatusMiddleware
       path.Contains("/account/logout") ||
     path.Contains("/account/register") ||
          path.Contains("/account/completetailorprofile") ||
-     path.Contains("/account/verifyemail") ||
      path.Contains("/account/resendverificationemail") ||
  path.StartsWith("/css") ||
      path.StartsWith("/js") ||
@@ -137,7 +136,6 @@ path.StartsWith("/lib") ||
       path.StartsWith("/uploads") ||
       path.StartsWith("/favicon") ||
 path.StartsWith("/health") ||
-   path.StartsWith("/swagger") ||
     path.StartsWith("/_framework") ||
        path.StartsWith("/_vs");
     }

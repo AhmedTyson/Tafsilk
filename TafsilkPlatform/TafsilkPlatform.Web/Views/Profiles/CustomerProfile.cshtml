@@ -1,448 +1,133 @@
 @model TafsilkPlatform.Models.Models.CustomerProfile
-
 @{
-    ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Account Settings";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Styles {
-<style>
-    :root {
-        --primary-color: #2c5aa0;
-        --primary-hover: #1e3f73;
-        --primary-light: #e3f2fd;
-        --secondary-color: #f39c12;
-        --success-color: #27ae60;
-        --text-primary: #2c3e50;
-        --text-secondary: #7f8c8d;
-        --border-color: #e1e8ed;
-        --background-white: #ffffff;
-        --background-gray: #f8f9fa;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        --radius-md: 0.5rem;
-        --radius-lg: 0.75rem;
-    }
-
-    .profile-page {
-        padding: 2rem 0;
-        background: var(--background-gray);
-        min-height: 100vh;
-    }
-
-    .profile-header {
-        background: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-sm);
-        display: flex;
-        align-items: center;
-        gap: 2rem;
-    }
-
-    .profile-avatar {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        overflow: hidden;
-        border: 4px solid var(--primary-color);
-        flex-shrink: 0;
-    }
-
-    .profile-avatar img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .profile-avatar i {
-        font-size: 4rem;
-        color: var(--text-secondary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-        background: var(--background-gray);
-    }
-
-    .profile-info h1 {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
-    }
-
-    .profile-meta {
-        display: flex;
-        gap: 1.5rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--text-secondary);
-    }
-
-    .meta-item i {
-        color: var(--primary-color);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .stat-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1.5rem;
-        flex-wrap: wrap;
-    }
-
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.3s;
-        border: none;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-outline {
-        background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-    }
-
-    .btn-outline:hover {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .profile-section {
-        background: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .info-label {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-    }
-
-    .info-value {
-        color: var(--text-primary);
-        font-size: 1rem;
-    }
-
-    .address-card {
-        border: 2px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 1rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s;
-    }
-
-    .address-card.default {
-        border-color: var(--primary-color);
-        background: var(--primary-light);
-    }
-
-    .address-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-
-    .address-label {
-        font-weight: 700;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .default-badge {
-        background: var(--success-color);
-        color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 1rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .address-text {
-        color: var(--text-secondary);
-        line-height: 1.6;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 3rem 1rem;
-        color: var(--text-secondary);
-    }
-
-    .empty-state i {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        color: var(--border-color);
-    }
-
-    @@media (max-width: 768px) {
-        .profile-header {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .profile-avatar {
-            width: 100px;
-            height: 100px;
-        }
-
-        .profile-meta {
-            justify-content: center;
-        }
-
-        .action-buttons {
-            justify-content: center;
-        }
-    }
-</style>
-}
-
-<div class="profile-page">
-    <div class="container">
-        <!-- Profile Completion Indicator -->
-        @if (ViewBag.ProfileCompletion != null)
-        {
-            @await Html.PartialAsync("_ProfileCompletion", (TafsilkPlatform.Web.Services.ProfileCompletionResult)ViewBag.ProfileCompletion)
-        }
-
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-avatar">
-                @if (Model.ProfilePictureData != null)
-                {
-                    <img src="@Url.Action("ProfilePicture", "Account", new { id = Model.UserId })" 
-                         alt="@Model.FullName" />
-                }
-                else
-                {
-                    <i class="fas fa-user"></i>
-                }
-            </div>
-
-            <div class="profile-info">
-                <h1>@(Model.FullName ?? "Customer")</h1>
-                <p class="text-muted">Tafsilk Customer</p>
-
-                <div class="profile-meta">
-                    <div class="meta-item">
-                        <i class="fas fa-envelope"></i>
-                        <span>@(Model.User?.Email ?? "Not Available")</span>
-                    </div>
-                    @if (!string.IsNullOrEmpty(Model.User?.PhoneNumber))
-                    {
-                        <div class="meta-item">
-                            <i class="fas fa-phone"></i>
-                            <span>@Model.User.PhoneNumber</span>
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-body text-center p-4 bg-white">
+                    <div class="mb-4 position-relative d-inline-block">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto text-primary shadow-sm" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                            <i class="fas fa-user"></i>
                         </div>
-                    }
-                    <div class="meta-item">
-                        <i class="fas fa-calendar"></i>
-                        <span>Member since @Model.CreatedAt.ToString("yyyy/MM/dd")</span>
                     </div>
+                    <h5 class="fw-bold mb-1">@Model.FullName</h5>
+                    <p class="text-muted small mb-0">@Model.User?.Email</p>
                 </div>
-
-                <div class="action-buttons">
-                    <a asp-controller="Dashboards" asp-action="Customer" class="btn btn-primary">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
+                <div class="list-group list-group-flush border-top-0 p-2 bg-white">
+                    <a href="@Url.Action("CustomerProfile", "Profiles")" class="list-group-item list-group-item-action active rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-user-cog me-3 opacity-75"></i> 
+                        <span class="fw-medium">Profile Settings</span>
                     </a>
-                    <a asp-action="ManageAddresses" class="btn btn-outline">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Manage Addresses</span>
+                    <a href="@Url.Action("MyOrders", "Orders")" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-shopping-bag me-3 opacity-75"></i>
+                        <span class="fw-medium">My Orders</span>
+                    </a>
+                    <a href="@Url.Action("ChangePassword", "Account")" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-lock me-3 opacity-75"></i>
+                        <span class="fw-medium">Security</span>
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Statistics -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-value">@ViewBag.AddressCount</div>
-                <div class="stat-label">Saved Addresses</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Active Orders</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Completed Orders</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">0</div>
-                <div class="stat-label">Favorite Tailors</div>
-            </div>
-        </div>
-
-        <!-- Profile Information -->
-        <div class="profile-section">
-            <h2 class="section-title">
-                <div class="section-icon">
-                    <i class="fas fa-info-circle"></i>
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h4 class="mb-0 fw-bold text-dark">Personal Information</h4>
+                    <p class="text-muted small mb-0 mt-1">Update your personal details and preferences</p>
                 </div>
-                Basic Information
-            </h2>
-
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Full Name</div>
-                    <div class="info-value">@(Model.FullName ?? "Not Specified")</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Phone Number</div>
-                    <div class="info-value">@(Model.User?.PhoneNumber ?? "Not Specified")</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Email</div>
-                    <div class="info-value">@(Model.User?.Email ?? "Not Specified")</div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-label">Registration Date</div>
-                    <div class="info-value">@Model.CreatedAt.ToString("yyyy/MM/dd")</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Saved Addresses -->
-        <div class="profile-section">
-            <h2 class="section-title">
-                <div class="section-icon">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                Saved Addresses
-                <a asp-action="ManageAddresses" class="btn btn-outline btn-sm ms-auto">
-                    <i class="fas fa-plus"></i>
-                    <span>Add Address</span>
-                </a>
-            </h2>
-
-            @if (ViewBag.Addresses != null && ((List<TafsilkPlatform.Models.Models.UserAddress>)ViewBag.Addresses).Any())
-            {
-                @foreach (var address in (List<TafsilkPlatform.Models.Models.UserAddress>)ViewBag.Addresses)
-                {
-                    <div class="address-card @(address.IsDefault ? "default" : "")">
-                        <div class="address-header">
-                            <div class="address-label">
-                                <i class="fas fa-map-marker-alt"></i>
-                                @address.Label
+                <div class="card-body px-4 pb-4">
+                    <form asp-action="CompleteCustomerProfile" method="post">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-light border-0" id="fullName" name="FullName" value="@Model.FullName" placeholder="Full Name" required>
+                                    <label for="fullName" class="text-muted">Full Name</label>
+                                </div>
                             </div>
-                            @if (address.IsDefault)
-                            {
-                                <span class="default-badge">Default Address</span>
-                            }
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="tel" class="form-control bg-light border-0" id="phone" name="PhoneNumber" value="@Model.User?.PhoneNumber" placeholder="Phone Number">
+                                    <label for="phone" class="text-muted">Phone Number</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control bg-light border-0" id="city" name="City" value="@Model.City" placeholder="City">
+                                    <label for="city" class="text-muted">City</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select bg-light border-0" id="gender" name="Gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="Male" selected="@(Model.Gender == "Male")">Male</option>
+                                        <option value="Female" selected="@(Model.Gender == "Female")">Female</option>
+                                    </select>
+                                    <label for="gender" class="text-muted">Gender</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea class="form-control bg-light border-0" id="bio" name="Bio" placeholder="Bio" style="height: 120px">@Model.Bio</textarea>
+                                    <label for="bio" class="text-muted">Bio / About You</label>
+                                </div>
+                            </div>
+                            <div class="col-12 text-end mt-4">
+                                <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm transition-all">
+                                    Save Changes
+                                </button>
+                            </div>
                         </div>
-                        <p class="address-text">
-                            @address.Street<br />
-                            @address.City
-                        </p>
-                    </div>
-                }
-            }
-            else
-            {
-                <div class="empty-state">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <p>No saved addresses</p>
-                    <a asp-action="AddAddress" class="btn btn-primary mt-3">
-                        <i class="fas fa-plus"></i>
-                        <span>Add New Address</span>
-                    </a>
+                    </form>
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Custom Styles for Premium Feel */
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .list-group-item {
+        color: #6c757d;
+        transition: all 0.2s ease;
+    }
+    
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+        color: var(--bs-primary);
+        transform: translateX(5px);
+    }
+    
+    .list-group-item.active {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+        border-color: transparent;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background-color: #fff;
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15);
+        border-color: rgba(var(--bs-primary-rgb), 0.3);
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, var(--bs-primary), #4a90e2);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3) !important;
+    }
+</style>

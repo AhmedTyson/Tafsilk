@@ -26,12 +26,7 @@ public class DashboardsController : Controller
         _logger = logger;
     }
 
-    [Authorize(Roles = "Customer,Admin")]
-    public IActionResult Customer()
-    {
-        ViewData["Title"] = "لوحة العميل";
-        return View();
-    }
+
 
     /// <summary>
     /// Redirect route for /Dashboards/Tailor/Add to correct product add route

@@ -5,7 +5,7 @@ namespace ProfileImageMigratorTool
 {
     internal static class Program
     {
-        private static async Task<int> Main(string[] args)
+        public static async Task<int> RunMigration(string[] args)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

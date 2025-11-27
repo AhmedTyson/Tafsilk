@@ -37,6 +37,25 @@ public interface IPaymentProcessorService
     /// Validate payment before processing
     /// </summary>
     Task<Result> ValidatePaymentAsync(Guid orderId, decimal amount);
+
+    /// <summary>
+    /// Create a Stripe Checkout Session
+    /// </summary>
+    Task<Result<string>> CreateCheckoutSessionAsync(CreateCheckoutSessionRequest request);
+}
+
+/// <summary>
+/// Create checkout session request
+/// </summary>
+public class CreateCheckoutSessionRequest
+{
+    public Guid OrderId { get; set; }
+    public decimal Amount { get; set; }
+    public string Currency { get; set; } = "SAR";
+    public string SuccessUrl { get; set; } = string.Empty;
+    public string CancelUrl { get; set; } = string.Empty;
+    public string? CustomerEmail { get; set; }
+    public string? Description { get; set; }
 }
 
 /// <summary>

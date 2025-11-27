@@ -24,7 +24,7 @@ namespace TafsilkPlatform.Models.Models
         public Enums.PaymentType PaymentType { get; set; }
         public Enums.PaymentStatus PaymentStatus { get; set; }
         public Enums.TransactionType TransactionType { get; set; }
-        public DateTimeOffset PaidAt { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset? PaidAt { get; set; } = DateTimeOffset.UtcNow;
 
         // ✅ NEW: Stripe integration fields
         /// <summary>

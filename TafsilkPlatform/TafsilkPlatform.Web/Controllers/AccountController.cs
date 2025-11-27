@@ -551,23 +551,12 @@ public class AccountController(
             byte[]? imageData = null;
             string? contentType = null;
 
-            // Try to get profile picture from Customer profile
-            var customerProfile = await _unitOfWork.Customers.GetByUserIdAsync(id);
-            if (customerProfile?.ProfilePictureData != null)
+            // Try Tailor profile
+            var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(id);
+            if (tailorProfile?.ProfilePictureData != null)
             {
-                imageData = customerProfile.ProfilePictureData;
-                contentType = customerProfile.ProfilePictureContentType ?? "image/jpeg";
-            }
-
-            // Try Tailor profile if not found
-            if (imageData == null)
-            {
-                var tailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(id);
-                if (tailorProfile?.ProfilePictureData != null)
-                {
-                    imageData = tailorProfile.ProfilePictureData;
-                    contentType = tailorProfile.ProfilePictureContentType ?? "image/jpeg";
-                }
+                imageData = tailorProfile.ProfilePictureData;
+                contentType = tailorProfile.ProfilePictureContentType ?? "image/jpeg";
             }
 
             // Return image or placeholder
@@ -711,8 +700,18 @@ public class AccountController(
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult GoogleLogin(string? returnUrl = null)
+    public async Task<IActionResult> GoogleLogin(string? returnUrl = null)
     {
+        // Check if Google authentication handler is registered
+        var schemes = await HttpContext.RequestServices.GetRequiredService<IAuthenticationSchemeProvider>().GetAllSchemesAsync();
+        var googleScheme = schemes.FirstOrDefault(s => s.Name == "Google");
+
+        if (googleScheme == null)
+        {
+            TempData["ErrorMessage"] = "تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.";
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
         var redirectUrl = Url.Action(nameof(GoogleResponse), "Account", new { returnUrl });
         var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
         return Challenge(properties, "Google");
@@ -997,7 +996,23 @@ public class AccountController(
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
      new AuthenticationProperties { IsPersistent = true });
 
-            return RedirectToRoleDashboard(roleName);
+            // Redirect based on role
+            if (role == RegistrationRole.Tailor)
+            {
+                // Tailors need to complete their profile
+                TempData["InfoMessage"] = "يرجى إكمال ملفك الشخصي للبدء باستخدام المنصة";
+                _logger.LogInformation("[AccountController] New tailor {UserId} from Google OAuth redirected to complete profile", user.Id);
+
+                return RedirectToAction("CompleteTailorProfile", new { userId = user.Id });
+            }
+            else
+            {
+                // Customers can go directly to their dashboard
+                TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح عبر Google";
+                _logger.LogInformation("[AccountController] New customer {UserId} from Google OAuth redirected to dashboard", user.Id);
+
+                return RedirectToAction("Customer", "Dashboards");
+            }
         }
         catch (Exception ex)
         {
@@ -1103,7 +1118,7 @@ public class AccountController(
         {
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
             "admin" => RedirectToAction("Index", "AdminDashboard", new { area = "Admin" }),
-            _ => RedirectToAction("Customer", "Dashboards")
+            _ => RedirectToAction("CustomerProfile", "Profiles")
         };
 
     /// <summary>

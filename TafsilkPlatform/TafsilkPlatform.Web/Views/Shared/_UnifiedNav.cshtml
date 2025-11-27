@@ -84,13 +84,7 @@
     <span>Admin Panel</span>
       </a>
      }
-  else if (userRole == "Customer")
-{
-        <a href="@Url.Action("Customer", "Dashboards")" class="taf-btn taf-btn-dashboard">
-   <i class="fas fa-tachometer-alt"></i>
- <span>Dashboard</span>
-  </a>
-         }
+
    else if (userRole == "Tailor")
      {
             <a href="@Url.Action("Tailor", "Dashboards")" class="taf-btn taf-btn-dashboard">
@@ -133,13 +127,7 @@
       <span>Admin Panel</span>
           </a>
    }
-   else if (userRole == "Customer")
-     {
-  <a href="@Url.Action("Customer", "Dashboards")" class="taf-dropdown-item taf-mobile-only">
-<i class="fas fa-tachometer-alt"></i>
-        <span>Dashboard</span>
- </a>
-    }
+
      else if (userRole == "Tailor")
          {
             <a href="@Url.Action("Tailor", "Dashboards")" class="taf-dropdown-item taf-mobile-only">
@@ -193,7 +181,7 @@
        }
 
        <!-- Settings -->
-               <a href="#" class="taf-dropdown-item">
+               <a href="/Identity/Account/Manage" class="taf-dropdown-item">
      <i class="fas fa-cog"></i>
     <span>Settings</span>
          </a>

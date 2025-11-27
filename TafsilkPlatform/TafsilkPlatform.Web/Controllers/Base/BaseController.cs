@@ -321,7 +321,7 @@ string? successMessage = null)
             "admin" => RedirectToAction("Index", "AdminDashboard", new { area = "Admin" }),
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
             "corporate" => RedirectToAction("Corporate", "Dashboards"),
-            "customer" => RedirectToAction("Customer", "Dashboards"),
+            "customer" => RedirectToAction("CustomerProfile", "Profiles"),
             _ => RedirectToAction("Index", "Home")
         };
     }

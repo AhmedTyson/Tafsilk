@@ -8,7 +8,7 @@ using TafsilkPlatform.Web.Interfaces;
 namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Route("[controller]")]
+    [Route("/Store")]
     public class StoreController : Controller
     {
         private readonly IStoreService _storeService;
@@ -266,13 +266,26 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     return RedirectToAction(nameof(Cart));
                 }
 
-                // ✅ SIMPLIFIED: Force Cash on Delivery
-                request.PaymentMethod = "CashOnDelivery";
+                // ✅ SIMPLIFIED: Force Cash on Delivery (REMOVED)
+                // request.PaymentMethod = "CashOnDelivery";
 
                 var (success, orderId, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
 
                 if (success && orderId.HasValue)
                 {
+                    // ✅ CHECK FOR STRIPE PAYMENT
+                    if (request.PaymentMethod == "CreditCard")
+                    {
+                        _logger.LogInformation("Redirecting to Stripe payment for order {OrderId}", orderId.Value);
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Json(new { success = true, redirectUrl = $"/payments/process?orderId={orderId.Value}" });
+                        }
+
+                        return RedirectToAction("ProcessPayment", "Payments", new { orderId = orderId.Value });
+                    }
+
                     _logger.LogInformation("Cash order {OrderId} confirmed successfully for customer {CustomerId}", orderId.Value, customerId);
 
                     // ✅ NEW: Return JSON for AJAX requests

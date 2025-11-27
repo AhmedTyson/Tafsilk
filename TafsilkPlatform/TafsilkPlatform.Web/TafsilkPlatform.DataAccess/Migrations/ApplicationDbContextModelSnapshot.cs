@@ -726,7 +726,7 @@ namespace TafsilkPlatform.DataAccess.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTimeOffset>("PaidAt")
+                    b.Property<DateTimeOffset?>("PaidAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int>("PaymentStatus")

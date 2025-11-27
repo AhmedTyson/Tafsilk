@@ -1,13 +1,9 @@
 using BLL.Services.Interfaces;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels.TailorManagement;
-using TafsilkPlatform.Web.Services;
 
 namespace TafsilkPlatform.Web.Services;
 
@@ -422,12 +418,12 @@ public class ProductManagementService : IProductManagementService
                     var currentImages = new List<string>();
                     if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
                     {
-                        try 
+                        try
                         {
                             currentImages = JsonSerializer.Deserialize<List<string>>(product.AdditionalImagesJson) ?? new List<string>();
                         }
-                        catch 
-                        { 
+                        catch
+                        {
                             // Ignore deserialization errors or handle legacy format if needed
                         }
                     }
@@ -591,7 +587,7 @@ public class ProductManagementService : IProductManagementService
             // Note: This method returns binary data. 
             // If using URLs, the controller should check PrimaryImageUrl first.
             // This is kept for backward compatibility or when binary data is explicitly needed.
-            
+
             if (product.PrimaryImageData == null)
             {
                 return (null, null);

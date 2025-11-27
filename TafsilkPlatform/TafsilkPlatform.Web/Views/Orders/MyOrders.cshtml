@@ -5,86 +5,86 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5" dir="ltr">
+<div class="container py-5">
     <!-- Page Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/">Home</a></li>
-                    <li class="breadcrumb-item active">My Orders</li>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5">
+        <div>
+            <nav aria-label="breadcrumb" class="mb-2">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active text-dark" aria-current="page">My Orders</li>
                 </ol>
             </nav>
-            <h2 class="display-5 fw-bold mb-3">
-                <i class="fas fa-shopping-bag text-primary me-2"></i>
-                My Orders
-            </h2>
+            <h1 class="display-5 fw-bold text-dark mb-0">My Orders</h1>
+            <p class="text-muted mt-2">Track and manage your tailoring requests</p>
+        </div>
+        <div class="mt-3 mt-md-0">
+            <a href="/Store" class="btn btn-dark rounded-pill px-4 py-2 fw-bold shadow-sm d-flex align-items-center gap-2 transition-all hover-scale">
+                <i class="fas fa-shopping-bag text-warning"></i>
+                <span>Shop New Items</span>
+            </a>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50 mb-1">Total Orders</h6>
-                            <h2 class="mb-0 fw-bold">@Model.TotalOrders</h2>
-                        </div>
-                        <div class="fs-1 opacity-50">
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative bg-white rounded-4 transition-all hover-lift">
+                <div class="card-body p-4 position-relative z-1">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-muted text-uppercase fw-bold small mb-0 spacing-1">Total Orders</h6>
+                        <div class="icon-box bg-light rounded-circle text-dark">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
                     </div>
+                    <h2 class="display-5 fw-bold mb-0 text-dark">@Model.TotalOrders</h2>
                 </div>
+                <div class="position-absolute bottom-0 start-0 w-100 h-1 bg-gradient-primary"></div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 bg-warning text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-dark mb-1">Pending</h6>
-                            <h2 class="mb-0 fw-bold">@Model.PendingOrders</h2>
-                        </div>
-                        <div class="fs-1 opacity-50">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative bg-white rounded-4 transition-all hover-lift">
+                <div class="card-body p-4 position-relative z-1">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-muted text-uppercase fw-bold small mb-0 spacing-1">Pending</h6>
+                        <div class="icon-box bg-warning-subtle rounded-circle text-warning">
                             <i class="fas fa-clock"></i>
                         </div>
                     </div>
+                    <h2 class="display-5 fw-bold mb-0 text-dark">@Model.PendingOrders</h2>
                 </div>
+                <div class="position-absolute bottom-0 start-0 w-100 h-1 bg-warning"></div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50 mb-1">In Progress</h6>
-                            <h2 class="mb-0 fw-bold">@Model.ProcessingOrders</h2>
-                        </div>
-                        <div class="fs-1 opacity-50">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative bg-white rounded-4 transition-all hover-lift">
+                <div class="card-body p-4 position-relative z-1">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-muted text-uppercase fw-bold small mb-0 spacing-1">In Progress</h6>
+                        <div class="icon-box bg-info-subtle rounded-circle text-info">
                             <i class="fas fa-cog fa-spin"></i>
                         </div>
                     </div>
+                    <h2 class="display-5 fw-bold mb-0 text-dark">@Model.ProcessingOrders</h2>
                 </div>
+                <div class="position-absolute bottom-0 start-0 w-100 h-1 bg-info"></div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="text-white-50 mb-1">Completed</h6>
-                            <h2 class="mb-0 fw-bold">@Model.CompletedOrders</h2>
-                        </div>
-                        <div class="fs-1 opacity-50">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100 overflow-hidden position-relative bg-white rounded-4 transition-all hover-lift">
+                <div class="card-body p-4 position-relative z-1">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h6 class="text-muted text-uppercase fw-bold small mb-0 spacing-1">Completed</h6>
+                        <div class="icon-box bg-success-subtle rounded-circle text-success">
                             <i class="fas fa-check-circle"></i>
                         </div>
                     </div>
+                    <h2 class="display-5 fw-bold mb-0 text-dark">@Model.CompletedOrders</h2>
                 </div>
+                <div class="position-absolute bottom-0 start-0 w-100 h-1 bg-success"></div>
             </div>
         </div>
     </div>
@@ -92,179 +92,138 @@
     <!-- Orders List -->
     @if (Model.Orders.Any())
     {
-        <div class="card shadow-sm">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>
-                    Order List
-                </h5>
-                <div>
-                    <a href="/Store" class="btn btn-primary btn-sm me-2">
-                        <i class="fas fa-shopping-bag me-2"></i>
-                        Product Store
-                    </a>
-                    <a asp-action="Index" asp-controller="Tailors" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-plus me-2"></i>
-                        New Tailor Order
-                    </a>
-                </div>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0">Recent Activity</h4>
+            <div class="dropdown">
+                <button class="btn btn-white border shadow-sm rounded-pill px-3 py-2 dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter me-2 text-muted"></i>Filter Status
+                </button>
+                <ul class="dropdown-menu border-0 shadow rounded-3 mt-2">
+                    <li><a class="dropdown-item" href="#">All Orders</a></li>
+                    <li><a class="dropdown-item" href="#">Pending</a></li>
+                    <li><a class="dropdown-item" href="#">In Progress</a></li>
+                    <li><a class="dropdown-item" href="#">Completed</a></li>
+                </ul>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Order #</th>
-                                <th>Type</th>
-                                <th>Details</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Price</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var order in Model.Orders)
-                            {
-                                var statusClass = order.Status switch
-                                {
-                                    TafsilkPlatform.Models.Models.OrderStatus.Pending => "bg-warning text-dark",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Confirmed => "bg-info text-white",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Processing => "bg-info text-white",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Shipped => "bg-primary text-white",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Delivered => "bg-success text-white",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "bg-danger text-white",
-                                    _ => "bg-secondary text-white"
-                                };
+        </div>
 
-                                var isStoreOrder = order.ServiceType == "StoreOrder";
-                                var statusDisplay = order.StatusDisplay ?? order.Status.ToString();
+        <div class="row g-4">
+            @foreach (var order in Model.Orders)
+            {
+                var statusColor = order.Status switch
+                {
+                    OrderStatus.Pending => "warning",
+                    OrderStatus.Confirmed => "info",
+                    OrderStatus.Processing => "primary",
+                    OrderStatus.Shipped => "primary",
+                    OrderStatus.Delivered => "success",
+                    OrderStatus.Cancelled => "danger",
+                    _ => "secondary"
+                };
 
-                                <tr>
-                                    <td>
-                                        <strong class="text-primary">#@order.OrderId.ToString().Substring(0, 8).ToUpper()</strong>
-                                    </td>
-                                    <td>
-                                        @if (isStoreOrder)
-                                        {
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-shopping-bag me-1"></i>
-                                                Store Order
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-primary">
-                                                <i class="fas fa-cut me-1"></i>
-                                                Tailor Order
-                                            </span>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (isStoreOrder)
-                                        {
-                                            <div>
-                                                <div class="fw-bold">
-                                                    <i class="fas fa-store text-muted me-1"></i>
-                                                    Store Order
-                                                </div>
-                                                <small class="text-muted">Various Products</small>
-                                            </div>
-                                        }
-                                        else
-                                        {
-                                            <div>
-                                                <div class="fw-bold">@(order.TailorShopName ?? "Tailor")</div>
-                                                <small class="text-muted">@(order.TailorName ?? "Tailor")</small>
-                                                @if (!string.IsNullOrEmpty(order.ServiceType) && order.ServiceType != "StoreOrder")
-                                                {
-                                                    <div>
-                                                        <span class="badge bg-light text-dark">
-                                                            <i class="fas fa-cut me-1"></i>
-                                                            @order.ServiceType
-                                                        </span>
-                                                    </div>
-                                                }
-                                            </div>
-                                        }
-                                    </td>
-                                    <td>
-                                        <span class="badge @statusClass">
-                                            @statusDisplay
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            <div class="small">@order.CreatedAt.ToString("dd MMM yyyy")</div>
-                                            <div class="text-muted small">@order.CreatedAt.ToString("hh:mm tt")</div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <strong class="text-primary">@order.TotalPrice.ToString("N2") SAR</strong>
+                var isStoreOrder = order.ServiceType == "StoreOrder";
+                var orderIdShort = order.OrderId.ToString().Substring(0, 8).ToUpper();
+
+                <div class="col-12 col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden transition-all hover-lift bg-white">
+                        <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge bg-light text-dark border fw-bold px-3 py-2 rounded-pill">#@orderIdShort</span>
+                                    <span class="badge bg-@statusColor-subtle text-@statusColor border border-@statusColor-subtle rounded-pill px-3 py-2">
+                                        @order.StatusDisplay
+                                    </span>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="far fa-calendar-alt me-1"></i> @order.CreatedAt.ToString("MMM dd, yyyy • hh:mm tt")
+                                </small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end border-0 shadow rounded-3">
+                                    <li><a class="dropdown-item" href="/orders/@order.OrderId"><i class="fas fa-eye me-2 text-primary"></i>View Details</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Cancel Order</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body px-4 py-2">
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <div class="rounded-4 p-3 bg-light d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas @(isStoreOrder ? "fa-shopping-bag" : "fa-cut") fs-4 text-dark"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">@(order.TailorShopName ?? order.TailorName)</h5>
+                                    <p class="text-muted mb-0 small">@order.ServiceType</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="p-3 rounded-3 bg-light">
+                                        <small class="text-muted d-block mb-1">Total Amount</small>
+                                        <span class="fw-bold text-dark">@order.TotalPrice.ToString("N2") SAR</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="p-3 rounded-3 bg-light">
+                                        <small class="text-muted d-block mb-1">Payment Status</small>
                                         @if (order.IsPaid)
                                         {
-                                            <div>
-                                                <span class="badge bg-success small">
-                                                    <i class="fas fa-check-circle"></i> Paid
-                                                </span>
-                                            </div>
+                                            <span class="text-success fw-bold"><i class="fas fa-check-circle me-1"></i>Paid</span>
                                         }
                                         else
                                         {
-                                            <div>
-                                                <span class="badge bg-warning small">
-                                                    <i class="fas fa-clock"></i> Unpaid
-                                                </span>
-                                            </div>
+                                            <span class="text-warning fw-bold"><i class="fas fa-clock me-1"></i>Pending</span>
                                         }
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="/orders/@order.OrderId" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               title="View Details">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            @if ((order.Status == TafsilkPlatform.Models.Models.OrderStatus.Pending || order.Status == TafsilkPlatform.Models.Models.OrderStatus.Confirmed) && !isStoreOrder)
-                                            {
-                                                <form action="/orders/@order.OrderId/cancel" method="post" class="d-inline"
-                                                      onsubmit="return confirm('Are you sure you want to cancel this order?');">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </form>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white border-0 p-4 pt-2">
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a href="/orders/@order.OrderId" class="btn btn-outline-dark rounded-pill fw-bold flex-grow-1">
+                                    View Details
+                                </a>
+                                @if (!order.IsPaid && order.Status != OrderStatus.Cancelled)
+                                {
+                                    <a href="/payments/process?orderId=@order.OrderId" class="btn btn-dark rounded-pill fw-bold flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                                        <span>Pay Now</span>
+                                        <i class="fas fa-arrow-right text-warning"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            }
         </div>
     }
     else
     {
         <!-- Empty State -->
-        <div class="card shadow-sm">
-            <div class="card-body text-center py-5">
-                <div class="mb-4">
-                    <i class="fas fa-shopping-bag text-muted" style="font-size: 5rem; opacity: 0.3;"></i>
+        <div class="text-center py-5">
+            <div class="mb-4 position-relative d-inline-block">
+                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                    <i class="fas fa-shopping-bag text-muted opacity-25" style="font-size: 4rem;"></i>
                 </div>
-                <h4 class="mb-3">No orders yet</h4>
-                <p class="text-muted mb-4">Start browsing products or tailors and create your first order</p>
-                <div>
-                    <a href="/Store" class="btn btn-primary btn-lg me-2">
-                        <i class="fas fa-shopping-bag me-2"></i>
-                        Browse Store
-                    </a>
-                    <a asp-action="Index" asp-controller="Tailors" class="btn btn-outline-primary btn-lg">
-                        <i class="fas fa-search me-2"></i>
-                        Find Tailors
-                    </a>
+                <div class="position-absolute bottom-0 end-0 bg-warning rounded-circle p-3 shadow-sm">
+                    <i class="fas fa-plus text-white fs-4"></i>
                 </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-2">No orders yet</h3>
+            <p class="text-muted mb-4 mw-500 mx-auto">Your order history will appear here. Start exploring our collection or find a tailor to create your first masterpiece.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/Store" class="btn btn-dark rounded-pill px-5 py-3 fw-bold shadow-sm transition-all hover-scale">
+                    Browse Store
+                </a>
+                <a asp-action="Index" asp-controller="Tailors" class="btn btn-outline-dark rounded-pill px-5 py-3 fw-bold transition-all hover-scale">
+                    Find Tailors
+                </a>
             </div>
         </div>
     }
@@ -273,41 +232,44 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-refresh for orders in progress
-            const hasActiveOrders = @(Model.ProcessingOrders > 0 ? "true" : "false");
-            if (hasActiveOrders) {
-                console.log('Active orders detected - consider adding real-time updates');
-            }
-            
-            // Show success/info messages if redirected from payment success
+            // Show success/info messages
             @if (TempData["Success"] != null)
             {
                 <text>
-                const successMsg = '@Html.Raw(TempData["Success"])';
-                if (successMsg) {
-                    showNotification(successMsg, 'success');
-                }
+                showNotification('@Html.Raw(TempData["Success"])', 'success');
                 </text>
             }
             
             @if (TempData["Info"] != null)
             {
                 <text>
-                const infoMsg = '@Html.Raw(TempData["Info"])';
-                if (infoMsg) {
-                    showNotification(infoMsg, 'info');
-                }
+                showNotification('@Html.Raw(TempData["Info"])', 'info');
                 </text>
             }
             
-            // Notification helper function
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                showNotification('@Html.Raw(TempData["Error"])', 'danger');
+                </text>
+            }
+            
             function showNotification(message, type = 'info') {
                 const notification = document.createElement('div');
-                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-                notification.style.cssText = 'top: 80px; right: 20px; z-index: 9999; min-width: 300px; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);';
+                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed border-0 shadow-lg rounded-3`;
+                notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideIn 0.3s ease; border-left: 5px solid var(--bs-${type});';
+                
+                let icon = 'info-circle';
+                if (type === 'success') icon = 'check-circle';
+                if (type === 'danger') icon = 'exclamation-circle';
+                
                 notification.innerHTML = `
-                    <i class="fas fa-${type === 'danger' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-                    ${message}
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-${type}-subtle p-2 me-3 text-${type}">
+                            <i class="fas fa-${icon}"></i>
+                        </div>
+                        <div class="fw-medium">${message}</div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
                 
@@ -323,24 +285,85 @@
 }
 
 <style>
-    .table tbody tr {
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+    /* Premium Theme Utilities */
+    .bg-gradient-primary {
+        background: linear-gradient(90deg, #000000 0%, #d4af37 100%);
+    }
+    
+    .text-warning {
+        color: #d4af37 !important;
+    }
+    
+    .bg-warning {
+        background-color: #d4af37 !important;
+    }
+    
+    .bg-warning-subtle {
+        background-color: rgba(212, 175, 55, 0.1) !important;
+    }
+    
+    .border-warning-subtle {
+        border-color: rgba(212, 175, 55, 0.2) !important;
     }
 
-    .table tbody tr:hover {
-        background-color: rgba(13, 110, 253, 0.05);
+    .btn-dark {
+        background-color: #000000;
+        border-color: #000000;
+        color: #ffffff;
+    }
+    
+    .btn-dark:hover {
+        background-color: #1a1a1a;
+        border-color: #1a1a1a;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
 
-    .btn-group .btn {
-        border-radius: 0;
+    .btn-outline-dark {
+        color: #000000;
+        border-color: #000000;
+    }
+    
+    .btn-outline-dark:hover {
+        background-color: #000000;
+        color: #ffffff;
     }
 
-    .btn-group .btn:first-child {
-        border-radius: 0.25rem 0 0 0.25rem;
+    /* Card & Animation Styles */
+    .hover-lift {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .btn-group .btn:last-child {
-        border-radius: 0 0.25rem 0.25rem 0;
+    
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+    }
+    
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+    
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+    
+    .icon-box {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .spacing-1 {
+        letter-spacing: 1px;
+    }
+    
+    .mw-500 {
+        max-width: 500px;
+    }
+    
+    @@keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
 </style>

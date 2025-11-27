@@ -37,7 +37,7 @@ public class HomeController : Controller
         // For now, just show success message
         TempData["SuccessMessage"] = "Thank you for contacting us! We'll get back to you shortly.";
         _logger.LogInformation("Contact form submitted: {Name}, {Email}, Subject: {Subject}", name, email, subject);
-        
+
         return RedirectToAction(nameof(Contact));
     }
 

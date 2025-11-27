@@ -106,18 +106,21 @@
                             <li><hr class="dropdown-divider"></li>
                             
                             <!-- Dashboard Link -->
-                            <li>
-                                <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                </a>
-                            </li>
+                            @if (userRole != "Customer")
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a>
+                                </li>
+                            }
 
                             <!-- Role Specific Links -->
                             @if (userRole == "Tailor")
                             {
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Profiles" asp-action="TailorProfile">
-                                        <i class="fas fa-user me-2"></i>My Profile
+                                    <a class="dropdown-item" href="/Identity/Account/Manage">
+                                        <i class="fas fa-cog me-2"></i>Account Settings
                                     </a>
                                 </li>
                                 <li>
@@ -130,7 +133,7 @@
                             {
                                 <li>
                                     <a class="dropdown-item" asp-controller="Profiles" asp-action="CustomerProfile">
-                                        <i class="fas fa-user me-2"></i>My Profile
+                                        <i class="fas fa-cog me-2"></i>Account Settings
                                     </a>
                                 </li>
                                 <li>
@@ -140,7 +143,7 @@
                                 </li>
                             }
 
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">

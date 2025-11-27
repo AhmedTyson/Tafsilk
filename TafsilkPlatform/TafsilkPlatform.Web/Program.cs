@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using System.IO.Compression;
 using System.Text;
@@ -62,71 +61,9 @@ try
         options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
     });
 
-    // ✅ SWAGGER/OPENAPI CONFIGURATION
+    // ✅ SWAGGER/OPENAPI CONFIGURATION - REMOVED PERMANENTLY
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(options =>
-    {
-        options.SwaggerDoc("v1", new OpenApiInfo
-        {
-            Version = "v1",
-            Title = "Tafsilk Platform API",
-            Description = "Tafsilk - منصة الخياطين والتفصيل - API Documentation",
-            Contact = new OpenApiContact
-            {
-                Name = "Tafsilk Platform",
-                Email = "support@tafsilk.com",
-                Url = new Uri("https://tafsilk.com")
-            },
-            License = new OpenApiLicense
-            {
-                Name = "Use under Tafsilk License",
-                Url = new Uri("https://tafsilk.com/license")
-            }
-        });
-
-        // Add JWT Authentication
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.Http,
-            Scheme = "Bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
-        });
-
-        // Add Cookie Authentication
-        options.AddSecurityDefinition("Cookie", new OpenApiSecurityScheme
-        {
-            Name = ".Tafsilk.Auth",
-            Type = SecuritySchemeType.ApiKey,
-            In = ParameterLocation.Cookie,
-            Description = "Cookie-based authentication"
-        });
-
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-    {
-    new OpenApiSecurityScheme
-     {
-     Reference = new OpenApiReference
-   {
-     Type = ReferenceType.SecurityScheme,
-       Id = "Bearer"
-          }
-     },
-Array.Empty<string>()
-      }
-        });
-
-        // Include XML comments if available
-        var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-        if (File.Exists(xmlPath))
-        {
-            options.IncludeXmlComments(xmlPath);
-        }
-    });
+    // Swagger removed
 
     // Configure Antiforgery
     builder.Services.AddAntiforgery(options =>
@@ -221,7 +158,13 @@ Array.Empty<string>()
         var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
         var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
-        if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+        // Check if credentials exist and are not placeholder values
+        bool isValidClientId = !string.IsNullOrEmpty(googleClientId) && !googleClientId.Contains("YOUR_");
+        bool isValidClientSecret = !string.IsNullOrEmpty(googleClientSecret) &&
+                                   !googleClientSecret.Contains("YOUR_") &&
+                                   !googleClientSecret.Contains("6X2W6X2W"); // Detect placeholder pattern
+
+        if (isValidClientId && isValidClientSecret)
         {
             authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
           {
@@ -242,7 +185,8 @@ Array.Empty<string>()
         else
         {
             var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
-            logger.LogWarning("⚠️ Google OAuth enabled but credentials not configured. Add ClientId and ClientSecret to appsettings.json");
+            logger.LogWarning("⚠️ Google OAuth is DISABLED - Invalid or placeholder credentials detected in appsettings.json");
+            logger.LogWarning("   Update Authentication:Google:ClientId and ClientSecret with valid credentials from Google Cloud Console");
         }
     }
 
@@ -254,8 +198,8 @@ Array.Empty<string>()
     {
         // If connection string points to a SQLite file (development), use SQLite provider
         // Check for specific SQLite markers or file extensions
-        if (!string.IsNullOrEmpty(connectionString) && 
-            (connectionString.Contains(".db", StringComparison.OrdinalIgnoreCase) || 
+        if (!string.IsNullOrEmpty(connectionString) &&
+            (connectionString.Contains(".db", StringComparison.OrdinalIgnoreCase) ||
              connectionString.Contains(".sqlite", StringComparison.OrdinalIgnoreCase) ||
              connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase)))
         {
@@ -277,7 +221,7 @@ Array.Empty<string>()
 
         // Suppress PendingModelChangesWarning because we are manually managing schema updates
         // This is necessary because we added PrimaryImageUrl to Product entity without an EF migration
-        options.ConfigureWarnings(warnings => 
+        options.ConfigureWarnings(warnings =>
             warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 
         // Enable sensitive data logging only when explicitly allowed in config AND in Development
@@ -512,19 +456,7 @@ Array.Empty<string>()
         // In development, use detailed error page for better debugging
         app.UseDeveloperExceptionPage();
 
-        // ✅ SWAGGER MIDDLEWARE
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tafsilk Platform API v1");
-            options.RoutePrefix = "swagger";
-            options.DocumentTitle = "Tafsilk Platform API";
-            options.DisplayRequestDuration();
-            options.EnableDeepLinking();
-            options.EnableFilter();
-            options.ShowExtensions();
-            options.EnableTryItOutByDefault();
-        });
+        // Swagger middleware removed
     }
     else
     {
@@ -627,15 +559,13 @@ Array.Empty<string>()
         {
             foreach (var url in urls)
             {
-                Log.Information("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
-                Log.Information("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
+                // Swagger logging removed
             }
         }
         else
         {
             // Fallback to common development URLs
-            Log.Information("🔷 Swagger UI available at: https://localhost:7186/swagger");
-            Log.Information("🔷 Swagger UI available at: http://localhost:5140/swagger");
+            // Swagger logging removed
         }
 
         Log.Information("🔷 Health Check available at: /health");

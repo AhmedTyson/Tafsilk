@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.DataAccess.Repository;
 using TafsilkPlatform.Models.Models;
@@ -197,38 +198,12 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
     /// <summary>
     /// Process Stripe payment
-    /// TO BE IMPLEMENTED: When Stripe SDK is added
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessStripePaymentAsync(Order order, PaymentProcessingRequest request)
     {
-        // ✅ READY FOR STRIPE INTEGRATION
-        // This method will handle Stripe payment processing when you add the Stripe.net NuGet package
-
         Logger.LogInformation("Processing Stripe payment for order {OrderId}", order.OrderId);
 
-        // TODO: When Stripe is integrated, uncomment and implement:
-        /*
-        var stripe = new StripeClient(_stripeSecretKey);
-        
-        var paymentIntentCreateOptions = new PaymentIntentCreateOptions
-        {
-            Amount = (long)(request.Amount * 100), // Stripe uses smallest currency unit (halalas for SAR)
-            Currency = request.Currency?.ToLower() ?? "sar",
-            PaymentMethod = request.StripePaymentMethodId,
-            Customer = request.StripeCustomerId,
-            Confirm = true, // Confirm immediately
-            ReturnUrl = $"{_configuration["AppSettings:BaseUrl"]}/orders/{order.OrderId}",
-            Metadata = new Dictionary<string, string>
-            {
-                { "order_id", order.OrderId.ToString() },
-                { "customer_id", request.CustomerId.ToString() }
-            }
-        };
-
-        var paymentIntent = await stripe.PaymentIntents.CreateAsync(paymentIntentCreateOptions);
-        */
-
-        // For now, create a pending payment record
+        // Create a pending payment record first
         var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
@@ -242,46 +217,82 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
             PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
             TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
-            PaidAt = default
+            PaidAt = default,
+            Provider = "Stripe"
         };
 
         _context.Payment.Add(payment);
 
+        // We don't create the PaymentIntent here anymore, the frontend will call CreatePaymentIntentAsync
+        // This method is just to record the attempt and return necessary info
+
         return new PaymentProcessingResult
         {
             PaymentId = payment.PaymentId,
-            RequiresAction = true, // Will require 3D Secure when Stripe is integrated
-            ClientSecret = null, // Will be: paymentIntent.ClientSecret
+            RequiresAction = true,
             Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
-            ProviderTransactionId = null, // Will be: paymentIntent.Id
-            Message = "Stripe payment processing ready for integration"
+            Message = "Redirecting to payment..."
         };
+    }
 
-        // When Stripe is integrated, handle different statuses:
-        /*
-        return paymentIntent.Status switch
+    /// <summary>
+    /// Create a Stripe Checkout Session
+    /// </summary>
+    public async Task<Result<string>> CreateCheckoutSessionAsync(CreateCheckoutSessionRequest request)
+    {
+        return await ExecuteAsync(async () =>
         {
-            "succeeded" => new PaymentProcessingResult
+            ValidateGuid(request.OrderId, nameof(request.OrderId));
+            ValidatePositive(request.Amount, nameof(request.Amount));
+
+            if (!_stripeEnabled)
             {
-                PaymentId = payment.PaymentId,
-                RequiresAction = false,
-                Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed,
-                ProviderTransactionId = paymentIntent.Id,
-                Message = "Payment successful"
-            },
-            "requires_action" => new PaymentProcessingResult
+                throw new InvalidOperationException("Stripe is not enabled. Please configure Stripe in appsettings.json");
+            }
+
+            var stripe = new StripeClient(_stripeSecretKey);
+
+            var options = new Stripe.Checkout.SessionCreateOptions
             {
-                PaymentId = payment.PaymentId,
-                RequiresAction = true,
-                ClientSecret = paymentIntent.ClientSecret,
-                RedirectUrl = paymentIntent.NextAction?.RedirectToUrl?.Url,
-                Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
-                ProviderTransactionId = paymentIntent.Id,
-                Message = "3D Secure authentication required"
-            },
-            _ => throw new InvalidOperationException($"Unexpected payment status: {paymentIntent.Status}")
-        };
-        */
+                PaymentMethodTypes = new List<string> { "card" },
+                LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
+                {
+                    new Stripe.Checkout.SessionLineItemOptions
+                    {
+                        PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = (long)(request.Amount * 100),
+                            Currency = request.Currency?.ToLower() ?? "sar",
+                            ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = request.Description ?? "Tafsilk Order",
+                            },
+                        },
+                        Quantity = 1,
+                    },
+                },
+                Mode = "payment",
+                SuccessUrl = request.SuccessUrl,
+                CancelUrl = request.CancelUrl,
+                CustomerEmail = request.CustomerEmail,
+                Metadata = new Dictionary<string, string>
+                {
+                    { "order_id", request.OrderId.ToString() }
+                },
+                PaymentIntentData = new Stripe.Checkout.SessionPaymentIntentDataOptions
+                {
+                    Metadata = new Dictionary<string, string>
+                    {
+                        { "order_id", request.OrderId.ToString() }
+                    }
+                }
+            };
+
+            var service = new Stripe.Checkout.SessionService(stripe);
+            var session = await service.CreateAsync(options);
+
+            return session.Url;
+        }, "CreateCheckoutSession");
     }
 
     /// <summary>
@@ -299,14 +310,11 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 throw new InvalidOperationException("Stripe is not enabled. Please configure Stripe in appsettings.json");
             }
 
-            // ✅ READY FOR STRIPE INTEGRATION
-            // When Stripe.net is added:
-            /*
             var stripe = new StripeClient(_stripeSecretKey);
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(request.Amount * 100),
-                Currency = request.Currency.ToLower(),
+                Currency = request.Currency?.ToLower() ?? "sar",
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true
@@ -318,68 +326,124 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 }
             };
 
-            var paymentIntent = await stripe.PaymentIntents.CreateAsync(options);
-            return paymentIntent.ClientSecret;
-            */
+            var service = new PaymentIntentService(stripe);
+            var paymentIntent = await service.CreateAsync(options);
 
-            // Placeholder for now
-            Logger.LogWarning("Stripe CreatePaymentIntent called but not configured");
-            return "placeholder_client_secret_configure_stripe";
+            return paymentIntent.ClientSecret;
         }, "CreatePaymentIntent");
     }
 
     /// <summary>
     /// Confirm Stripe payment from webhook
     /// </summary>
-    public async Task<Result> ConfirmStripePaymentAsync(string paymentIntentId, string stripeSignature)
+    public async Task<Result> ConfirmStripePaymentAsync(string json, string stripeSignature)
     {
         return await ExecuteAsync(async () =>
         {
-            ValidateNotEmpty(paymentIntentId, nameof(paymentIntentId));
+            ValidateNotEmpty(json, nameof(json));
 
             if (!_stripeEnabled)
             {
                 throw new InvalidOperationException("Stripe is not enabled");
             }
 
-            // ✅ READY FOR STRIPE WEBHOOK INTEGRATION
-            // When Stripe.net is added:
-            /*
-            var stripeEvent = EventUtility.ConstructEvent(
-                await Request.Body.ReadAsStringAsync(),
-                stripeSignature,
-                _stripeWebhookSecret
-            );
-
-            if (stripeEvent.Type == Events.PaymentIntentSucceeded)
+            try
             {
-                var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
-                var orderId = Guid.Parse(paymentIntent.Metadata["order_id"]);
+                var stripeEvent = EventUtility.ConstructEvent(
+                    json,
+                    stripeSignature,
+                    _stripeWebhookSecret
+                );
 
-                await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                if (stripeEvent.Type == "payment_intent.succeeded" || stripeEvent.Type == "checkout.session.completed")
                 {
-                    var payment = await _context.Payment
-                        .FirstOrDefaultAsync(p => p.ProviderTransactionId == paymentIntent.Id);
+                    string? orderIdStr = null;
+                    long amount = 0;
+                    string? currency = "";
+                    string? transactionId = "";
 
-                    if (payment != null)
+                    if (stripeEvent.Type == "payment_intent.succeeded")
                     {
-                        payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
-                        payment.PaidAt = DateTimeOffset.UtcNow;
-
-                        // Update order status
-                        var order = await _context.Orders.FindAsync(payment.OrderId);
-                        if (order != null && order.Status == OrderStatus.Pending)
+                        var paymentIntent = stripeEvent.Data.Object as PaymentIntent;
+                        if (paymentIntent != null)
                         {
-                            order.Status = OrderStatus.Confirmed;
+                            paymentIntent.Metadata.TryGetValue("order_id", out orderIdStr);
+                            amount = paymentIntent.Amount;
+                            currency = paymentIntent.Currency;
+                            transactionId = paymentIntent.Id;
                         }
-
-                        await _unitOfWork.SaveChangesAsync();
                     }
-                });
-            }
-            */
+                    else if (stripeEvent.Type == "checkout.session.completed")
+                    {
+                        var session = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                        if (session != null)
+                        {
+                            session.Metadata.TryGetValue("order_id", out orderIdStr);
+                            amount = session.AmountTotal ?? 0;
+                            currency = session.Currency;
+                            transactionId = session.PaymentIntentId ?? session.Id;
+                        }
+                    }
 
-            Logger.LogWarning("Stripe webhook received but not configured: {PaymentIntentId}", paymentIntentId);
+                    if (!string.IsNullOrEmpty(orderIdStr) && Guid.TryParse(orderIdStr, out var orderId))
+                    {
+                        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                        {
+                            // Find existing payment or create new one
+                            var payment = await _context.Payment
+                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
+
+                            if (payment == null)
+                            {
+                                // If no pending payment found, create one (this handles cases where webhook arrives before local record is created, though unlikely with our flow)
+                                var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
+                                if (order != null)
+                                {
+                                    payment = new TafsilkPlatform.Models.Models.Payment
+                                    {
+                                        PaymentId = Guid.NewGuid(),
+                                        OrderId = order.OrderId,
+                                        Order = order,
+                                        CustomerId = order.CustomerId,
+                                        Customer = order.Customer,
+                                        TailorId = order.TailorId,
+                                        Tailor = order.Tailor,
+                                        Amount = (decimal)amount / 100m,
+                                        PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+                                        TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
+                                        Provider = "Stripe",
+                                        CreatedAt = DateTimeOffset.UtcNow
+                                    };
+                                    _context.Payment.Add(payment);
+                                }
+                            }
+
+                            if (payment != null)
+                            {
+                                payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
+                                payment.PaidAt = DateTimeOffset.UtcNow;
+                                payment.ProviderTransactionId = transactionId;
+                                payment.Currency = currency;
+
+                                // Update order status
+                                var order = await _context.Orders.FindAsync(payment.OrderId);
+                                if (order != null && order.Status == OrderStatus.Pending)
+                                {
+                                    order.Status = OrderStatus.Confirmed;
+                                }
+
+                                await _unitOfWork.SaveChangesAsync();
+                                Logger.LogInformation("Payment confirmed via webhook for order {OrderId}", orderId);
+                            }
+                        });
+                    }
+                }
+            }
+            catch (StripeException e)
+            {
+                Logger.LogError(e, "Stripe webhook error");
+                throw;
+            }
         }, "ConfirmStripePayment");
     }
 
@@ -415,8 +479,20 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                     throw new InvalidOperationException($"Refund amount ({amount:C}) cannot exceed payment amount ({payment.Amount:C})");
                 }
 
-                // Create refund record
-                // Note: You'll need to add a Refund table/model for this
+                // If Stripe payment, process refund via Stripe
+                if (payment.Provider == "Stripe" && !string.IsNullOrEmpty(payment.ProviderTransactionId) && _stripeEnabled)
+                {
+                    var stripe = new StripeClient(_stripeSecretKey);
+                    var refundService = new RefundService(stripe);
+                    var refundOptions = new RefundCreateOptions
+                    {
+                        PaymentIntent = payment.ProviderTransactionId,
+                        Amount = (long)(amount * 100),
+                        Reason = RefundReasons.RequestedByCustomer // Or map from reason string
+                    };
+                    await refundService.CreateAsync(refundOptions);
+                }
+
                 Logger.LogInformation("Processing refund for payment {PaymentId}. Amount: {Amount}, Reason: {Reason}",
                     paymentId, amount, reason);
 

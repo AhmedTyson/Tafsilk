@@ -2,8 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.DataAccess.Data
@@ -43,11 +41,11 @@ namespace TafsilkPlatform.DataAccess.Data
                             // ✅ Seed admin user
                             var adminConfig = services.GetRequiredService<IConfiguration>();
                             // We need a logger for the seeder, can use the same one or a generic one
-                            var adminLogger = services.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeeder"); 
+                            var adminLogger = services.GetRequiredService<ILoggerFactory>().CreateLogger("AdminSeeder");
                             // Note: Program might not be accessible here if it's in Web project. 
                             // Better to use ILogger<object> or just pass the current logger if compatible.
                             // However, AdminSeeder.Seed expects ILogger.
-                            
+
                             TafsilkPlatform.DataAccess.Data.Seed.AdminSeeder.Seed(db, adminConfig, adminLogger);
                         }
                     }

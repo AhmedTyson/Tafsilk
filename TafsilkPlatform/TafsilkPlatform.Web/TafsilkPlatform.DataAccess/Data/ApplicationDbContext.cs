@@ -85,7 +85,7 @@ public partial class ApplicationDbContext : DbContext
 
         // Check if using SQLite
         var isSqlite = Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true;
-        
+
         if (isSqlite)
         {
             // SQLite defaults
@@ -181,7 +181,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FullName).HasMaxLength(255);
             entity.Property(e => e.Gender).HasMaxLength(20);
             entity.Property(e => e.Bio).HasMaxLength(1000);
+#pragma warning disable CS0618
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
             entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
@@ -211,7 +213,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
             entity.Property(e => e.PricingRange).HasMaxLength(100);
             entity.Property(e => e.ShopName).HasMaxLength(255);
+#pragma warning disable CS0618
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
             entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 

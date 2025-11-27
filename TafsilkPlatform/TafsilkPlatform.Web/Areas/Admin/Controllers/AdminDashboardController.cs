@@ -39,7 +39,7 @@ public class AdminDashboardController : BaseController
             var activeOrders = await _db.Orders.CountAsync(o =>
                 o.Status != OrderStatus.Delivered &&
                o.Status != OrderStatus.Cancelled);
-            
+
             var totalSales = await _db.Orders
                   .Where(o => o.Status == OrderStatus.Delivered)
                   .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
