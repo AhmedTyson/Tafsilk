@@ -90,7 +90,7 @@ public class ProfileCompletionService : IProfileCompletionService
      // Profile picture item removed
      // new ProfileCompletionItem
      // {
-     //     Label = "صورة الملف الشخصي",
+     //     Label = "Profile Picture",
      //     IsCompleted = customer.ProfilePictureData != null && customer.ProfilePictureData.Length > 0,
      //     Weight = 10,
      //     ActionUrl = "/Profiles/CustomerProfile",

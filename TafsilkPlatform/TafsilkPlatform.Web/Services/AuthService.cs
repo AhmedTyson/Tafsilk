@@ -34,6 +34,8 @@ namespace TafsilkPlatform.Web.Services
  db.Users
      .AsNoTracking()
               .Include(u => u.Role)
+              .Include(u => u.CustomerProfile)
+              .Include(u => u.TailorProfile)
                     .FirstOrDefault(u => u.Email == email));
 
         // Compiled query for checking tailor profile existence
@@ -866,7 +868,7 @@ namespace TafsilkPlatform.Web.Services
                 {
                     "Customer" => "Customer - Can order services from tailors",
                     "Tailor" => "Tailor - Provides tailoring services",
-                    // "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية", // REMOVED: Corporate feature
+                    // "Corporate" => "Corporate Account", // REMOVED: Corporate feature
                     _ => null
                 },
                 CreatedAt = _dateTime.Now
@@ -915,7 +917,7 @@ namespace TafsilkPlatform.Web.Services
                 {
                     "customer" => userInfo.CustomerName ?? userInfo.Email ?? "User",
                     "tailor" => userInfo.TailorName ?? userInfo.Email ?? "User",
-                    // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم", // REMOVED
+                    // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "User", // REMOVED
                     _ => userInfo.Email ?? "User"
                 };
             }
