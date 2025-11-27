@@ -50,6 +50,8 @@ public class PaymentsController : Controller
             var order = await _db.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.Tailor)
+                .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order == null)
@@ -88,16 +90,26 @@ public class PaymentsController : Controller
                 return RedirectToAction("OrderDetails", "Orders", new { id = orderId });
             }
 
+            // Construct description from product names
+            var productNames = order.Items
+                .Select(i => i.Product?.Name ?? i.Description)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
+                .ToList();
+
+            var description = productNames.Any()
+                ? string.Join(", ", productNames)
+                : $"Order #{order.OrderId.ToString().Substring(0, 8).ToUpper()}";
+
             // Create Checkout Session
             var checkoutRequest = new CreateCheckoutSessionRequest
             {
                 OrderId = order.OrderId,
                 Amount = (decimal)order.TotalPrice,
-                Currency = "SAR",
-                SuccessUrl = $"{Request.Scheme}://{Request.Host}/payments/success?orderId={order.OrderId}",
+                Currency = "EGP",
+                SuccessUrl = $"{Request.Scheme}://{Request.Host}/payments/success?orderId={order.OrderId}&session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{Request.Scheme}://{Request.Host}/Store/Checkout",
                 CustomerEmail = customer.User?.Email,
-                Description = $"Order #{order.OrderId.ToString().Substring(0, 8).ToUpper()}"
+                Description = description
             };
 
             var result = await _paymentService.CreateCheckoutSessionAsync(checkoutRequest);
@@ -169,11 +181,24 @@ public class PaymentsController : Controller
 
     /// <summary>
     /// Payment Success Page
-    /// GET: /payments/success?orderId={orderId}
+    /// GET: /payments/success?orderId={orderId}&session_id={session_id}
     /// </summary>
     [HttpGet("success")]
-    public IActionResult PaymentSuccess(Guid orderId)
+    public async Task<IActionResult> PaymentSuccess(Guid orderId, [FromQuery(Name = "session_id")] string? sessionId)
     {
+        if (!string.IsNullOrEmpty(sessionId))
+        {
+            try
+            {
+                // Verify payment status directly from Stripe (in case webhook is delayed)
+                await _paymentService.VerifyCheckoutSessionAsync(sessionId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error verifying checkout session {SessionId} for order {OrderId}", sessionId, orderId);
+            }
+        }
+
         return View(orderId);
     }
 

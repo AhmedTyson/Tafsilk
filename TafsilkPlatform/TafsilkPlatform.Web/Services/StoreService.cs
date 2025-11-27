@@ -659,7 +659,7 @@ namespace TafsilkPlatform.Web.Services
                          PaymentStatus = paymentStatus,
                          TransactionType = Enums.TransactionType.Credit,
                          PaidAt = paymentStatus == Enums.PaymentStatus.Completed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null,
-                         Currency = "SAR",
+                         Currency = "EGP",
                          Provider = request.PaymentMethod == "CreditCard" ? "Stripe" : "Internal",
                          Notes = request.PaymentMethod == "CashOnDelivery"
                             ? "Payment will be collected on delivery"
@@ -691,15 +691,15 @@ namespace TafsilkPlatform.Web.Services
 
         private decimal CalculateShipping(decimal subtotal)
         {
-            // Free shipping over 500 SAR
+            // Free shipping over 500 EGP
             if (subtotal >= 500) return 0;
             return 25; // Flat rate
         }
 
         private decimal CalculateTax(decimal subtotal)
         {
-            // 15% VAT in Saudi Arabia
-            return subtotal * 0.15m;
+            // 14% VAT in Egypt
+            return subtotal * 0.14m;
         }
 
         /// <summary>
@@ -737,8 +737,8 @@ namespace TafsilkPlatform.Web.Services
                             OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(),
                             TotalAmount = (decimal)order.TotalPrice,
                             OrderDate = order.CreatedAt,
-                            PaymentMethod = "الدفع عند الاستلام",
-                            DeliveryAddress = order.DeliveryAddress ?? "غير محدد",
+                            PaymentMethod = "Cash on Delivery",
+                            DeliveryAddress = order.DeliveryAddress ?? "Not specified",
                             Items = order.Items.Select(item => new OrderSuccessItemViewModel
                             {
                                 ProductName = item.Product?.Name ?? item.Description,

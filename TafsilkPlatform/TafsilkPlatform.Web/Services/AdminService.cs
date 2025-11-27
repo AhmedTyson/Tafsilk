@@ -47,14 +47,14 @@ namespace TafsilkPlatform.Web.Services
                     var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
                     if (tailor == null)
                     {
-                        throw new InvalidOperationException("الخياط غير موجود");
+                        throw new InvalidOperationException("Tailor not found");
                     }
 
                     tailor.IsVerified = true;
                     tailor.UpdatedAt = DateTime.UtcNow;
 
                     await _unitOfWork.SaveChangesAsync();
-                    await LogAdminActionAsync(adminId, "VerifyTailor", $"تم التحقق من الخياط {tailorId}", "Tailor");
+                    await LogAdminActionAsync(adminId, "VerifyTailor", $"Tailor verified {tailorId}", "Tailor");
 
                     return true;
                 });
@@ -81,12 +81,12 @@ namespace TafsilkPlatform.Web.Services
                     var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
                     if (tailor == null)
                     {
-                        throw new InvalidOperationException("الخياط غير موجود");
+                        throw new InvalidOperationException("Tailor not found");
                     }
 
                     tailor.UpdatedAt = DateTime.UtcNow;
                     await _unitOfWork.SaveChangesAsync();
-                    await LogAdminActionAsync(adminId, "RejectTailor", $"تم رفض تحقق الخياط {tailorId}. السبب: {reason}", "Tailor");
+                    await LogAdminActionAsync(adminId, "RejectTailor", $"Tailor verification rejected {tailorId}. Reason: {reason}", "Tailor");
 
                     return true;
                 });
@@ -111,14 +111,14 @@ namespace TafsilkPlatform.Web.Services
                     var user = await _unitOfWork.Users.GetByIdAsync(userId);
                     if (user == null)
                     {
-                        throw new InvalidOperationException("المستخدم غير موجود");
+                        throw new InvalidOperationException("User not found");
                     }
 
                     user.IsActive = false;
                     user.UpdatedAt = DateTime.UtcNow;
 
                     await _unitOfWork.SaveChangesAsync();
-                    await LogAdminActionAsync(userId, "SuspendUser", $"تم إيقاف حساب المستخدم {userId}. السبب: {reason}", "User");
+                    await LogAdminActionAsync(userId, "SuspendUser", $"User suspended {userId}. Reason: {reason}", "User");
 
                     return true;
                 });
@@ -141,14 +141,14 @@ namespace TafsilkPlatform.Web.Services
                     var user = await _unitOfWork.Users.GetByIdAsync(userId);
                     if (user == null)
                     {
-                        throw new InvalidOperationException("المستخدم غير موجود");
+                        throw new InvalidOperationException("User not found");
                     }
 
                     user.IsActive = true;
                     user.UpdatedAt = DateTime.UtcNow;
 
                     await _unitOfWork.SaveChangesAsync();
-                    await LogAdminActionAsync(userId, "ActivateUser", $"تم تفعيل حساب المستخدم {userId}", "User");
+                    await LogAdminActionAsync(userId, "ActivateUser", $"User activated {userId}", "User");
 
                     return true;
                 });
@@ -171,18 +171,18 @@ namespace TafsilkPlatform.Web.Services
                     var user = await _unitOfWork.Users.GetByIdAsync(userId);
                     if (user == null)
                     {
-                        throw new InvalidOperationException("المستخدم غير موجود");
+                        throw new InvalidOperationException("User not found");
                     }
 
                     user.IsActive = false;
                     user.IsDeleted = true;
                     user.UpdatedAt = DateTime.UtcNow;
                     user.BannedAt = DateTime.UtcNow;
-                    user.BanReason = reason ?? "تم حظر الحساب من قبل الإدارة";
+                    user.BanReason = reason ?? "Account banned by administration";
                     user.BanExpiresAt = null; // Permanent ban
 
                     await _unitOfWork.SaveChangesAsync();
-                    await LogAdminActionAsync(userId, "BanUser", $"تم حظر الحساب {userId} نهائياً. السبب: {reason}", "User");
+                    await LogAdminActionAsync(userId, "BanUser", $"User banned permanently {userId}. Reason: {reason}", "User");
 
                     return true;
                 });
@@ -205,7 +205,7 @@ namespace TafsilkPlatform.Web.Services
                     var user = await _unitOfWork.Users.GetByIdAsync(userId);
                     if (user == null)
                     {
-                        throw new InvalidOperationException("المستخدم غير موجود");
+                        throw new InvalidOperationException("User not found");
                     }
 
                     user.IsDeleted = true;
@@ -236,7 +236,7 @@ namespace TafsilkPlatform.Web.Services
                 var image = await _unitOfWork.PortfolioImages.GetByIdAsync(imageId);
                 if (image == null)
                 {
-                    throw new InvalidOperationException("الصورة غير موجودة");
+                    throw new InvalidOperationException("Image not found");
                 }
 
                 await _unitOfWork.SaveChangesAsync();
@@ -264,7 +264,7 @@ namespace TafsilkPlatform.Web.Services
                     var image = await _unitOfWork.PortfolioImages.GetByIdAsync(imageId);
                     if (image == null)
                     {
-                        throw new InvalidOperationException("الصورة غير موجودة");
+                        throw new InvalidOperationException("Image not found");
                     }
 
                     image.IsDeleted = true;

@@ -38,13 +38,13 @@ public class TailorPortfolioController : Controller
         {
             var tailor = await _db.TailorProfiles
                 .Include(t => t.User)
-                .Include(t => t.TailorServices.Where(s => !s.IsDeleted))
+
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor profile not found: {TailorId}", id);
-                TempData["Error"] = "الملف الشخصي للخياط غير موجود";
+                TempData["Error"] = "Tailor profile not found";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -57,17 +57,8 @@ public class TailorPortfolioController : Controller
 
             // Ensure navigation collections are not null to avoid NRE in views
             tailor.PortfolioImages = portfolioImages.ToList();
-            if (tailor.TailorServices == null)
-            {
-                tailor.TailorServices = new List<TafsilkPlatform.Models.Models.TailorService>();
-            }
-            if (tailor.User == null)
-            {
-                tailor.User = new TafsilkPlatform.Models.Models.User();
-            }
-
             // Calculate statistics with safety guards
-            ViewBag.ServiceCount = tailor.TailorServices?.Count ?? 0;
+            ViewBag.PortfolioCount = tailor.PortfolioImages?.Count ?? 0;
             ViewBag.PortfolioCount = tailor.PortfolioImages?.Count ?? 0;
             ViewBag.ReviewCount = 0; // Simplified - no reviews
             ViewBag.AverageRating = tailor.AverageRating;
@@ -80,7 +71,7 @@ public class TailorPortfolioController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading public tailor profile for {TailorId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحميل الملف الشخصي";
+            TempData["Error"] = "An error occurred while loading the profile";
             return RedirectToAction("Index", "Home");
         }
     }

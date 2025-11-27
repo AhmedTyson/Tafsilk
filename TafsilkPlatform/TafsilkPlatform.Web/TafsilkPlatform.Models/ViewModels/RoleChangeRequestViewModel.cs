@@ -5,24 +5,24 @@ namespace TafsilkPlatform.Models.ViewModels;
 
 public class RoleChangeRequestViewModel
 {
-    [Required(ErrorMessage = "الدور المستهدف مطلوب")]
-    [Display(Name = "الدور المطلوب")]
+    [Required(ErrorMessage = "Target role is required")]
+    [Display(Name = "Requested Role")]
     public string TargetRole { get; set; } = string.Empty;
 
-    [Display(Name = "اسم المتجر")]
+    [Display(Name = "Shop Name")]
     public string? ShopName { get; set; }
 
-    [Display(Name = "العنوان")]
+    [Display(Name = "Address")]
     public string? Address { get; set; }
 
-    [Display(Name = "سنوات الخبرة")]
-    [Range(0, 50, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 50")]
+    [Display(Name = "Years of Experience")]
+    [Range(0, 50, ErrorMessage = "Experience years must be between 0 and 50")]
     public int ExperienceYears { get; set; }
 
-    [Display(Name = "السبب")]
-    [MaxLength(500, ErrorMessage = "السبب لا يمكن أن يتجاوز 500 حرف")]
+    [Display(Name = "Reason")]
+    [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
     public string? Reason { get; set; }
 
-    [Display(Name = "صورة رخصة العمل")]
+    [Display(Name = "Business License Image")]
     public IFormFile? BusinessLicenseImage { get; set; }
 }

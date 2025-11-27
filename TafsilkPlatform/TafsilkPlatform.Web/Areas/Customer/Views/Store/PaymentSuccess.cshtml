@@ -1,10 +1,10 @@
 @model TafsilkPlatform.Models.ViewModels.Store.PaymentSuccessViewModel
 @{
-    ViewData["Title"] = "تم تأكيد الطلب بنجاح";
+    ViewData["Title"] = "Order Confirmed Successfully";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5" dir="rtl">
+<div class="container py-5" dir="ltr">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <!-- Success Animation -->
@@ -18,29 +18,29 @@
                     </div>
                 </div>
                 <h1 class="text-success mt-4 mb-2">
-                    <i class="fas fa-check-circle"></i> تم تأكيد طلبك بنجاح!
+                    <i class="fas fa-check-circle"></i> Your order has been confirmed successfully!
                 </h1>
-                <p class="text-muted lead">شكراً لك على طلبك من منصة تفصيلك</p>
+                <p class="text-muted lead">Thank you for ordering from Tafsilk Platform</p>
             </div>
 
             <!-- Order Summary Card -->
             <div class="card shadow-lg mb-4">
                 <div class="card-header bg-success text-white">
                     <h4 class="mb-0">
-                        <i class="fas fa-receipt"></i> تفاصيل الطلب
+                        <i class="fas fa-receipt"></i> Order Details
                     </h4>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="info-item">
-                                <small class="text-muted d-block">رقم الطلب</small>
+                                <small class="text-muted d-block">Order Number</small>
                                 <strong class="h5 text-primary">#@Model.OrderNumber</strong>
                             </div>
                         </div>
                         <div class="col-md-6 text-md-end">
                             <div class="info-item">
-                                <small class="text-muted d-block">تاريخ الطلب</small>
+                                <small class="text-muted d-block">Order Date</small>
                                 <strong>@Model.OrderDate.ToString("dd/MM/yyyy - HH:mm")</strong>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                         <div class="col-md-6">
                             <div class="info-item mb-3">
                                 <small class="text-muted d-block">
-                                    <i class="fas fa-money-bill-wave"></i> طريقة الدفع
+                                    <i class="fas fa-money-bill-wave"></i> Payment Method
                                 </small>
                                 <strong class="text-success">@Model.PaymentMethod</strong>
                             </div>
@@ -60,9 +60,9 @@
                         <div class="col-md-6 text-md-end">
                             <div class="info-item mb-3">
                                 <small class="text-muted d-block">
-                                    <i class="fas fa-dollar-sign"></i> المبلغ الإجمالي
+                                    <i class="fas fa-dollar-sign"></i> Total Amount
                                 </small>
-                                <strong class="h4 text-primary">@Model.TotalAmount.ToString("N2") ريال</strong>
+                                <strong class="h4 text-primary">@Model.TotalAmount.ToString("N2") EGP</strong>
                             </div>
                         </div>
                     </div>
@@ -73,9 +73,9 @@
                             <div class="d-flex align-items-center">
                                 <i class="fas fa-info-circle fa-2x me-3"></i>
                                 <div>
-                                    <strong>ملاحظة هامة:</strong>
+                                    <strong>Important Note:</strong>
                                     <p class="mb-0">
-                                        يرجى تجهيز المبلغ المستحق (@Model.TotalAmount.ToString("N2") ريال) نقداً عند استلام الطلب من المندوب.
+                                        Please prepare the due amount (@Model.TotalAmount.ToString("N2") EGP) in cash upon receipt of the order from the representative.
                                     </p>
                                 </div>
                             </div>
@@ -88,7 +88,7 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-truck"></i> معلومات التوصيل
+                        <i class="fas fa-truck"></i> Delivery Information
                     </h5>
                 </div>
                 <div class="card-body">
@@ -99,8 +99,8 @@
                                     <i class="fas fa-clock"></i>
                                 </div>
                                 <div>
-                                    <small class="text-muted d-block">الوقت المتوقع للتوصيل</small>
-                                    <strong>@Model.EstimatedDeliveryDays-@(Model.EstimatedDeliveryDays + 2) أيام عمل</strong>
+                                    <small class="text-muted d-block">Expected Delivery Time</small>
+                                    <strong>@Model.EstimatedDeliveryDays-@(Model.EstimatedDeliveryDays + 2) Business Days</strong>
                                 </div>
                             </div>
                         </div>
@@ -110,20 +110,20 @@
                                     <i class="fas fa-box"></i>
                                 </div>
                                 <div>
-                                    <small class="text-muted d-block">حالة الطلب</small>
-                                    <strong class="text-success">تم التأكيد</strong>
+                                    <small class="text-muted d-block">Order Status</small>
+                                    <strong class="text-success">Confirmed</strong>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="alert alert-light border mt-3">
-                        <h6><i class="fas fa-shipping-fast"></i> خطوات التوصيل:</h6>
+                        <h6><i class="fas fa-shipping-fast"></i> Delivery Steps:</h6>
                         <ol class="mb-0 ps-3">
-                            <li>تم تأكيد طلبك وجاري المعالجة</li>
-                            <li>سيتم تحضير طلبك وتعبئته</li>
-                            <li>سيتم شحن الطلب للتوصيل</li>
-                            <li>سيقوم المندوب بالاتصال بك لتحديد موعد التسليم</li>
+                            <li>Your order has been confirmed and is being processed</li>
+                            <li>Your order will be prepared and packed</li>
+                            <li>The order will be shipped for delivery</li>
+                            <li>The representative will contact you to schedule delivery</li>
                         </ol>
                     </div>
                 </div>
@@ -132,13 +132,13 @@
             <!-- Action Buttons -->
             <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h5 class="mb-4">ماذا تريد أن تفعل الآن؟</h5>
+                    <h5 class="mb-4">What would you like to do now?</h5>
                     
                     <!-- Primary Action Button -->
                     <div class="mb-4">
                         <a href="@Url.Action("MyOrders", "Orders")" class="btn btn-success btn-lg px-5 py-3" id="viewOrdersBtn" style="font-size: 1.1rem;">
                             <i class="fas fa-list me-2"></i>
-                            عرض جميع الطلبات
+                            View All Orders
                         </a>
                     </div>
                     
@@ -149,13 +149,13 @@
                         <div class="col-md-6">
                             <a href="@Url.Action("OrderDetails", "Orders", new { id = Model.OrderId })" class="btn btn-outline-primary btn-lg w-100" id="viewOrderBtn">
                                 <i class="fas fa-eye"></i><br/>
-                                <small>تفاصيل هذا الطلب</small>
+                                <small>Order Details</small>
                             </a>
                         </div>
                         <div class="col-md-6">
                             <a href="@Url.Action("Index", "Store")" class="btn btn-outline-secondary btn-lg w-100" id="continueShoppingBtn">
                                 <i class="fas fa-shopping-bag"></i><br/>
-                                <small>متابعة التسوق</small>
+                                <small>Continue Shopping</small>
                             </a>
                         </div>
                     </div>
@@ -165,11 +165,11 @@
                     <div class="text-muted">
                         <p class="mb-1">
                             <i class="fas fa-envelope"></i> 
-                            سيتم إرسال تفاصيل الطلب إلى بريدك الإلكتروني
+                            Order details will be sent to your email
                         </p>
                         <p class="mb-0">
                             <i class="fas fa-question-circle"></i> 
-                            لأي استفسار، يمكنك التواصل معنا
+                            For any inquiries, you can contact us
                         </p>
                     </div>
                 </div>
@@ -179,7 +179,7 @@
             <div class="text-center mt-4">
                 <p class="text-muted">
                     <i class="fas fa-heart text-danger"></i>
-                    نشكرك على ثقتك بمنصة تفصيلك
+                    Thank you for trusting Tafsilk Platform
                 </p>
             </div>
         </div>
@@ -449,7 +449,7 @@
                         );
                         
                         // Show friendly message
-                        if (confirm('لقد أتممت طلبك بنجاح. هل تريد الانتقال إلى صفحة الطلبات؟')) {
+                        if (confirm('You have successfully completed your order. Do you want to go to the orders page?')) {
                             sessionStorage.setItem('navigating_from_success', 'true');
                             window.location.href = '@Url.Action("MyOrders", "Orders")';
                         }

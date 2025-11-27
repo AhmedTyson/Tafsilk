@@ -26,7 +26,7 @@ namespace TafsilkPlatform.Models.Models
         public bool IsActive { get; set; } = true;
 
         // Navigation properties
-        public virtual ICollection<CartItem> Items { get; set; } = new List<CartItem>();
+        public virtual ICollection<CartItem> Items { get; set; } = [];
 
         // Calculated properties
         [NotMapped]

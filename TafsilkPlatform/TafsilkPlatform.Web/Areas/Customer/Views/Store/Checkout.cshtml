@@ -1,6 +1,6 @@
 @model TafsilkPlatform.Models.ViewModels.Store.CheckoutViewModel
 @{
-    ViewData["Title"] = "إتمام الطلب";
+    ViewData["Title"] = "Complete Order";
     var selectedCity = Model.ShippingAddress.City ?? "";
 }
 
@@ -224,27 +224,27 @@
                 <div class="success-checkmark mb-4">
                     <div class="check-icon"></div>
                 </div>
-                <h2 class="premium-heading mb-3 text-center" style="display: inline-block;">تم تأكيد الطلب بنجاح</h2>
-                <p class="text-muted mb-5">شكراً لثقتك بنا. سيتم تجهيز طلبك وشحنه قريباً.</p>
+                <h2 class="premium-heading mb-3 text-center" style="display: inline-block;">Order Confirmed Successfully</h2>
+                <p class="text-muted mb-5">Thank you for trusting us. Your order will be prepared and shipped soon.</p>
 
                 <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-light text-start">
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">رقم الطلب</span>
+                        <span class="text-muted">Order Number</span>
                         <span class="fw-bold font-monospace" id="successOrderNumber">#---</span>
                     </div>
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="text-muted">الإجمالي</span>
+                        <span class="text-muted">Total</span>
                         <span class="fw-bold text-success" id="successTotalAmount">---</span>
                     </div>
                     <div class="d-flex justify-content-between">
-                        <span class="text-muted">طريقة الدفع</span>
-                        <span class="fw-bold" id="successPaymentMethod">الدفع عند الاستلام</span>
+                        <span class="text-muted">Payment Method</span>
+                        <span class="fw-bold" id="successPaymentMethod">Cash on Delivery</span>
                     </div>
                 </div>
 
                 <div class="d-grid gap-2">
-                    <a href="/Orders/MyOrders" class="btn btn-premium">عرض طلباتي</a>
-                    <a href="/Store" class="btn btn-outline-dark rounded-pill py-3">متابعة التسوق</a>
+                    <a href="/Orders/MyOrders" class="btn btn-premium">View My Orders</a>
+                    <a href="/Store" class="btn btn-outline-dark rounded-pill py-3">Continue Shopping</a>
                 </div>
             </div>
         </div>
@@ -252,7 +252,7 @@
 
     <!-- CHECKOUT FORM -->
     <div id="checkoutSection">
-        <h1 class="premium-heading mb-5">إتمام الطلب</h1>
+        <h1 class="premium-heading mb-5">Complete Order</h1>
 
         <form asp-action="ProcessCheckout" method="post" id="checkoutForm">
             @Html.AntiForgeryToken()
@@ -264,46 +264,48 @@
                     <div class="checkout-card">
                         <div class="checkout-header">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>عنوان الشحن</span>
+                            <span>Shipping Address</span>
                         </div>
                         <div class="p-4">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="ShippingAddress.FullName" value="@Model.ShippingAddress.FullName" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">رقم الجوال <span class="text-danger">*</span></label>
+                                    <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
                                     <div class="input-group" dir="ltr">
-                                        <input type="tel" class="form-control text-end" name="ShippingAddress.PhoneNumber" value="@Model.ShippingAddress.PhoneNumber" placeholder="5xxxxxxxx" pattern="[0-9]{9}" required>
-                                        <span class="input-group-text bg-light border-start-0">+966</span>
+                                        <input type="tel" class="form-control text-end" name="ShippingAddress.PhoneNumber" value="@Model.ShippingAddress.PhoneNumber" placeholder="1XXXXXXXXX" pattern="[0-9]{10}" required>
+                                        <span class="input-group-text bg-light border-start-0">+20</span>
                                     </div>
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">العنوان <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" name="ShippingAddress.Street" value="@Model.ShippingAddress.Street" placeholder="اسم الشارع، رقم المبنى" required>
+                                    <label class="form-label">Address <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="ShippingAddress.Street" value="@Model.ShippingAddress.Street" placeholder="Street name, building number" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">المدينة <span class="text-danger">*</span></label>
+                                    <label class="form-label">City <span class="text-danger">*</span></label>
                                     <select class="form-select" name="ShippingAddress.City" required>
-                                        <option value="">اختر المدينة</option>
-                                        <option value="الرياض" selected="@(selectedCity == "الرياض")">الرياض</option>
-                                        <option value="جدة" selected="@(selectedCity == "جدة")">جدة</option>
-                                        <option value="مكة" selected="@(selectedCity == "مكة")">مكة</option>
-                                        <option value="المدينة" selected="@(selectedCity == "المدينة")">المدينة المنورة</option>
-                                        <option value="الدمام" selected="@(selectedCity == "الدمام")">الدمام</option>
-                                        <option value="الخبر" selected="@(selectedCity == "الخبر")">الخبر</option>
-                                        <option value="الطائف" selected="@(selectedCity == "الطائف")">الطائف</option>
-                                        <option value="أخرى" selected="@(selectedCity == "أخرى")">أخرى</option>
+                                        <option value="">Select City</option>
+                                        <option value="Cairo" selected="@(selectedCity == "Cairo")">Cairo</option>
+                                        <option value="Alexandria" selected="@(selectedCity == "Alexandria")">Alexandria</option>
+                                        <option value="Giza" selected="@(selectedCity == "Giza")">Giza</option>
+                                        <option value="Port Said" selected="@(selectedCity == "Port Said")">Port Said</option>
+                                        <option value="Suez" selected="@(selectedCity == "Suez")">Suez</option>
+                                        <option value="Mansoura" selected="@(selectedCity == "Mansoura")">Mansoura</option>
+                                        <option value="Tanta" selected="@(selectedCity == "Tanta")">Tanta</option>
+                                        <option value="Aswan" selected="@(selectedCity == "Aswan")">Aswan</option>
+                                        <option value="Ismailia" selected="@(selectedCity == "Ismailia")">Ismailia</option>
+                                        <option value="Other" selected="@(selectedCity == "Other")">Other</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">الحي</label>
+                                    <label class="form-label">District</label>
                                     <input type="text" class="form-control" name="ShippingAddress.District" value="@Model.ShippingAddress.District">
                                 </div>
                                 <div class="col-12">
-                                    <label class="form-label">ملاحظات إضافية</label>
-                                    <textarea class="form-control" name="ShippingAddress.AdditionalInfo" rows="2" placeholder="معالم قريبة، تعليمات خاصة...">@Model.ShippingAddress.AdditionalInfo</textarea>
+                                    <label class="form-label">Additional Notes</label>
+                                    <textarea class="form-control" name="ShippingAddress.AdditionalInfo" rows="2" placeholder="Nearby landmarks, special instructions...">@Model.ShippingAddress.AdditionalInfo</textarea>
                                 </div>
                             </div>
                         </div>
@@ -313,7 +315,7 @@
                     <div class="checkout-card">
                         <div class="checkout-header">
                             <i class="fas fa-wallet"></i>
-                            <span>طريقة الدفع</span>
+                            <span>Payment Method</span>
                         </div>
                         <div class="p-4">
                             <div class="d-flex flex-column gap-3">
@@ -324,8 +326,8 @@
                                         <div class="payment-check"></div>
                                         <i class="fas fa-money-bill-wave fa-2x text-success"></i>
                                         <div>
-                                            <h6 class="mb-1 fw-bold">الدفع عند الاستلام</h6>
-                                            <p class="mb-0 text-muted small">ادفع نقداً عند استلام طلبك</p>
+                                            <h6 class="mb-1 fw-bold">Cash on Delivery</h6>
+                                            <p class="mb-0 text-muted small">Pay cash when you receive your order</p>
                                         </div>
                                     </div>
                                 </label>
@@ -337,8 +339,8 @@
                                         <div class="payment-check"></div>
                                         <i class="fab fa-cc-stripe fa-2x text-primary"></i>
                                         <div>
-                                            <h6 class="mb-1 fw-bold">بطاقة ائتمان / مدى</h6>
-                                            <p class="mb-0 text-muted small">دفع آمن عبر Stripe</p>
+                                            <h6 class="mb-1 fw-bold">Credit/Debit Card</h6>
+                                            <p class="mb-0 text-muted small">Secure payment via Stripe</p>
                                         </div>
                                         <div class="ms-auto d-flex gap-2">
                                             <i class="fab fa-cc-visa fa-lg text-muted"></i>
@@ -354,7 +356,7 @@
                 <!-- Summary -->
                 <div class="col-lg-4">
                     <div class="summary-card p-4 sticky-top" style="top: 100px;">
-                        <h4 class="mb-4" style="color: var(--premium-gold);">ملخص الطلب</h4>
+                        <h4 class="mb-4" style="color: var(--premium-gold);">Order Summary</h4>
                         
                         <div class="mb-4" style="max-height: 300px; overflow-y: auto;">
                             @foreach (var item in Model.Cart.Items)
@@ -382,32 +384,32 @@
                         <div class="summary-divider"></div>
 
                         <div class="summary-item">
-                            <span class="text-white-50">المجموع الفرعي</span>
-                            <span>@Model.Cart.SubTotal.ToString("N2") ريال</span>
+                            <span class="text-white-50">Subtotal</span>
+                            <span>@Model.Cart.SubTotal.ToString("N2") EGP</span>
                         </div>
                         <div class="summary-item">
-                            <span class="text-white-50">الشحن</span>
-                            <span>@(Model.Cart.ShippingCost == 0 ? "مجاني" : Model.Cart.ShippingCost.ToString("N2") + " ريال")</span>
+                            <span class="text-white-50">Shipping</span>
+                            <span>@(Model.Cart.ShippingCost == 0 ? "Free" : Model.Cart.ShippingCost.ToString("N2") + " EGP")</span>
                         </div>
                         <div class="summary-item">
-                            <span class="text-white-50">الضريبة (15%)</span>
-                            <span>@Model.Cart.Tax.ToString("N2") ريال</span>
+                            <span class="text-white-50">VAT (14%)</span>
+                            <span>@Model.Cart.Tax.ToString("N2") EGP</span>
                         </div>
 
                         <div class="summary-divider"></div>
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="h5 mb-0">الإجمالي</span>
-                            <span class="h3 mb-0" style="color: var(--premium-gold);">@Model.Cart.Total.ToString("N2") <small class="fs-6 text-white-50">ريال</small></span>
+                            <span class="h5 mb-0">Total</span>
+                            <span class="h3 mb-0" style="color: var(--premium-gold);">@Model.Cart.Total.ToString("N2") <small class="fs-6 text-white-50">EGP</small></span>
                         </div>
 
                         <button type="submit" id="submitBtn" class="btn btn-premium">
-                            تأكيد الطلب
+                            Confirm Order
                         </button>
 
                         <div class="text-center mt-3">
                             <small class="text-white-50">
-                                <i class="fas fa-lock me-1"></i> جميع البيانات مشفرة وآمنة
+                                <i class="fas fa-lock me-1"></i> All data is encrypted and secure
                             </small>
                         </div>
                     </div>
@@ -428,9 +430,9 @@
             // Update button text
             const btn = document.getElementById('submitBtn');
             if (method === 'CreditCard') {
-                btn.textContent = 'متابعة للدفع';
+                btn.textContent = 'Proceed to Payment';
             } else {
-                btn.textContent = 'تأكيد الطلب';
+                btn.textContent = 'Confirm Order';
             }
         }
 
@@ -449,7 +451,7 @@
                 }
 
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>جاري المعالجة...';
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
 
                 const formData = new FormData(form);
 
@@ -479,8 +481,8 @@
                         } else {
                             // Show success message (Cash on Delivery)
                             document.getElementById('successOrderNumber').textContent = '#' + (data.orderNumber || '---');
-                            document.getElementById('successTotalAmount').textContent = (data.totalAmount ? data.totalAmount.toFixed(2) : '@Model.Cart.Total.ToString("N2")') + ' ريال';
-                            document.getElementById('successPaymentMethod').textContent = data.paymentMethod || 'الدفع عند الاستلام';
+                            document.getElementById('successTotalAmount').textContent = (data.totalAmount ? data.totalAmount.toFixed(2) : '@Model.Cart.Total.ToString("N2")') + ' EGP';
+                            document.getElementById('successPaymentMethod').textContent = data.paymentMethod || 'Cash on Delivery';
                             
                             checkoutSection.classList.add('fade-out');
                             setTimeout(() => {
@@ -491,16 +493,16 @@
                             }, 500);
                         }
                     } else {
-                        alert(data.message || 'حدث خطأ أثناء المعالجة');
+                        alert(data.message || 'An error occurred during processing');
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'تأكيد الطلب';
+                        submitBtn.textContent = 'Confirm Order';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+                    alert('A connection error occurred. Please try again.');
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'تأكيد الطلب';
+                    submitBtn.textContent = 'Confirm Order';
                 });
             });
         });

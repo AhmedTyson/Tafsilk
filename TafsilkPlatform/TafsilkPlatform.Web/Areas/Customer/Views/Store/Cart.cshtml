@@ -1,6 +1,6 @@
 @model TafsilkPlatform.Models.ViewModels.Store.CartViewModel
 @{
-    ViewData["Title"] = "سلة التسوق";
+    ViewData["Title"] = "Shopping Cart";
 }
 
 @section Styles {
@@ -156,16 +156,16 @@
 <div class="container py-5">
     <div class="row mb-5 align-items-end">
         <div class="col-md-8">
-            <h1 class="premium-heading mb-2">سلة التسوق</h1>
-            <p class="text-muted mb-0">لديك @Model.TotalItems منتجات في السلة</p>
+            <h1 class="premium-heading mb-2">Shopping Cart</h1>
+            <p class="text-muted mb-0">You have @Model.TotalItems items in your cart</p>
         </div>
         <div class="col-md-4 text-md-end">
             @if (Model.Items.Any())
             {
-                <form asp-action="ClearCart" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من إفراغ السلة بالكامل؟')">
+                <form asp-action="ClearCart" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to clear the cart?')">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-link text-danger text-decoration-none">
-                        <i class="fas fa-trash-alt me-1"></i> إفراغ السلة
+                        <i class="fas fa-trash-alt me-1"></i> Clear Cart
                     </button>
                 </form>
             }
@@ -214,11 +214,11 @@
                                     
                                     @if (!item.IsAvailable)
                                     {
-                                        <span class="badge bg-danger">غير متوفر</span>
+                                        <span class="badge bg-danger">Out of Stock</span>
                                     }
                                     else if (item.Quantity > item.StockAvailable)
                                     {
-                                        <span class="badge bg-warning text-dark">متوفر @item.StockAvailable فقط</span>
+                                        <span class="badge bg-warning text-dark">Only @item.StockAvailable available</span>
                                     }
                                 </div>
 
@@ -244,13 +244,13 @@
 
                                 <!-- Price & Remove -->
                                 <div class="col-md-2 col-6 mt-3 mt-md-0 text-end">
-                                    <div class="fw-bold fs-5 text-dark mb-2">@item.TotalPrice.ToString("N0") ريال</div>
+                                    <div class="fw-bold fs-5 text-dark mb-2">@item.TotalPrice.ToString("N0") EGP</div>
                                     <form asp-action="RemoveFromCart" method="post">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="cartItemId" value="@item.CartItemId" />
                                         <button type="submit" class="btn btn-link text-muted p-0 text-decoration-none small" 
-                                                onclick="return confirm('حذف هذا المنتج؟')">
-                                            <i class="fas fa-times me-1"></i> حذف
+                                                onclick="return confirm('Remove this item?')">
+                                            <i class="fas fa-times me-1"></i> Remove
                                         </button>
                                     </form>
                                 </div>
@@ -261,7 +261,7 @@
 
                 <div class="mt-4">
                     <a href="/Store" class="btn btn-outline-dark rounded-pill px-4">
-                        <i class="fas fa-arrow-right me-2"></i> متابعة التسوق
+                        <i class="fas fa-arrow-right me-2"></i> Continue Shopping
                     </a>
                 </div>
             </div>
@@ -269,45 +269,45 @@
             <!-- Summary -->
             <div class="col-lg-4">
                 <div class="summary-card p-4 sticky-top" style="top: 100px;">
-                    <h4 class="mb-4" style="color: var(--premium-gold);">ملخص الطلب</h4>
+                    <h4 class="mb-4" style="color: var(--premium-gold);">Order Summary</h4>
                     
                     <div class="summary-row">
-                        <span class="text-white-50">المجموع الفرعي</span>
-                        <span class="fw-bold">@Model.SubTotal.ToString("N2") ريال</span>
+                        <span class="text-white-50">Subtotal</span>
+                        <span class="fw-bold">@Model.SubTotal.ToString("N2") EGP</span>
                     </div>
                     
                     <div class="summary-row">
-                        <span class="text-white-50">الشحن</span>
+                        <span class="text-white-50">Shipping</span>
                         @if (Model.ShippingCost == 0)
                         {
-                            <span class="text-success fw-bold">مجاني</span>
+                            <span class="text-success fw-bold">Free</span>
                         }
                         else
                         {
-                            <span class="fw-bold">@Model.ShippingCost.ToString("N2") ريال</span>
+                            <span class="fw-bold">@Model.ShippingCost.ToString("N2") EGP</span>
                         }
                     </div>
                     
                     <div class="summary-row">
-                        <span class="text-white-50">الضريبة (15%)</span>
-                        <span class="fw-bold">@Model.Tax.ToString("N2") ريال</span>
+                        <span class="text-white-50">VAT (14%)</span>
+                        <span class="fw-bold">@Model.Tax.ToString("N2") EGP</span>
                     </div>
 
                     <div class="pt-3 mt-2 border-top border-secondary">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="h5 mb-0">الإجمالي</span>
-                            <span class="h3 mb-0" style="color: var(--premium-gold);">@Model.Total.ToString("N2") <small class="fs-6 text-white-50">ريال</small></span>
+                            <span class="h5 mb-0">Total</span>
+                            <span class="h3 mb-0" style="color: var(--premium-gold);">@Model.Total.ToString("N2") <small class="fs-6 text-white-50">EGP</small></span>
                         </div>
                     </div>
 
                     <a href="/Store/Checkout" class="btn btn-premium w-100 py-3 d-flex align-items-center justify-content-center gap-2">
-                        <span>إتمام الطلب</span>
+                        <span>Checkout</span>
                         <i class="fas fa-lock small"></i>
                     </a>
 
                     <div class="text-center mt-3">
                         <small class="text-white-50">
-                            <i class="fas fa-shield-alt me-1"></i> دفع آمن ومشفر 100%
+                            <i class="fas fa-shield-alt me-1"></i> 100% Secure Payment
                         </small>
                     </div>
                 </div>
@@ -317,19 +317,19 @@
                     <div class="col-4">
                         <div class="bg-white p-2 rounded shadow-sm h-100">
                             <i class="fas fa-truck text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">شحن سريع</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Fast Shipping</div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-white p-2 rounded shadow-sm h-100">
                             <i class="fas fa-undo text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">إرجاع مجاني</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">Free Returns</div>
                         </div>
                     </div>
                     <div class="col-4">
                         <div class="bg-white p-2 rounded shadow-sm h-100">
                             <i class="fas fa-headset text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">دعم 24/7</div>
+                            <div class="small text-muted" style="font-size: 0.7rem;">24/7 Support</div>
                         </div>
                     </div>
                 </div>
@@ -342,10 +342,10 @@
             <div class="empty-cart-icon">
                 <i class="fas fa-shopping-bag"></i>
             </div>
-            <h2 class="fw-bold mb-3">سلة التسوق فارغة</h2>
-            <p class="text-muted mb-4 lead">لم تقم بإضافة أي منتجات إلى سلتك بعد.</p>
+            <h2 class="fw-bold mb-3">Your cart is empty</h2>
+            <p class="text-muted mb-4 lead">You haven't added any items to your cart yet.</p>
             <a href="/Store" class="btn btn-premium px-5">
-                ابدأ التسوق الآن
+                Start Shopping Now
             </a>
         </div>
     }

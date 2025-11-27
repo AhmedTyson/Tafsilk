@@ -176,6 +176,28 @@ try
               // Request additional scopes
               options.Scope.Add("profile");
               options.Scope.Add("email");
+
+              // Handle Remote Failure (e.g., User Cancelled)
+              options.Events.OnRemoteFailure = context =>
+              {
+                  var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                  var failureMessage = context.Failure?.Message ?? "Unknown error";
+
+                  logger.LogWarning("Google OAuth Remote Failure: {Error}", failureMessage);
+
+                  // If access denied (cancelled), redirect to login
+                  if (failureMessage.Contains("Access was denied") || failureMessage.Contains("canceled"))
+                  {
+                      context.Response.Redirect("/Account/Login");
+                  }
+                  else
+                  {
+                      context.Response.Redirect("/Account/Login?error=ExternalLoginFailed");
+                  }
+
+                  context.HandleResponse();
+                  return Task.CompletedTask;
+              };
           });
 
             builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Information);
@@ -431,7 +453,7 @@ try
         {
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "Unhandled exception in fallback middleware");
-            context.Response.Redirect("/Error?message=حدث خطأ غير متوقع");
+            context.Response.Redirect("/Error?message=An unexpected error occurred");
         }
     });
 

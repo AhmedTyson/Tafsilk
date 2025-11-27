@@ -48,8 +48,7 @@ namespace TafsilkPlatform.DataAccess.Repository
         {
             return await _db.Products
             .Include(p => p.Tailor)
-                       .Include(p => p.Reviews.Where(r => r.IsApproved))
-               .ThenInclude(r => r.Customer)
+
                    .FirstOrDefaultAsync(p => p.Slug == slug && !p.IsDeleted);
         }
 

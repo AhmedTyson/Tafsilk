@@ -1,11 +1,11 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.ManageProductsViewModel
 @{
-    ViewData["Title"] = "إدارة المنتجات";
+    ViewData["Title"] = "Product Management";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("إدارة المنتجات", "")
+        ("Dashboard", Url.Action("Tailor", "Dashboards")),
+        ("Product Management", "")
     };
 }
 
@@ -16,7 +16,7 @@
     @if (TempData["Success"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+            <i class="fas fa-check-circle"></i> <strong>Success:</strong> @TempData["Success"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -24,7 +24,7 @@
     @if (TempData["Error"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+            <i class="fas fa-exclamation-circle"></i> <strong>Error:</strong> @TempData["Error"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -35,13 +35,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <h1 class="h3 mb-2">
-                        <i class="fas fa-box"></i> إدارة المنتجات
+                        <i class="fas fa-box"></i> Product Management
                     </h1>
-                    <p class="text-muted">إضافة وتعديل وإدارة منتجاتك في المتجر</p>
+                    <p class="text-muted">Add, edit, and manage your products in the store</p>
                 </div>
                 <div>
                     <a href="/Tailor/manage/products/add" class="btn btn-primary btn-lg">
-                        <i class="fas fa-plus"></i> إضافة منتج جديد
+                        <i class="fas fa-plus"></i> Add New Product
                     </a>
                 </div>
             </div>
@@ -55,7 +55,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">إجمالي المنتجات</h6>
+                            <h6 class="text-white-50 mb-1">Total Products</h6>
                             <h2 class="mb-0">@Model.TotalProducts</h2>
                         </div>
                         <div class="display-4">
@@ -71,7 +71,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">منتجات نشطة</h6>
+                            <h6 class="text-white-50 mb-1">Active Products</h6>
                             <h2 class="mb-0">@Model.ActiveProducts</h2>
                         </div>
                         <div class="display-4">
@@ -87,7 +87,7 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">نفذت من المخزون</h6>
+                            <h6 class="text-white-50 mb-1">Out of Stock</h6>
                             <h2 class="mb-0">@Model.OutOfStockProducts</h2>
                         </div>
                         <div class="display-4">
@@ -103,9 +103,9 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <h6 class="text-white-50 mb-1">قيمة المخزون</h6>
+                            <h6 class="text-white-50 mb-1">Inventory Value</h6>
                             <h2 class="mb-0">@Model.TotalInventoryValue.ToString("N0")</h2>
-                            <small class="text-white-50">ريال</small>
+                            <small class="text-white-50">EGP</small>
                         </div>
                         <div class="display-4">
                             <i class="fas fa-coins"></i>
@@ -122,7 +122,7 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-list"></i> قائمة المنتجات
+                        <i class="fas fa-list"></i> Product List
                     </h5>
                 </div>
                 <div class="card-body">
@@ -132,16 +132,16 @@
                             <table class="table table-hover align-middle" id="productsTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>الصورة</th>
-                                        <th>اسم المنتج</th>
-                                        <th>التصنيف</th>
-                                        <th>السعر</th>
-                                        <th>الكمية</th>
-                                        <th>المبيعات</th>
-                                        <th>التقييم</th>
-                                        <th>الحالة</th>
-                                        <th>تاريخ الإضافة</th>
-                                        <th>الإجراءات</th>
+                                        <th>Image</th>
+                                        <th>Product Name</th>
+                                        <th>Category</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Sales</th>
+                                        <th>Rating</th>
+                                        <th>Status</th>
+                                        <th>Date Added</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -168,7 +168,7 @@
                                                 <strong>@product.Name</strong>
                                                 @if (product.IsFeatured)
                                                 {
-                                                    <br><span class="badge bg-warning"><i class="fas fa-star"></i> مميز</span>
+                                                    <br><span class="badge bg-warning"><i class="fas fa-star"></i> Featured</span>
                                                 }
                                             </td>
                                             <td>@product.Category</td>
@@ -178,12 +178,12 @@
                                                     <div>
                                                         <span class="text-decoration-line-through text-muted small">@product.Price.ToString("N2")</span>
                                                         <br>
-                                                        <strong class="text-success">@product.DiscountedPrice.Value.ToString("N2") ريال</strong>
+                                                        <strong class="text-success">@product.DiscountedPrice.Value.ToString("N2") EGP</strong>
                                                     </div>
                                                 }
                                                 else
                                                 {
-                                                    <strong>@product.Price.ToString("N2") ريال</strong>
+                                                    <strong>@product.Price.ToString("N2") EGP</strong>
                                                 }
                                             </td>
                                             <td>
@@ -202,14 +202,14 @@
                                                 </div>
                                                 @if (product.StockQuantity == 0)
                                                 {
-                                                    <small class="text-danger d-block mt-1">نفذت من المخزون</small>
+                                                  <small class="text-danger d-block mt-1">Out of stock</small>
                                                 }
                                             </td>
                                             <td>
                                                 <i class="fas fa-shopping-cart text-muted"></i> @product.SalesCount
                                                 <br>
                                                 <small class="text-muted">
-                                                    <i class="fas fa-eye"></i> @product.ViewCount مشاهدة
+                                                    <i class="fas fa-eye"></i> @product.ViewCount views
                                                 </small>
                                             </td>
                                             <td>
@@ -230,7 +230,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <small class="text-muted">لا يوجد</small>
+                                                    <small class="text-muted">None</small>
                                                 }
                                             </td>
                                             <td>
@@ -245,7 +245,7 @@
                                                                data-product-id="@product.ProductId"
                                                                onchange="this.form.submit()">
                                                         <label class="form-check-label small">
-                                                            @(product.IsAvailable ? "متاح" : "غير متاح")
+                                                            @(product.IsAvailable ? "Available" : "Unavailable")
                                                         </label>
                                                     </div>
                                                 </form>
@@ -257,20 +257,20 @@
                                                 <div class="btn-group" role="group">
                                                     <a href="@($"/Tailor/manage/products/edit/{product.ProductId}")" 
                                                        class="btn btn-sm btn-outline-primary"
-                                                       title="تعديل">
+                                                       title="Edit">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     <a href="@Url.Action("ProductDetails", "Store", new { id = product.ProductId })" 
                                                        class="btn btn-sm btn-outline-info"
                                                        target="_blank"
-                                                       title="معاينة">
+                                                       title="Preview">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     <button type="button" 
                                                             class="btn btn-sm btn-outline-danger delete-product-btn"
                                                             data-product-id="@product.ProductId"
                                                             data-product-name="@product.Name"
-                                                            title="حذف">
+                                                            title="Delete">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </div>
@@ -287,10 +287,10 @@
                             <div class="display-1 text-muted mb-3">
                                 <i class="fas fa-box-open"></i>
                             </div>
-                            <h4 class="text-muted mb-3">لا توجد منتجات بعد</h4>
-                            <p class="text-muted mb-4">ابدأ بإضافة منتجاتك الأولى إلى المتجر</p>
+                            <h4 class="text-muted mb-3">No Products Yet</h4>
+                            <p class="text-muted mb-4">Start by adding your first products to the store</p>
                             <a href="/Tailor/manage/products/add" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus"></i> إضافة منتج جديد
+                                <i class="fas fa-plus"></i> Add New Product
                             </a>
                         </div>
                     }
@@ -305,21 +305,21 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">تأكيد الحذف</h5>
+                <h5 class="modal-title">Confirm Deletion</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>هل أنت متأكد من حذف المنتج "<strong id="deleteProductName"></strong>"؟</p>
+                <p>Are you sure you want to delete the product "<strong id="deleteProductName"></strong>"?</p>
                 <p class="text-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    لن يكون بإمكانك التراجع عن هذا الإجراء.
+                    You will not be able to undo this action.
                 </p>
             </div>
             <div class="modal-footer">
                 <form id="deleteForm" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="submit" class="btn btn-danger">حذف المنتج</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Product</button>
                 </form>
             </div>
         </div>
@@ -378,7 +378,7 @@
                     },
                     success: function(response) {
                         if (response.success) {
-                            toastr.success('تم تحديث الكمية بنجاح');
+                            toastr.success('Stock quantity updated successfully');
                             btn.html('<i class="fas fa-check"></i>');
                             
                             // Update stock display
@@ -387,19 +387,19 @@
                             // Update availability if needed
                             if (!response.isAvailable) {
                                 $(`.availability-toggle[data-product-id="${productId}"]`).prop('checked', false);
-                                toastr.info('المنتج أصبح غير متاح بسبب نفاذ المخزون');
+                                toastr.info('Product is now unavailable due to stock depletion');
                             }
                             
                             setTimeout(function() {
                                 location.reload();
                             }, 1000);
                         } else {
-                            toastr.error(response.message || 'حدث خطأ');
+                            toastr.error(response.message || 'An error occurred');
                             btn.html('<i class="fas fa-check"></i>');
                         }
                     },
                     error: function() {
-                        toastr.error('حدث خطأ في الاتصال');
+                        toastr.error('Connection error occurred');
                         btn.html('<i class="fas fa-check"></i>');
                     },
                     complete: function() {
@@ -436,16 +436,16 @@
                             const label = toggle.next('label');
                             
                             if (response.isAvailable) {
-                                label.text('متاح');
-                                toastr.success('المنتج أصبح متاحاً');
+                                label.text('Available');
+                                toastr.success('Product is now available');
                             } else {
-                                label.text('غير متاح');
-                                toastr.info('المنتج أصبح غير متاح');
+                                label.text('Unavailable');
+                                toastr.info('Product is now unavailable');
                             }
                         }
                     },
                     error: function() {
-                        toastr.error('حدث خطأ في الاتصال');
+                        toastr.error('Connection error occurred');
                         location.reload();
                     }
                 });

@@ -1,4 +1,4 @@
-@model TafsilkPlatform.Models.Models.CustomerProfile
+@model TafsilkPlatform.Models.ViewModels.CustomerProfileEditViewModel
 @{
     ViewData["Title"] = "Account Settings";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -16,7 +16,19 @@
                         </div>
                     </div>
                     <h5 class="fw-bold mb-1">@Model.FullName</h5>
-                    <p class="text-muted small mb-0">@Model.User?.Email</p>
+                    <p class="text-muted small mb-3">@Model.Email</p>
+                    
+                    <div class="d-flex justify-content-center gap-3 mb-2">
+                        <div class="text-center px-2">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Joined</small>
+                            <span class="fw-bold text-primary">@Model.MemberSince.ToString("MMM yyyy")</span>
+                        </div>
+                        <div class="vr opacity-25"></div>
+                        <div class="text-center px-2">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Orders</small>
+                            <span class="fw-bold text-primary">@Model.TotalOrders</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="list-group list-group-flush border-top-0 p-2 bg-white">
                     <a href="@Url.Action("CustomerProfile", "Profiles")" class="list-group-item list-group-item-action active rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
@@ -43,41 +55,84 @@
                     <p class="text-muted small mb-0 mt-1">Update your personal details and preferences</p>
                 </div>
                 <div class="card-body px-4 pb-4">
-                    <form asp-action="CompleteCustomerProfile" method="post">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    <form asp-action="EditCustomerProfile" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="text" class="form-control bg-light border-0" id="fullName" name="FullName" value="@Model.FullName" placeholder="Full Name" required>
                                     <label for="fullName" class="text-muted">Full Name</label>
                                 </div>
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="tel" class="form-control bg-light border-0" id="phone" name="PhoneNumber" value="@Model.User?.PhoneNumber" placeholder="Phone Number">
+                                    <input type="tel" class="form-control bg-light border-0" id="phone" name="PhoneNumber" value="@Model.PhoneNumber" placeholder="Phone Number">
                                     <label for="phone" class="text-muted">Phone Number</label>
                                 </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="text" class="form-control bg-light border-0" id="city" name="City" value="@Model.City" placeholder="City">
                                     <label for="city" class="text-muted">City</label>
                                 </div>
+                                <span asp-validation-for="City" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <select class="form-select bg-light border-0" id="gender" name="Gender">
                                         <option value="">Select Gender</option>
-                                        <option value="Male" selected="@(Model.Gender == "Male")">Male</option>
-                                        <option value="Female" selected="@(Model.Gender == "Female")">Female</option>
+                                        @if (Model.Gender == "Male")
+                                        {
+                                            <option value="Male" selected>Male</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Male">Male</option>
+                                        }
+                                        @if (Model.Gender == "Female")
+                                        {
+                                            <option value="Female" selected>Female</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="Female">Female</option>
+                                        }
                                     </select>
                                     <label for="gender" class="text-muted">Gender</label>
                                 </div>
+                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control bg-light border-0" id="dob" name="DateOfBirth" value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))" placeholder="Date of Birth">
+                                    <label for="dob" class="text-muted">Date of Birth</label>
+                                </div>
+                                <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating">
                                     <textarea class="form-control bg-light border-0" id="bio" name="Bio" placeholder="Bio" style="height: 120px">@Model.Bio</textarea>
                                     <label for="bio" class="text-muted">Bio / About You</label>
                                 </div>
+                                <span asp-validation-for="Bio" class="text-danger small"></span>
                             </div>
                             <div class="col-12 text-end mt-4">
                                 <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm transition-all">

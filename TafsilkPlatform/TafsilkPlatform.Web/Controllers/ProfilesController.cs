@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Models.ViewModels;
 using TafsilkPlatform.Models.ViewModels.Tailor;
 using TafsilkPlatform.Web.Services;
 
@@ -40,112 +41,113 @@ public class ProfilesController : Controller
     #region Customer Profile Actions
 
     /// <summary>
-    /// Complete customer profile form
-    /// GET: /profile/complete-customer
+    /// Update customer profile
+    /// POST: /profile/customer/edit
     /// </summary>
-    [HttpGet("complete-customer")]
-    [Authorize(Roles = "Customer")]
-    public async Task<IActionResult> CompleteCustomerProfile()
-    {
-        try
-        {
-            var userId = GetCurrentUserId();
-            if (userId == Guid.Empty) return Unauthorized();
-
-            // Check if profile already completed
-            var hasProfile = await _db.CustomerProfiles.AnyAsync(c => c.UserId == userId);
-            if (hasProfile)
-            {
-                TempData["Info"] = "تم إكمال ملفك الشخصي مسبقاً";
-                return RedirectToAction(nameof(CustomerProfile));
-            }
-
-            var model = new TafsilkPlatform.Models.ViewModels.CompleteCustomerProfileRequest
-            {
-                // Pre-fill from user data if available
-            };
-
-            return View(model);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading customer profile completion form");
-            TempData["Error"] = "حدث خطأ أثناء تحميل النموذج";
-            return RedirectToAction("Index", "Home");
-        }
-    }
-
-    /// <summary>
-    /// Save completed customer profile
-    /// POST: /profile/complete-customer
-    /// </summary>
-    [HttpPost("complete-customer")]
+    [HttpPost("customer/edit")]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Customer")]
-    public async Task<IActionResult> CompleteCustomerProfile(TafsilkPlatform.Models.ViewModels.CompleteCustomerProfileRequest model)
+    public async Task<IActionResult> EditCustomerProfile(CustomerProfileEditViewModel model)
     {
+        _logger.LogInformation("EditCustomerProfile POST action called for user");
+
         try
         {
             var userId = GetCurrentUserId();
+            _logger.LogInformation("User ID retrieved: {UserId}", userId);
+
             if (userId == Guid.Empty) return Unauthorized();
 
             if (!ModelState.IsValid)
-                return View(model);
-
-            // Check if profile already exists
-            var existingProfile = await _db.CustomerProfiles
-            .FirstOrDefaultAsync(c => c.UserId == userId);
-
-            if (existingProfile != null)
             {
-                TempData["Info"] = "تم إكمال الملف الشخصي مسبقاً";
-                return RedirectToAction(nameof(CustomerProfile));
+                _logger.LogWarning("Model state is invalid. Errors: {Errors}",
+                    string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+
+                // Reload user email for display
+                var user = await _db.Users.FindAsync(userId);
+                model.Email = user?.Email;
+
+                return View("CustomerProfile", model);
             }
 
-            // Create customer profile
-            var profile = new CustomerProfile
+            var customer = await _db.CustomerProfiles
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
+
+            if (customer == null)
             {
-                Id = Guid.NewGuid(),
-                UserId = userId,
-                FullName = model.FullName,
-                City = model.City,
-                Gender = model.Gender,
-                Bio = model.Bio,
-                CreatedAt = DateTime.UtcNow
-            };
+                // Create if not exists (shouldn't happen for existing users, but good fallback)
+                customer = new CustomerProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.CustomerProfiles.Add(customer);
+                _logger.LogInformation("Creating new customer profile for user {UserId}", userId);
+            }
+
+            // Update fields
+            _logger.LogInformation("Updating customer profile. Old Gender: {OldGender}, New Gender: {NewGender}", customer.Gender, model.Gender);
+            customer.FullName = model.FullName;
+            customer.City = model.City;
+            customer.Gender = string.IsNullOrWhiteSpace(model.Gender) ? null : model.Gender;
+            customer.Bio = model.Bio;
+            customer.DateOfBirth = model.DateOfBirth;
+            customer.UpdatedAt = DateTime.UtcNow;
+
+            // Explicitly mark as modified to ensure EF Core tracks changes
+            if (_db.Entry(customer).State == Microsoft.EntityFrameworkCore.EntityState.Unchanged)
+            {
+                _db.Entry(customer).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            }
 
             // Update user phone number if provided
-            var user = await _db.Users.FindAsync(userId);
-            if (user != null && !string.IsNullOrEmpty(model.PhoneNumber))
+            if (model.PhoneNumber != null) // Allow clearing phone number if empty string passed? ViewModel has string?
             {
-                // Check if phone already exists
-                var phoneExists = await _db.Users
-              .AnyAsync(u => u.PhoneNumber == model.PhoneNumber && u.Id != userId);
-
-                if (phoneExists)
+                var user = customer.User ?? await _db.Users.FindAsync(userId);
+                if (user != null)
                 {
-                    ModelState.AddModelError(nameof(model.PhoneNumber), "رقم الهاتف مستخدم بالفعل");
-                    return View(model);
-                }
+                    _logger.LogInformation("Updating user phone. Old Phone: {OldPhone}, New Phone: {NewPhone}", user.PhoneNumber, model.PhoneNumber);
 
-                user.PhoneNumber = model.PhoneNumber;
+                    // Check if phone already exists for OTHER users
+                    if (!string.IsNullOrEmpty(model.PhoneNumber))
+                    {
+                        var phoneExists = await _db.Users
+                            .AnyAsync(u => u.PhoneNumber == model.PhoneNumber && u.Id != userId);
+
+                        if (phoneExists)
+                        {
+                            ModelState.AddModelError("PhoneNumber", "Phone number is already in use");
+
+                            // Reload user email for display
+                            model.Email = user.Email;
+                            return View("CustomerProfile", model);
+                        }
+                    }
+
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.UpdatedAt = DateTime.UtcNow;
+                    _db.Entry(user).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+                }
+                else
+                {
+                    _logger.LogWarning("User entity not found for customer {CustomerId}", customer.Id);
+                }
             }
 
+            var changesCount = await _db.SaveChangesAsync();
+            _logger.LogInformation("Customer profile updated for user {UserId}. Changes saved: {ChangesCount}", userId, changesCount);
 
+            TempData["Success"] = "Profile updated successfully";
 
-            _db.CustomerProfiles.Add(profile);
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("Customer profile completed for user {UserId}", userId);
-            TempData["Success"] = "تم إكمال ملفك الشخصي بنجاح! يمكنك الآن تصفح الخياطين وطلب الخدمات";
-
-            return RedirectToAction("Index", "Tailors");
+            return RedirectToAction(nameof(CustomerProfile));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error completing customer profile");
-            ModelState.AddModelError("", "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى");
-            return View(model);
+            _logger.LogError(ex, "Error updating customer profile");
+            TempData["Error"] = "An error occurred while saving data";
+            return RedirectToAction(nameof(CustomerProfile));
         }
     }
 
@@ -163,25 +165,60 @@ public class ProfilesController : Controller
             if (userId == Guid.Empty) return Unauthorized();
 
             var customer = await _db.CustomerProfiles
-.Include(c => c.User)
-         .FirstOrDefaultAsync(c => c.UserId == userId);
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.UserId == userId);
 
             if (customer == null)
             {
-                _logger.LogWarning("Customer profile not found for user {UserId}", userId);
-                return NotFound("الملف الشخصي غير موجود");
+                _logger.LogInformation("Creating default customer profile for user {UserId}", userId);
+
+                // Create a default profile for this customer
+                var user = await _db.Users.FindAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogError("User {UserId} not found when creating customer profile", userId);
+                    return Unauthorized();
+                }
+
+                customer = new CustomerProfile
+                {
+                    Id = Guid.NewGuid(),
+                    UserId = userId,
+                    FullName = user.Email, // Default to email until user updates their profile
+                    CreatedAt = DateTime.UtcNow,
+                    User = user
+                };
+
+                _db.CustomerProfiles.Add(customer);
+                await _db.SaveChangesAsync();
+
+                _logger.LogInformation("Created default customer profile for user {UserId}", userId);
             }
+
+            // Map to ViewModel
+            var model = new CustomerProfileEditViewModel
+            {
+                FullName = customer.FullName ?? string.Empty,
+                PhoneNumber = customer.User?.PhoneNumber,
+                City = customer.City,
+                Gender = customer.Gender,
+                Bio = customer.Bio,
+                DateOfBirth = customer.DateOfBirth,
+                Email = customer.User?.Email,
+                MemberSince = customer.User?.CreatedAt ?? customer.CreatedAt,
+                TotalOrders = await _db.Orders.CountAsync(o => o.CustomerId == customer.Id)
+            };
 
             // Get profile completion
             var completion = await _profileCompletionService.GetCustomerCompletionAsync(userId);
             ViewBag.ProfileCompletion = completion;
 
-            return View(customer);
+            return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading customer profile");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الملف الشخصي";
+            TempData["Error"] = "An error occurred while loading profile";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -212,7 +249,7 @@ public class ProfilesController : Controller
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor profile not found for user {UserId}", userId);
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
             }
 
             ViewBag.ServiceCount = tailor.TailorServices.Count(s => !s.IsDeleted);
@@ -228,7 +265,7 @@ public class ProfilesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor profile");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الملف الشخصي";
+            TempData["Error"] = "An error occurred while loading profile";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -253,7 +290,7 @@ public class ProfilesController : Controller
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             var model = new EditTailorProfileViewModel
             {
@@ -300,7 +337,7 @@ public class ProfilesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor profile for editing");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الملف الشخصي";
+            TempData["Error"] = "An error occurred while loading profile";
             return RedirectToAction(nameof(TailorProfile));
         }
     }
@@ -331,7 +368,7 @@ public class ProfilesController : Controller
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
-                return NotFound("الملف الشخصي غير موجود");
+                return NotFound("Profile not found");
 
             // Ensure user is editing their own profile
             if (tailor.UserId != userId)
@@ -352,7 +389,7 @@ public class ProfilesController : Controller
 
                 if (phoneExists)
                 {
-                    ModelState.AddModelError(nameof(model.PhoneNumber), "رقم الهاتف مستخدم بالفعل");
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "Phone number is already in use");
                     ViewBag.Cities = EgyptCities.GetAll();
                     ViewBag.Specializations = TailorSpecializations.GetAll();
                     return View(model);
@@ -390,7 +427,7 @@ public class ProfilesController : Controller
                 // Validate image
                 if (!await _fileUploadService.IsValidImageAsync(model.ProfilePicture))
                 {
-                    ModelState.AddModelError(nameof(model.ProfilePicture), "نوع الملف غير صالح. يرجى اختيار صورة");
+                    ModelState.AddModelError(nameof(model.ProfilePicture), "Invalid file type. Please select an image");
                     ViewBag.Cities = EgyptCities.GetAll();
                     ViewBag.Specializations = TailorSpecializations.GetAll();
                     return View(model);
@@ -398,7 +435,7 @@ public class ProfilesController : Controller
 
                 if (model.ProfilePicture.Length > _fileUploadService.GetMaxFileSizeInBytes())
                 {
-                    ModelState.AddModelError(nameof(model.ProfilePicture), "حجم الملف كبير جداً");
+                    ModelState.AddModelError(nameof(model.ProfilePicture), "File size is too large");
                     return View(model);
                 }
 
@@ -438,14 +475,14 @@ public class ProfilesController : Controller
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Tailor profile updated for user {UserId}", userId);
-            TempData["Success"] = "تم تحديث الملف الشخصي بنجاح";
+            TempData["Success"] = "Profile updated successfully";
 
             return RedirectToAction(nameof(TailorProfile));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating tailor profile");
-            ModelState.AddModelError("", "حدث خطأ أثناء تحديث الملف الشخصي");
+            ModelState.AddModelError("", "An error occurred while updating profile");
             ViewBag.Cities = EgyptCities.GetAll();
             ViewBag.Specializations = TailorSpecializations.GetAll();
             return View(model);
@@ -514,7 +551,6 @@ public class ProfilesController : Controller
 
 
     /* REMOVED: Corporate Profile Actions - Corporate feature has been removed
-    #region Corporate Profile Actions
 
     // All Corporate profile methods commented out as Corporate feature was removed
     // If you need to restore this functionality, uncomment this section and:
@@ -523,8 +559,7 @@ public class ProfilesController : Controller
     // 3. Restore Corporate views
    // 4. Add Corporate registration role back
 
-    #endregion
-   */
+    */
 
     #region Helper Methods
 

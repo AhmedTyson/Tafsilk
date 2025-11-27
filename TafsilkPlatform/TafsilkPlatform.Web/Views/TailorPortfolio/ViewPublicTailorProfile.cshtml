@@ -555,7 +555,7 @@
                                 <h3 class="service-name">@service.ServiceName</h3>
                                 <p class="service-desc">@(service.Description ?? "Custom tailoring service tailored to your exact measurements.")</p>
                                 <div class="service-footer">
-                                    <span class="service-price">@service.BasePrice.ToString("N0") SAR</span>
+                                    <span class="service-price">@service.BasePrice.ToString("N0") EGP</span>
                                     <a href="@Url.Action("CreateOrder", "Orders", new { tailorId = safeModel.Id, serviceId = service.TailorServiceId })" 
                                        class="btn btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">
                                         Book Now
@@ -598,7 +598,7 @@
                                 <h3 style="color: white; margin: 0; font-size: 1.1rem;">@(image.Title ?? "Work Sample")</h3>
                                 @if (image.EstimatedPrice.HasValue)
                                 {
-                                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0;">~ @image.EstimatedPrice.Value.ToString("N0") SAR</p>
+                                    <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0;">~ @image.EstimatedPrice.Value.ToString("N0") EGP</p>
                                 }
                             </div>
                         </div>

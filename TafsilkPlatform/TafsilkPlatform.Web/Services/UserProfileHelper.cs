@@ -49,7 +49,7 @@ public class UserProfileHelper : IUserProfileHelper
             if (string.IsNullOrEmpty(roleName))
             {
                 var user = await _unitOfWork.Users.GetByIdAsync(userId);
-                if (user == null) return "مستخدم";
+                if (user == null) return "User";
                 roleName = user.Role?.Name;
             }
 
@@ -58,13 +58,13 @@ public class UserProfileHelper : IUserProfileHelper
             {
                 "customer" => await GetCustomerNameAsync(userId),
                 "tailor" => await GetTailorNameAsync(userId),
-                _ => "مستخدم"
+                _ => "User"
             };
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Error getting full name for user {UserId}", userId);
-            return "مستخدم";
+            return "User";
         }
     }
 
@@ -77,11 +77,12 @@ public class UserProfileHelper : IUserProfileHelper
         try
         {
             // Try Customer profile first
-            var customer = await _unitOfWork.Customers.GetByUserIdAsync(userId);
-            if (customer?.ProfilePictureData != null)
-            {
-                return (customer.ProfilePictureData, customer.ProfilePictureContentType ?? "image/jpeg");
-            }
+            // Customer profile picture removed
+            // var customer = await _unitOfWork.Customers.GetByUserIdAsync(userId);
+            // if (customer?.ProfilePictureData != null)
+            // {
+            //     return (customer.ProfilePictureData, customer.ProfilePictureContentType ?? "image/jpeg");
+            // }
 
             // Try Tailor profile
             var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(userId);
@@ -147,7 +148,7 @@ public class UserProfileHelper : IUserProfileHelper
 
         // Fallback to user email
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
-        return user?.Email ?? "مستخدم";
+        return user?.Email ?? "User";
     }
 
     private async Task<string> GetTailorNameAsync(Guid userId)
@@ -160,7 +161,7 @@ public class UserProfileHelper : IUserProfileHelper
 
         // Fallback to user email
         var user = await _unitOfWork.Users.GetByIdAsync(userId);
-        return user?.Email ?? "مستخدم";
+        return user?.Email ?? "User";
     }
 
     private async Task AddRoleSpecificClaimsAsync(List<Claim> claims, Guid userId, string? roleName)

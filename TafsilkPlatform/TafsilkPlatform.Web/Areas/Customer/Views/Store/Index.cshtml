@@ -494,12 +494,12 @@
                             <div class="product-price">
                                 @if (product.DiscountedPrice.HasValue && product.DiscountedPrice < product.Price)
                                 {
-                                    <span class="current-price">@product.DiscountedPrice.Value.ToString("N0") SAR</span>
-                                    <span class="original-price">@product.Price.ToString("N0") SAR</span>
+                                    <span class="current-price">@product.DiscountedPrice.Value.ToString("N0") EGP</span>
+                                    <span class="original-price">@product.Price.ToString("N0") EGP</span>
                                 }
                                 else
                                 {
-                                    <span class="current-price">@product.Price.ToString("N0") SAR</span>
+                                    <span class="current-price">@product.Price.ToString("N0") EGP</span>
                                 }
                             </div>
 

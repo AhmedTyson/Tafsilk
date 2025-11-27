@@ -19,14 +19,7 @@ namespace TafsilkPlatform.Models.Models
             /// <summary>Cash on Delivery/Pickup</summary>
             Cash = 3,
 
-            /// <summary>Vodafone Cash (Egypt)</summary>
-            VodafoneCash = 4,
 
-            /// <summary>Orange Cash (Egypt/MENA)</summary>
-            OrangeCash = 5,
-
-            /// <summary>Etisalat Cash (UAE/MENA)</summary>
-            EtisalatCash = 6,
 
             /// <summary>Other payment methods</summary>
             Other = 99

@@ -12,7 +12,7 @@ public class CustomerRepository : EfRepository<CustomerProfile>, ICustomerReposi
         => _db.CustomerProfiles.AsNoTracking().FirstOrDefaultAsync(c => c.UserId == userId);
 
     public Task<CustomerProfile?> GetCustomerWithOrdersAsync(Guid customerId)
-        => _db.CustomerProfiles.Include(c => c.orders).AsNoTracking().FirstOrDefaultAsync(c => c.Id == customerId);
+        => _db.CustomerProfiles.Include(c => c.Orders).AsNoTracking().FirstOrDefaultAsync(c => c.Id == customerId);
 
     public Task<CustomerProfile?> GetCustomerWithAddressesAsync(Guid customerId)
         => _db.CustomerProfiles.Include(c => c.User).ThenInclude(u => u.UserAddresses).AsNoTracking().FirstOrDefaultAsync(c => c.Id == customerId);

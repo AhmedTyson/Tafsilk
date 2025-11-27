@@ -47,7 +47,7 @@ public class AccountController(
             var roleName = User.FindFirstValue(ClaimTypes.Role);
             _logger.LogInformation("[AccountController] Authenticated user {Email} attempted to access Register. Redirecting to dashboard.",
            User.FindFirstValue(ClaimTypes.Email));
-            TempData["InfoMessage"] = "أنت مسجل دخول بالفعل. يرجى تسجيل الخروج أولاً إذا كنت تريد إنشاء حساب جديد.";
+            TempData["InfoMessage"] = "You are already logged in. Please logout first if you want to create a new account.";
             return RedirectToRoleDashboard(roleName);
         }
 
@@ -68,7 +68,7 @@ public class AccountController(
             var roleName = User.FindFirstValue(ClaimTypes.Role);
             _logger.LogWarning("[AccountController] Authenticated user {Email} attempted to POST Register. Blocking.",
         User.FindFirstValue(ClaimTypes.Email));
-            TempData["ErrorMessage"] = "أنت مسجل دخول بالفعل. لا يمكنك إنشاء حساب جديد أثناء تسجيل الدخول.";
+            TempData["ErrorMessage"] = "You are already logged in. Cannot create a new account while logged in.";
             return RedirectToRoleDashboard(roleName);
         }
 
@@ -78,21 +78,21 @@ public class AccountController(
 
         // Validate name
         if (string.IsNullOrWhiteSpace(name))
-            ModelState.AddModelError(nameof(name), "الاسم الكامل مطلوب");
+            ModelState.AddModelError(nameof(name), "Full Name is required");
         else if (name.Length < 2)
-            ModelState.AddModelError(nameof(name), "الاسم يجب أن يكون حرفين على الأقل");
+            ModelState.AddModelError(nameof(name), "Name must be at least 2 characters");
         else if (name.Length > 100)
-            ModelState.AddModelError(nameof(name), "الاسم طويل جداً (100 حرف كحد أقصى)");
+            ModelState.AddModelError(nameof(name), "Name too long (100 characters maximum)");
 
         // Validate email
         if (string.IsNullOrWhiteSpace(email))
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+            ModelState.AddModelError(nameof(email), "Email is required");
         else if (!IsValidEmail(email))
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح. يرجى إدخال بريد إلكتروني صحيح");
+            ModelState.AddModelError(nameof(email), "Invalid email address. Please enter a valid email");
 
         // Validate password
         if (string.IsNullOrWhiteSpace(password))
-            ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+            ModelState.AddModelError(nameof(password), "Password is required");
         else
         {
             var (isValidPassword, passwordError) = ValidatePasswordStrength(password);
@@ -129,7 +129,7 @@ public class AccountController(
         var (ok, err, user) = await _auth.RegisterAsync(req);
         if (!ok || user is null)
         {
-            ModelState.AddModelError(string.Empty, err ?? "فشل التسجيل. يرجى المحاولة مرة أخرى");
+            ModelState.AddModelError(string.Empty, err ?? "Registration failed. Please try again");
             return View();
         }
 
@@ -141,7 +141,7 @@ public class AccountController(
             TempData["UserId"] = user.Id.ToString();
             TempData["UserEmail"] = email;
             TempData["UserName"] = name;
-            TempData["InfoMessage"] = "تم إنشاء حسابك بنجاح! يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية";
+            TempData["InfoMessage"] = "Your account has been created! Please complete your profile and submit documents";
             return RedirectToAction(nameof(CompleteTailorProfile));
         }
 
@@ -165,12 +165,12 @@ public class AccountController(
 
             _logger.LogInformation("[AccountController] Customer auto-logged in after registration: {Email}", email);
 
-            TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح";
+            TempData["SuccessMessage"] = "Welcome! Your account has been created successfully";
             return RedirectToAction("Customer", "Dashboards");
         }
 
         // Default fallback (should not reach here)
-        TempData["SuccessMessage"] = "تم إنشاء الحساب بنجاح!";
+        TempData["SuccessMessage"] = "Account created successfully!";
         return RedirectToAction("Login");
     }
 
@@ -198,12 +198,12 @@ public class AccountController(
 
         // Validate
         if (string.IsNullOrWhiteSpace(email) && !ModelState.ContainsKey(nameof(email)))
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+            ModelState.AddModelError(nameof(email), "Email is required");
         else if (!IsValidEmail(email))
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني غير صالح");
+            ModelState.AddModelError(nameof(email), "Invalid email address");
 
         if (string.IsNullOrWhiteSpace(password))
-            ModelState.AddModelError(nameof(password), "كلمة المرور مطلوبة");
+            ModelState.AddModelError(nameof(password), "Password is required");
 
         if (!ModelState.IsValid)
             return View();
@@ -218,14 +218,14 @@ public class AccountController(
             TempData["UserId"] = user.Id.ToString();
             TempData["UserEmail"] = user.Email ?? email;
             TempData["UserName"] = user.Email ?? email;
-            TempData["InfoMessage"] = "يجب إكمال ملفك الشخصي وتقديم الأوراق الثبوتية قبل تسجيل الدخول";
+            TempData["InfoMessage"] = "Please complete your profile and submit documents before logging in";
 
             return RedirectToAction(nameof(CompleteTailorProfile), new { userId = user.Id });
         }
 
         if (!ok || user is null)
         {
-            ModelState.AddModelError(string.Empty, err ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
+            ModelState.AddModelError(string.Empty, err ?? "Incorrect email or password");
             return View();
         }
 
@@ -300,7 +300,7 @@ public class AccountController(
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userGuid))
             {
                 _logger.LogWarning("[AccountController] Authenticated user has no valid UserId claim");
-                TempData["ErrorMessage"] = "جلسة غير صالحة. يرجى تسجيل الدخول مرة أخرى";
+                TempData["ErrorMessage"] = "Invalid session. Please log in again";
                 return RedirectToAction(nameof(Login));
             }
 
@@ -310,7 +310,7 @@ public class AccountController(
         {
             // No user ID and not authenticated - redirect to registration
             _logger.LogWarning("[AccountController] No UserId available from any source");
-            TempData["InfoMessage"] = "يرجى التسجيل أولاً لإنشاء حساب خياط";
+            TempData["InfoMessage"] = "Please register first to create a tailor account";
             return RedirectToAction(nameof(Register));
         }
 
@@ -321,21 +321,21 @@ public class AccountController(
         if (user == null)
         {
             _logger.LogWarning("[AccountController] User not found: {UserId}", userGuid);
-            TempData["ErrorMessage"] = "المستخدم غير موجود. يرجى التسجيل مرة أخرى";
+            TempData["ErrorMessage"] = "User not found. Please register again";
             return RedirectToAction(nameof(Register));
         }
 
         if (user.Role == null)
         {
             _logger.LogError("[AccountController] User {UserId} has no role assigned. Email: {Email}", userGuid, user.Email);
-            TempData["ErrorMessage"] = "خطأ في البيانات: الدور غير محدد. يرجى الاتصال بالدعم";
+            TempData["ErrorMessage"] = "Data error: Role not specified. Please contact support";
             return RedirectToAction(nameof(Register));
         }
 
         if (user.Role.Name?.ToLower() != "tailor")
         {
             _logger.LogWarning("[AccountController] User {UserId} is not a tailor. Role: {Role}", userGuid, user.Role.Name);
-            TempData["ErrorMessage"] = $"هذا الحساب مسجل كـ {user.Role.Name}. يرجى تسجيل الدخول بدلاً من ذلك";
+            TempData["ErrorMessage"] = $"This account is registered as {user.Role.Name}. Please log in instead";
             return RedirectToAction(nameof(Login));
         }
 
@@ -348,7 +348,7 @@ public class AccountController(
         if (existingProfile != null)
         {
             _logger.LogWarning("[AccountController] Tailor {UserId} attempted to access complete profile page but already has profile. Redirecting to dashboard.", user.Id);
-            TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بالفعل. مرحباً بك!";
+            TempData["SuccessMessage"] = "Your profile is already complete. Welcome!";
 
             // ✅ FIX: If profile exists, auto-login and redirect to dashboard
             if (User.Identity?.IsAuthenticated != true)
@@ -358,8 +358,8 @@ public class AccountController(
   {
     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
           new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-      new Claim(ClaimTypes.Name, existingProfile.FullName ?? user.Email ?? "خياط"),
-         new Claim("FullName", existingProfile.FullName ?? user.Email ?? "خياط"),
+      new Claim(ClaimTypes.Name, existingProfile.FullName ?? user.Email ?? "Tailor"),
+         new Claim("FullName", existingProfile.FullName ?? user.Email ?? "Tailor"),
     new Claim(ClaimTypes.Role, "Tailor")
   };
 
@@ -376,7 +376,7 @@ public class AccountController(
         {
             UserId = user.Id,
             Email = user.Email ?? string.Empty,
-            FullName = user.Email ?? "خياط جديد"
+            FullName = user.Email ?? "New Tailor"
         };
 
         return View(model);
@@ -400,7 +400,7 @@ public class AccountController(
             if (user == null)
             {
                 _logger.LogWarning("[AccountController] User not found during profile completion: {UserId}", model.UserId);
-                ModelState.AddModelError(string.Empty, "المستخدم غير موجود");
+                ModelState.AddModelError(string.Empty, "User not found");
                 return View(model);
             }
 
@@ -411,7 +411,7 @@ public class AccountController(
             {
                 _logger.LogWarning("[AccountController] Invalid user or not a tailor: {UserId}, Role: {Role}",
                   model.UserId, user.Role?.Name ?? "NULL");
-                ModelState.AddModelError(string.Empty, "حساب غير صالح");
+                ModelState.AddModelError(string.Empty, "Invalid account");
                 return View(model);
             }
 
@@ -420,7 +420,7 @@ public class AccountController(
             if (existingProfile != null)
             {
                 _logger.LogWarning("[AccountController] Tailor {UserId} attempted to submit profile but already has one. Blocking submission.", model.UserId);
-                TempData["InfoMessage"] = "تم إكمال ملفك الشخصي بالفعل. لا يمكن التقديم مرة أخرى.";
+                TempData["InfoMessage"] = "Your profile is already complete. Cannot submit again.";
                 return RedirectToAction("Tailor", "Dashboards");
             }
 
@@ -443,7 +443,7 @@ public class AccountController(
 
                 if (portfolioFiles.Count > 10)
                 {
-                    ModelState.AddModelError(string.Empty, "يمكن تحميل 10 صور كحد أقصى");
+                    ModelState.AddModelError(string.Empty, "Maximum 10 images allowed");
                     return View(model);
                 }
 
@@ -475,7 +475,7 @@ public class AccountController(
                 Address = sanitizedAddress,
                 City = sanitizedCity,
                 Bio = sanitizedDescription,
-                Specialization = SanitizeInput(model.WorkshopType, 50) ?? "خياطة عامة",
+                Specialization = SanitizeInput(model.WorkshopType, 50) ?? "General Tailoring",
                 ExperienceYears = model.ExperienceYears,
                 IsVerified = false, // Awaiting admin approval
                 CreatedAt = _dateTime.Now
@@ -512,8 +512,8 @@ public class AccountController(
        {
     new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
     new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-        new Claim(ClaimTypes.Name, sanitizedFullName ?? user.Email ?? "خياط"),
-     new Claim("FullName", sanitizedFullName ?? user.Email ?? "خياط"),
+        new Claim(ClaimTypes.Name, sanitizedFullName ?? user.Email ?? "Tailor"),
+     new Claim("FullName", sanitizedFullName ?? user.Email ?? "Tailor"),
        new Claim(ClaimTypes.Role, "Tailor")
   };
 
@@ -524,13 +524,13 @@ public class AccountController(
 
             _logger.LogInformation("[AccountController] Tailor {UserId} auto-logged in after profile completion.", model.UserId);
 
-            TempData["SuccessMessage"] = "تم إكمال ملفك الشخصي بنجاح! مرحباً بك في منصة تفصيلك.";
+            TempData["SuccessMessage"] = "Profile completed successfully! Welcome to Tafsilk platform.";
             return RedirectToAction("Tailor", "Dashboards");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[AccountController] Error completing tailor profile for user: {UserId}", model.UserId);
-            ModelState.AddModelError(string.Empty, "حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+            ModelState.AddModelError(string.Empty, "An error occurred while saving data. Please try again.");
             return View(model);
         }
     }
@@ -601,7 +601,7 @@ public class AccountController(
         // Verify current password
         if (!PasswordHasher.Verify(user.PasswordHash, model.CurrentPassword))
         {
-            ModelState.AddModelError(nameof(model.CurrentPassword), "كلمة المرور الحالية غير صحيحة");
+            ModelState.AddModelError(nameof(model.CurrentPassword), "Current password is incorrect");
             return View(model);
         }
 
@@ -612,7 +612,7 @@ public class AccountController(
         await _unitOfWork.Users.UpdateAsync(user);
         await _unitOfWork.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = "تم تغيير كلمة المرور بنجاح!";
+        TempData["SuccessMessage"] = "Password changed successfully!";
 
         var roleName = User.FindFirstValue(ClaimTypes.Role);
         return RedirectToRoleDashboard(roleName);
@@ -643,16 +643,16 @@ public class AccountController(
     {
         if (string.IsNullOrEmpty(token))
         {
-            TempData["ErrorMessage"] = "رابط التحقق غير صالح";
+            TempData["ErrorMessage"] = "Invalid verification link";
             return RedirectToAction("Login");
         }
 
         var (success, error) = await _auth.VerifyEmailAsync(token);
 
         if (success)
-            TempData["RegisterSuccess"] = "تم تأكيد بريدك الإلكتروني بنجاح! يمكنك الآن تسجيل الدخول";
+            TempData["RegisterSuccess"] = "Email confirmed successfully! You can now log in";
         else
-            TempData["ErrorMessage"] = error ?? "فشل تأكيد البريد الإلكتروني";
+            TempData["ErrorMessage"] = error ?? "Email verification failed";
 
         return RedirectToAction("Login");
     }
@@ -677,16 +677,16 @@ public class AccountController(
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            ModelState.AddModelError(nameof(email), "البريد الإلكتروني مطلوب");
+            ModelState.AddModelError(nameof(email), "Email is required");
             return View();
         }
 
         var (success, error) = await _auth.ResendVerificationEmailAsync(email);
 
         if (success)
-            TempData["RegisterSuccess"] = "تم إرسال رسالة التحقق بنجاح! يرجى التحقق من بريدك الإلكتروني";
+            TempData["RegisterSuccess"] = "Verification email sent successfully! Please check your email";
         else
-            TempData["ErrorMessage"] = error ?? "فشل إرسال رسالة التحقق";
+            TempData["ErrorMessage"] = error ?? "Failed to send verification email";
 
         return View();
     }
@@ -708,7 +708,7 @@ public class AccountController(
 
         if (googleScheme == null)
         {
-            TempData["ErrorMessage"] = "تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.";
+            TempData["ErrorMessage"] = "Google login is currently unavailable. Please use email and password.";
             return RedirectToAction(nameof(Login), new { returnUrl });
         }
 
@@ -738,8 +738,19 @@ public class AccountController(
 
             if (!authenticateResult.Succeeded)
             {
-                TempData["ErrorMessage"] = $"فشل تسجيل الدخول عبر {provider}";
-                return RedirectToAction(nameof(Login));
+                var failureMessage = authenticateResult.Failure?.Message;
+                _logger.LogWarning("OAuth authentication failed for provider {Provider}. Error: {Error}", provider, failureMessage);
+
+                if (failureMessage != null && (failureMessage.Contains("Access was denied") || failureMessage.Contains("canceled")))
+                {
+                    TempData["InfoMessage"] = "Login cancelled";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Failed to log in via {provider}";
+                }
+
+                return RedirectToAction(nameof(Login), new { returnUrl });
             }
 
             var claims = authenticateResult.Principal?.Claims;
@@ -753,18 +764,29 @@ public class AccountController(
 
             if (string.IsNullOrEmpty(email))
             {
-                TempData["ErrorMessage"] = $"لم نتمكن من الحصول على بريدك الإلكتروني من {provider}";
+                TempData["ErrorMessage"] = $"We couldn't get your email from {provider}";
                 return RedirectToAction(nameof(Login));
             }
-
             // Check if user exists
             var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
 
             if (existingUser != null)
             {
                 // User exists, sign them in
-                string fullName = existingUser.Email ?? "مستخدم";
+                string fullName = existingUser.Email ?? "User";
                 var roleName = existingUser.Role?.Name ?? string.Empty;
+
+                // ✅ CHECK: If user has no role, force them to complete registration
+                if (string.IsNullOrEmpty(roleName))
+                {
+                    TempData["OAuthProvider"] = provider;
+                    TempData["OAuthEmail"] = email;
+                    TempData["OAuthName"] = name ?? string.Empty;
+                    TempData["OAuthPicture"] = picture ?? string.Empty;
+                    TempData["OAuthId"] = providerId ?? string.Empty;
+
+                    return RedirectToAction(nameof(CompleteSocialRegistration));
+                }
 
                 if (!string.IsNullOrEmpty(roleName))
                 {
@@ -819,7 +841,7 @@ public class AccountController(
         }
         catch (Exception ex)
         {
-            TempData["ErrorMessage"] = $"حدث خطأ أثناء تسجيل الدخول: {ex.Message}";
+            TempData["ErrorMessage"] = $"An error occurred while logging in: {ex.Message}";
             return RedirectToAction(nameof(Login));
         }
     }
@@ -914,23 +936,85 @@ public class AccountController(
                 _ => RegistrationRole.Customer
             };
 
-            // Create registration request
-            var registerRequest = new RegisterRequest
-            {
-                Email = email,
-                Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
-                FullName = model.FullName,
-                PhoneNumber = model.PhoneNumber,
-                Role = role
-            };
+            User user = null;
+            var existingUser = await _unitOfWork.Users.GetByEmailAsync(email);
 
-            var (ok, err, user) = await _auth.RegisterAsync(registerRequest);
-
-            if (!ok || user == null)
+            if (existingUser != null)
             {
-                ModelState.AddModelError(string.Empty, err ?? "فشل إنشاء الحساب");
-                ViewData["Provider"] = provider;
-                return View("CompleteGoogleRegistration", model);
+                // Update existing user
+                var roleNameStr = role == RegistrationRole.Tailor ? "Tailor" : "Customer";
+                var roleEntity = await _unitOfWork.Context.Roles.FirstOrDefaultAsync(r => r.Name == roleNameStr);
+
+                if (roleEntity != null)
+                {
+                    existingUser.Role = roleEntity;
+                    existingUser.PhoneNumber = model.PhoneNumber;
+                    existingUser.UpdatedAt = _dateTime.Now;
+
+                    await _unitOfWork.Users.UpdateAsync(existingUser);
+
+                    // Update/Create Profile
+                    if (role == RegistrationRole.Customer)
+                    {
+                        var customer = await _unitOfWork.Customers.GetByUserIdAsync(existingUser.Id);
+                        if (customer == null)
+                        {
+                            customer = new CustomerProfile
+                            {
+                                UserId = existingUser.Id,
+                                FullName = model.FullName,
+                                CreatedAt = _dateTime.Now
+                            };
+                            await _unitOfWork.Customers.AddAsync(customer);
+                        }
+                        else
+                        {
+                            customer.FullName = model.FullName;
+                            await _unitOfWork.Customers.UpdateAsync(customer);
+                        }
+                    }
+                    else if (role == RegistrationRole.Tailor)
+                    {
+                        var tailor = await _unitOfWork.Tailors.GetByUserIdAsync(existingUser.Id);
+                        if (tailor != null)
+                        {
+                            tailor.FullName = model.FullName;
+                            await _unitOfWork.Tailors.UpdateAsync(tailor);
+                        }
+                        else
+                        {
+                            // Defer profile creation to CompleteTailorProfile page
+                            // Ensure user is inactive until they complete the profile
+                            existingUser.IsActive = false;
+                        }
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+                }
+
+                user = existingUser;
+            }
+            else
+            {
+                // Create registration request
+                var registerRequest = new RegisterRequest
+                {
+                    Email = email,
+                    Password = Guid.NewGuid().ToString(), // Generate random password for OAuth users
+                    FullName = model.FullName,
+                    PhoneNumber = model.PhoneNumber,
+                    Role = role
+                };
+
+                var (ok, err, newUser) = await _auth.RegisterAsync(registerRequest);
+
+                if (!ok || newUser == null)
+                {
+                    ModelState.AddModelError(string.Empty, err ?? "Failed to create account");
+                    ViewData["Provider"] = provider;
+                    return View("CompleteGoogleRegistration", model);
+                }
+                user = newUser;
             }
 
             // Update profile picture if available from OAuth provider
@@ -1000,7 +1084,7 @@ public class AccountController(
             if (role == RegistrationRole.Tailor)
             {
                 // Tailors need to complete their profile
-                TempData["InfoMessage"] = "يرجى إكمال ملفك الشخصي للبدء باستخدام المنصة";
+                TempData["InfoMessage"] = "Please complete your profile to start using the platform";
                 _logger.LogInformation("[AccountController] New tailor {UserId} from Google OAuth redirected to complete profile", user.Id);
 
                 return RedirectToAction("CompleteTailorProfile", new { userId = user.Id });
@@ -1008,7 +1092,7 @@ public class AccountController(
             else
             {
                 // Customers can go directly to their dashboard
-                TempData["SuccessMessage"] = "مرحباً بك! تم إنشاء حسابك بنجاح عبر Google";
+                TempData["SuccessMessage"] = "Welcome! Your account has been created successfully via Google";
                 _logger.LogInformation("[AccountController] New customer {UserId} from Google OAuth redirected to dashboard", user.Id);
 
                 return RedirectToAction("Customer", "Dashboards");
@@ -1016,7 +1100,7 @@ public class AccountController(
         }
         catch (Exception ex)
         {
-            ModelState.AddModelError(string.Empty, $"حدث خطأ: {ex.Message}");
+            ModelState.AddModelError(string.Empty, $"Error: {ex.Message}");
             ViewData["Provider"] = provider;
             return View("CompleteGoogleRegistration", model);
         }
@@ -1058,7 +1142,7 @@ public class AccountController(
         // Validate role change
         if (currentRole == "Tailor" && model.TargetRole == "Customer")
         {
-            ModelState.AddModelError(string.Empty, "لا يمكن التحويل من خياط إلى عميل بشكل مباشر. يرجى الاتصال بالدعم.");
+            ModelState.AddModelError(string.Empty, "Cannot convert from Tailor to Customer directly. Please contact support.");
             return View(model);
         }
 
@@ -1067,14 +1151,14 @@ public class AccountController(
         {
             if (string.IsNullOrWhiteSpace(model.ShopName) || string.IsNullOrWhiteSpace(model.Address))
             {
-                ModelState.AddModelError(string.Empty, "اسم المتجر والعنوان مطلوبان للخياطين");
+                ModelState.AddModelError(string.Empty, "Shop name and address are required for Tailors");
                 return View(model);
             }
 
             var tailorRole = await _unitOfWork.Context.Set<Role>().FirstOrDefaultAsync(r => r.Name == "Tailor");
             if (tailorRole == null)
             {
-                ModelState.AddModelError(string.Empty, "دور الخياط غير موجود في النظام");
+                ModelState.AddModelError(string.Empty, "Tailor role not found in the system");
                 return View(model);
             }
 
@@ -1097,11 +1181,11 @@ public class AccountController(
             await _unitOfWork.SaveChangesAsync();
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            TempData["RegisterSuccess"] = "تم تحويل حسابك إلى خياط بنجاح! يرجى تسجيل الدخول مرة أخرى.";
+            TempData["RegisterSuccess"] = "Your account has been converted to Tailor successfully! Please log in again.";
             return RedirectToAction("Login");
         }
 
-        TempData["ErrorMessage"] = "طلب تغيير الدور غير مدعوم حالياً";
+        TempData["ErrorMessage"] = "Role change request is not currently supported";
         var roleName = User.FindFirstValue(ClaimTypes.Role);
         return RedirectToRoleDashboard(roleName);
     }
@@ -1118,7 +1202,8 @@ public class AccountController(
         {
             "tailor" => RedirectToAction("Tailor", "Dashboards"),
             "admin" => RedirectToAction("Index", "AdminDashboard", new { area = "Admin" }),
-            _ => RedirectToAction("CustomerProfile", "Profiles")
+            "customer" => RedirectToAction("Index", "Store", new { area = "Customer" }),
+            _ => RedirectToAction("Index", "Store", new { area = "Customer" })
         };
 
     /// <summary>
@@ -1146,29 +1231,29 @@ public class AccountController(
     private static (bool IsValid, string? Error) ValidatePasswordStrength(string password)
     {
         if (string.IsNullOrWhiteSpace(password))
-            return (false, "كلمة المرور مطلوبة");
+            return (false, "Password is required");
 
         if (password.Length < 8)
-            return (false, "كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+            return (false, "Password must be at least 8 characters");
 
         if (password.Length > 128)
-            return (false, "كلمة المرور طويلة جداً");
+            return (false, "Password is too long");
 
         if (!password.Any(char.IsUpper))
-            return (false, "كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل");
+            return (false, "Password must contain at least one uppercase letter");
 
         if (!password.Any(char.IsLower))
-            return (false, "كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل");
+            return (false, "Password must contain at least one lowercase letter");
 
         if (!password.Any(char.IsDigit))
-            return (false, "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل");
+            return (false, "Password must contain at least one number");
 
         if (!password.Any(ch => !char.IsLetterOrDigit(ch)))
-            return (false, "كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل");
+            return (false, "Password must contain at least one special character");
 
         string[] weakPasswords = ["password1!", "qwerty123!", "admin123!", "welcome1!", "Password1!", "Qwerty123!"];
         if (weakPasswords.Any(weak => password.Equals(weak, StringComparison.OrdinalIgnoreCase)))
-            return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
+            return (false, "Password is too weak. Please choose a stronger password");
 
         return (true, null);
     }
@@ -1179,12 +1264,12 @@ public class AccountController(
     private static (bool IsValid, string? Error) ValidatePhoneNumber(string phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
-            return (false, "رقم الهاتف مطلوب");
+            return (false, "Phone number is required");
 
         var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
 
         if (digitsOnly.Length < 9)
-            return (false, "رقم الهاتف يجب أن يحتوي على 9 أرقام على الأقل");
+            return (false, "Phone number must contain at least 9 digits");
 
         string[] invalidPrefixes = ["000", "111", "222", "333", "444", "555", "666", "777", "888", "999"];
         if (invalidPrefixes.Any(digitsOnly.StartsWith) ||
@@ -1192,7 +1277,7 @@ public class AccountController(
                digitsOnly == new string('1', digitsOnly.Length) ||
           digitsOnly == new string('2', digitsOnly.Length))
         {
-            return (false, "رقم الهاتف ضعيف جداً. يرجى اختيار رقم آخر");
+            return (false, "Phone number is too weak. Please choose another number");
         }
 
         return (true, null);
@@ -1204,11 +1289,11 @@ public class AccountController(
     private static (bool IsValid, string? Error) ValidateFileUpload(IFormFile? file, string fileType = "image")
     {
         if (file is null || file.Length == 0)
-            return (false, "الملف مطلوب");
+            return (false, "File is required");
 
         var maxSize = fileType == "image" ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
         if (file.Length > maxSize)
-            return (false, $"حجم الملف كبير جداً. الحد الأقصى {maxSize / (1024 * 1024)} ميجابايت");
+            return (false, $"File size is too large. Maximum {maxSize / (1024 * 1024)} MB");
 
         string[] allowedExtensions = fileType == "image"
       ? [".jpg", ".jpeg", ".png", ".gif", ".webp"]
@@ -1216,7 +1301,7 @@ public class AccountController(
 
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
-            return (false, $"نوع الملف غير مدعوم. الأنواع المسموحة: {string.Join(", ", allowedExtensions)}");
+            return (false, $"File type not supported. Allowed types: {string.Join(", ", allowedExtensions)}");
 
         string[] allowedContentTypes = fileType == "image"
                   ? ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"]
@@ -1225,11 +1310,11 @@ public class AccountController(
       "image/jpeg", "image/png"];
 
         if (!allowedContentTypes.Contains(file.ContentType.ToLowerInvariant()))
-            return (false, "نوع محتوى الملف غير صحيح");
+            return (false, "Invalid file content type");
 
         var fileName = Path.GetFileName(file.FileName);
         if (fileName.Contains("..") || fileName.Contains('/') || fileName.Contains('\\'))
-            return (false, "اسم الملف غير صالح");
+            return (false, "Invalid file name");
 
         return (true, null);
     }

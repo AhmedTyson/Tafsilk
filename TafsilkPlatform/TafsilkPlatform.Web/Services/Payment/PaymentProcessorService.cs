@@ -262,7 +262,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                         PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
                         {
                             UnitAmount = (long)(request.Amount * 100),
-                            Currency = request.Currency?.ToLower() ?? "sar",
+                Currency = request.Currency?.ToLower() ?? "egp",
                             ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = request.Description ?? "Tafsilk Order",
@@ -314,7 +314,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(request.Amount * 100),
-                Currency = request.Currency?.ToLower() ?? "sar",
+                Currency = request.Currency?.ToLower() ?? "egp",
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true
@@ -389,7 +389,17 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                     {
                         await _unitOfWork.ExecuteInTransactionAsync(async () =>
                         {
-                            // Find existing payment or create new one
+                            // Check if order is already paid to prevent duplicate payments from multiple events
+                            var existingCompletedPayment = await _context.Payment
+                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+
+                            if (existingCompletedPayment != null)
+                            {
+                                Logger.LogInformation("Payment already completed for order {OrderId}. Skipping webhook processing.", orderId);
+                                return;
+                            }
+
+                            // Find existing pending payment or create new one
                             var payment = await _context.Payment
                                 .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
 
@@ -427,7 +437,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
                                 // Update order status
                                 var order = await _context.Orders.FindAsync(payment.OrderId);
-                                if (order != null && order.Status == OrderStatus.Pending)
+                                if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
                                 {
                                     order.Status = OrderStatus.Confirmed;
                                 }
@@ -584,6 +594,100 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 throw new InvalidOperationException("Order already paid");
             }
         }, "ValidatePayment");
+    }
+
+    /// <summary>
+    /// Verify a Checkout Session and update payment status if paid
+    /// </summary>
+    public async Task<Result<bool>> VerifyCheckoutSessionAsync(string sessionId)
+    {
+        return await ExecuteAsync(async () =>
+        {
+            ValidateNotEmpty(sessionId, nameof(sessionId));
+
+            if (!_stripeEnabled)
+            {
+                throw new InvalidOperationException("Stripe is not enabled");
+            }
+
+            var stripe = new StripeClient(_stripeSecretKey);
+            var service = new Stripe.Checkout.SessionService(stripe);
+            var session = await service.GetAsync(sessionId);
+
+            if (session == null)
+            {
+                throw new InvalidOperationException("Session not found");
+            }
+
+            if (session.PaymentStatus == "paid")
+            {
+                // Extract order ID from metadata
+                if (session.Metadata.TryGetValue("order_id", out var orderIdStr) && Guid.TryParse(orderIdStr, out var orderId))
+                {
+                    await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                    {
+                        // Check if already completed to avoid redundant updates
+                        var existingCompletedPayment = await _context.Payment
+                            .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+
+                        if (existingCompletedPayment != null)
+                        {
+                            return; // Already processed
+                        }
+
+                        // Find pending payment or create new one
+                        var payment = await _context.Payment
+                            .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
+
+                        if (payment == null)
+                        {
+                            var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
+                            if (order != null)
+                            {
+                                payment = new TafsilkPlatform.Models.Models.Payment
+                                {
+                                    PaymentId = Guid.NewGuid(),
+                                    OrderId = order.OrderId,
+                                    Order = order,
+                                    CustomerId = order.CustomerId,
+                                    Customer = order.Customer,
+                                    TailorId = order.TailorId,
+                                    Tailor = order.Tailor,
+                                    Amount = (decimal)(session.AmountTotal ?? 0) / 100m,
+                                    PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+                                    TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
+                                    Provider = "Stripe",
+                                    CreatedAt = DateTimeOffset.UtcNow
+                                };
+                                _context.Payment.Add(payment);
+                            }
+                        }
+
+                        if (payment != null)
+                        {
+                            payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
+                            payment.PaidAt = DateTimeOffset.UtcNow;
+                            payment.ProviderTransactionId = session.PaymentIntentId ?? session.Id;
+                            payment.Currency = session.Currency;
+
+                            // Update order status
+                            var order = await _context.Orders.FindAsync(payment.OrderId);
+                            if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
+                            {
+                                order.Status = OrderStatus.Confirmed;
+                            }
+
+                            await _unitOfWork.SaveChangesAsync();
+                            Logger.LogInformation("Payment verified and confirmed via Session Check for order {OrderId}", orderId);
+                        }
+                    });
+
+                    return true;
+                }
+            }
+
+            return false;
+        }, "VerifyCheckoutSession");
     }
 
     private string GetPaymentStatusMessage(TafsilkPlatform.Models.Models.Enums.PaymentStatus status) => status switch

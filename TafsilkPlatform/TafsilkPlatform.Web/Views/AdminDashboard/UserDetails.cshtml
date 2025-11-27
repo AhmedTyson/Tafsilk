@@ -12,7 +12,7 @@
             <div class="card shadow-sm mb-4">
                 <div class="card-body text-center">
                   <div class="user-avatar mb-3">
-           @if (Model.CustomerProfile?.ProfilePictureData != null || Model.TailorProfile?.ProfilePictureData != null)
+           @if (Model.TailorProfile?.ProfilePictureData != null)
                 {
               <img src="@Url.Action("ProfilePicture", "Account", new { id = Model.Id })" 
            alt="@Model.Email" 
@@ -330,7 +330,7 @@ else
       <td>
          <span class="badge bg-info">@order.Status</span>
          </td>
-         <td>@order.TotalPrice SAR</td>
+         <td>@order.TotalPrice EGP</td>
         <td>
                <a href="@Url.Action("OrderDetails", "AdminDashboard", new { id = order.OrderId })" 
               class="btn btn-sm btn-outline-primary">

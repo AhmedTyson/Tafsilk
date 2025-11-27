@@ -1,10 +1,10 @@
 @page
 @model TafsilkPlatform.Web.Pages.ErrorModel
 @{
-    ViewData["Title"] = "خطأ";
+    ViewData["Title"] = "Error";
 }
 <div class="alert alert-danger" style="margin-top:2em">
-    <h2>حدث خطأ أثناء معالجة الطلب</h2>
+    <h2>An error occurred while processing the request</h2>
     <p>
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
@@ -12,7 +12,7 @@
         }
         else
         {
-            <span>يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني.</span>
+            <span>Please try again or contact technical support.</span>
         }
     </p>
 </div>

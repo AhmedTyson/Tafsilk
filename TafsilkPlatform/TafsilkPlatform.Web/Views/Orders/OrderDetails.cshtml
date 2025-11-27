@@ -84,7 +84,7 @@
                 
                 <div class="d-flex justify-content-between position-relative z-1">
                     <!-- Step 1: Placed -->
-                    <div class="text-center timeline-step @(Model.Status >= OrderStatus.Pending ? "active" : "")">
+                    <div class="text-center timeline-step active">
                         <div class="timeline-icon bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm">
                             <i class="fas fa-file-alt"></i>
                         </div>
@@ -92,7 +92,7 @@
                     </div>
 
                     <!-- Step 2: Payment -->
-                    <div class="text-center timeline-step @(Model.Status >= OrderStatus.Confirmed || (Model.Status == OrderStatus.PendingPayment && Model.IsPaid) ? "active" : "")">
+                    <div class="text-center timeline-step @(Model.Status == OrderStatus.PendingPayment || Model.Status == OrderStatus.Confirmed || Model.Status == OrderStatus.Processing || Model.Status == OrderStatus.Shipped || Model.Status == OrderStatus.ReadyForPickup || Model.Status == OrderStatus.Delivered ? "active" : "")">
                         <div class="timeline-icon bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm">
                             <i class="fas fa-credit-card"></i>
                         </div>
@@ -100,7 +100,7 @@
                     </div>
 
                     <!-- Step 3: Confirmed -->
-                    <div class="text-center timeline-step @(Model.Status >= OrderStatus.Confirmed ? "active" : "")">
+                    <div class="text-center timeline-step @(Model.Status == OrderStatus.Confirmed || Model.Status == OrderStatus.Processing || Model.Status == OrderStatus.Shipped || Model.Status == OrderStatus.ReadyForPickup || Model.Status == OrderStatus.Delivered ? "active" : "")">
                         <div class="timeline-icon bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm">
                             <i class="fas fa-check"></i>
                         </div>
@@ -108,7 +108,7 @@
                     </div>
 
                     <!-- Step 4: Processing -->
-                    <div class="text-center timeline-step @(Model.Status >= OrderStatus.Processing ? "active" : "")">
+                    <div class="text-center timeline-step @(Model.Status == OrderStatus.Processing || Model.Status == OrderStatus.Shipped || Model.Status == OrderStatus.ReadyForPickup || Model.Status == OrderStatus.Delivered ? "active" : "")">
                         <div class="timeline-icon bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm">
                             <i class="fas fa-cut"></i>
                         </div>
@@ -116,7 +116,7 @@
                     </div>
 
                     <!-- Step 5: Delivered -->
-                    <div class="text-center timeline-step @(Model.Status == OrderStatus.Delivered ? "active" : "")">
+                    <div class="text-center timeline-step @(Model.Status == OrderStatus.Delivered || Model.Status == OrderStatus.ReadyForPickup ? "active" : "")">
                         <div class="timeline-icon bg-white border border-2 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm">
                             <i class="fas fa-box-open"></i>
                         </div>
@@ -192,7 +192,7 @@
                                                     }
                                                 </td>
                                                 <td class="text-center">@item.Quantity</td>
-                                                <td class="text-end pe-3 fw-bold">@item.Price.ToString("N2") SAR</td>
+                                                <td class="text-end pe-3 fw-bold">@item.Price.ToString("N2") EGP</td>
                                             </tr>
                                         }
                                     </tbody>
@@ -283,16 +283,16 @@
                     
                     <div class="d-flex justify-content-between mb-2">
                         <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold">@Model.TotalPrice.ToString("N2") SAR</span>
+                        <span class="fw-bold">@Model.TotalPrice.ToString("N2") EGP</span>
                     </div>
                     <div class="d-flex justify-content-between mb-4">
                         <span class="text-muted">Tax (Included)</span>
-                        <span class="fw-bold">0.00 SAR</span>
+                        <span class="fw-bold">0.00 EGP</span>
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center pt-3 border-top mb-4">
                         <span class="fw-bold fs-5">Total</span>
-                        <span class="fw-bold fs-4 text-primary">@Model.TotalPrice.ToString("N2") SAR</span>
+                        <span class="fw-bold fs-4 text-primary">@Model.TotalPrice.ToString("N2") EGP</span>
                     </div>
 
                     @if (Model.IsPaid)

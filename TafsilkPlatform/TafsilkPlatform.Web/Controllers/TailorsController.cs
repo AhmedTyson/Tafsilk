@@ -27,12 +27,12 @@ public class TailorsController : Controller
     /// </summary>
     [HttpGet("")]
     [HttpGet("index")]
-    public async Task<IActionResult> Index(string? city = null, string? specialization = null, int page = 1, int pageSize = 12)
+    public async Task<IActionResult> Index(string? city = null, string? specialization = null, string? filter = null, int page = 1, int pageSize = 12)
     {
         try
         {
             var query = _db.TailorProfiles
-   .Include(t => t.User)
+                .Include(t => t.User)
                 .Where(t => t.IsVerified && t.User.IsActive && !t.User.IsDeleted);
 
             // Filter by city
@@ -47,15 +47,27 @@ public class TailorsController : Controller
                 query = query.Where(t => t.Specialization != null && t.Specialization.Contains(specialization));
             }
 
+            // Apply sorting based on filter
+            switch (filter)
+            {
+                case "Verified":
+                    // Sort by name for "Verified" (or just general browsing)
+                    query = query.OrderBy(t => t.ShopName).ThenBy(t => t.FullName);
+                    break;
+                case "TopRated":
+                default:
+                    // Default to Top Rated
+                    query = query.OrderByDescending(t => t.AverageRating).ThenBy(t => t.ShopName);
+                    break;
+            }
+
             // Get total count for pagination
             var totalCount = await query.CountAsync();
 
             // Get tailors with pagination
             var tailors = await query
-             .OrderByDescending(t => t.AverageRating)
-                     .ThenBy(t => t.ShopName)
-            .Skip((page - 1) * pageSize)
-              .Take(pageSize)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             // Get available cities for filter
@@ -87,7 +99,7 @@ public class TailorsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailors");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الخياطين";
+            TempData["Error"] = "An error occurred while loading tailors";
             return View(new List<TailorProfile>());
         }
     }
@@ -110,14 +122,14 @@ public class TailorsController : Controller
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor {TailorId} not found", id);
-                return NotFound("الخياط غير موجود");
+                return NotFound("Tailor not found");
             }
 
             // Only show verified tailors to public
             if (!tailor.IsVerified)
             {
                 _logger.LogWarning("Attempt to view unverified tailor {TailorId}", id);
-                return NotFound("الخياط غير موجود");
+                return NotFound("Tailor not found");
             }
 
             // Reviews simplified - no database
@@ -134,7 +146,7 @@ public class TailorsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor details {TailorId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل الخياط";
+            TempData["Error"] = "An error occurred while loading tailor details";
             return RedirectToAction(nameof(Index));
         }
     }
@@ -228,7 +240,7 @@ public class TailorsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching tailors");
-            TempData["Error"] = "حدث خطأ أثناء البحث";
+            TempData["Error"] = "An error occurred while searching";
             return RedirectToAction(nameof(Index));
         }
     }

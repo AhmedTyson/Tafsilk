@@ -211,7 +211,7 @@ string? successMessage = null)
             }
         }
 
-        return ErrorResponse(result.ErrorMessage ?? "حدث خطأ غير متوقع");
+        return ErrorResponse(result.ErrorMessage ?? "An unexpected error occurred");
     }
 
     /// <summary>
@@ -221,11 +221,11 @@ string? successMessage = null)
     {
         if (result.Succeeded)
         {
-            return SuccessJsonResponse("تمت العملية بنجاح", result.Data);
+            return SuccessJsonResponse("Operation completed successfully", result.Data);
         }
 
         return ErrorJsonResponse(
-     result.ErrorMessage ?? "حدث خطأ غير متوقع",
+     result.ErrorMessage ?? "An unexpected error occurred",
                result.ValidationErrors);
     }
 
@@ -247,7 +247,7 @@ string? successMessage = null)
 
             _logger.LogWarning("Model validation failed: {Errors}", string.Join(", ", errors));
 
-            TempData["ErrorMessage"] = "يرجى تصحيح الأخطاء في النموذج";
+            TempData["ErrorMessage"] = "Please correct the errors in the form";
             return View();
         }
 
@@ -366,7 +366,7 @@ string? successMessage = null)
     /// </summary>
     protected IActionResult ForbiddenResponse(string? message = null)
     {
-        TempData["ErrorMessage"] = message ?? "ليس لديك صلاحية للوصول إلى هذا المورد";
+        TempData["ErrorMessage"] = message ?? "You do not have permission to access this resource";
         return Forbid();
     }
 
@@ -407,7 +407,7 @@ public class ServiceResult<T>
         {
             Succeeded = false,
             ValidationErrors = errors,
-            ErrorMessage = "فشل التحقق من البيانات"
+            ErrorMessage = "Validation failed"
         };
     }
 

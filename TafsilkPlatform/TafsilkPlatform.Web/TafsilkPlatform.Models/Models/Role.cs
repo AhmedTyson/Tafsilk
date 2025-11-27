@@ -37,7 +37,7 @@ namespace TafsilkPlatform.Models.Models
         public DateTime CreatedAt { get; set; }
 
         // Navigation properties
-        public virtual ICollection<User> Users { get; set; } = new List<User>();
+        public virtual ICollection<User> Users { get; set; } = [];
 
         /// <summary>
         /// Helper to check if this role is an admin role

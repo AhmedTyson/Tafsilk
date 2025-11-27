@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - لوحة تحكم تفصيلك</title>
+    <title>@ViewData["Title"] - Tafsilk Admin</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -37,9 +37,9 @@
             <div class="logo-icon">
                 <i class="fas fa-cut"></i>
             </div>
-            <span class="logo-text">تفصيلك</span>
+            <span class="logo-text">Tafsilk</span>
         </div>
-        <button class="sidebar-close" id="sidebarClose" aria-label="إغلاق القائمة">
+        <button class="sidebar-close" id="sidebarClose" aria-label="Close Menu">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -49,67 +49,67 @@
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
                 <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-home"></i>
-                    <span class="nav-text">لوحة التحكم</span>
+                    <span class="nav-text">Dashboard</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" || ViewContext.RouteData.Values["Action"]?.ToString() == "UserDetails" ? "active" : "")">
                 <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-users"></i>
-                    <span class="nav-text">إدارة المستخدمين</span>
+                    <span class="nav-text">User Management</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PortfolioReview" ? "active" : "")">
                 <a href="@Url.Action("PortfolioReview", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-images"></i>
-                    <span class="nav-text">مراجعة الصور</span>
+                    <span class="nav-text">Portfolio Review</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
                 <a href="@Url.Action("Orders", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="nav-text">الطلبات</span>
+                    <span class="nav-text">Orders</span>
                 </a>
             </li>
              <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
                 <a href="@Url.Action("Products", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-box-open"></i>
-                    <span class="nav-text">المنتجات</span>
+                    <span class="nav-text">Products</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Disputes" ? "active" : "")">
                 <a href="@Url.Action("Disputes", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <span class="nav-text">حل النزاعات</span>
+                    <span class="nav-text">Dispute Resolution</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Refunds" ? "active" : "")">
                 <a href="@Url.Action("Refunds", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-money-bill-wave"></i>
-                    <span class="nav-text">طلبات الاسترداد</span>
+                    <span class="nav-text">Refund Requests</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reviews" ? "active" : "")">
                 <a href="@Url.Action("Reviews", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-star"></i>
-                    <span class="nav-text">مراجعة التقييمات</span>
+                    <span class="nav-text">Review Management</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
                 <a href="@Url.Action("Analytics", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-chart-line"></i>
-                    <span class="nav-text">التقارير والإحصائيات</span>
+                    <span class="nav-text">Reports & Statistics</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Notifications" ? "active" : "")">
                 <a href="@Url.Action("Notifications", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-bell"></i>
-                    <span class="nav-text">مركز الإشعارات</span>
+                    <span class="nav-text">Notification Center</span>
                 </a>
             </li>
             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")">
                 <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="nav-link">
                     <i class="fas fa-clipboard-list"></i>
-                    <span class="nav-text">سجلات التدقيق</span>
+                    <span class="nav-text">Audit Logs</span>
                 </a>
             </li>
         </ul>
@@ -118,7 +118,7 @@
     <div class="sidebar-footer">
         <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-outline-light btn-block">
             <i class="fas fa-home"></i>
-            <span class="nav-text">العودة للموقع</span>
+            <span class="nav-text">Back to Site</span>
         </a>
     </div>
 </aside>
@@ -128,7 +128,7 @@
     <!-- Top Navigation Bar -->
     <header class="topbar">
         <div class="topbar-left">
-            <button class="sidebar-toggle" id="sidebarToggle" aria-label="فتح القائمة">
+            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open Menu">
                 <i class="fas fa-bars"></i>
             </button>
             <div class="breadcrumb">
@@ -141,13 +141,13 @@
         <div class="topbar-right">
             <!-- Quick Search -->
             <div class="topbar-search">
-                <input type="text" placeholder="بحث سريع..." aria-label="بحث" />
+                <input type="text" placeholder="Quick Search..." aria-label="Search" />
                 <i class="fas fa-search"></i>
             </div>
 
             <!-- Notifications -->
             <div class="topbar-item">
-                <button class="topbar-btn" id="notificationBtn" aria-label="الإشعارات">
+                <button class="topbar-btn" id="notificationBtn" aria-label="Notifications">
                     <i class="fas fa-bell"></i>
                     <span class="badge-dot"></span>
                 </button>
@@ -157,11 +157,11 @@
             <div class="topbar-item user-menu">
                 <button class="user-menu-toggle" id="userMenuToggle">
                     <div class="user-avatar">
-                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="المسؤول" />
+                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="Admin" />
                     </div>
                     <div class="user-info">
-                        <span class="user-name">@(User.Identity?.Name ?? "المسؤول")</span>
-                        <span class="user-role">مسؤول النظام</span>
+                        <span class="user-name">@(User.Identity?.Name ?? "Admin")</span>
+                        <span class="user-role">System Admin</span>
                     </div>
                     <i class="fas fa-chevron-down"></i>
                 </button>
@@ -169,21 +169,21 @@
                 <div class="user-menu-dropdown" id="userMenuDropdown">
                     <div class="user-menu-header">
                         <div class="user-avatar-large">
-                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="المسؤول" />
+                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="Admin" />
                         </div>
                         <div class="user-details">
-                            <strong>@(User.Identity?.Name ?? "المسؤول")</strong>
+                            <strong>@(User.Identity?.Name ?? "Admin")</strong>
                             <span>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@tafsilk.com")</span>
                         </div>
                     </div>
                     <div class="user-menu-body">
                         <a href="#" class="user-menu-item">
                             <i class="fas fa-user"></i>
-                            <span>الملف الشخصي</span>
+                            <span>Profile</span>
                         </a>
                         <a href="#" class="user-menu-item">
                             <i class="fas fa-cog"></i>
-                            <span>الإعدادات</span>
+                            <span>Settings</span>
                         </a>
                     </div>
                     <div class="user-menu-footer">
@@ -191,7 +191,7 @@
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-logout btn-block">
                                 <i class="fas fa-sign-out-alt"></i>
-                                <span>تسجيل الخروج</span>
+                                <span>Logout</span>
                             </button>
                         </form>
                     </div>

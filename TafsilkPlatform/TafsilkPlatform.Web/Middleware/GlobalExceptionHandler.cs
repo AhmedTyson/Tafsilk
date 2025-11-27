@@ -41,14 +41,14 @@ public class GlobalExceptionHandler : IExceptionHandler
             exception.StackTrace);
 
         // Check for specific exception types
-        var errorMessage = "حدث خطأ غير متوقع";
+        var errorMessage = "An unexpected error occurred";
         var statusCode = StatusCodes.Status500InternalServerError;
 
         switch (exception)
         {
             case OutOfMemoryException oomEx:
                 _logger.LogCritical(oomEx, "OUT OF MEMORY EXCEPTION!");
-                errorMessage = "الملف كبير جداً. يرجى اختيار ملف أصغر";
+                errorMessage = "File is too large. Please choose a smaller file";
                 statusCode = StatusCodes.Status413RequestEntityTooLarge;
                 break;
 
@@ -66,19 +66,19 @@ public class GlobalExceptionHandler : IExceptionHandler
 
             case UnauthorizedAccessException uaEx:
                 _logger.LogWarning(uaEx, "Unauthorized access attempt");
-                errorMessage = "غير مصرح لك بتنفيذ هذا الإجراء";
+                errorMessage = "You are not authorized to perform this action";
                 statusCode = StatusCodes.Status403Forbidden;
                 break;
 
             case FileNotFoundException fnfEx:
                 _logger.LogError(fnfEx, "File not found");
-                errorMessage = "الملف غير موجود";
+                errorMessage = "File not found";
                 statusCode = StatusCodes.Status404NotFound;
                 break;
 
             case IOException ioException:
                 _logger.LogError(ioException, "IO exception");
-                errorMessage = "حدث خطأ أثناء قراءة أو كتابة الملف";
+                errorMessage = "An error occurred while reading or writing the file";
                 statusCode = StatusCodes.Status500InternalServerError;
                 break;
         }

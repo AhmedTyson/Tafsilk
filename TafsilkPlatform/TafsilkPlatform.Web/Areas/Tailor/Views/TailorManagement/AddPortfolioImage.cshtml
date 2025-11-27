@@ -1,169 +1,18 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.AddPortfolioImageViewModel
 
 @{
-    ViewData["Title"] = "إضافة صورة جديدة";
+    ViewData["Title"] = "Add New Image";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var breadcrumbs = new List<(string Text, string? Url)>
     {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("معرض الأعمال", Url.Action("ManagePortfolio", "TailorManagement")),
-        ("إضافة صورة", "")
+        ("Dashboard", Url.Action("Tailor", "Dashboards")),
+        ("Portfolio", Url.Action("ManagePortfolio", "TailorManagement")),
+        ("Add Image", "")
     };
 }
 
 @await Html.PartialAsync("_Breadcrumb", breadcrumbs)
 
-<div class="container tailor-management-container" dir="rtl">
-    <div class="row justify-content-center">
-   <div class="col-lg-8">
-            <!-- Page Header -->
-      <div class="page-header">
-         <div class="d-flex justify-content-between align-items-center">
-          <div>
-       <h1 class="page-title">
-    <i class="fas fa-image"></i>
-        إضافة صورة جديدة
-      </h1>
-         <p class="page-description">أضف صورة من أعمالك السابقة إلى معرض الأعمال</p>
-            </div>
-  <a asp-action="ManagePortfolio" class="btn btn-outline-secondary">
-           <i class="fas fa-arrow-right"></i>
-       رجوع
-           </a>
-    </div>
-   </div>
-
-     <!-- Form Card -->
-        <div class="card">
-                <div class="card-body">
-       <form asp-action="AddPortfolioImage" method="post" enctype="multipart/form-data">
-   @Html.AntiForgeryToken()
-     <input type="hidden" asp-for="TailorId" />
-            
-   <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-    <!-- Image Upload with Preview -->
- <div class="mb-4">
-         <label asp-for="ImageFile" class="form-label">
-         <i class="fas fa-image text-primary"></i>
-   اختر الصورة
-     <span class="text-danger">*</span>
-    </label>
-          
-  <div class="image-preview-container">
-          <div id="imagePreview" style="display: none;">
-       <img id="preview" class="image-preview" src="#" alt="معاينة">
-          </div>
-              
-           <label for="ImageFile" class="image-upload-label" style="cursor: pointer; display: block; padding: 2rem; border: 2px dashed #dee2e6; border-radius: 0.5rem; text-align: center; transition: all 0.3s;">
-          <i class="fas fa-cloud-upload-alt"></i>
-        اختر صورة أو اسحبها هنا
-            </label>
-    
-          <input asp-for="ImageFile" 
-     id="ImageFile"
-           class="form-control" 
-             type="file" 
-   accept="image/*"
-                  style="display: none;">
-   </div>
-      
-                     <span asp-validation-for="ImageFile" class="invalid-feedback d-block"></span>
-   <div class="form-text">
-      <i class="fas fa-info-circle text-primary"></i>
-              الحجم الأقصى: 5 ميجابايت • الصيغ المدعومة: JPG, PNG, GIF
-       </div>
-             </div>
-
-   <!-- Title -->
-            <div class="mb-3">
-       <label asp-for="Title" class="form-label">
-   عنوان الصورة
-             <span class="text-danger">*</span>
-       </label>
-       <input asp-for="Title" class="form-control" placeholder="مثال: ثوب رجالي أنيق">
-            <span asp-validation-for="Title" class="invalid-feedback"></span>
-    </div>
-
-             <!-- Category -->
-                <div class="mb-3">
-           <label asp-for="Category" class="form-label">الفئة</label>
-      <select asp-for="Category" class="form-control">
-     <option value="">-- اختر الفئة --</option>
- @foreach (var category in ViewBag.Categories as List<string> ?? new List<string>())
-       {
-  <option value="@category">@category</option>
-           }
-                   </select>
-      <span asp-validation-for="Category" class="invalid-feedback"></span>
-         </div>
-
-            <!-- Description -->
-        <div class="mb-3">
-      <label asp-for="Description" class="form-label">الوصف</label>
-            <textarea asp-for="Description" class="form-control" rows="4" 
-       placeholder="وصف مختصر للعمل والتفاصيل المهمة..."></textarea>
-  <span asp-validation-for="Description" class="invalid-feedback"></span>
-     </div>
-
-  <!-- Estimated Price -->
-        <div class="mb-4">
-          <label asp-for="EstimatedPrice" class="form-label">السعر التقديري (ريال)</label>
-      <div class="input-group">
-        <input asp-for="EstimatedPrice" type="number" class="form-control" 
-             placeholder="0.00" step="0.01" min="0">
-    <span class="input-group-text">ريال</span>
-  </div>
-         <span asp-validation-for="EstimatedPrice" class="invalid-feedback"></span>
-      <div class="form-text">
-               <i class="fas fa-info-circle text-primary"></i>
-    السعر التقريبي لهذا النوع من الأعمال
-        </div>
-      </div>
-
-          <!-- Options -->
-          <div class="card mb-4" style="background-color: var(--background-gray); border: none;">
-        <div class="card-body">
-     <h6 class="mb-3">
-     <i class="fas fa-cog text-primary"></i>
-      خيارات إضافية
-       </h6>
-      
-    <div class="form-check mb-3">
-        <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeatured">
-                <label class="form-check-label" for="IsFeatured">
-  <i class="fas fa-star text-warning"></i>
-        <strong>صورة مميزة</strong>
- </label>
-  <div class="form-text">الصور المميزة تظهر في أول معرض الأعمال</div>
-   </div>
-
-      <div class="form-check">
-  <input asp-for="IsBeforeAfter" class="form-check-input" type="checkbox" id="IsBeforeAfter">
-    <label class="form-check-label" for="IsBeforeAfter">
-      <i class="fas fa-exchange-alt text-info"></i>
-    <strong>صورة قبل وبعد</strong>
-       </label>
-  <div class="form-text">صورة توضح التحسين أو التغيير في العمل</div>
-       </div>
-           </div>
-           </div>
-
-          <!-- Action Buttons -->
- <div class="d-flex justify-content-between gap-2">
-          <button type="submit" class="btn btn-primary btn-lg">
-         <i class="fas fa-save"></i>
-   حفظ الصورة
-  </button>
-           <a asp-action="ManagePortfolio" class="btn btn-outline-secondary btn-lg">
-        <i class="fas fa-times"></i>
-       إلغاء
-         </a>
-        </div>
-  </form>
-                </div>
-         </div>
-        </div>
     </div>
 </div>
 
@@ -205,8 +54,8 @@
 
             function validateFile(file) {
                 if (!file) return { ok: false, reason: 'No file' };
-                if (!file.type || !file.type.startsWith('image/')) return { ok: false, reason: 'الملف المحدد ليس صورة. اختر ملف صورة صالحًا.' };
-                if (file.size > MAX_FILE_SIZE) return { ok: false, reason: 'حجم الملف أكبر من 5 ميجابايت.' };
+                if (!file.type || !file.type.startsWith('image/')) return { ok: false, reason: 'Selected file is not an image. Choose a valid image file.' };
+                if (file.size > MAX_FILE_SIZE) return { ok: false, reason: 'File size is larger than 5MB.' };
                 return { ok: true };
             }
 
@@ -246,7 +95,7 @@
                     }
 
                     var label = document.querySelector('.image-upload-label');
-                    if (label) label.innerHTML = '<i class="fas fa-check-circle"></i> تم اختيار الصورة - انقر لتغييرها';
+                    if (label) label.innerHTML = '<i class="fas fa-check-circle"></i> Image selected - click to change';
                     clearErrors();
                 } catch (err) {
                     logSafe('setPreviewDataUrl error', err);
@@ -269,7 +118,7 @@
                     }
 
                     if (typeof FileReader === 'undefined') {
-                        showError('المتصفح الحالي لا يدعم معاينة الصور. يمكنك المتابعة وسيتم رفع الصورة بدون معاينة.');
+                        showError('Current browser does not support image preview. You can continue and the image will be uploaded without preview.');
                         return;
                     }
 
@@ -290,19 +139,19 @@
                             });
                         } catch (err) {
                             logSafe('reader.onload error', err);
-                            showError('حدث خطأ أثناء معالجة الصورة. يرجى المحاولة مرة أخرى.');
+                            showError('Error processing image. Please try again.');
                         }
                     };
 
                     reader.onerror = function (err) {
                         logSafe('FileReader error', err);
-                        showError('حدث خطأ أثناء قراءة الملف. حاول اختيار ملف آخر.');
+                        showError('Error reading file. Try choosing another file.');
                     };
 
                     reader.readAsDataURL(file);
                 } catch (err) {
                     logSafe('previewImage outer error', err);
-                    showError('حدث خطأ أثناء معاينة الصورة. يرجى المحاولة مرة أخرى.');
+                    showError('Error previewing image. Please try again.');
                 }
             }
 

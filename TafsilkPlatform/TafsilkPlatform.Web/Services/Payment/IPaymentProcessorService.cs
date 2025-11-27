@@ -42,6 +42,11 @@ public interface IPaymentProcessorService
     /// Create a Stripe Checkout Session
     /// </summary>
     Task<Result<string>> CreateCheckoutSessionAsync(CreateCheckoutSessionRequest request);
+
+    /// <summary>
+    /// Verify a Checkout Session and update payment status if paid
+    /// </summary>
+    Task<Result<bool>> VerifyCheckoutSessionAsync(string sessionId);
 }
 
 /// <summary>
@@ -51,7 +56,7 @@ public class CreateCheckoutSessionRequest
 {
     public Guid OrderId { get; set; }
     public decimal Amount { get; set; }
-    public string Currency { get; set; } = "SAR";
+    public string Currency { get; set; } = "EGP";
     public string SuccessUrl { get; set; } = string.Empty;
     public string CancelUrl { get; set; } = string.Empty;
     public string? CustomerEmail { get; set; }
@@ -67,7 +72,7 @@ public class PaymentProcessingRequest
     public Guid CustomerId { get; set; }
     public decimal Amount { get; set; }
     public string PaymentMethod { get; set; } = "CashOnDelivery"; // CashOnDelivery, CreditCard, Stripe
-    public string? Currency { get; set; } = "SAR";
+    public string? Currency { get; set; } = "EGP";
 
     // Stripe-specific fields
     public string? StripePaymentMethodId { get; set; }
@@ -101,7 +106,7 @@ public class CreatePaymentIntentRequest
 {
     public Guid OrderId { get; set; }
     public decimal Amount { get; set; }
-    public string Currency { get; set; } = "SAR";
+    public string Currency { get; set; } = "EGP";
     public string CustomerEmail { get; set; } = string.Empty;
     public string? Description { get; set; }
 }

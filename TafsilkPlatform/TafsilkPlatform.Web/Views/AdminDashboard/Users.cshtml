@@ -571,8 +571,7 @@
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar">
-                                            @if (user.CustomerProfile?.ProfilePictureData != null || 
-                                                 user.TailorProfile?.ProfilePictureData != null)
+                                            @if (user.TailorProfile?.ProfilePictureData != null)
                                             {
                                                 <img src="@Url.Action("ProfilePicture", "Account", new { id = user.Id })" 
                                                      alt="@user.Email" />

@@ -21,7 +21,7 @@ public class ImageUploadService : IFileUploadService
         var relative = await _attachmentService.Upload(file, "profile");
         if (string.IsNullOrEmpty(relative))
         {
-            throw new InvalidOperationException("فشل رفع الصورة إلى التخزين");
+            throw new InvalidOperationException("Failed to upload image to storage");
         }
 
         _logger.LogInformation("Profile picture uploaded for user {UserId}. File: {File}", userId, relative);
