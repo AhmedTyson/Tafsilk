@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\TafsilkPlatform.Web",
-    "\\TafsilkPlatform.Web\\TafsilkPlatform.Web"
+    "\\TafsilkPlatform",
+    "\\TafsilkPlatform\\TafsilkPlatform.Web"
   ],
-  "SelectedNode": "\\TafsilkPlatform.Web\\TafsilkPlatform.Web\\TafsilkPlatformSolution.sln",
+  "SelectedNode": "\\TafsilkPlatform\\TafsilkPlatform.Web\\TafsilkPlatformSolution.sln",
   "PreviewInSolutionExplorer": false
 }

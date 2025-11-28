@@ -32,6 +32,7 @@
     <Compile Remove="TafsilkPlatform.Models\**" />
     <Compile Remove="TafsilkPlatform.DataAccess\**" />
     <Compile Remove="TafsilkPlatform.Utility\**" />
+    <Compile Remove="Tools\**" />
   </ItemGroup>
 
   <ItemGroup>

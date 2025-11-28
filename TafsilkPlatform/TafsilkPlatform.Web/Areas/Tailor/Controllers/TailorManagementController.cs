@@ -6,6 +6,7 @@ using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
+using TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 
@@ -707,6 +708,575 @@ public class TailorManagementController : Controller
             return Json(new { success = false, message = "An error occurred" });
         }
     }
+
+    #endregion
+
+    #region Order Management (إدارة الطلبات)
+
+    /// <summary>
+    /// View and manage orders
+    /// GET: /tailor/manage/orders
+    /// </summary>
+    [HttpGet("orders")]
+    public async Task<IActionResult> ManageOrders(string? search = null, OrderStatus? status = null)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound("Profile not found");
+
+            // Base query
+            var query = _context.Orders
+                .Include(o => o.Customer)
+                .Where(o => o.TailorId == tailor.Id);
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(o => 
+                    o.OrderId.ToString().Contains(search) || 
+                    o.Customer.FullName.ToLower().Contains(search) ||
+                    o.Description.ToLower().Contains(search));
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+
+            // Get stats (before filtering for accurate counts)
+            var allOrders = await _context.Orders
+                .Where(o => o.TailorId == tailor.Id)
+                .Select(o => new { o.Status, o.TotalPrice })
+                .ToListAsync();
+
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new OrderItemDto
+                {
+                    OrderId = o.OrderId,
+                    OrderNumber = $"#{o.OrderId.ToString().Substring(0, 8).ToUpper()}",
+                    CustomerName = o.Customer.FullName,
+                    CustomerImageUrl = o.Customer.ProfilePictureData != null && o.Customer.ProfilePictureData.Length > 0
+                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(o.Customer.ProfilePictureData)}"
+                        : null,
+                    Description = o.Description,
+                    TotalPrice = o.TotalPrice,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    DueDate = o.DueDate,
+                    IsNew = o.Status == OrderStatus.Pending,
+                    OrderType = o.OrderType
+                })
+                .ToListAsync();
+
+            var model = new ManageOrdersViewModel
+            {
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "Tailor",
+                Orders = orders,
+                TotalOrders = allOrders.Count,
+                PendingOrders = allOrders.Count(o => o.Status == OrderStatus.Pending),
+                CompletedOrders = allOrders.Count(o => o.Status == OrderStatus.Delivered),
+                CancelledOrders = allOrders.Count(o => o.Status == OrderStatus.Cancelled),
+                TotalRevenue = allOrders.Where(o => o.Status == OrderStatus.Delivered).Select(o => o.TotalPrice).DefaultIfEmpty(0).Sum(),
+                SearchTerm = search,
+                FilterStatus = status
+            };
+
+            ViewData["Title"] = "Manage Orders";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading orders management");
+            TempData["Error"] = "Error loading orders";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+    }
+
+    /// <summary>
+    /// Update order status
+    /// POST: /tailor/manage/orders/update-status/{id}
+    /// </summary>
+    [HttpPost("orders/update-status/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateOrderStatus(Guid id, OrderStatus status)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
+
+            if (order == null)
+                return NotFound();
+
+            var oldStatus = order.Status;
+            order.Status = status;
+            
+            // If status changed to Delivered, update payment status if needed or trigger notifications
+            if (status == OrderStatus.Delivered && oldStatus != OrderStatus.Delivered)
+            {
+                // Logic for delivery completion
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Status updated successfully", newStatus = status.ToString() });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating order status");
+            return Json(new { success = false, message = "Error updating status" });
+        }
+    }
+
+    /// <summary>
+    /// Get order details for modal
+    /// GET: /tailor/manage/orders/details/{id}
+    /// </summary>
+    [HttpGet("orders/details/{id:guid}")]
+    public async Task<IActionResult> GetOrderDetails(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                    .ThenInclude(c => c.User)
+                .Include(o => o.Items)
+                .Include(o => o.orderImages)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
+
+            if (order == null)
+                return NotFound();
+
+            // Return partial view or JSON. For now, let's return JSON to populate the modal dynamically
+            // or a PartialView if we create one. Let's stick to JSON for simplicity as per the HTML design which likely used JS.
+            // Actually, returning a PartialView is cleaner for Razor. I'll assume we might use a PartialView later, 
+            // but for now I will return JSON to match the likely JS implementation in the HTML file.
+            
+            var details = new
+            {
+                order.OrderId,
+                OrderNumber = $"#{order.OrderId.ToString().Substring(0, 8).ToUpper()}",
+                CustomerName = order.Customer.FullName,
+                CustomerPhone = order.Customer.User.PhoneNumber,
+                CustomerEmail = order.Customer.User.Email,
+                order.Description,
+                order.TotalPrice,
+                Status = order.Status.ToString(),
+                CreatedAt = order.CreatedAt.ToString("dd/MM/yyyy"),
+                DueDate = order.DueDate?.ToString("dd/MM/yyyy") ?? "Not set",
+                order.MeasurementsJson,
+                Images = order.orderImages.Select(i => new { ImageUrl = i.ImgUrl, i.OrderImageId }).ToList(),
+                Items = order.Items.Select(i => new { ItemName = i.Description, i.Quantity, Price = i.UnitPrice }).ToList()
+            };
+
+            return Json(new { success = true, data = details });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting order details");
+            return Json(new { success = false, message = "Error loading details" });
+        }
+    }
+
+    #endregion
+
+    #region Service Management (الخدمات)
+
+    /// <summary>
+    /// View and manage services
+    /// GET: /tailor/manage/services
+    /// </summary>
+    [HttpGet("services")]
+    public async Task<IActionResult> ManageServices()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound("Profile not found");
+
+            var services = await _context.TailorServices
+            .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
+             .OrderBy(s => s.ServiceName)
+          .ToListAsync();
+
+            var model = new ManageServicesViewModel
+            {
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "Tailor",
+                Services = services.Select(s => new ServiceItemDto
+                {
+                    Id = s.TailorServiceId,
+                    ServiceName = s.ServiceName,
+                    Description = s.Description,
+                    BasePrice = s.BasePrice,
+                    EstimatedDuration = s.EstimatedDuration
+                }).ToList(),
+                TotalServices = services.Count,
+                AveragePrice = services.Any() ? services.Average(s => s.BasePrice) : 0
+            };
+
+            ViewData["Title"] = "Manage Services";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading services management");
+            TempData["Error"] = "Error loading services";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+    }
+
+    /// <summary>
+    /// Add new service form
+    /// GET: /tailor/manage/services/add
+    /// </summary>
+    [HttpGet("services/add")]
+    public async Task<IActionResult> AddService()
+    {
+        var userId = User.GetUserId();
+        var tailor = await GetTailorProfileAsync(userId);
+
+        if (tailor == null)
+            return NotFound();
+
+        var model = new AddServiceViewModel
+        {
+            TailorId = tailor.Id
+        };
+
+        ViewBag.ServiceTypes = GetServiceTypes();
+        return View(model);
+    }
+
+    /// <summary>
+    /// Save new service
+    /// POST: /tailor/manage/services/add
+    /// </summary>
+    [HttpPost("services/add")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddService(AddServiceViewModel model)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
+            }
+
+            // Check for duplicate service name
+            var existingService = await _context.TailorServices
+   .AnyAsync(s => s.TailorId == tailor.Id && s.ServiceName == model.ServiceName && !s.IsDeleted);
+
+            if (existingService)
+            {
+                ModelState.AddModelError(nameof(model.ServiceName), "Service with this name already exists");
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
+            }
+
+            // Create service
+            var service = new TailorService
+            {
+                TailorServiceId = Guid.NewGuid(),
+                TailorId = tailor.Id,
+                ServiceName = model.ServiceName,
+                Description = model.Description,
+                BasePrice = model.BasePrice,
+                EstimatedDuration = model.EstimatedDuration,
+                IsDeleted = false
+            };
+
+            _context.TailorServices.Add(service);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Service added for tailor {TailorId}", tailor.Id);
+            TempData["Success"] = "Service added successfully";
+
+            return RedirectToAction(nameof(ManageServices));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding service");
+            ModelState.AddModelError("", "Error adding service");
+            ViewBag.ServiceTypes = GetServiceTypes();
+            return View(model);
+        }
+    }
+
+    /// <summary>
+    /// Edit service
+    /// GET: /tailor/manage/services/edit/{id}
+    /// </summary>
+    [HttpGet("services/edit/{id:guid}")]
+    public async Task<IActionResult> EditService(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound();
+
+            var service = await _context.TailorServices
+        .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
+
+            if (service == null)
+                return NotFound("Service not found");
+
+            var model = new EditServiceViewModel
+            {
+                Id = service.TailorServiceId,
+                TailorId = tailor.Id,
+                ServiceName = service.ServiceName,
+                Description = service.Description,
+                BasePrice = service.BasePrice,
+                EstimatedDuration = service.EstimatedDuration
+            };
+
+            ViewBag.ServiceTypes = GetServiceTypes();
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading service for editing");
+            TempData["Error"] = "Error loading service";
+            return RedirectToAction(nameof(ManageServices));
+        }
+    }
+
+    /// <summary>
+    /// Update service
+    /// POST: /tailor/manage/services/edit/{id}
+    /// </summary>
+    [HttpPost("services/edit/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditService(Guid id, EditServiceViewModel model)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
+
+            if (id != model.Id)
+                return BadRequest();
+
+            var service = await _context.TailorServices
+                     .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
+
+            if (service == null)
+                return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
+            }
+
+            // Check for duplicate service name (excluding current service)
+            var existingService = await _context.TailorServices
+        .AnyAsync(s => s.TailorId == tailor.Id && s.ServiceName == model.ServiceName && s.TailorServiceId != id && !s.IsDeleted);
+
+            if (existingService)
+            {
+                ModelState.AddModelError(nameof(model.ServiceName), "Service with this name already exists");
+                ViewBag.ServiceTypes = GetServiceTypes();
+                return View(model);
+            }
+
+            // Update service
+            service.ServiceName = model.ServiceName;
+            service.Description = model.Description;
+            service.BasePrice = model.BasePrice;
+            service.EstimatedDuration = model.EstimatedDuration;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Service {ServiceId} updated for tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "Service updated successfully";
+
+            return RedirectToAction(nameof(ManageServices));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating service");
+            ModelState.AddModelError("", "Error updating service");
+            ViewBag.ServiceTypes = GetServiceTypes();
+            return View(model);
+        }
+    }
+
+    /// <summary>
+    /// Delete service
+    /// POST: /tailor/manage/services/delete/{id}
+    /// </summary>
+    [HttpPost("services/delete/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteService(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var service = await _context.TailorServices
+         .FirstOrDefaultAsync(s => s.TailorServiceId == id && s.TailorId == tailor.Id && !s.IsDeleted);
+
+            if (service == null)
+                return NotFound();
+
+            // Soft delete
+            service.IsDeleted = true;
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Service {ServiceId} deleted for tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "Service deleted successfully";
+
+            return RedirectToAction(nameof(ManageServices));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting service");
+            TempData["Error"] = "Error deleting service";
+            return RedirectToAction(nameof(ManageServices));
+        }
+    }
+
+    #endregion
+
+    #region Pricing Management
+
+    /// <summary>
+    /// Bulk update service prices
+    /// GET: /tailor/manage/pricing
+    /// </summary>
+    [HttpGet("pricing")]
+    public async Task<IActionResult> ManagePricing()
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound("Profile not found");
+
+            var services = await _context.TailorServices
+     .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
+              .OrderBy(s => s.ServiceName)
+       .ToListAsync();
+
+            var model = new ManagePricingViewModel
+            {
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "Tailor",
+                ServicePrices = services.Select(s => new ServicePriceDto
+                {
+                    ServiceId = s.TailorServiceId,
+                    ServiceName = s.ServiceName,
+                    CurrentPrice = s.BasePrice,
+                    NewPrice = s.BasePrice
+                }).ToList()
+            };
+
+            ViewData["Title"] = "Manage Pricing";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading pricing management");
+            TempData["Error"] = "Error loading pricing management";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+    }
+
+    /// <summary>
+    /// Update service prices
+    /// POST: /tailor/manage/pricing
+    /// </summary>
+    [HttpPost("pricing")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdatePricing(ManagePricingViewModel model)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null || tailor.Id != model.TailorId)
+                return Unauthorized();
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Update service prices
+            foreach (var servicePrice in model.ServicePrices)
+            {
+                var service = await _context.TailorServices
+                      .FirstOrDefaultAsync(s => s.TailorServiceId == servicePrice.ServiceId && s.TailorId == tailor.Id);
+
+                if (service != null && servicePrice.NewPrice > 0)
+                {
+                    service.BasePrice = servicePrice.NewPrice;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Prices updated for tailor {TailorId}", tailor.Id);
+            TempData["Success"] = "Prices updated successfully";
+
+            return RedirectToAction(nameof(ManageServices));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating pricing");
+            ModelState.AddModelError("", "Error updating prices");
+            return View(model);
+        }
+    }
+
+    #endregion
+
+    #region Product Management (إدارة المنتجات)
+
+    /// <summary>
+    /// View and manage products
     /// GET: /tailor/manage/products
     /// </summary>
     [HttpGet("products")]

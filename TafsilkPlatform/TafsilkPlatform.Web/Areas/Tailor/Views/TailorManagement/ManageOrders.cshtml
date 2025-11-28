@@ -1,0 +1,459 @@
+@model TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement.ManageOrdersViewModel
+@using TafsilkPlatform.Models.Models
+@{
+    ViewData["Title"] = "إدارة الطلبات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var breadcrumbs = new List<(string Text, string? Url)>
+    {
+        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
+        ("إدارة الطلبات", "")
+    };
+}
+
+@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
+
+<div class="container-fluid py-4" dir="rtl">
+    <!-- Success/Error Messages -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-2">
+                        <i class="fas fa-clipboard-list"></i> إدارة الطلبات
+                    </h1>
+                    <p class="text-muted">تتبع وإدارة طلبات العملاء وحالاتها</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">إجمالي الطلبات</h6>
+                            <h2 class="mb-0">@Model.TotalOrders</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">طلبات جديدة</h6>
+                            <h2 class="mb-0">@Model.PendingOrders</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">طلبات مكتملة</h6>
+                            <h2 class="mb-0">@Model.CompletedOrders</h2>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-white-50 mb-1">إجمالي الإيرادات</h6>
+                            <h2 class="mb-0">@Model.TotalRevenue.ToString("N0")</h2>
+                            <small class="text-white-50">ريال</small>
+                        </div>
+                        <div class="display-4">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orders Layout -->
+    <div class="row">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">تصفية الطلبات</h5>
+                    <form method="get" action="@Url.Action("ManageOrders")">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">بحث</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" name="search" value="@Model.SearchTerm" placeholder="رقم الطلب، اسم العميل...">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">حالة الطلب</label>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" value="" id="statusAll" @(!Model.FilterStatus.HasValue ? "checked" : "")>
+                                    <label class="form-check-label" for="statusAll">الكل</label>
+                                </div>
+                                @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="status" value="@status" id="status_@status" @(Model.FilterStatus == status ? "checked" : "")>
+                                        <label class="form-check-label" for="status_@status">@status.ToString()</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">تطبيق التصفية</button>
+                        <a href="@Url.Action("ManageOrders")" class="btn btn-outline-secondary w-100 mt-2">إعادة تعيين</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders List -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> قائمة الطلبات
+                    </h5>
+                    <span class="badge bg-secondary">@Model.Orders.Count طلب</span>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Orders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>رقم الطلب</th>
+                                        <th>العميل</th>
+                                        <th>التفاصيل</th>
+                                        <th>السعر</th>
+                                        <th>الحالة</th>
+                                        <th>التاريخ</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.Orders)
+                                    {
+                                        <tr class="@(order.IsNew ? "table-active border-start border-primary border-4" : "")">
+                                            <td>
+                                                <strong>@order.OrderNumber</strong>
+                                                @if (order.IsNew)
+                                                {
+                                                    <span class="badge bg-danger ms-1">جديد</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(order.CustomerImageUrl))
+                                                    {
+                                                        <img src="@order.CustomerImageUrl" class="rounded-circle me-2" width="32" height="32" alt="@order.CustomerName">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                            <i class="fas fa-user text-secondary"></i>
+                                                        </div>
+                                                    }
+                                                    <span>@order.CustomerName</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted d-block text-truncate" style="max-width: 200px;">@order.Description</small>
+                                                <span class="badge bg-light text-dark border">@order.OrderType</span>
+                                            </td>
+                                            <td class="fw-bold text-primary">@order.TotalPrice.ToString("N2") ريال</td>
+                                            <td>
+                                                @{
+                                                    var badgeClass = order.Status switch
+                                                    {
+                                                        OrderStatus.Pending => "bg-warning text-dark",
+                                                        OrderStatus.Confirmed => "bg-info text-dark",
+                                                        OrderStatus.Processing => "bg-primary",
+                                                        OrderStatus.ReadyForPickup => "bg-info",
+                                                        OrderStatus.Delivered => "bg-success",
+                                                        OrderStatus.Cancelled => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@order.Status</span>
+                                            </td>
+                                            <td>
+                                                <small>@order.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                                @if (order.DueDate.HasValue)
+                                                {
+                                                    <br>
+                                                    <small class="text-danger" title="تاريخ التسليم"><i class="far fa-calendar-alt"></i> @order.DueDate.Value.ToString("dd/MM")</small>
+                                                }
+                                            </td>
+                                            <td>
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-outline-primary view-details-btn"
+                                                        data-order-id="@order.OrderId">
+                                                    <i class="fas fa-eye"></i> التفاصيل
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="display-1 text-muted mb-3">
+                                <i class="fas fa-clipboard"></i>
+                            </div>
+                            <h4 class="text-muted mb-3">لا توجد طلبات</h4>
+                            <p class="text-muted">لم يتم العثور على طلبات تطابق معايير البحث.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" dir="rtl">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تفاصيل الطلب <span id="modalOrderNumber"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div class="text-center py-4" id="modalLoading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">جاري التحميل...</span>
+                    </div>
+                </div>
+                <div id="modalContent" style="display: none;">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted">معلومات العميل</h6>
+                            <p class="mb-1 fw-bold" id="modalCustomerName"></p>
+                            <p class="mb-1"><i class="fas fa-phone fa-fw text-muted"></i> <span id="modalCustomerPhone"></span></p>
+                        </div>
+                        <div class="col-md-6 text-md-end">
+                            <h6 class="text-muted">حالة الطلب</h6>
+                            <div class="mb-2">
+                                <span class="badge bg-secondary" id="modalStatusBadge"></span>
+                            </div>
+                            <p class="mb-0 small text-muted">تاريخ الطلب: <span id="modalCreatedAt"></span></p>
+                            <p class="mb-0 small text-muted">تاريخ التسليم: <span id="modalDueDate"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">الوصف</h6>
+                            <p class="card-text" id="modalDescription"></p>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-3">العناصر</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>العنصر</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalItemsTable">
+                                <!-- Items will be populated here -->
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="2" class="text-end fw-bold">الإجمالي</td>
+                                    <td class="fw-bold text-primary" id="modalTotalPrice"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div id="modalMeasurementsSection" style="display: none;">
+                        <h6 class="mb-3">المقاسات</h6>
+                        <div class="card">
+                            <div class="card-body">
+                                <pre id="modalMeasurements" class="mb-0 bg-light p-2 rounded" style="white-space: pre-wrap;"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <div>
+                    <select class="form-select form-select-sm d-inline-block w-auto" id="updateStatusSelect">
+                        @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                        {
+                            <option value="@status">@status.ToString()</option>
+                        }
+                    </select>
+                    <button type="button" class="btn btn-sm btn-primary" id="updateStatusBtn">تحديث الحالة</button>
+                </div>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let currentOrderId = null;
+
+            // View Details Button Click
+            $('.view-details-btn').click(function() {
+                const orderId = $(this).data('order-id');
+                currentOrderId = orderId;
+                
+                // Reset and show modal
+                $('#modalLoading').show();
+                $('#modalContent').hide();
+                $('#modalItemsTable').empty();
+                new bootstrap.Modal(document.getElementById('orderDetailsModal')).show();
+
+                // Fetch details
+                $.ajax({
+                    url: '/Tailor/manage/orders/details/' + orderId,
+                    method: 'GET',
+                    success: function(response) {
+                        if (response.success) {
+                            const data = response.data;
+                            
+                            // Populate modal
+                            $('#modalOrderNumber').text(data.orderNumber);
+                            $('#modalCustomerName').text(data.customerName);
+                            $('#modalCustomerPhone').text(data.customerPhone || 'غير متوفر');
+                            $('#modalStatusBadge').text(data.status);
+                            $('#modalCreatedAt').text(data.createdAt);
+                            $('#modalDueDate').text(data.dueDate);
+                            $('#modalDescription').text(data.description);
+                            $('#modalTotalPrice').text(data.totalPrice.toFixed(2) + ' ريال');
+                            
+                            // Update status select
+                            $('#updateStatusSelect').val(data.status);
+
+                            // Items
+                            if (data.items && data.items.length > 0) {
+                                data.items.forEach(item => {
+                                    $('#modalItemsTable').append(`
+                                        <tr>
+                                            <td>${item.itemName}</td>
+                                            <td>${item.quantity}</td>
+                                            <td>${item.price.toFixed(2)}</td>
+                                        </tr>
+                                    `);
+                                });
+                            } else {
+                                $('#modalItemsTable').append('<tr><td colspan="3" class="text-center text-muted">لا توجد عناصر</td></tr>');
+                            }
+
+                            // Measurements
+                            if (data.measurementsJson) {
+                                $('#modalMeasurementsSection').show();
+                                try {
+                                    const measurements = JSON.parse(data.measurementsJson);
+                                    $('#modalMeasurements').text(JSON.stringify(measurements, null, 2));
+                                } catch (e) {
+                                    $('#modalMeasurements').text(data.measurementsJson);
+                                }
+                            } else {
+                                $('#modalMeasurementsSection').hide();
+                            }
+
+                            $('#modalLoading').hide();
+                            $('#modalContent').fadeIn();
+                        } else {
+                            toastr.error('فشل تحميل تفاصيل الطلب');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('حدث خطأ في الاتصال');
+                    }
+                });
+            });
+
+            // Update Status Button Click
+            $('#updateStatusBtn').click(function() {
+                if (!currentOrderId) return;
+
+                const newStatus = $('#updateStatusSelect').val();
+                const btn = $(this);
+                
+                btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+                $.ajax({
+                    url: '/Tailor/manage/orders/update-status/' + currentOrderId,
+                    method: 'POST',
+                    data: {
+                        status: newStatus,
+                        __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success('تم تحديث حالة الطلب بنجاح');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            toastr.error('فشل تحديث الحالة');
+                            btn.prop('disabled', false).text('تحديث الحالة');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('حدث خطأ في الاتصال');
+                        btn.prop('disabled', false).text('تحديث الحالة');
+                    }
+                });
+            });
+        });
+    </script>
+}

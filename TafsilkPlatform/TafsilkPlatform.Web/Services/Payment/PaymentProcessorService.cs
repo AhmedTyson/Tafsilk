@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Stripe;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.DataAccess.Repository;
@@ -131,6 +131,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessCashPaymentAsync(Order order, PaymentProcessingRequest request)
     {
+        await Task.CompletedTask;
         var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
@@ -169,6 +170,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessPendingCardPaymentAsync(Order order, PaymentProcessingRequest request)
     {
+        await Task.CompletedTask;
         var payment = new TafsilkPlatform.Models.Models.Payment
         {
             PaymentId = Guid.NewGuid(),
@@ -201,6 +203,10 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// </summary>
     private async Task<PaymentProcessingResult> ProcessStripePaymentAsync(Order order, PaymentProcessingRequest request)
     {
+        await Task.CompletedTask;
+        // ✅ READY FOR STRIPE INTEGRATION
+        // This method will handle Stripe payment processing when you add the Stripe.net NuGet package
+
         Logger.LogInformation("Processing Stripe payment for order {OrderId}", order.OrderId);
 
         // Create a pending payment record first
@@ -302,6 +308,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     {
         return await ExecuteAsync(async () =>
         {
+            await Task.CompletedTask;
             ValidateGuid(request.OrderId, nameof(request.OrderId));
             ValidatePositive(request.Amount, nameof(request.Amount));
 
@@ -340,7 +347,8 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     {
         return await ExecuteAsync(async () =>
         {
-            ValidateNotEmpty(json, nameof(json));
+            await Task.CompletedTask;
+            ValidateNotEmpty(paymentIntentId, nameof(paymentIntentId));
 
             if (!_stripeEnabled)
             {
