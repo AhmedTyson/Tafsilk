@@ -11,7 +11,7 @@ namespace TafsilkPlatform.DataAccess.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Use raw SQL to check if columns exist before adding them (Idempotent)
-            
+
             // 1. PrimaryImageUrl on Products
             migrationBuilder.Sql(@"
                 IF NOT EXISTS(SELECT * FROM sys.columns WHERE Name = N'PrimaryImageUrl' AND Object_ID = Object_ID(N'Products'))

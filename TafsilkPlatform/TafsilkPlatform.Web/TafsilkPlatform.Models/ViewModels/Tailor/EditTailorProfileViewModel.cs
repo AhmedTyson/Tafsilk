@@ -12,64 +12,64 @@ public class EditTailorProfileViewModel
     public Guid UserId { get; set; }
 
     // Personal Information
-    [Required(ErrorMessage = "الاسم الكامل مطلوب")]
-    [StringLength(100, ErrorMessage = "الاسم الكامل لا يمكن أن يتجاوز 100 حرف")]
-    [Display(Name = "الاسم الكامل")]
+    [Required(ErrorMessage = "Full Name is required")]
+    [StringLength(100, ErrorMessage = "Full Name cannot exceed 100 characters")]
+    [Display(Name = "Full Name")]
     public string FullName { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "رقم الهاتف مطلوب")]
-    [Phone(ErrorMessage = "رقم الهاتف غير صالح")]
-    [Display(Name = "رقم الهاتف")]
+    [Required(ErrorMessage = "Phone Number is required")]
+    [Phone(ErrorMessage = "Invalid Phone Number")]
+    [Display(Name = "Phone Number")]
     public string PhoneNumber { get; set; } = string.Empty;
 
-    [EmailAddress(ErrorMessage = "البريد الإلكتروني غير صالح")]
-    [Display(Name = "البريد الإلكتروني")]
+    [EmailAddress(ErrorMessage = "Invalid Email Address")]
+    [Display(Name = "Email")]
     public string? Email { get; set; }
 
     // Shop Details
-    [Required(ErrorMessage = "اسم الورشة مطلوب")]
-    [StringLength(100, ErrorMessage = "اسم الورشة لا يمكن أن يتجاوز 100 حرف")]
-    [Display(Name = "اسم الورشة")]
+    [Required(ErrorMessage = "Shop Name is required")]
+    [StringLength(100, ErrorMessage = "Shop Name cannot exceed 100 characters")]
+    [Display(Name = "Shop Name")]
     public string ShopName { get; set; } = string.Empty;
 
-    [StringLength(500, ErrorMessage = "الوصف لا يمكن أن يتجاوز 500 حرف")]
-    [Display(Name = "وصف الورشة")]
+    [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
+    [Display(Name = "Shop Description")]
     public string? ShopDescription { get; set; }
 
-    [StringLength(200, ErrorMessage = "التخصص لا يمكن أن يتجاوز 200 حرف")]
-    [Display(Name = "التخصص")]
+    [StringLength(200, ErrorMessage = "Specialization cannot exceed 200 characters")]
+    [Display(Name = "Specialization")]
     public string? Specialization { get; set; }
 
-    [Range(0, 100, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 100")]
-    [Display(Name = "سنوات الخبرة")]
+    [Range(0, 100, ErrorMessage = "Experience years must be between 0 and 100")]
+    [Display(Name = "Years of Experience")]
     public int? YearsOfExperience { get; set; }
 
     // Location
-    [StringLength(100, ErrorMessage = "المدينة لا يمكن أن تتجاوز 100 حرف")]
-    [Display(Name = "المدينة")]
+    [StringLength(100, ErrorMessage = "City cannot exceed 100 characters")]
+    [Display(Name = "City")]
     public string? City { get; set; }
 
-    [StringLength(100, ErrorMessage = "المنطقة لا يمكن أن تتجاوز 100 حرف")]
-    [Display(Name = "المنطقة")]
+    [StringLength(100, ErrorMessage = "District cannot exceed 100 characters")]
+    [Display(Name = "District")]
     public string? District { get; set; }
 
-    [StringLength(500, ErrorMessage = "العنوان لا يمكن أن يتجاوز 500 حرف")]
-    [Display(Name = "العنوان التفصيلي")]
+    [StringLength(500, ErrorMessage = "Address cannot exceed 500 characters")]
+    [Display(Name = "Detailed Address")]
     public string? Address { get; set; }
 
-    [Display(Name = "خط الطول")]
+    [Display(Name = "Longitude")]
     public decimal? Longitude { get; set; }
 
-    [Display(Name = "خط العرض")]
+    [Display(Name = "Latitude")]
     public decimal? Latitude { get; set; }
 
     // Bio
-    [StringLength(1000, ErrorMessage = "النبذة التعريفية لا يمكن أن تتجاوز 1000 حرف")]
-    [Display(Name = "النبذة التعريفية")]
+    [StringLength(1000, ErrorMessage = "Bio cannot exceed 1000 characters")]
+    [Display(Name = "Bio")]
     public string? Bio { get; set; }
 
     // Profile Picture
-    [Display(Name = "صورة الملف الشخصي")]
+    [Display(Name = "Profile Picture")]
     public IFormFile? ProfilePicture { get; set; }
 
     public string? CurrentProfilePictureUrl { get; set; }
@@ -77,24 +77,24 @@ public class EditTailorProfileViewModel
     public string? CurrentProfilePictureContentType { get; set; }
 
     // Business Hours
-    [Display(Name = "ساعات العمل")]
+    [Display(Name = "Business Hours")]
     public string? BusinessHours { get; set; }
 
     // Social Media
-    [Url(ErrorMessage = "رابط فيسبوك غير صالح")]
-    [Display(Name = "رابط فيسبوك")]
+    [Url(ErrorMessage = "Invalid Facebook URL")]
+    [Display(Name = "Facebook URL")]
     public string? FacebookUrl { get; set; }
 
-    [Url(ErrorMessage = "رابط إنستغرام غير صالح")]
-    [Display(Name = "رابط إنستغرام")]
+    [Url(ErrorMessage = "Invalid Instagram URL")]
+    [Display(Name = "Instagram URL")]
     public string? InstagramUrl { get; set; }
 
-    [Url(ErrorMessage = "رابط تويتر غير صالح")]
-    [Display(Name = "رابط تويتر")]
+    [Url(ErrorMessage = "Invalid Twitter URL")]
+    [Display(Name = "Twitter URL")]
     public string? TwitterUrl { get; set; }
 
-    [Url(ErrorMessage = "رابط الموقع الإلكتروني غير صالح")]
-    [Display(Name = "الموقع الإلكتروني")]
+    [Url(ErrorMessage = "Invalid Website URL")]
+    [Display(Name = "Website URL")]
     public string? WebsiteUrl { get; set; }
 
     // Statistics (Read-only)
@@ -117,33 +117,33 @@ public static class EgyptCities
     {
         return new List<string>
       {
-            "القاهرة",
-            "الجيزة",
-            "الإسكندرية",
-            "الشرقية",
-         "الدقهلية",
-            "القليوبية",
-            "البحيرة",
-            "المنوفية",
-            "الغربية",
-    "كفر الشيخ",
-        "دمياط",
-            "بورسعيد",
-    "الإسماعيلية",
-    "السويس",
-            "شمال سيناء",
-            "جنوب سيناء",
-  "البحر الأحمر",
-        "الفيوم",
-       "بني سويف",
-            "المنيا",
-       "أسيوط",
-    "سوهاج",
-     "قنا",
-            "الأقصر",
-      "أسوان",
-            "الوادي الجديد",
-     "مطروح"
+            "Cairo",
+            "Giza",
+            "Alexandria",
+            "Sharqia",
+            "Dakahlia",
+            "Qalyubia",
+            "Beheira",
+            "Monufia",
+            "Gharbia",
+            "Kafr El Sheikh",
+            "Damietta",
+            "Port Said",
+            "Ismailia",
+            "Suez",
+            "North Sinai",
+            "South Sinai",
+            "Red Sea",
+            "Fayoum",
+            "Beni Suef",
+            "Minya",
+            "Assiut",
+            "Sohag",
+            "Qena",
+            "Luxor",
+            "Aswan",
+            "New Valley",
+            "Matrouh"
         };
     }
 }
@@ -157,15 +157,15 @@ public static class TailorSpecializations
     {
         return new List<string>
         {
-            "بدل رجالية",
-  "فساتين سهرة",
-            "فساتين زفاف",
-            "ملابس أطفال",
-         "تعديلات ملابس",
-            "ملابس تقليدية",
-       "ملابس رياضية",
-            "أزياء خاصة",
-            "جميع الأنواع"
+            "Men's Suits",
+            "Evening Dresses",
+            "Wedding Dresses",
+            "Kids Clothing",
+            "Alterations",
+            "Traditional Clothing",
+            "Sports Wear",
+            "Custom Fashion",
+            "All Types"
       };
     }
 }

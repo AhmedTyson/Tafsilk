@@ -48,7 +48,7 @@ public class PortfolioService : IPortfolioService
             return new ManagePortfolioViewModel
             {
                 TailorId = tailor.Id,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 Images = portfolioImages.Select(p => new PortfolioItemDto
                 {
                     Id = p.PortfolioImageId,
@@ -86,23 +86,23 @@ public class PortfolioService : IPortfolioService
             var tailor = await _unitOfWork.Tailors.GetByIdAsync(tailorId);
             if (tailor == null)
             {
-                return (false, null, "الملف الشخصي غير موجود");
+                return (false, null, "Profile not found");
             }
 
             // Validate image file
             if (model.ImageFile == null || model.ImageFile.Length == 0)
             {
-                return (false, null, "يرجى اختيار صورة");
+                return (false, null, "Please select an image");
             }
 
             if (!await _fileUploadService.IsValidImageAsync(model.ImageFile))
             {
-                return (false, null, "نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF)");
+                return (false, null, "Invalid file type. Please select an image (JPG, PNG, GIF)");
             }
 
             if (model.ImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
             {
-                return (false, null, $"حجم الصورة يجب أن يكون أقل من {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} ميجابايت");
+                return (false, null, $"Image size must be less than {_fileUploadService.GetMaxFileSizeInBytes() / 1024 / 1024} MB");
             }
 
             // Check image count limit
@@ -111,14 +111,14 @@ public class PortfolioService : IPortfolioService
 
             if (currentImageCount >= 50)
             {
-                return (false, null, "لقد وصلت إلى الحد الأقصى لعدد الصور (50 صورة)");
+                return (false, null, "You have reached the maximum number of images (50 images)");
             }
 
             // Upload to filesystem (gallery folder)
             var uploadedRelative = await _attachmentService.Upload(model.ImageFile, "gallery");
             if (string.IsNullOrEmpty(uploadedRelative))
             {
-                return (false, null, "فشل رفع الملف أو نوع الملف غير مدعوم");
+                return (false, null, "Failed to upload file or file type not supported");
             }
 
             // Get next display order
@@ -158,7 +158,7 @@ public class PortfolioService : IPortfolioService
                 if (saveResult == 0)
                 {
                     _logger.LogError("Failed to save portfolio image - SaveChangesAsync returned 0");
-                    throw new InvalidOperationException("فشل حفظ الصورة في قاعدة البيانات");
+                    throw new InvalidOperationException("Failed to save image to database");
                 }
 
                 _logger.LogInformation(
@@ -171,7 +171,7 @@ public class PortfolioService : IPortfolioService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding portfolio image for tailor {TailorId}", tailorId);
-            return (false, null, $"حدث خطأ: {ex.Message}");
+            return (false, null, $"Error: {ex.Message}");
         }
     }
 
@@ -222,7 +222,7 @@ public class PortfolioService : IPortfolioService
 
                 if (image == null)
                 {
-                    return (false, "الصورة غير موجودة");
+                    return (false, "Image not found");
                 }
 
                 // Update image info
@@ -239,19 +239,19 @@ public class PortfolioService : IPortfolioService
                 {
                     if (!await _fileUploadService.IsValidImageAsync(model.NewImageFile))
                     {
-                        return (false, "نوع الملف غير صالح");
+                        return (false, "Invalid file type");
                     }
 
                     if (model.NewImageFile.Length > _fileUploadService.GetMaxFileSizeInBytes())
                     {
-                        return (false, "حجم الملف كبير جداً");
+                        return (false, "File size is too large");
                     }
 
                     // Upload new file
                     var newRelative = await _attachmentService.Upload(model.NewImageFile, "gallery");
                     if (string.IsNullOrEmpty(newRelative))
                     {
-                        return (false, "فشل رفع الملف الجديد");
+                        return (false, "Failed to upload new file");
                     }
 
                     // Delete old file if it exists and was stored in attachments
@@ -275,7 +275,7 @@ public class PortfolioService : IPortfolioService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating portfolio image {ImageId}", imageId);
-            return (false, "حدث خطأ أثناء تحديث الصورة");
+            return (false, "An error occurred while updating the image");
         }
     }
 
@@ -288,7 +288,7 @@ public class PortfolioService : IPortfolioService
 
             if (image == null)
             {
-                return (false, "الصورة غير موجودة");
+                return (false, "Image not found");
             }
 
             // Try delete the stored file if exists
@@ -316,7 +316,7 @@ public class PortfolioService : IPortfolioService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting portfolio image {ImageId}", imageId);
-            return (false, "حدث خطأ أثناء حذف الصورة");
+            return (false, "An error occurred while deleting the image");
         }
     }
 
@@ -331,7 +331,7 @@ public class PortfolioService : IPortfolioService
 
             if (image == null)
             {
-                return (false, false, "الصورة غير موجودة");
+                return (false, false, "Image not found");
             }
 
             image.IsFeatured = !image.IsFeatured;
@@ -343,7 +343,7 @@ public class PortfolioService : IPortfolioService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling featured status for image {ImageId}", imageId);
-            return (false, false, "حدث خطأ");
+            return (false, false, "An error occurred");
         }
     }
 

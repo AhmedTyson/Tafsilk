@@ -3,332 +3,46 @@
     ViewData["Title"] = Model.Name;
 }
 
-<div class="container py-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-     <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">الرئيسية</a></li>
-            <li class="breadcrumb-item"><a asp-action="Index">المتجر</a></li>
-    <li class="breadcrumb-item"><a asp-action="Index" asp-route-category="@Model.Category">@Model.Category</a></li>
- <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
-        </ol>
-    </nav>
-
-    <div class="row">
-      <!-- Product Images -->
-     <div class="col-lg-6 mb-4">
-            <div class="card shadow-sm">
-<div class="card-body p-0">
-   @if (!string.IsNullOrEmpty(Model.PrimaryImageBase64))
-       {
-      <img src="data:image/jpeg;base64,@Model.PrimaryImageBase64" 
-             class="img-fluid w-100" alt="@Model.Name" id="mainImage"
-      style="max-height: 500px; object-fit: contain; cursor: zoom-in;">
-         }
-  else
-          {
-          <div class="bg-light d-flex align-items-center justify-content-center" 
-     style="height: 500px;">
-     <i class="fas fa-image fa-5x text-muted"></i>
-            </div>
-           }
-    </div>
-        
-              @if (Model.AdditionalImages.Any())
-             {
- <div class="card-footer bg-white">
-                   <div class="row g-2">
-   @foreach (var image in Model.AdditionalImages)
-         {
-         <div class="col-3">
-  <img src="@image" class="img-thumbnail cursor-pointer thumbnail-image" 
-alt="صورة إضافية" style="height: 80px; object-fit: cover;">
-         </div>
-      }
-               </div>
-              </div>
-       }
-      </div>
-        </div>
-
-        <!-- Product Details -->
-   <div class="col-lg-6">
-      <div class="mb-3">
-      <span class="badge bg-info">@Model.Category</span>
-    @if (Model.IsFeatured)
-      {
-          <span class="badge bg-warning text-dark">
-  <i class="fas fa-star"></i> منتج مميز
-      </span>
-    }
-       @if (Model.StockQuantity <= 5 && Model.StockQuantity > 0)
-             {
-   <span class="badge bg-danger">
-        <i class="fas fa-exclamation-triangle"></i> باقي @Model.StockQuantity فقط!
-                    </span>
-   }
-        @if (Model.StockQuantity == 0)
-            {
-           <span class="badge bg-secondary">غير متوفر</span>
-           }
-    </div>
-
-     <h1 class="display-5 fw-bold mb-3">@Model.Name</h1>
-
-      <div class="d-flex align-items-center mb-3">
-        <div class="text-warning fs-5">
-     @for (int i = 0; i < 5; i++)
-     {
-             @if (i < Math.Floor(Model.AverageRating))
-     {
-               <i class="fas fa-star"></i>
-        }
-        else if (i < Model.AverageRating)
-{
-    <i class="fas fa-star-half-alt"></i>
-        }
-       else
-     {
-      <i class="far fa-star"></i>
-     }
-       }
-     </div>
-    <span class="ms-2 text-muted">
-  @Model.AverageRating.ToString("F1") (@Model.ReviewCount تقييم)
-          </span>
-            </div>
-
-     <div class="mb-4">
-           @if (Model.DiscountedPrice.HasValue)
-   {
-             <div>
-    <span class="text-muted text-decoration-line-through h4 me-3">
-          @Model.Price.ToString("N2") ريال
-           </span>
-      <span class="h2 text-danger fw-bold">
-            @Model.DiscountedPrice.Value.ToString("N2") ريال
-         </span>
-    <span class="badge bg-danger ms-2 fs-6">
-         وفر @((((Model.Price - Model.DiscountedPrice.Value) / Model.Price) * 100).ToString("F0"))%
-      </span>
-   </div>
-                }
-  else
-        {
- <span class="h2 text-primary fw-bold">
-     @Model.Price.ToString("N2") ريال
-        </span>
-              }
-     </div>
-
-    <div class="card bg-light mb-4">
-    <div class="card-body">
-            <h5 class="card-title">
-           <i class="fas fa-info-circle"></i> تفاصيل المنتج
-          </h5>
-         <p class="card-text">@Model.Description</p>
-       
-    <ul class="list-unstyled mb-0">
-             @if (!string.IsNullOrEmpty(Model.Material))
-        {
-            <li><i class="fas fa-check text-success"></i> <strong>الخامة:</strong> @Model.Material</li>
-              }
-       @if (!string.IsNullOrEmpty(Model.Brand))
-         {
-    <li><i class="fas fa-check text-success"></i> <strong>الماركة:</strong> @Model.Brand</li>
-                   }
-         @if (!string.IsNullOrEmpty(Model.Color))
-       {
-  <li><i class="fas fa-check text-success"></i> <strong>اللون:</strong> @Model.Color</li>
-      }
-             @if (!string.IsNullOrEmpty(Model.Size))
-         {
-     <li><i class="fas fa-check text-success"></i> <strong>المقاس:</strong> @Model.Size</li>
-   }
-     <li><i class="fas fa-check text-success"></i> <strong>المخزون:</strong> @Model.StockQuantity قطعة</li>
-        </ul>
-       </div>
-            </div>
-
-          @if (User.Identity?.IsAuthenticated == true && User.IsInRole("Customer"))
-  {
-         @if (Model.StockQuantity > 0)
-    {
-            <form asp-action="AddToCart" method="post" class="mb-4">
-             @Html.AntiForgeryToken()
-           <input type="hidden" name="ProductId" value="@Model.ProductId" />
-       
-  <div class="row g-3 mb-3">
-              <div class="col-md-4">
-               <label for="quantity" class="form-label fw-bold">الكمية</label>
-            <div class="input-group">
-          <button type="button" class="btn btn-outline-secondary" onclick="decrementQty()">
- <i class="fas fa-minus"></i>
-  </button>
-     <input type="number" name="Quantity" id="quantity" 
-     class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" required>
-        <button type="button" class="btn btn-outline-secondary" onclick="incrementQty(@Model.StockQuantity)">
-     <i class="fas fa-plus"></i>
-      </button>
-           </div>
-         </div>
-        
-    @if (!string.IsNullOrEmpty(Model.Size))
-        {
-         <div class="col-md-4">
-          <label for="size" class="form-label fw-bold">المقاس</label>
-          <select name="SelectedSize" id="size" class="form-select">
-  <option value="">اختر المقاس</option>
-        <option value="S">صغير (S)</option>
-             <option value="M" selected>وسط (M)</option>
-               <option value="L">كبير (L)</option>
-           <option value="XL">كبير جداً (XL)</option>
-     <option value="XXL">2XL</option>
-             </select>
-         </div>
- }
-          
-      @if (!string.IsNullOrEmpty(Model.Color))
-                {
-         <div class="col-md-4">
-    <label for="color" class="form-label fw-bold">اللون</label>
-   <input type="text" name="SelectedColor" id="color" 
-         class="form-control" value="@Model.Color" readonly>
-       </div>
-         }
-      </div>
-
-        <div class="mb-3">
-      <label for="instructions" class="form-label fw-bold">
-        <i class="fas fa-comment"></i> ملاحظات خاصة (اختياري)
-      </label>
-             <textarea name="SpecialInstructions" id="instructions" 
-         class="form-control" rows="2" 
-        placeholder="أي طلبات خاصة أو تخصيصات..."></textarea>
-           </div>
-
-  <div class="d-grid gap-2">
-       <button type="submit" class="btn btn-primary btn-lg">
-   <i class="fas fa-shopping-cart"></i> أضف إلى السلة
-                </button>
-                </div>
-      </form>
-      }
-        else
-        {
-     <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i>
-        <strong>غير متوفر</strong> - هذا المنتج غير متوفر حالياً
-  </div>
-        }
-          }
-            else if (User.Identity?.IsAuthenticated == false)
-        {
-  <div class="alert alert-info">
-               <i class="fas fa-info-circle"></i>
-           يرجى <a asp-controller="Account" asp-action="Login" class="alert-link">تسجيل الدخول</a> 
-          كعميل لشراء هذا المنتج.
-     </div>
-            }
-            else
-        {
-           <div class="alert alert-warning">
-                 <i class="fas fa-exclamation-circle"></i>
-            هذا المتجر متاح للعملاء فقط. يرجى التسجيل كعميل.
-        </div>
- }
-
-  @if (Model.TailorId.HasValue && !string.IsNullOrEmpty(Model.TailorName))
-         {
-                <div class="card border-primary mt-3">
-          <div class="card-body">
-  <h6 class="card-title">
-             <i class="fas fa-store"></i> يباع بواسطة
-                </h6>
-              <p class="mb-0">
-  <a asp-controller="TailorPortfolio" asp-action="ViewPublicTailorProfile" 
-        asp-route-id="@Model.TailorId" class="text-decoration-none">
-    <strong>@Model.TailorName</strong>
-        </a>
-         </p>
-  </div>
-     </div>
-          }
-        </div>
-    </div>
-
-    <!-- Product Tabs -->
-    <div class="row mt-5">
-      <div class="col-12">
-     <ul class="nav nav-tabs" id="productTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-           <button class="nav-link active" id="description-tab" data-bs-toggle="tab" 
-       data-bs-target="#description" type="button" role="tab">
-<i class="fas fa-align-right"></i> الوصف
-              </button>
-  </li>
-   <li class="nav-item" role="presentation">
-            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" 
-          data-bs-target="#reviews" type="button" role="tab">
-             <i class="fas fa-star"></i> التقييمات (@Model.ReviewCount)
-   </button>
-   </li>
-            </ul>
-            <div class="tab-content p-4 border border-top-0" id="productTabsContent">
-      <div class="tab-pane fade show active" id="description" role="tabpanel">
-       <h5>وصف المنتج</h5>
-         <p>@Model.Description</p>
-      </div>
-           <div class="tab-pane fade" id="reviews" role="tabpanel">
-    <h5>تقييمات العملاء</h5>
-        <div class="text-center text-muted py-5">
-     <i class="fas fa-comments fa-3x mb-3"></i>
-       <p>لا توجد تقييمات حتى الآن. كن أول من يقيّم هذا المنتج!</p>
-         </div>
-    </div>
-    </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
         function incrementQty(max) {
             const input = document.getElementById('quantity');
             const currentValue = parseInt(input.value);
-   if (currentValue < max) {
-       input.value = currentValue + 1;
+            if (currentValue < max) {
+                input.value = currentValue + 1;
             }
-    }
+        }
 
         function decrementQty() {
             const input = document.getElementById('quantity');
             const currentValue = parseInt(input.value);
-  if (currentValue > 1) {
-              input.value = currentValue - 1;
-    }
+            if (currentValue > 1) {
+                input.value = currentValue - 1;
+            }
         }
 
-  // Image gallery functionality
+        // Image gallery functionality
         document.querySelectorAll('.thumbnail-image').forEach(img => {
-     img.addEventListener('click', function() {
-         document.getElementById('mainImage').src = this.src;
-       });
-   });
+            img.addEventListener('click', function() {
+                document.getElementById('mainImage').src = this.src;
+            });
+        });
 
-// Zoom on main image click
+        // Zoom on main image click
         document.getElementById('mainImage')?.addEventListener('click', function() {
             this.classList.toggle('zoomed');
-      });
+        });
     </script>
 }
 
 @section Styles {
     <style>
         .cursor-pointer {
- cursor: pointer;
-  }
+            cursor: pointer;
+        }
         .thumbnail-image {
-   transition: all 0.3s ease;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
         .thumbnail-image:hover {
             opacity: 0.8;
@@ -336,10 +50,10 @@ alt="صورة إضافية" style="height: 80px; object-fit: cover;">
             transform: scale(1.05);
         }
         #mainImage {
-        transition: transform 0.3s ease;
- }
+            transition: transform 0.3s ease;
+        }
         #mainImage.zoomed {
-      transform: scale(1.5);
+            transform: scale(1.5);
         }
     </style>
 }

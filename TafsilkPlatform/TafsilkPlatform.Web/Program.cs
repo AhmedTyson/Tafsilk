@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using System.IO.Compression;
 using System.Text;
@@ -62,71 +61,9 @@ try
         options.JsonSerializerOptions.WriteIndented = builder.Environment.IsDevelopment();
     });
 
-    // ✅ SWAGGER/OPENAPI CONFIGURATION
+    // ✅ SWAGGER/OPENAPI CONFIGURATION - REMOVED PERMANENTLY
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(options =>
-    {
-        options.SwaggerDoc("v1", new OpenApiInfo
-        {
-            Version = "v1",
-            Title = "Tafsilk Platform API",
-            Description = "Tafsilk - منصة الخياطين والتفصيل - API Documentation",
-            Contact = new OpenApiContact
-            {
-                Name = "Tafsilk Platform",
-                Email = "support@tafsilk.com",
-                Url = new Uri("https://tafsilk.com")
-            },
-            License = new OpenApiLicense
-            {
-                Name = "Use under Tafsilk License",
-                Url = new Uri("https://tafsilk.com/license")
-            }
-        });
-
-        // Add JWT Authentication
-        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            Type = SecuritySchemeType.Http,
-            Scheme = "Bearer",
-            BearerFormat = "JWT",
-            In = ParameterLocation.Header,
-            Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\""
-        });
-
-        // Add Cookie Authentication
-        options.AddSecurityDefinition("Cookie", new OpenApiSecurityScheme
-        {
-            Name = ".Tafsilk.Auth",
-            Type = SecuritySchemeType.ApiKey,
-            In = ParameterLocation.Cookie,
-            Description = "Cookie-based authentication"
-        });
-
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
-    {
-    new OpenApiSecurityScheme
-     {
-     Reference = new OpenApiReference
-   {
-     Type = ReferenceType.SecurityScheme,
-       Id = "Bearer"
-          }
-     },
-Array.Empty<string>()
-      }
-        });
-
-        // Include XML comments if available
-        var xmlFilename = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
-        if (File.Exists(xmlPath))
-        {
-            options.IncludeXmlComments(xmlPath);
-        }
-    });
+    // Swagger removed
 
     // Configure Antiforgery
     builder.Services.AddAntiforgery(options =>
@@ -221,7 +158,13 @@ Array.Empty<string>()
         var googleClientId = builder.Configuration["Authentication:Google:ClientId"];
         var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
 
-        if (!string.IsNullOrEmpty(googleClientId) && !string.IsNullOrEmpty(googleClientSecret))
+        // Check if credentials exist and are not placeholder values
+        bool isValidClientId = !string.IsNullOrEmpty(googleClientId) && !googleClientId.Contains("YOUR_");
+        bool isValidClientSecret = !string.IsNullOrEmpty(googleClientSecret) &&
+                                   !googleClientSecret.Contains("YOUR_") &&
+                                   !googleClientSecret.Contains("6X2W6X2W"); // Detect placeholder pattern
+
+        if (isValidClientId && isValidClientSecret)
         {
             authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
           {
@@ -233,6 +176,28 @@ Array.Empty<string>()
               // Request additional scopes
               options.Scope.Add("profile");
               options.Scope.Add("email");
+
+              // Handle Remote Failure (e.g., User Cancelled)
+              options.Events.OnRemoteFailure = context =>
+              {
+                  var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                  var failureMessage = context.Failure?.Message ?? "Unknown error";
+
+                  logger.LogWarning("Google OAuth Remote Failure: {Error}", failureMessage);
+
+                  // If access denied (cancelled), redirect to login
+                  if (failureMessage.Contains("Access was denied") || failureMessage.Contains("canceled"))
+                  {
+                      context.Response.Redirect("/Account/Login");
+                  }
+                  else
+                  {
+                      context.Response.Redirect("/Account/Login?error=ExternalLoginFailed");
+                  }
+
+                  context.HandleResponse();
+                  return Task.CompletedTask;
+              };
           });
 
             builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Information);
@@ -242,7 +207,8 @@ Array.Empty<string>()
         else
         {
             var logger = LoggerFactory.Create(config => config.AddConsole()).CreateLogger("Startup");
-            logger.LogWarning("⚠️ Google OAuth enabled but credentials not configured. Add ClientId and ClientSecret to appsettings.json");
+            logger.LogWarning("⚠️ Google OAuth is DISABLED - Invalid or placeholder credentials detected in appsettings.json");
+            logger.LogWarning("   Update Authentication:Google:ClientId and ClientSecret with valid credentials from Google Cloud Console");
         }
     }
 
@@ -254,8 +220,8 @@ Array.Empty<string>()
     {
         // If connection string points to a SQLite file (development), use SQLite provider
         // Check for specific SQLite markers or file extensions
-        if (!string.IsNullOrEmpty(connectionString) && 
-            (connectionString.Contains(".db", StringComparison.OrdinalIgnoreCase) || 
+        if (!string.IsNullOrEmpty(connectionString) &&
+            (connectionString.Contains(".db", StringComparison.OrdinalIgnoreCase) ||
              connectionString.Contains(".sqlite", StringComparison.OrdinalIgnoreCase) ||
              connectionString.Contains("Filename=", StringComparison.OrdinalIgnoreCase)))
         {
@@ -277,7 +243,7 @@ Array.Empty<string>()
 
         // Suppress PendingModelChangesWarning because we are manually managing schema updates
         // This is necessary because we added PrimaryImageUrl to Product entity without an EF migration
-        options.ConfigureWarnings(warnings => 
+        options.ConfigureWarnings(warnings =>
             warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 
         // Enable sensitive data logging only when explicitly allowed in config AND in Development
@@ -487,7 +453,7 @@ Array.Empty<string>()
         {
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
             logger.LogError(ex, "Unhandled exception in fallback middleware");
-            context.Response.Redirect("/Error?message=حدث خطأ غير متوقع");
+            context.Response.Redirect("/Error?message=An unexpected error occurred");
         }
     });
 
@@ -512,19 +478,7 @@ Array.Empty<string>()
         // In development, use detailed error page for better debugging
         app.UseDeveloperExceptionPage();
 
-        // ✅ SWAGGER MIDDLEWARE
-        app.UseSwagger();
-        app.UseSwaggerUI(options =>
-        {
-            options.SwaggerEndpoint("/swagger/v1/swagger.json", "Tafsilk Platform API v1");
-            options.RoutePrefix = "swagger";
-            options.DocumentTitle = "Tafsilk Platform API";
-            options.DisplayRequestDuration();
-            options.EnableDeepLinking();
-            options.EnableFilter();
-            options.ShowExtensions();
-            options.EnableTryItOutByDefault();
-        });
+        // Swagger middleware removed
     }
     else
     {
@@ -627,15 +581,13 @@ Array.Empty<string>()
         {
             foreach (var url in urls)
             {
-                Log.Information("🔷 Swagger UI available at: {SwaggerUrl}", $"{url}/swagger");
-                Log.Information("🔷 Swagger JSON available at: {SwaggerJsonUrl}", $"{url}/swagger/v1/swagger.json");
+                // Swagger logging removed
             }
         }
         else
         {
             // Fallback to common development URLs
-            Log.Information("🔷 Swagger UI available at: https://localhost:7186/swagger");
-            Log.Information("🔷 Swagger UI available at: http://localhost:5140/swagger");
+            // Swagger logging removed
         }
 
         Log.Information("🔷 Health Check available at: /health");
@@ -644,89 +596,7 @@ Array.Empty<string>()
     }
 
     // ✅ Verify database connection before accepting requests
-    try
-    {
-        using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var providerName = db.Database.ProviderName ?? string.Empty;
-
-        // Apply migrations and seed minimal data
-        // If using SQLite in development, prefer EnsureCreated to avoid running SQL Server-specific migrations
-        if (db.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            try
-            {
-                await db.Database.EnsureCreatedAsync();
-                Log.Information("✓ SQLite database ensured/created successfully");
-
-                if (!await db.Roles.AnyAsync())
-                {
-                    db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
-                    );
-                    await db.SaveChangesAsync();
-                    Log.Information("✓ Seeded default roles into SQLite database");
-                    
-                    // ✅ Seed admin user
-                    var adminConfig = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                    var adminLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                    TafsilkPlatform.DataAccess.Data.Seed.AdminSeeder.Seed(db, adminConfig, adminLogger);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "Failed to ensure/create SQLite database during startup");
-                if (!app.Environment.IsDevelopment()) throw;
-            }
-        }
-        else
-        {
-            // For SQL Server and other providers, attempt to apply migrations
-            try
-            {
-                await db.Database.MigrateAsync();
-                Log.Information("✓ Database migrations applied successfully");
-
-                if (!await db.Roles.AnyAsync())
-                {
-                    db.Roles.AddRange(
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Admin", Description = "Administrator", CreatedAt = DateTime.UtcNow },
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Tailor", Description = "Tailor role", CreatedAt = DateTime.UtcNow },
-                        new TafsilkPlatform.Models.Models.Role { Id = Guid.NewGuid(), Name = "Customer", Description = "Customer role", CreatedAt = DateTime.UtcNow }
-                    );
-                    await db.SaveChangesAsync();
-                    Log.Information("✓ Seeded default roles into database");
-                    
-                    await db.SaveChangesAsync();
-                    Log.Information("✓ Seeded default roles into database");
-                }
-                
-                // ✅ Seed admin user (Run every time to ensure admin exists/updates)
-                var adminConfig = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-                var adminLogger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-                TafsilkPlatform.DataAccess.Data.Seed.AdminSeeder.Seed(db, adminConfig, adminLogger);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "❌ Applying migrations failed. Please ensure the database is available and migrations are compatible.");
-                throw;
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        if (app.Environment.IsDevelopment())
-        {
-            Log.Warning(ex, "Database initialization failed during startup but continuing because environment is Development");
-        }
-        else
-        {
-            Log.Fatal(ex, "❌ Cannot initialize database. Application will stop.");
-            throw;
-        }
-    }
+    await TafsilkPlatform.DataAccess.Data.DbInitializer.InitializeAsync(app.Services, app.Environment.IsDevelopment());
 
     // ✅ STARTUP HEALTH CHECKS - fail fast if attachments folder not writable
     try

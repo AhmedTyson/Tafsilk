@@ -21,6 +21,7 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public double AverageRating { get; set; }
         public int ReviewCount { get; set; }
         public string? PrimaryImageBase64 { get; set; }
+        public string? PrimaryImageContentType { get; set; }
         public List<string> AdditionalImages { get; set; } = new();
         public string? TailorName { get; set; }
         public Guid? TailorId { get; set; }

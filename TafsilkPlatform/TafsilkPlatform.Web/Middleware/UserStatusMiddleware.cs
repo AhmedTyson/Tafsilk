@@ -10,16 +10,14 @@ namespace TafsilkPlatform.Web.Middleware;
 /// Middleware to check user active status and verification/approval status
 /// CRITICAL FOR TAILORS: Ensures incomplete registrations are redirected to verification
 /// </summary>
-public class UserStatusMiddleware
+/// <summary>
+/// Middleware to check user active status and verification/approval status
+/// CRITICAL FOR TAILORS: Ensures incomplete registrations are redirected to verification
+/// </summary>
+public class UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddleware> logger)
 {
-    private readonly RequestDelegate _next;
-    private readonly ILogger<UserStatusMiddleware> _logger;
-
-    public UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddleware> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
+    private readonly RequestDelegate _next = next;
+    private readonly ILogger<UserStatusMiddleware> _logger = logger;
 
     public async Task InvokeAsync(HttpContext context, IAuthService authService, IUnitOfWork unitOfWork)
     {
@@ -122,13 +120,12 @@ public class UserStatusMiddleware
     /// <summary>
     /// Determines if middleware should skip processing for this path
     /// </summary>
-    private bool ShouldSkipMiddleware(string path)
+    private static bool ShouldSkipMiddleware(string path)
     {
         return path.Contains("/account/login") ||
       path.Contains("/account/logout") ||
     path.Contains("/account/register") ||
          path.Contains("/account/completetailorprofile") ||
-     path.Contains("/account/verifyemail") ||
      path.Contains("/account/resendverificationemail") ||
  path.StartsWith("/css") ||
      path.StartsWith("/js") ||
@@ -137,12 +134,11 @@ path.StartsWith("/lib") ||
       path.StartsWith("/uploads") ||
       path.StartsWith("/favicon") ||
 path.StartsWith("/health") ||
-   path.StartsWith("/swagger") ||
     path.StartsWith("/_framework") ||
        path.StartsWith("/_vs");
     }
 
-    private async Task SignOutUser(HttpContext context)
+    private static async Task SignOutUser(HttpContext context)
     {
         await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         context.Response.Redirect("/Account/Login?error=unauthorized");

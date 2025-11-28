@@ -30,13 +30,13 @@ public class OrderRepository : EfRepository<Order>, IOrderRepository
     public Task<Order?> GetOrderWithDetailsAsync(Guid orderId)
         => _db.Orders
             .Include(o => o.Items)
-            .Include(o => o.orderImages)
+            .Include(o => o.OrderImages)
             .Include(o => o.Payments)
             .AsNoTracking()
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
 
     public Task<Order?> GetOrderWithImagesAsync(Guid orderId)
-        => _db.Orders.Include(o => o.orderImages).AsNoTracking().FirstOrDefaultAsync(o => o.OrderId == orderId);
+        => _db.Orders.Include(o => o.OrderImages).AsNoTracking().FirstOrDefaultAsync(o => o.OrderId == orderId);
 
     public Task<Order?> GetOrderWithPaymentsAsync(Guid orderId)
         => _db.Orders.Include(o => o.Payments).AsNoTracking().FirstOrDefaultAsync(o => o.OrderId == orderId);

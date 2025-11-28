@@ -23,18 +23,12 @@
         dashboardAction = "Tailor";
         dashboardArea = "";
     }
-    else if (userRole == "Customer")
-    {
-        dashboardController = "Dashboards";
-        dashboardAction = "Customer";
-        dashboardArea = "";
-    }
 }
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
     <div class="container-fluid px-3">
         <!-- Brand -->
-        <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">
+        <a class="navbar-brand fw-bold" asp-area="" asp-controller="Home" asp-action="Index">
             <i class="fas fa-cut me-2"></i>Tafsilk
         </a>
 
@@ -48,7 +42,7 @@
             <!-- Main Links (Left/Center) -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                 </li>
                 
                 <!-- Categories Dropdown -->
@@ -57,10 +51,10 @@
                         Categories
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
-                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index">All Tailors</a></li>
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index">All Tailors</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index" asp-route-filter="Verified">Verified Tailors</a></li>
-                        <li><a class="dropdown-item" asp-controller="Tailors" asp-action="Index" asp-route-filter="TopRated">Top Rated</a></li>
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index" asp-route-filter="Verified">Verified Tailors</a></li>
+                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index" asp-route-filter="TopRated">Top Rated</a></li>
                     </ul>
                 </li>
 
@@ -71,7 +65,7 @@
                 </li>
                 
                 <li class="nav-item">
-                    <a class="nav-link" asp-controller="Home" asp-action="Contact">Contact</a>
+                    <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
                 </li>
             </ul>
 
@@ -106,18 +100,21 @@
                             <li><hr class="dropdown-divider"></li>
                             
                             <!-- Dashboard Link -->
-                            <li>
-                                <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
-                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
-                                </a>
-                            </li>
+                            @if (userRole != "Customer")
+                            {
+                                <li>
+                                    <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
+                                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                    </a>
+                                </li>
+                            }
 
                             <!-- Role Specific Links -->
                             @if (userRole == "Tailor")
                             {
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Profiles" asp-action="TailorProfile">
-                                        <i class="fas fa-user me-2"></i>My Profile
+                                    <a class="dropdown-item" asp-area="" asp-controller="Profiles" asp-action="EditTailorProfile">
+                                        <i class="fas fa-cog me-2"></i>Account Settings
                                     </a>
                                 </li>
                                 <li>
@@ -129,21 +126,21 @@
                             else if (userRole == "Customer")
                             {
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Profiles" asp-action="CustomerProfile">
-                                        <i class="fas fa-user me-2"></i>My Profile
+                                    <a class="dropdown-item" asp-area="" asp-controller="Profiles" asp-action="CustomerProfile">
+                                        <i class="fas fa-cog me-2"></i>Account Settings
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Orders" asp-action="MyOrders">
+                                    <a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="MyOrders">
                                         <i class="fas fa-shopping-bag me-2"></i>My Orders
                                     </a>
                                 </li>
                             }
 
-                            <li><a class="dropdown-item" asp-controller="Account" asp-action="Settings"><i class="fas fa-cog me-2"></i>Settings</a></li>
+
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                     <button type="submit" class="dropdown-item text-danger">
                                         <i class="fas fa-sign-out-alt me-2"></i>Logout
                                     </button>
@@ -155,8 +152,8 @@
                 else
                 {
                     <!-- Guest Actions -->
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-light">Login</a>
-                    <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-warning text-dark fw-bold">Sign Up</a>
+                    <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-sm btn-outline-light">Login</a>
+                    <a asp-area="" asp-controller="Account" asp-action="Register" class="btn btn-sm btn-warning text-dark fw-bold">Sign Up</a>
                 }
             </div>
         </div>

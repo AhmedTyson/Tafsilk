@@ -77,7 +77,7 @@ namespace TafsilkPlatform.Web.Services
                 if (profile == null)
                 {
                     _logger.LogWarning("[ProfileService] Customer profile not found: {CustomerId}", customerId);
-                    return (false, "الملف الشخصي غير موجود");
+                    return (false, "Profile not found");
                 }
 
                 // Update fields
@@ -97,7 +97,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error updating customer profile");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -120,7 +120,7 @@ namespace TafsilkPlatform.Web.Services
                 if (profile == null)
                 {
                     _logger.LogWarning("[ProfileService] Tailor profile not found: {TailorId}", tailorId);
-                    return (false, "الملف الشخصي غير موجود");
+                    return (false, "Profile not found");
                 }
 
                 // Update fields
@@ -141,7 +141,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error updating tailor profile");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -161,7 +161,7 @@ namespace TafsilkPlatform.Web.Services
                 var profile = await _unitOfWork.Customers.GetByUserIdAsync(customerId);
                 if (profile == null)
                 {
-                    return (false, "الملف الشخصي غير موجود");
+                    return (false, "Profile not found");
                 }
 
                 var address = new UserAddress
@@ -191,7 +191,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error adding address");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -210,13 +210,13 @@ namespace TafsilkPlatform.Web.Services
                 var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
                 if (address == null)
                 {
-                    return (false, "العنوان غير موجود");
+                    return (false, "Address not found");
                 }
 
                 // Verify ownership using helper method
                 if (!VerifyOwnership(address.UserId, customerId))
                 {
-                    return (false, "غير مصرح بهذا الإجراء");
+                    return (false, "Unauthorized action");
                 }
 
                 // Update fields
@@ -241,7 +241,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error updating address");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -259,13 +259,13 @@ namespace TafsilkPlatform.Web.Services
                 var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
                 if (address == null)
                 {
-                    return (false, "العنوان غير موجود");
+                    return (false, "Address not found");
                 }
 
                 // Verify ownership using helper method
                 if (!VerifyOwnership(address.UserId, customerId))
                 {
-                    return (false, "غير مصرح بهذا الإجراء");
+                    return (false, "Unauthorized action");
                 }
 
                 // If deleting default address, make another one default
@@ -283,7 +283,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error deleting address");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -301,13 +301,13 @@ namespace TafsilkPlatform.Web.Services
                 var address = await _unitOfWork.Addresses.GetByIdAsync(addressId);
                 if (address == null)
                 {
-                    return (false, "العنوان غير موجود");
+                    return (false, "Address not found");
                 }
 
                 // Verify ownership using helper method
                 if (!VerifyOwnership(address.UserId, customerId))
                 {
-                    return (false, "غير مصرح بهذا الإجراء");
+                    return (false, "Unauthorized action");
                 }
 
                 // Unset other defaults
@@ -321,7 +321,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error setting default address");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -341,7 +341,7 @@ namespace TafsilkPlatform.Web.Services
                 var profile = await _unitOfWork.Tailors.GetByUserIdAsync(tailorId);
                 if (profile == null)
                 {
-                    return (false, "الملف الشخصي غير موجود");
+                    return (false, "Profile not found");
                 }
 
                 var service = new TailorService
@@ -364,7 +364,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error adding service");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -383,14 +383,14 @@ namespace TafsilkPlatform.Web.Services
                 var service = await _unitOfWork.TailorServices.GetByIdAsync(serviceId);
                 if (service == null)
                 {
-                    return (false, "الخدمة غير موجودة");
+                    return (false, "Service not found");
                 }
 
                 // Verify ownership
                 var profile = await _unitOfWork.Tailors.GetByUserIdAsync(tailorId);
                 if (profile == null || !VerifyOwnership(service.TailorId, profile.Id))
                 {
-                    return (false, "غير مصرح بهذا الإجراء");
+                    return (false, "Unauthorized action");
                 }
 
                 // Update fields
@@ -407,7 +407,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error updating service");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
 
@@ -425,14 +425,14 @@ namespace TafsilkPlatform.Web.Services
                 var service = await _unitOfWork.TailorServices.GetByIdAsync(serviceId);
                 if (service == null)
                 {
-                    return (false, "الخدمة غير موجودة");
+                    return (false, "Service not found");
                 }
 
                 // Verify ownership
                 var profile = await _unitOfWork.Tailors.GetByUserIdAsync(tailorId);
                 if (profile == null || !VerifyOwnership(service.TailorId, profile.Id))
                 {
-                    return (false, "غير مصرح بهذا الإجراء");
+                    return (false, "Unauthorized action");
                 }
 
                 // Soft delete
@@ -446,7 +446,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[ProfileService] Error deleting service");
-                return (false, $"حدث خطأ: {ex.Message}");
+                return (false, $"Error: {ex.Message}");
             }
         }
     }

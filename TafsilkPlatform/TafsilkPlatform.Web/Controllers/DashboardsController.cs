@@ -26,12 +26,34 @@ public class DashboardsController : Controller
         _logger = logger;
     }
 
-    [Authorize(Roles = "Customer,Admin")]
-    public IActionResult Customer()
+    /// <summary>
+    /// Router action to redirect to the correct dashboard based on role
+    /// GET: /Dashboards
+    /// </summary>
+    [HttpGet("")]
+    public IActionResult Index()
     {
-        ViewData["Title"] = "لوحة العميل";
-        return View();
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction("Index", "AdminDashboard", new { area = "Admin" });
+        }
+
+        if (User.IsInRole("Tailor"))
+        {
+            return RedirectToAction("Tailor");
+        }
+
+        if (User.IsInRole("Customer"))
+        {
+            // Customers don't have a specific dashboard, redirect to store or profile
+            return RedirectToAction("Index", "Store", new { area = "Customer" });
+        }
+
+        // Fallback
+        return RedirectToAction("Index", "Home");
     }
+
+
 
     /// <summary>
     /// Redirect route for /Dashboards/Tailor/Add to correct product add route
@@ -68,7 +90,7 @@ public class DashboardsController : Controller
                 // Tailor has not provided evidence - MANDATORY redirect
                 // ✅ Skip redirect for admins (they can see all pages)
                 _logger.LogWarning("Tailor profile not found for user {UserId}. Redirecting to evidence submission.", userId);
-                TempData["ErrorMessage"] = "يجب تقديم الأوراق الثبوتية وإكمال ملفك الشخصي أولاً. هذه الخطوة إلزامية للخياطين.";
+                TempData["ErrorMessage"] = "You must submit documents and complete your profile first. This step is mandatory for tailors.";
                 return RedirectToAction("ProvideTailorEvidence", "Account", new { incomplete = true });
             }
 
@@ -85,15 +107,15 @@ public class DashboardsController : Controller
             if (!tailor.IsVerified || isPendingApproval)
             {
                 ViewData["PendingApproval"] = true;
-                ViewData["PendingMessage"] = "حسابك قيد المراجعة من قبل الإدارة. سيتم تفعيل جميع الميزات بعد الموافقة (عادة خلال 2-3 أيام عمل).";
+                ViewData["PendingMessage"] = "Your account is under review by administration. All features will be activated after approval (usually within 2-3 business days).";
             }
 
             // Build dashboard data
             var model = new TailorDashboardViewModel
             {
                 TailorId = tailor.Id,
-                FullName = tailor.FullName ?? "خياط",
-                ShopName = tailor.ShopName ?? "ورشة غير مسماة",
+                FullName = tailor.FullName ?? "Tailor",
+                ShopName = tailor.ShopName ?? "Unnamed Workshop",
                 IsVerified = tailor.IsVerified,
                 City = tailor.City,
             };
@@ -149,8 +171,8 @@ public class DashboardsController : Controller
             {
                 OrderId = o.OrderId,
                 OrderNumber = $"#{o.OrderId.ToString().Substring(0, 8).ToUpper()}",
-                CustomerName = o.Customer.User.Email ?? "عميل",
-                ServiceName = o.OrderType ?? "خدمة تفصيل",
+                CustomerName = o.Customer.User.Email ?? "Customer",
+                ServiceName = o.OrderType ?? "Tailoring Service",
                 Status = o.Status,
                 TotalAmount = (decimal)o.TotalPrice,
                 CreatedAt = o.CreatedAt.DateTime,
@@ -192,13 +214,13 @@ public class DashboardsController : Controller
             // Generate alerts
             model.Alerts = GenerateTailorAlerts(tailor, model);
 
-            ViewData["Title"] = "لوحة الخياط";
+            ViewData["Title"] = "Tailor Dashboard";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor dashboard");
-            TempData["Error"] = "حدث خطأ أثناء تحميل لوحة التحكم";
+            TempData["Error"] = "An error occurred while loading the dashboard";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -217,24 +239,10 @@ public class DashboardsController : Controller
             {
                 Type = "info",
                 Icon = "fa-info-circle",
-                Title = "حسابك بانتظار التحقق",
-                Message = "يرجى إكمال بياناتك وإضافة خدماتك لتسريع عملية التحقق. سيتم مراجعة حسابك من قبل الإدارة خلال 24-48 ساعة.",
-                ActionUrl = Url.Action("ManageServices", "TailorManagement"),
-                ActionText = "إضافة خدمات"
-            });
-        }
-
-        // No services alert
-        if (model.TotalServices == 0)
-        {
-            alerts.Add(new DashboardAlert
-            {
-                Type = "warning",
-                Icon = "fa-exclamation-triangle",
-                Title = "لا توجد خدمات",
-                Message = "قم بإضافة خدماتك ليتمكن العملاء من العثور عليك وطلب خدماتك.",
-                ActionUrl = Url.Action("AddService", "TailorManagement"),
-                ActionText = "إضافة خدمة"
+                Title = "Your Account is Awaiting Verification",
+                Message = "Please complete your data and add your products to speed up the verification process. Your account will be reviewed by administration within 24-48 hours.",
+                ActionUrl = Url.Action("AddProduct", "TailorManagement"),
+                ActionText = "Add Product"
             });
         }
 
@@ -245,10 +253,10 @@ public class DashboardsController : Controller
             {
                 Type = "warning",
                 Icon = "fa-images",
-                Title = "معرض الأعمال فارغ",
-                Message = "أضف صور من أعمالك السابقة لجذب المزيد من العملاء وزيادة مصداقيتك.",
+                Title = "Portfolio is Empty",
+                Message = "Add photos of your previous work to attract more customers and increase your credibility.",
                 ActionUrl = Url.Action("AddPortfolioImage", "TailorManagement"),
-                ActionText = "إضافة صور"
+                ActionText = "Add Images"
             });
         }
 
@@ -259,10 +267,10 @@ public class DashboardsController : Controller
             {
                 Type = "success",
                 Icon = "fa-bell",
-                Title = $"لديك {model.NewOrdersCount} طلب جديد!",
-                Message = "يوجد طلبات جديدة تحتاج إلى مراجعتك والرد عليها.",
+                Title = $"You have {model.NewOrdersCount} new order!",
+                Message = "There are new orders that need your review and response.",
                 ActionUrl = "#orders-section",
-                ActionText = "عرض الطلبات"
+                ActionText = "View Orders"
             });
         }
 

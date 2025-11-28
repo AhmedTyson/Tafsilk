@@ -146,13 +146,13 @@ namespace TafsilkPlatform.Models.Models
         {
             get
             {
-                if (!ExperienceYears.HasValue) return "غير محدد";
+                if (!ExperienceYears.HasValue) return "Not Specified";
                 return ExperienceYears.Value switch
                 {
-                    < 2 => "مبتدئ",
-                    < 5 => "متوسط",
-                    < 10 => "محترف",
-                    _ => "خبير"
+                    < 2 => "Beginner",
+                    < 5 => "Intermediate",
+                    < 10 => "Professional",
+                    _ => "Expert"
                 };
             }
         }

@@ -84,7 +84,8 @@ namespace TafsilkPlatform.Web.Services
                     IsFeatured = p.IsFeatured,
                     AverageRating = p.AverageRating,
                     ReviewCount = p.ReviewCount,
-                    PrimaryImageBase64 = p.PrimaryImageData != null ? Convert.ToBase64String(p.PrimaryImageData) : null
+                    PrimaryImageBase64 = p.PrimaryImageData != null ? Convert.ToBase64String(p.PrimaryImageData) : null,
+                    PrimaryImageContentType = p.PrimaryImageContentType
                 })
                 .ToListAsync();
 
@@ -134,6 +135,7 @@ namespace TafsilkPlatform.Web.Services
                 AverageRating = product.AverageRating,
                 ReviewCount = product.ReviewCount,
                 PrimaryImageBase64 = product.PrimaryImageData != null ? Convert.ToBase64String(product.PrimaryImageData) : null,
+                PrimaryImageContentType = product.PrimaryImageContentType,
                 AdditionalImages = !string.IsNullOrEmpty(product.AdditionalImagesJson)
                     ? JsonSerializer.Deserialize<List<string>>(product.AdditionalImagesJson) ?? new()
                     : new(),
@@ -159,7 +161,8 @@ namespace TafsilkPlatform.Web.Services
                 IsAvailable = p.IsAvailable,
                 AverageRating = p.AverageRating,
                 ReviewCount = p.ReviewCount,
-                PrimaryImageBase64 = p.PrimaryImageData != null ? Convert.ToBase64String(p.PrimaryImageData) : null
+                PrimaryImageBase64 = p.PrimaryImageData != null ? Convert.ToBase64String(p.PrimaryImageData) : null,
+                PrimaryImageContentType = p.PrimaryImageContentType
             });
         }
 
@@ -559,6 +562,11 @@ namespace TafsilkPlatform.Web.Services
                      var tax = CalculateTax(subtotal);
                      var total = subtotal + shipping + tax;
 
+                     // Determine order status based on payment method
+                     var orderStatus = request.PaymentMethod == "CreditCard"
+                         ? OrderStatus.PendingPayment
+                         : OrderStatus.Confirmed;
+
                      // Create order
                      var order = new Order
                      {
@@ -570,7 +578,7 @@ namespace TafsilkPlatform.Web.Services
                          Description = "Store Purchase",
                          OrderType = "StoreOrder",
                          TotalPrice = (double)total,
-                         Status = OrderStatus.Confirmed, // Store orders are auto-confirmed
+                         Status = orderStatus,
                          CreatedAt = DateTimeOffset.UtcNow,
                          DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
                          FulfillmentMethod = "Delivery"
@@ -630,7 +638,9 @@ namespace TafsilkPlatform.Web.Services
                      }
 
                      // Determine payment status
-                     var paymentStatus = Enums.PaymentStatus.Completed;
+                     var paymentStatus = request.PaymentMethod == "CreditCard"
+                         ? Enums.PaymentStatus.Pending
+                         : Enums.PaymentStatus.Completed;
 
                      // Create payment record
                      var payment = new TafsilkPlatform.Models.Models.Payment
@@ -648,12 +658,12 @@ namespace TafsilkPlatform.Web.Services
                             : Enums.PaymentType.Cash,
                          PaymentStatus = paymentStatus,
                          TransactionType = Enums.TransactionType.Credit,
-                         PaidAt = DateTimeOffset.UtcNow,
-                         Currency = "SAR",
-                         Provider = "Internal",
+                         PaidAt = paymentStatus == Enums.PaymentStatus.Completed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null,
+                         Currency = "EGP",
+                         Provider = request.PaymentMethod == "CreditCard" ? "Stripe" : "Internal",
                          Notes = request.PaymentMethod == "CashOnDelivery"
                             ? "Payment will be collected on delivery"
-                            : null
+                            : "Pending Stripe payment"
                      };
 
                      // Use Context to add payment
@@ -666,8 +676,8 @@ namespace TafsilkPlatform.Web.Services
                      await _unitOfWork.SaveChangesAsync();
 
                      _logger.LogInformation(
-                         "Checkout completed successfully for customer {CustomerId}. OrderId: {OrderId}",
-                         customerId, order.OrderId);
+                         "Checkout completed successfully for customer {CustomerId}. OrderId: {OrderId}. Status: {Status}",
+                         customerId, order.OrderId, orderStatus);
 
                      return (true, order.OrderId, (string?)null);
                  }
@@ -681,15 +691,15 @@ namespace TafsilkPlatform.Web.Services
 
         private decimal CalculateShipping(decimal subtotal)
         {
-            // Free shipping over 500 SAR
+            // Free shipping over 500 EGP
             if (subtotal >= 500) return 0;
             return 25; // Flat rate
         }
 
         private decimal CalculateTax(decimal subtotal)
         {
-            // 15% VAT in Saudi Arabia
-            return subtotal * 0.15m;
+            // 14% VAT in Egypt
+            return subtotal * 0.14m;
         }
 
         /// <summary>
@@ -727,8 +737,8 @@ namespace TafsilkPlatform.Web.Services
                             OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(),
                             TotalAmount = (decimal)order.TotalPrice,
                             OrderDate = order.CreatedAt,
-                            PaymentMethod = "الدفع عند الاستلام",
-                            DeliveryAddress = order.DeliveryAddress ?? "غير محدد",
+                            PaymentMethod = "Cash on Delivery",
+                            DeliveryAddress = order.DeliveryAddress ?? "Not specified",
                             Items = order.Items.Select(item => new OrderSuccessItemViewModel
                             {
                                 ProductName = item.Product?.Name ?? item.Description,

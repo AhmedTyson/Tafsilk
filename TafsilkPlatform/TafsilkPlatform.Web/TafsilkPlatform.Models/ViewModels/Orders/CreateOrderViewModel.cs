@@ -19,43 +19,43 @@ public class CreateOrderViewModel
     // Service Selection
     public List<ServiceOptionViewModel> AvailableServices { get; set; } = new();
 
-    [Required(ErrorMessage = "يرجى اختيار نوع الخدمة")]
+    [Required(ErrorMessage = "Please select service type")]
     public Guid? SelectedServiceId { get; set; }
 
     public string? ServiceType { get; set; }
 
     // Order Details
-    [Required(ErrorMessage = "يرجى إدخال وصف الطلب")]
-    [StringLength(2000, ErrorMessage = "الوصف يجب أن لا يتجاوز 2000 حرف")]
+    [Required(ErrorMessage = "Please enter order description")]
+    [StringLength(2000, ErrorMessage = "Description must not exceed 2000 characters")]
     public string? Description { get; set; }
 
     // Reference Images
-    [Display(Name = "صور مرجعية")]
+    [Display(Name = "Reference Images")]
     public List<IFormFile>? ReferenceImages { get; set; }
 
     // Measurements
-    [Display(Name = "المقاسات")]
+    [Display(Name = "Measurements")]
     public string? Measurements { get; set; }
 
-    [Display(Name = "ملاحظات إضافية")]
-    [StringLength(1000, ErrorMessage = "الملاحظات يجب أن لا تتجاوز 1000 حرف")]
+    [Display(Name = "Additional Notes")]
+    [StringLength(1000, ErrorMessage = "Notes must not exceed 1000 characters")]
     public string? AdditionalNotes { get; set; }
 
     // Appointment
-    [Display(Name = "تاريخ التسليم المطلوب")]
+    [Display(Name = "Requested Delivery Date")]
     public DateTimeOffset? DueDate { get; set; }
 
-    [Display(Name = "وقت الموعد المفضل")]
+    [Display(Name = "Preferred Appointment Time")]
     public string? PreferredTime { get; set; }
 
     // Pricing
-    [Display(Name = "السعر التقديري")]
+    [Display(Name = "Estimated Price")]
     public decimal EstimatedPrice { get; set; }
 
     public bool IsExpressService { get; set; }
 
     // Agreement
-    [Required(ErrorMessage = "يجب الموافقة على الشروط والأحكام")]
+    [Required(ErrorMessage = "You must agree to the terms and conditions")]
     public bool AgreeToTerms { get; set; }
 
     // Internal

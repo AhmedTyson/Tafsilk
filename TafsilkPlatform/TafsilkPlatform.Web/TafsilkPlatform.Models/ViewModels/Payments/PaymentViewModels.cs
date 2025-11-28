@@ -100,37 +100,6 @@ public class PaymentDetailsViewModel
     // Computed properties
     public string StatusDisplay => GetStatusDisplay(Status);
     public string MethodDisplay => GetMethodDisplay(PaymentMethod);
-    public string DurationMinutes => CompletedAt.HasValue 
-      ? (CompletedAt.Value - CreatedAt).TotalMinutes.ToString("F0") 
-   : "N/A";
-    
-    private string GetStatusDisplay(PaymentStatus status) => status switch
-  {
-        PaymentStatus.Pending => "قيد الانتظار",
-    PaymentStatus.Processing => "جارِ المعالجة",
-        PaymentStatus.Completed => "مكتمل",
-        PaymentStatus.Failed => "فشل",
-        PaymentStatus.Cancelled => "ملغي",
- PaymentStatus.Refunded => "مسترد",
-        _ => "غير معروف"
-    };
-    
-    private string GetMethodDisplay(PaymentMethod method) => method switch
-    {
-   PaymentMethod.CashOnDelivery => "الدفع عند الاستلام",
-     PaymentMethod.Card => "بطاقة ائتمان",
-        PaymentMethod.Wallet => "المحفظة",
-        PaymentMethod.VodafoneCash => "فودافون كاش",
-        PaymentMethod.OrangeCash => "أورنج كاش",
-        PaymentMethod.EtisalatCash => "اتصالات كاش",
-      PaymentMethod.BankTransfer => "تحويل بنكي",
-        _ => "غير معروف"
-    };
-}
-
-// ============================================
-// PAYMENT HISTORY
-// ============================================
 
 /// <summary>
 /// Payment history view

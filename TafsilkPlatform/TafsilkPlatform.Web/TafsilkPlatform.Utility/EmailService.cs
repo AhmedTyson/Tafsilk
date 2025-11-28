@@ -42,7 +42,7 @@ public class EmailService : IEmailService
         _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
         _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
         _fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
-        _fromName = _configuration["Email:FromName"] ?? "منصة تفصيلك";
+        _fromName = _configuration["Email:FromName"] ?? "Tafsilk Platform";
         _username = _configuration["Email:Username"] ?? "";
         _password = _configuration["Email:Password"] ?? "";
         _enableSsl = bool.Parse(_configuration["Email:EnableSsl"] ?? "true");
@@ -58,50 +58,46 @@ public class EmailService : IEmailService
     {
         try
         {
-            var verificationUrl = $"{_configuration["App:BaseUrl"]}/Account/VerifyEmail?token={verificationToken}";
+            var verificationUrl = $"{_configuration["App:BaseUrl"]}/Account/VerifyEmail?token={verificationToken}&email={WebUtility.UrlEncode(email)}";
 
-            var subject = "تأكيد البريد الإلكتروني - منصة تفصيلك";
+            var subject = "Email Verification - Tafsilk Platform";
             var body = $@"
 <!DOCTYPE html>
-<html dir='rtl' lang='ar'>
+<html dir='ltr' lang='en'>
 <head>
-    <meta charset='utf-8'>
+<meta charset='utf-8'>
     <style>
-     body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }}
- .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
-   .header {{ text-align: center; margin-bottom: 30px; }}
-     .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
-   .title {{ font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 20px; }}
+        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+        .header {{ text-align: center; margin-bottom: 30px; }}
+        .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
+        .title {{ font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 20px; }}
         .message {{ font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 30px; }}
         .button {{ display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }}
-    .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
+        .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
     </style>
 </head>
 <body>
     <div class='container'>
         <div class='header'>
-      <div class='logo'>🔧 تفصيلك</div>
+            <div class='logo'>🔧 Tafsilk</div>
         </div>
-    <div class='title'>مرحباً {fullName}،</div>
+        <div class='title'>Hello {{fullName}},</div>
         <div class='message'>
-            <p>شكراً لتسجيلك في منصة تفصيلك!</p>
-          <p>لإكمال عملية التسجيل، يرجى تأكيد بريدك الإلكتروني بالضغط على الزر أدناه:</p>
+            <p>Thank you for registering with Tafsilk Platform.</p>
+            <p>To verify your email address, please click the button below:</p>
         </div>
-     <div style='text-align: center;'>
-            <a href='{verificationUrl}' class='button'>تأكيد البريد الإلكتروني</a>
+        <div style='text-align: center;'>
+            <a href='{{verificationUrl}}' class='button'>Verify Email</a>
         </div>
-     <div class='message' style='margin-top: 30px;'>
-            <p><strong>أو انسخ الرابط التالي في متصفحك:</strong></p>
-          <p style='word-break: break-all; color: #2563eb;'>{verificationUrl}</p>
-    </div>
-  <div class='message'>
-   <p style='color: #ef4444; font-weight: 600;'>⚠️ هذا الرابط صالح لمدة 24 ساعة فقط</p>
-            <p style='font-size: 14px; color: #6b7280;'>إذا لم تقم بإنشاء هذا الحساب، يمكنك تجاهل هذا البريد.</p>
+        <div class='message' style='margin-top: 30px;'>
+            <p><strong>Or copy the following link into your browser:</strong></p>
+            <p style='word-break: break-all; color: #2563eb;'>{{verificationUrl}}</p>
         </div>
         <div class='footer'>
-            <p>© 2024 منصة تفصيلك - جميع الحقوق محفوظة</p>
- <p>هذا البريد تم إرساله تلقائياً، يرجى عدم الرد عليه</p>
-    </div>
+            <p>© 2024 Tafsilk Platform - All rights reserved</p>
+            <p>This email was sent automatically, please do not reply</p>
+        </div>
     </div>
 </body>
 </html>";
@@ -124,10 +120,10 @@ public class EmailService : IEmailService
         {
             var resetUrl = $"{_configuration["App:BaseUrl"]}/Account/ResetPassword?token={resetToken}";
 
-            var subject = "إعادة تعيين كلمة المرور - منصة تفصيلك";
+            var subject = "Password Reset - Tafsilk Platform";
             var body = $@"
 <!DOCTYPE html>
-<html dir='rtl' lang='ar'>
+<html dir='ltr' lang='en'>
 <head>
 <meta charset='utf-8'>
     <style>
@@ -144,27 +140,27 @@ public class EmailService : IEmailService
 <body>
     <div class='container'>
         <div class='header'>
-         <div class='logo'>🔧 تفصيلك</div>
+         <div class='logo'>🔧 Tafsilk</div>
     </div>
-    <div class='title'>مرحباً {fullName}،</div>
+    <div class='title'>Hello {fullName},</div>
         <div class='message'>
-      <p>تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بحسابك.</p>
-    <p>لإعادة تعيين كلمة المرور، يرجى الضغط على الزر أدناه:</p>
+      <p>We received a request to reset your password.</p>
+    <p>To reset your password, please click the button below:</p>
         </div>
         <div style='text-align: center;'>
-       <a href='{resetUrl}' class='button'>إعادة تعيين كلمة المرور</a>
+       <a href='{resetUrl}' class='button'>Reset Password</a>
         </div>
  <div class='message' style='margin-top: 30px;'>
-            <p><strong>أو انسخ الرابط التالي في متصفحك:</strong></p>
+            <p><strong>Or copy the following link into your browser:</strong></p>
   <p style='word-break: break-all; color: #2563eb;'>{resetUrl}</p>
   </div>
         <div class='message'>
- <p style='color: #ef4444; font-weight: 600;'>⚠️ هذا الرابط صالح لمدة ساعة واحدة فقط</p>
-  <p style='font-size: 14px; color: #6b7280;'>إذا لم تطلب إعادة تعيين كلمة المرور، يمكنك تجاهل هذا البريد بأمان.</p>
+ <p style='color: #ef4444; font-weight: 600;'>⚠️ This link is valid for one hour only</p>
+  <p style='font-size: 14px; color: #6b7280;'>If you did not request a password reset, you can safely ignore this email.</p>
         </div>
 <div class='footer'>
-        <p>© 2024 منصة تفصيلك - جميع الحقوق محفوظة</p>
-            <p>هذا البريد تم إرساله تلقائياً، يرجى عدم الرد عليه</p>
+        <p>© 2024 Tafsilk Platform - All rights reserved</p>
+            <p>This email was sent automatically, please do not reply</p>
  </div>
     </div>
 </body>
@@ -188,17 +184,17 @@ public class EmailService : IEmailService
         {
             var roleText = role switch
             {
-                "Customer" => "عميل",
-                "Tailor" => "خياط",
-                // "Corporate" => "عميل مؤسسي", // REMOVED: Corporate feature
-                "Admin" => "مدير",
-                _ => "مستخدم"
+                "Customer" => "Customer",
+                "Tailor" => "Tailor",
+                // "Corporate" => "Corporate Customer", // REMOVED: Corporate feature
+                "Admin" => "Admin",
+                _ => "User"
             };
 
-            var subject = "مرحباً بك في منصة تفصيلك!";
+            var subject = "Welcome to Tafsilk Platform!";
             var body = $@"
 <!DOCTYPE html>
-<html dir='rtl' lang='ar'>
+<html dir='ltr' lang='en'>
 <head>
     <meta charset='utf-8'>
     <style>
@@ -215,18 +211,18 @@ public class EmailService : IEmailService
 <body>
     <div class='container'>
       <div class='header'>
- <div class='logo'>🎉 تفصيلك</div>
+ <div class='logo'>🎉 Tafsilk</div>
         </div>
-        <div class='title'>مرحباً {fullName}،</div>
+        <div class='title'>Hello {fullName},</div>
         <div class='message'>
- <p>نرحب بك في منصة تفصيلك كـ <strong>{roleText}</strong>!</p>
-          <p>تم تأكيد بريدك الإلكتروني بنجاح ويمكنك الآن الاستمتاع بجميع مزايا المنصة.</p>
+ <p>Welcome to Tafsilk Platform as a <strong>{roleText}</strong>!</p>
+          <p>Your email has been successfully verified and you can now enjoy all the platform features.</p>
         </div>
         <div style='text-align: center;'>
-     <a href='{_configuration["App:BaseUrl"]}' class='button'>ابدأ الآن</a>
+     <a href='{_configuration["App:BaseUrl"]}' class='button'>Start Now</a>
         </div>
         <div class='footer'>
-      <p>© 2024 منصة تفصيلك - جميع الحقوق محفوظة</p>
+      <p>© 2024 Tafsilk Platform - All rights reserved</p>
         </div>
     </div>
 </body>
@@ -250,7 +246,7 @@ public class EmailService : IEmailService
         {
             var body = $@"
 <!DOCTYPE html>
-<html dir='rtl' lang='ar'>
+<html dir='ltr' lang='en'>
 <head>
     <meta charset='utf-8'>
     <style>
@@ -265,13 +261,13 @@ public class EmailService : IEmailService
 <body>
     <div class='container'>
         <div class='header'>
-    <div class='logo'>🔧 تفصيلك</div>
+    <div class='logo'>🔧 Tafsilk</div>
         </div>
         <div class='message'>
             {message}
         </div>
      <div class='footer'>
-            <p>© 2024 منصة تفصيلك - جميع الحقوق محفوظة</p>
+            <p>© 2024 Tafsilk Platform - All rights reserved</p>
         </div>
   </div>
 </body>
@@ -297,7 +293,7 @@ public class EmailService : IEmailService
             _logger.LogWarning("Email service not configured. Skipping email to {Email}", toEmail);
             // In development, just log the email instead of sending
             _logger.LogInformation("EMAIL PREVIEW:\nTo: {Email}\nSubject: {Subject}\nBody: {Body}",
-      toEmail, subject, htmlBody.Substring(0, Math.Min(200, htmlBody.Length)));
+      toEmail, subject, htmlBody[..Math.Min(200, htmlBody.Length)]);
             return true; // Return true in development mode
         }
 

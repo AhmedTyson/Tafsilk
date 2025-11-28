@@ -23,7 +23,7 @@ public class Result<T>
     public static Result<T> Failure(string error) => new(false, default, error);
 
     public static Result<T> ValidationFailure(Dictionary<string, List<string>> errors)
-        => new(false, default, "خطأ في التحقق من البيانات", errors);
+        => new(false, default, "Validation failed", errors);
 }
 
 /// <summary>

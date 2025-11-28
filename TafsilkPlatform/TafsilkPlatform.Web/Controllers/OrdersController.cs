@@ -67,14 +67,14 @@ public class OrdersController : Controller
 
             if (tailor == null)
             {
-                TempData["Error"] = "الخياط غير موجود";
+                TempData["Error"] = "Tailor not found";
                 return RedirectToAction("SearchTailors", "Profiles");
             }
 
             // Check if tailor is verified and active
             if (!tailor.IsVerified)
             {
-                TempData["Error"] = "هذا الخياط غير مفعّل حالياً";
+                TempData["Error"] = "This tailor is currently inactive";
                 return RedirectToAction("ViewPublicTailorProfile", "Profiles", new { id = tailorId });
             }
 
@@ -84,14 +84,14 @@ public class OrdersController : Controller
 
             if (customer == null)
             {
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Index", "Home");
             }
 
             var model = new CreateOrderViewModel
             {
                 TailorId = tailorId,
-                TailorName = tailor.FullName ?? "خياط",
+                TailorName = tailor.FullName ?? "Tailor",
                 TailorShopName = tailor.ShopName,
                 TailorCity = tailor.City,
                 TailorDistrict = tailor.District,
@@ -118,7 +118,7 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading order creation page for tailor {TailorId}", tailorId);
-            TempData["Error"] = "حدث خطأ أثناء تحميل الصفحة";
+            TempData["Error"] = "An error occurred while loading the page";
             return RedirectToAction("SearchTailors", "Profiles");
         }
     }
@@ -150,7 +150,7 @@ public class OrdersController : Controller
 
             if (customer == null)
             {
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -160,7 +160,7 @@ public class OrdersController : Controller
 
             if (tailor == null || !tailor.IsVerified)
             {
-                ModelState.AddModelError("", "الخياط غير متاح حالياً");
+                ModelState.AddModelError("", "Tailor is currently unavailable");
                 await ReloadOrderViewModel(model);
                 return View(model);
             }
@@ -172,7 +172,7 @@ public class OrdersController : Controller
                 CustomerId = customer.Id,
                 TailorId = model.TailorId,
                 Description = model.Description ?? string.Empty, // ✅ FIXED: Use correct property name
-                OrderType = model.ServiceType ?? "خدمة عامة",
+                OrderType = model.ServiceType ?? "General Service",
                 Status = OrderStatus.Pending,
                 CreatedAt = DateTimeOffset.UtcNow,
                 DueDate = model.DueDate,
@@ -295,7 +295,7 @@ public class OrdersController : Controller
 
             if (validImageCount == 0 && model.ReferenceImages != null && model.ReferenceImages.Any())
             {
-                TempData["Warning"] = "لم يتم قبول أي صورة من الصور المرفوعة. يرجى التأكد من نوع وحجم الصور.";
+                TempData["Warning"] = "No images were accepted. Please check image type and size.";
             }
 
             // Save measurements as order items (if provided)
@@ -305,7 +305,7 @@ public class OrdersController : Controller
                 {
                     OrderItemId = Guid.NewGuid(),
                     OrderId = order.OrderId,
-                    Description = model.ServiceType ?? "خدمة عامة",
+                    Description = model.ServiceType ?? "General Service",
                     Quantity = 1,
                     UnitPrice = model.EstimatedPrice,
                     Total = model.EstimatedPrice,
@@ -317,15 +317,15 @@ public class OrdersController : Controller
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Order {OrderId} created by customer {CustomerId}", order.OrderId, customer.Id);
-            TempData["Success"] = "تم إنشاء الطلب بنجاح! سيتواصل معك الخياط قريباً.";
+            TempData["Success"] = "Order created successfully! The tailor will contact you soon.";
 
             return RedirectToAction(nameof(OrderDetails), new { id = order.OrderId });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating order (fatal)");
-            TempData["Error"] = "حدث خطأ غير متوقع أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني.";
-            return Redirect("/Error?message=حدث خطأ أثناء إنشاء الطلب. يرجى المحاولة مرة أخرى.");
+            TempData["Error"] = "An unexpected error occurred while creating the order. Please try again or contact support.";
+            return Redirect("/Error?message=An error occurred while creating the order. Please try again.");
         }
     }
 
@@ -347,7 +347,7 @@ public class OrdersController : Controller
 
             if (customer == null)
             {
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -359,6 +359,7 @@ public class OrdersController : Controller
                 .Include(o => o.Payments)
                 .Where(o => o.CustomerId == customer.Id)
                 .OrderByDescending(o => o.CreatedAt)
+                .AsSplitQuery()
                 .ToListAsync();
 
             var model = new CustomerOrdersViewModel
@@ -366,9 +367,9 @@ public class OrdersController : Controller
                 Orders = orders.Select(o => new OrderSummaryViewModel
                 {
                     OrderId = o.OrderId,
-                    TailorName = o.Tailor?.FullName ?? (o.OrderType == "StoreOrder" ? "متجر تفصيلك" : "خياط"),
-                    TailorShopName = o.Tailor?.ShopName ?? (o.OrderType == "StoreOrder" ? "متجر تفصيلك" : null),
-                    ServiceType = o.OrderType ?? "غير محدد",
+                    TailorName = o.Tailor?.FullName ?? (o.OrderType == "StoreOrder" ? "Tafsilk Store" : "Tailor"),
+                    TailorShopName = o.Tailor?.ShopName ?? (o.OrderType == "StoreOrder" ? "Tafsilk Store" : null),
+                    ServiceType = o.OrderType ?? "Not Specified",
                     Status = o.Status,
                     StatusDisplay = GetStatusDisplay(o.Status),
                     CreatedAt = o.CreatedAt,
@@ -383,7 +384,7 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading customer orders");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الطلبات";
+            TempData["Error"] = "An error occurred while loading orders";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -407,11 +408,12 @@ public class OrdersController : Controller
                .ThenInclude(t => t.User)
              .Include(o => o.Items)
          .Include(o => o.Payments)
-          .Include(o => o.orderImages)
+          .Include(o => o.OrderImages)
+        .AsSplitQuery()
         .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null)
-                return NotFound("الطلب غير موجود");
+                return NotFound("Order not found");
 
             // Check authorization
             var customer = await _db.CustomerProfiles.FirstOrDefaultAsync(c => c.UserId == userId);
@@ -439,12 +441,12 @@ public class OrdersController : Controller
                 TotalPrice = (decimal)order.TotalPrice,
 
                 // Customer info
-                CustomerName = order.Customer.User?.Email ?? "عميل",
+                CustomerName = order.Customer.User?.Email ?? "Customer",
                 CustomerPhone = order.Customer.User?.PhoneNumber,
 
                 // Tailor info
                 TailorId = order.TailorId,
-                TailorName = order.Tailor.FullName ?? "خياط",
+                TailorName = order.Tailor.FullName ?? "Tailor",
                 TailorShopName = order.Tailor.ShopName,
                 TailorPhone = order.Tailor.User?.PhoneNumber,
                 TailorProfilePictureData = order.Tailor.ProfilePictureData,
@@ -454,13 +456,13 @@ public class OrdersController : Controller
                 Items = order.Items.Select(i => new OrderItemViewModel
                 {
                     ItemId = i.OrderItemId,
-                    ServiceName = i.Description ?? i.Product?.Name ?? "منتج",
+                    ServiceName = i.Description ?? i.Product?.Name ?? "Product",
                     Quantity = i.Quantity,
                     Price = i.UnitPrice,
                     Notes = !string.IsNullOrEmpty(i.SpecialInstructions)
                         ? i.SpecialInstructions
                         : (!string.IsNullOrEmpty(i.SelectedSize) || !string.IsNullOrEmpty(i.SelectedColor))
-                            ? $"المقاس: {i.SelectedSize ?? "غير محدد"}, اللون: {i.SelectedColor ?? "غير محدد"}"
+                            ? $"Size: {i.SelectedSize ?? "N/A"}, Color: {i.SelectedColor ?? "N/A"}"
                             : null
                 }).ToList(),
 
@@ -471,7 +473,7 @@ public class OrdersController : Controller
                 .Sum(p => p.Amount),
 
                 // Images
-                ReferenceImages = order.orderImages.Select(img => new OrderImageViewModel
+                ReferenceImages = order.OrderImages.Select(img => new OrderImageViewModel
                 {
                     ImageId = img.OrderImageId,
                     ContentType = img.ContentType,
@@ -488,7 +490,7 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading order details {OrderId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل الطلب";
+            TempData["Error"] = "An error occurred while loading order details";
             return RedirectToAction(nameof(MyOrders));
         }
     }
@@ -517,12 +519,12 @@ public class OrdersController : Controller
                   .FirstOrDefaultAsync(o => o.OrderId == id && o.CustomerId == customer.Id);
 
             if (order == null)
-                return NotFound("الطلب غير موجود");
+                return NotFound("Order not found");
 
             // Check if order can be cancelled
             if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Confirmed && order.Status != OrderStatus.Processing)
             {
-                TempData["Error"] = "لا يمكن إلغاء الطلب في هذه المرحلة";
+                TempData["Error"] = "Order cannot be cancelled at this stage";
                 return RedirectToAction(nameof(OrderDetails), new { id });
             }
 
@@ -530,14 +532,14 @@ public class OrdersController : Controller
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Order {OrderId} cancelled by customer {CustomerId}", id, customer.Id);
-            TempData["Success"] = "تم إلغاء الطلب بنجاح";
+            TempData["Success"] = "Order cancelled successfully";
 
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error cancelling order {OrderId}", id);
-            TempData["Error"] = "حدث خطأ أثناء إلغاء الطلب";
+            TempData["Error"] = "An error occurred while cancelling order";
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
     }
@@ -564,7 +566,7 @@ public class OrdersController : Controller
 
             if (tailor == null)
             {
-                TempData["Error"] = "الملف الشخصي غير موجود";
+                TempData["Error"] = "Profile not found";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -575,6 +577,7 @@ public class OrdersController : Controller
                      .Include(o => o.Payments)
             .Where(o => o.TailorId == tailor.Id)
                      .OrderByDescending(o => o.CreatedAt)
+                 .AsSplitQuery()
                  .ToListAsync();
 
             var model = new TailorOrdersViewModel
@@ -582,7 +585,7 @@ public class OrdersController : Controller
                 Orders = orders.Select(o => new OrderSummaryViewModel
                 {
                     OrderId = o.OrderId,
-                    CustomerName = o.Customer.User?.Email ?? "عميل",
+                    CustomerName = o.Customer.User?.Email ?? "Customer",
                     ServiceType = o.OrderType,
                     Status = o.Status,
                     StatusDisplay = GetStatusDisplay(o.Status),
@@ -607,7 +610,7 @@ public class OrdersController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor orders");
-            TempData["Error"] = "حدث خطأ أثناء تحميل الطلبات";
+            TempData["Error"] = "An error occurred while loading orders";
             return RedirectToAction("TailorProfile", "Profiles");
         }
     }
@@ -636,12 +639,12 @@ public class OrdersController : Controller
        .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
 
             if (order == null)
-                return NotFound("الطلب غير موجود");
+                return NotFound("Order not found");
 
             // Validate status transition
             if (!IsValidStatusTransition(order.Status, newStatus))
             {
-                TempData["Error"] = "تحديث الحالة غير صالح";
+                TempData["Error"] = "Invalid status transition";
                 return RedirectToAction(nameof(OrderDetails), new { id });
             }
 
@@ -650,14 +653,14 @@ public class OrdersController : Controller
 
             _logger.LogInformation("Order {OrderId} status updated to {Status} by tailor {TailorId}",
            id, newStatus, tailor.Id);
-            TempData["Success"] = "تم تحديث حالة الطلب بنجاح";
+            TempData["Success"] = "Order status updated successfully";
 
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating order status {OrderId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحديث حالة الطلب";
+            TempData["Error"] = "An error occurred while updating order status";
             return RedirectToAction(nameof(OrderDetails), new { id });
         }
     }
@@ -776,13 +779,20 @@ public class OrdersController : Controller
     {
         var serviceIconMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            { "بدل رجالية", "fa-user-tie" },
-   { "فساتين سهرة", "fa-tshirt" },
-            { "فساتين زفاف", "fa-ring" },
-          { "تعديلات", "fa-tools" },
-         { "ملابس أطفال", "fa-child" },
-   { "ثياب", "fa-dharmachakra" },
-     { "عبايات", "fa-user-tie" }
+            { "Men's Suits", "fa-user-tie" },
+            { "Evening Dresses", "fa-tshirt" },
+            { "Wedding Dresses", "fa-ring" },
+            { "Alterations", "fa-tools" },
+            { "Kids Clothing", "fa-child" },
+            { "Thobes", "fa-dharmachakra" },
+            { "Abayas", "fa-user-tie" },
+            { "Men's Suits", "fa-user-tie" },
+            { "Evening Dresses", "fa-tshirt" },
+            { "Wedding Dresses", "fa-ring" },
+            { "Alterations", "fa-tools" },
+            { "Kids Wear", "fa-child" },
+            { "Thobes", "fa-dharmachakra" },
+            { "Abayas", "fa-user-tie" }
         };
 
         foreach (var kvp in serviceIconMap)
@@ -798,14 +808,14 @@ public class OrdersController : Controller
     {
         return status switch
         {
-            OrderStatus.Pending => "قيد الانتظار",
-            OrderStatus.Confirmed => "تم التأكيد",
-            OrderStatus.Processing => "قيد التنفيذ",
-            OrderStatus.Shipped => "قيد الشحن",
-            OrderStatus.ReadyForPickup => "جاهز للاستلام",
-            OrderStatus.Delivered => "تم التسليم",
-            OrderStatus.Cancelled => "ملغي",
-            _ => "غير محدد"
+            OrderStatus.Pending => "Pending",
+            OrderStatus.Confirmed => "Confirmed",
+            OrderStatus.Processing => "Processing",
+            OrderStatus.Shipped => "Shipped",
+            OrderStatus.ReadyForPickup => "Ready for Pickup",
+            OrderStatus.Delivered => "Delivered",
+            OrderStatus.Cancelled => "Cancelled",
+            _ => "Not Specified"
         };
     }
 

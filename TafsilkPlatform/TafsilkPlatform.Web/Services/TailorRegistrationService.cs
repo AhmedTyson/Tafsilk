@@ -59,7 +59,7 @@ public class TailorRegistrationService : ITailorRegistrationService
             if (user == null || user.Role?.Name?.ToLower() != "tailor")
             {
                 _logger.LogWarning("[TailorRegistration] Invalid user or role: {UserId}", request.UserId);
-                return Result<TailorProfile>.Failure("حساب غير صالح");
+                return Result<TailorProfile>.Failure("Invalid account");
             }
 
             // 3. Check for duplicate submission (ONE-TIME submission)
@@ -67,7 +67,7 @@ public class TailorRegistrationService : ITailorRegistrationService
             if (existingProfile != null)
             {
                 _logger.LogWarning("[TailorRegistration] Duplicate submission attempt: {UserId}", request.UserId);
-                return Result<TailorProfile>.Failure("تم تقديم الأوراق الثبوتية بالفعل. لا يمكن التقديم مرة أخرى.");
+                return Result<TailorProfile>.Failure("Documents already submitted. Cannot submit again.");
             }
 
             // 4. Validate documents (additional check)
@@ -135,7 +135,7 @@ public class TailorRegistrationService : ITailorRegistrationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "[TailorRegistration] Error completing profile: {UserId}", request.UserId);
-            return Result<TailorProfile>.Failure("حدث خطأ أثناء حفظ البيانات. يرجى المحاولة مرة أخرى.");
+            return Result<TailorProfile>.Failure("Error saving data. Please try again.");
         }
     }
 
@@ -153,7 +153,7 @@ public class TailorRegistrationService : ITailorRegistrationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "[TailorRegistration] Error checking profile: {UserId}", userId);
-            return Result<bool>.Failure("حدث خطأ");
+            return Result<bool>.Failure("An error occurred");
         }
     }
 
@@ -199,12 +199,12 @@ public class TailorRegistrationService : ITailorRegistrationService
             await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("[TailorRegistration] Saved {Count} portfolio images for tailor: {TailorId}", savedCount, tailorId);
-            return Result<string>.Success($"تم حفظ {savedCount} صور");
+            return Result<string>.Success($"{savedCount} images saved");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[TailorRegistration] Error saving portfolio images: {TailorId}", tailorId);
-            return Result<string>.Failure("حدث خطأ أثناء حفظ الصور");
+            return Result<string>.Failure("Error saving images");
         }
     }
 
@@ -214,7 +214,7 @@ public class TailorRegistrationService : ITailorRegistrationService
         {
             if (!IsValidImage(document))
             {
-                return Result<string>.Failure("صورة الهوية غير صالحة");
+                return Result<string>.Failure("Invalid ID image");
             }
 
             using var memoryStream = new MemoryStream();
@@ -224,12 +224,12 @@ public class TailorRegistrationService : ITailorRegistrationService
             _logger.LogInformation("[TailorRegistration] ID document saved for tailor: {TailorId}, Size: {Size} bytes",
         tailorId, data.Length);
 
-            return Result<string>.Success("تم حفظ الهوية بنجاح");
+            return Result<string>.Success("ID saved successfully");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[TailorRegistration] Error saving ID document: {TailorId}", tailorId);
-            return Result<string>.Failure("حدث خطأ أثناء حفظ الهوية");
+            return Result<string>.Failure("Error saving ID");
         }
     }
 
@@ -237,29 +237,29 @@ public class TailorRegistrationService : ITailorRegistrationService
     {
         if (request.IdDocument == null || request.IdDocument.Length == 0)
         {
-            return Result<bool>.Failure("يجب تحميل صورة الهوية الشخصية");
+            return Result<bool>.Failure("ID image is required");
         }
 
         if (!IsValidImage(request.IdDocument))
         {
-            return Result<bool>.Failure("نوع ملف الهوية غير مدعوم. يرجى تحميل صورة JPG أو PNG");
+            return Result<bool>.Failure("ID file type not supported. Please upload JPG or PNG");
         }
 
         if ((request.PortfolioImages == null || !request.PortfolioImages.Any()) &&
             (request.WorkSamples == null || !request.WorkSamples.Any()))
         {
-            return Result<bool>.Failure("يجب تحميل على الأقل 3 صور من أعمالك السابقة");
+            return Result<bool>.Failure("At least 3 portfolio images are required");
         }
 
         var portfolioImages = request.PortfolioImages ?? request.WorkSamples ?? new List<IFormFile>();
         if (portfolioImages.Count < 3)
         {
-            return Result<bool>.Failure("يجب تحميل على الأقل 3 صور من أعمالك السابقة");
+            return Result<bool>.Failure("At least 3 portfolio images are required");
         }
 
         if (portfolioImages.Count > MaxPortfolioImages)
         {
-            return Result<bool>.Failure($"يمكن تحميل {MaxPortfolioImages} صور كحد أقصى");
+            return Result<bool>.Failure($"Maximum {MaxPortfolioImages} images allowed");
         }
 
         return Result<bool>.Success(true);
@@ -281,7 +281,7 @@ public class TailorRegistrationService : ITailorRegistrationService
         catch (Exception ex)
         {
             _logger.LogError(ex, "[TailorRegistration] Error saving ID to database");
-            return Result<bool>.Failure("حدث خطأ أثناء حفظ الهوية");
+            return Result<bool>.Failure("Error saving ID");
         }
     }
 

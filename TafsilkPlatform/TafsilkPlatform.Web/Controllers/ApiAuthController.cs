@@ -53,7 +53,7 @@ public class ApiAuthController : ControllerBase
             return BadRequest(new
             {
                 success = false,
-                message = "بيانات التسجيل غير صالحة", // Invalid registration data
+                message = "Invalid registration data", // Invalid registration data
                 errors = errors
             });
         }
@@ -64,7 +64,7 @@ public class ApiAuthController : ControllerBase
             return BadRequest(new
             {
                 success = false,
-                message = "تسجيل الخياطين يجب أن يتم عبر الموقع لتقديم الأوراق الثبوتية", // Tailor registration must be done via website for evidence submission
+                message = "Tailor registration must be done via website for evidence submission", // Tailor registration must be done via website for evidence submission
                 redirectUrl = "/Account/Register"
             });
         }
@@ -88,7 +88,7 @@ public class ApiAuthController : ControllerBase
         return Ok(new
         {
             success = true,
-            message = "تم إنشاء الحساب بنجاح. يرجى تسجيل الدخول", // Account created successfully. Please login
+            message = "Account created successfully. Please login", // Account created successfully. Please login
             userId = User?.Id
         });
     }
@@ -110,7 +110,7 @@ public class ApiAuthController : ControllerBase
             return BadRequest(new
             {
                 success = false,
-                message = "بيانات تسجيل الدخول غير صالحة", // Invalid login data
+                message = "Invalid login data", // Invalid login data
                 errors = errors
             });
         }
@@ -127,7 +127,7 @@ public class ApiAuthController : ControllerBase
                 return Unauthorized(new
                 {
                     success = false,
-                    message = "يجب تقديم الأوراق الثبوتية لإكمال التسجيل قبل تسجيل الدخول", // Must provide evidence to complete registration before login
+                    message = "Must provide evidence to complete registration before login", // Must provide evidence to complete registration before login
                     requiresEvidence = true,
                     redirectUrl = "/Account/CompleteTailorProfile", // ← CHANGED: Better UX page
                     userId = User?.Id
@@ -137,7 +137,7 @@ public class ApiAuthController : ControllerBase
             return Unauthorized(new
             {
                 success = false,
-                message = GetArabicErrorMessage(Error) ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة", // Email or password is incorrect
+                message = GetArabicErrorMessage(Error) ?? "Email or password is incorrect", // Email or password is incorrect
                 error = Error
             });
         }
@@ -148,8 +148,8 @@ public class ApiAuthController : ControllerBase
             var roleName = User.Role?.Name?.ToLower();
             string message = roleName switch
             {
-                "tailor" => "حسابك قيد المراجعة من قبل الإدارة. سيتم إشعارك عند الموافقة", // Your account is under admin review. You'll be notified upon approval
-                _ => "حسابك غير نشط. يرجى الاتصال بالدعم" // Your account is inactive. Please contact support
+                "tailor" => "Your account is under admin review. You'll be notified upon approval", // Your account is under admin review. You'll be notified upon approval
+                _ => "Your account is inactive. Please contact support" // Your account is inactive. Please contact support
             };
 
             return Unauthorized(new
@@ -169,7 +169,7 @@ public class ApiAuthController : ControllerBase
         return Ok(new
         {
             success = true,
-            message = "تم تسجيل الدخول بنجاح", // Login successful
+            message = "Login successful", // Login successful
             token = tokenResponse.Token,
             expiresAt = tokenResponse.ExpiresAtUtc,
             user = new
@@ -196,7 +196,7 @@ public class ApiAuthController : ControllerBase
             return Unauthorized(new
             {
                 success = false,
-                message = "جلسة غير صالحة. يرجى تسجيل الدخول مرة أخرى" // Invalid session. Please login again
+                message = "Invalid session. Please login again" // Invalid session. Please login again
             });
         }
 
@@ -207,7 +207,7 @@ public class ApiAuthController : ControllerBase
             return NotFound(new
             {
                 success = false,
-                message = "المستخدم غير موجود" // User not found
+                message = "User not found" // User not found
             });
         }
 
@@ -273,7 +273,7 @@ public class ApiAuthController : ControllerBase
         return Ok(new
         {
             success = true,
-            message = "تم تسجيل الخروج بنجاح" // Logout successful
+            message = "Logout successful" // Logout successful
         });
     }
 
@@ -331,21 +331,21 @@ public class ApiAuthController : ControllerBase
 
     private string GetArabicErrorMessage(string? error)
     {
-        if (string.IsNullOrEmpty(error)) return "حدث خطأ غير متوقع"; // Unexpected error occurred
+        if (string.IsNullOrEmpty(error)) return "Unexpected error occurred"; // Unexpected error occurred
 
         return error switch
         {
-            "TAILOR_INCOMPLETE_PROFILE" => "يجب تقديم الأوراق الثبوتية لإكمال التسجيل",
-            "USER_NOT_ACTIVE" => "حسابك غير نشط. يرجى الاتصال بالدعم",
-            "INVALID_CREDENTIALS" => "البريد الإلكتروني أو كلمة المرور غير صحيحة",
-            "EMAIL_ALREADY_EXISTS" => "البريد الإلكتروني مسجل بالفعل",
-            "WEAK_PASSWORD" => "كلمة المرور ضعيفة جداً",
-            "TAILOR_PENDING_VERIFICATION" => "حسابك قيد المراجعة من قبل الإدارة",
-            "CORPORATE_PENDING_APPROVAL" => "حسابك الشركي قيد المراجعة من قبل الإدارة",
-            "REGISTRATION_FAILED" => "فشل التسجيل. يرجى المحاولة مرة أخرى",
+            "TAILOR_INCOMPLETE_PROFILE" => "Must provide evidence to complete registration",
+            "USER_NOT_ACTIVE" => "Your account is inactive. Please contact support",
+            "INVALID_CREDENTIALS" => "Email or password is incorrect",
+            "EMAIL_ALREADY_EXISTS" => "Email is already registered",
+            "WEAK_PASSWORD" => "Password is too weak",
+            "TAILOR_PENDING_VERIFICATION" => "Your account is under admin review",
+            "CORPORATE_PENDING_APPROVAL" => "Your corporate account is under admin review",
+            "REGISTRATION_FAILED" => "Registration failed. Please try again",
             _ => error.Contains("exists", StringComparison.OrdinalIgnoreCase)
-                ? "البريد الإلكتروني مسجل بالفعل"
-                : "حدث خطأ. يرجى المحاولة مرة أخرى"
+                ? "Email is already registered"
+                : "An error occurred. Please try again"
         };
     }
 

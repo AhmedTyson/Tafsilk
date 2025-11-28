@@ -20,21 +20,21 @@ public class PortfolioImageDto
 {
     public Guid Id { get; set; }
 
-    [Required(ErrorMessage = "العنوان مطلوب")]
-    [StringLength(100, ErrorMessage = "العنوان لا يمكن أن يتجاوز 100 حرف")]
+    [Required(ErrorMessage = "Title is required")]
+    [StringLength(100, ErrorMessage = "Title cannot exceed 100 characters")]
     public string Title { get; set; } = string.Empty;
 
     public string? ImageUrl { get; set; }
     public byte[]? ImageData { get; set; }
     public string? ContentType { get; set; }
 
-    [Required(ErrorMessage = "الفئة مطلوبة")]
+    [Required(ErrorMessage = "Category is required")]
     public string Category { get; set; } = string.Empty;
 
-    [Range(0, double.MaxValue, ErrorMessage = "السعر يجب أن يكون أكبر من أو يساوي صفر")]
+    [Range(0, double.MaxValue, ErrorMessage = "Price must be greater than or equal to zero")]
     public decimal Price { get; set; }
 
-    [StringLength(500, ErrorMessage = "الوصف لا يمكن أن يتجاوز 500 حرف")]
+    [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
     public string? Description { get; set; }
 
     public int DisplayOrder { get; set; }
@@ -60,14 +60,14 @@ public class UploadPortfolioImageViewModel
 {
     public Guid TailorId { get; set; }
 
-    [Required(ErrorMessage = "العنوان مطلوب")]
+    [Required(ErrorMessage = "Title is required")]
     [StringLength(100)]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "الفئة مطلوبة")]
+    [Required(ErrorMessage = "Category is required")]
     public string Category { get; set; } = string.Empty;
 
-    [Range(0, double.MaxValue, ErrorMessage = "السعر يجب أن يكون أكبر من أو يساوي صفر")]
+    [Range(0, double.MaxValue, ErrorMessage = "Price must be greater than or equal to zero")]
     public decimal Price { get; set; }
 
     [StringLength(500)]
@@ -83,11 +83,11 @@ public class UpdatePortfolioImageViewModel
 {
     public Guid Id { get; set; }
 
-    [Required(ErrorMessage = "العنوان مطلوب")]
+    [Required(ErrorMessage = "Title is required")]
     [StringLength(100)]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "الفئة مطلوبة")]
+    [Required(ErrorMessage = "Category is required")]
     public string Category { get; set; } = string.Empty;
 
     [Range(0, double.MaxValue)]
@@ -112,12 +112,12 @@ public class ReorderPortfolioViewModel
 /// </summary>
 public static class PortfolioCategories
 {
-    public const string MensSuits = "بدل رجالية";
-    public const string EveningDresses = "فساتين سهرة";
-    public const string Alterations = "تعديلات";
-    public const string ChildrenClothing = "ملابس أطفال";
-    public const string WeddingDresses = "فساتين زفاف";
-    public const string Other = "أخرى";
+    public const string MensSuits = "Men's Suits";
+    public const string EveningDresses = "Evening Dresses";
+    public const string Alterations = "Alterations";
+    public const string ChildrenClothing = "Kids Clothing";
+    public const string WeddingDresses = "Wedding Dresses";
+    public const string Other = "Other";
 
     public static List<string> GetAll()
     {

@@ -34,6 +34,8 @@ namespace TafsilkPlatform.Web.Services
  db.Users
      .AsNoTracking()
               .Include(u => u.Role)
+              .Include(u => u.CustomerProfile)
+              .Include(u => u.TailorProfile)
                     .FirstOrDefault(u => u.Email == email));
 
         // Compiled query for checking tailor profile existence
@@ -83,13 +85,13 @@ namespace TafsilkPlatform.Web.Services
                 if (await IsEmailTakenAsync(request.Email))
                 {
                     _logger.LogWarning("[AuthService] Registration failed - Email already exists: {Email}", request.Email);
-                    return (false, "البريد الإلكتروني مستخدم بالفعل", null);
+                    return (false, "Email is already in use", null);
                 }
 
                 if (!string.IsNullOrEmpty(request.PhoneNumber) && await IsPhoneTakenAsync(request.PhoneNumber))
                 {
                     _logger.LogWarning("[AuthService] Registration failed - Phone already exists: {Phone}", request.PhoneNumber);
-                    return (false, "رقم الهاتف مستخدم بالفعل", null);
+                    return (false, "Phone number is already in use", null);
                 }
 
                 // Create user account
@@ -121,7 +123,7 @@ namespace TafsilkPlatform.Web.Services
                         {
                             try
                             {
-                                await _emailService.SendWelcomeEmailAsync(user.Email, request.FullName ?? "عميل", "Customer");
+                                await _emailService.SendWelcomeEmailAsync(user.Email, request.FullName ?? "Customer", "Customer");
                             }
                             catch (Exception ex)
                             {
@@ -143,7 +145,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Registration failed for email: {Email}", request.Email);
-                return (false, "حدث خطأ أثناء التسجيل. يرجى المحاولة مرة أخرى.", null);
+                return (false, "An error occurred during registration. Please try again.", null);
             }
         }
         // Called by: [POST] /Account/Login, /ApiAuth/Login
@@ -170,7 +172,7 @@ namespace TafsilkPlatform.Web.Services
 
                     _logger.LogWarning("[AuthService] Login failed - User not found: {Email}", email);
 
-                    return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+                    return (false, "Invalid email or password", null);
 
                 }
 
@@ -184,7 +186,7 @@ namespace TafsilkPlatform.Web.Services
 
                     _logger.LogWarning("[AuthService] Login failed - Invalid password: {Email}", email);
 
-                    return (false, "البريد الإلكتروني أو كلمة المرور غير صحيحة", null);
+                    return (false, "Invalid email or password", null);
 
                 }
 
@@ -246,7 +248,7 @@ namespace TafsilkPlatform.Web.Services
 
                             // Evidence not submitted yet (should not reach here anymore)
 
-                            message = "يجب تقديم الأوراق الثبوتية أولاً لإكمال التسجيل. يرجى إكمال التسجيل عبر رابط التسجيل.";
+                            message = "You must submit your documents first to complete registration. Please complete registration via the registration link.";
 
                             _logger.LogInformation("[AuthService] Tailor has not submitted evidence yet: {Email}", email);
 
@@ -258,7 +260,7 @@ namespace TafsilkPlatform.Web.Services
 
                             // Evidence submitted, waiting for admin approval or banned
 
-                            message = "حسابك قيد المراجعة من قبل الإدارة أو تم حظرك. سيتم تفعيله خلال24-48 ساعة عمل أو يرجى التواصل مع الدعم.";
+                            message = "Your account is under review or has been banned. It will be activated within 24-48 business hours or please contact support.";
 
                             _logger.LogInformation("[AuthService] Tailor awaiting admin approval or banned: {Email}", email);
 
@@ -270,7 +272,7 @@ namespace TafsilkPlatform.Web.Services
 
                     {
 
-                        message = "حسابك غير نشط. يرجى التواصل مع الدعم.";
+                        message = "Your account is inactive. Please contact support.";
 
                     }
 
@@ -288,7 +290,7 @@ namespace TafsilkPlatform.Web.Services
 
                     _logger.LogWarning("[AuthService] Login failed - User is deleted: {Email}", email);
 
-                    return (false, "حسابك غير موجود. يرجى التواصل مع الدعم.", null);
+                    return (false, "Account not found. Please contact support.", null);
 
                 }
 
@@ -327,7 +329,7 @@ namespace TafsilkPlatform.Web.Services
 
                 _logger.LogError(ex, "[AuthService] Login error for: {Email}", email);
 
-                return (false, "حدث خطأ أثناء تسجيل الدخول. يرجى المحاولة مرة أخرى.", null);
+                return (false, "An error occurred during login. Please try again.", null);
 
             }
 
@@ -347,7 +349,7 @@ namespace TafsilkPlatform.Web.Services
                 if (user == null)
                 {
                     _logger.LogWarning("[AuthService] Email verification failed - Invalid token");
-                    return (false, "رابط التحقق غير صالح");
+                    return (false, "Invalid verification link");
                 }
 
                 if (user.EmailVerified)
@@ -359,7 +361,7 @@ namespace TafsilkPlatform.Web.Services
                 if (user.EmailVerificationTokenExpires < _dateTime.Now)
                 {
                     _logger.LogWarning("[AuthService] Email verification failed - Token expired: {UserId}", user.Id);
-                    return (false, "انتهت صلاحية رابط التحقق. يرجى طلب رابط جديد");
+                    return (false, "Verification link expired. Please request a new one");
                 }
 
                 // Mark email as verified
@@ -393,7 +395,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Error verifying email for token: {Token}", token);
-                return (false, "حدث خطأ أثناء تأكيد البريد الإلكتروني");
+                return (false, "An error occurred while verifying email");
             }
         }
 
@@ -409,12 +411,12 @@ namespace TafsilkPlatform.Web.Services
 
                 if (user == null)
                 {
-                    return (false, "المستخدم غير موجود");
+                    return (false, "User not found");
                 }
 
                 if (user.EmailVerified)
                 {
-                    return (false, "البريد الإلكتروني مؤكد بالفعل");
+                    return (false, "Email is already verified");
                 }
 
                 // Generate new verification token
@@ -435,7 +437,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Error resending verification email: {Email}", email);
-                return (false, "حدث خطأ أثناء إعادة إرسال رسالة التحقق");
+                return (false, "An error occurred while resending verification email");
             }
         }
 
@@ -454,12 +456,12 @@ namespace TafsilkPlatform.Web.Services
                 var user = await _db.Users.FindAsync(userId);
                 if (user == null)
                 {
-                    return (false, "المستخدم غير موجود");
+                    return (false, "User not found");
                 }
 
                 if (!PasswordHasher.Verify(user.PasswordHash, currentPassword))
                 {
-                    return (false, "كلمة المرور الحالية غير صحيحة");
+                    return (false, "Current password is incorrect");
                 }
 
                 user.PasswordHash = PasswordHasher.Hash(newPassword);
@@ -473,7 +475,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Error changing password: {UserId}", userId);
-                return (false, "حدث خطأ أثناء تغيير كلمة المرور");
+                return (false, "An error occurred while changing password");
             }
         }
 
@@ -585,14 +587,14 @@ namespace TafsilkPlatform.Web.Services
             switch (user.Role?.Name?.ToLower())
             {
                 case "customer":
-                    return user.CustomerProfile?.FullName ?? user.Email ?? "مستخدم";
+                    return user.CustomerProfile?.FullName ?? user.Email ?? "User";
 
                 case "tailor":
-                    return user.TailorProfile?.FullName ?? user.Email ?? "مستخدم";
+                    return user.TailorProfile?.FullName ?? user.Email ?? "User";
 
 
                 default:
-                    return user.Email ?? "مستخدم";
+                    return user.Email ?? "User";
             }
         }
         /// <summary>
@@ -639,7 +641,7 @@ namespace TafsilkPlatform.Web.Services
                 var user = await _db.Users.FindAsync(userId);
                 if (user == null)
                 {
-                    return (false, "المستخدم غير موجود");
+                    return (false, "User not found");
                 }
 
                 user.IsActive = isActive;
@@ -655,7 +657,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Error setting user active status: {UserId}", userId);
-                return (false, "حدث خطأ أثناء تحديث حالة المستخدم");
+                return (false, "An error occurred while updating user status");
             }
         }
 
@@ -666,7 +668,7 @@ namespace TafsilkPlatform.Web.Services
                 var tailor = await _db.TailorProfiles.FindAsync(tailorId);
                 if (tailor == null)
                 {
-                    return (false, "الخياط غير موجود");
+                    return (false, "Tailor not found");
                 }
 
                 tailor.IsVerified = isVerified;
@@ -687,7 +689,7 @@ namespace TafsilkPlatform.Web.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "[AuthService] Error verifying tailor: {TailorId}", tailorId);
-                return (false, "حدث خطأ أثناء تحديث حالة التحقق");
+                return (false, "An error occurred while updating verification status");
             }
         }
 
@@ -703,7 +705,7 @@ namespace TafsilkPlatform.Web.Services
             // Validate email format
             if (!IsValidEmail(request.Email))
             {
-                return "البريد الإلكتروني غير صالح";
+                return "Invalid email address";
             }
 
             // Validate password strength
@@ -743,18 +745,18 @@ namespace TafsilkPlatform.Web.Services
         {
             if (string.IsNullOrWhiteSpace(password))
             {
-                return (false, "كلمة المرور مطلوبة");
+                return (false, "Password is required");
             }
 
             if (password.Length < 6)
             {
-                return (false, "كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+                return (false, "Password must be at least 6 characters");
             }
 
             // Check for weak passwords
             if (WeakPasswords.Contains(password.ToLower()))
             {
-                return (false, "كلمة المرور ضعيفة جداً. يرجى اختيار كلمة مرور أقوى");
+                return (false, "Password is too weak. Please choose a stronger password");
             }
 
             return (true, null);
@@ -817,7 +819,7 @@ namespace TafsilkPlatform.Web.Services
                        {
                            await _emailService.SendEmailVerificationAsync(
                    user.Email,
-                          fullName ?? "مستخدم",
+                          fullName ?? "User",
                      verificationToken);
                        }
                        catch (Exception ex)
@@ -864,9 +866,9 @@ namespace TafsilkPlatform.Web.Services
                 Name = name,
                 Description = name switch
                 {
-                    "Customer" => "عميل - يمكنه طلب الخدمات من الخياطين",
-                    "Tailor" => "خياط - يقدم خدمات الخياطة",
-                    // "Corporate" => "شركة - حساب مؤسسي للطلبات الجماعية", // REMOVED: Corporate feature
+                    "Customer" => "Customer - Can order services from tailors",
+                    "Tailor" => "Tailor - Provides tailoring services",
+                    // "Corporate" => "Corporate Account", // REMOVED: Corporate feature
                     _ => null
                 },
                 CreatedAt = _dateTime.Now
@@ -909,19 +911,19 @@ namespace TafsilkPlatform.Web.Services
                      })
        .FirstOrDefaultAsync();
 
-                if (userInfo == null) return "مستخدم";
+                if (userInfo == null) return "User";
 
                 return userInfo.RoleName?.ToLower() switch
                 {
-                    "customer" => userInfo.CustomerName ?? userInfo.Email ?? "مستخدم",
-                    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "مستخدم",
-                    // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "مستخدم", // REMOVED
-                    _ => userInfo.Email ?? "مستخدم"
+                    "customer" => userInfo.CustomerName ?? userInfo.Email ?? "User",
+                    "tailor" => userInfo.TailorName ?? userInfo.Email ?? "User",
+                    // "corporate" => userInfo.CorporatePerson ?? userInfo.CompanyName ?? userInfo.Email ?? "User", // REMOVED
+                    _ => userInfo.Email ?? "User"
                 };
             }
             catch
             {
-                return "مستخدم";
+                return "User";
             }
         }
 

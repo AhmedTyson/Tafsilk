@@ -44,67 +44,67 @@ public class AddProductViewModel
 {
     public Guid TailorId { get; set; }
 
-    [Required(ErrorMessage = "اسم المنتج مطلوب")]
-    [StringLength(200, ErrorMessage = "اسم المنتج يجب أن لا يتجاوز 200 حرف")]
-    [Display(Name = "اسم المنتج")]
+    [Required(ErrorMessage = "Product name is required")]
+    [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]
+    [Display(Name = "Product Name")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "وصف المنتج مطلوب")]
-    [StringLength(2000, ErrorMessage = "الوصف يجب أن لا يتجاوز 2000 حرف")]
-    [Display(Name = "وصف المنتج")]
+    [Required(ErrorMessage = "Product description is required")]
+    [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
+    [Display(Name = "Product Description")]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "السعر مطلوب")]
-    [Range(0.01, 999999.99, ErrorMessage = "السعر يجب أن يكون بين 0.01 و 999999.99")]
-    [Display(Name = "السعر (ريال)")]
+    [Required(ErrorMessage = "Price is required")]
+    [Range(0.01, 999999.99, ErrorMessage = "Price must be between 0.01 and 999999.99")]
+    [Display(Name = "Price (EGP)")]
     public decimal Price { get; set; }
 
-    [Range(0.01, 999999.99, ErrorMessage = "سعر الخصم يجب أن يكون بين 0.01 و 999999.99")]
-    [Display(Name = "سعر الخصم (اختياري)")]
+    [Range(0.01, 999999.99, ErrorMessage = "Discounted price must be between 0.01 and 999999.99")]
+    [Display(Name = "Discounted Price (Optional)")]
     public decimal? DiscountedPrice { get; set; }
 
-    [Required(ErrorMessage = "التصنيف مطلوب")]
-    [Display(Name = "التصنيف")]
+    [Required(ErrorMessage = "Category is required")]
+    [Display(Name = "Category")]
     public string Category { get; set; } = string.Empty;
 
-    [Display(Name = "التصنيف الفرعي")]
+    [Display(Name = "Sub Category")]
     public string? SubCategory { get; set; }
 
-    [Display(Name = "المقاس")]
+    [Display(Name = "Size")]
     public string? Size { get; set; }
 
-    [Display(Name = "اللون")]
+    [Display(Name = "Color")]
     public string? Color { get; set; }
 
-    [Display(Name = "الخامة")]
+    [Display(Name = "Material")]
     public string? Material { get; set; }
 
-    [Display(Name = "العلامة التجارية")]
+    [Display(Name = "Brand")]
     public string? Brand { get; set; }
 
-    [Required(ErrorMessage = "الكمية المتوفرة مطلوبة")]
-    [Range(0, 10000, ErrorMessage = "الكمية يجب أن تكون بين 0 و 10000")]
-    [Display(Name = "الكمية المتوفرة")]
+    [Required(ErrorMessage = "Stock quantity is required")]
+    [Range(0, 10000, ErrorMessage = "Quantity must be between 0 and 10000")]
+    [Display(Name = "Stock Quantity")]
     public int StockQuantity { get; set; }
 
-    [Display(Name = "متاح للبيع")]
+    [Display(Name = "Available for Sale")]
     public bool IsAvailable { get; set; } = true;
 
-    [Display(Name = "منتج مميز")]
+    [Display(Name = "Featured Product")]
     public bool IsFeatured { get; set; } = false;
 
-    [Required(ErrorMessage = "الصورة الأساسية مطلوبة")]
-    [Display(Name = "الصورة الأساسية")]
+    [Required(ErrorMessage = "Primary image is required")]
+    [Display(Name = "Primary Image")]
     public IFormFile? PrimaryImage { get; set; }
 
-    [Display(Name = "صور إضافية (حتى 5 صور)")]
+    [Display(Name = "Additional Images (Up to 5)")]
     public List<IFormFile>? AdditionalImages { get; set; }
 
-    [Display(Name = "عنوان SEO")]
+    [Display(Name = "SEO Title")]
     [StringLength(200)]
     public string? MetaTitle { get; set; }
 
-    [Display(Name = "وصف SEO")]
+    [Display(Name = "SEO Description")]
     [StringLength(500)]
     public string? MetaDescription { get; set; }
 }
@@ -117,69 +117,69 @@ public class EditProductViewModel
     public Guid ProductId { get; set; }
     public Guid TailorId { get; set; }
 
-    [Required(ErrorMessage = "اسم المنتج مطلوب")]
-    [StringLength(200, ErrorMessage = "اسم المنتج يجب أن لا يتجاوز 200 حرف")]
-    [Display(Name = "اسم المنتج")]
+    [Required(ErrorMessage = "Product name is required")]
+    [StringLength(200, ErrorMessage = "Product name cannot exceed 200 characters")]
+    [Display(Name = "Product Name")]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "وصف المنتج مطلوب")]
-    [StringLength(2000, ErrorMessage = "الوصف يجب أن لا يتجاوز 2000 حرف")]
-    [Display(Name = "وصف المنتج")]
+    [Required(ErrorMessage = "Product description is required")]
+    [StringLength(2000, ErrorMessage = "Description cannot exceed 2000 characters")]
+    [Display(Name = "Product Description")]
     public string Description { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "السعر مطلوب")]
-    [Range(0.01, 999999.99, ErrorMessage = "السعر يجب أن يكون بين 0.01 و 999999.99")]
-    [Display(Name = "السعر (ريال)")]
+    [Required(ErrorMessage = "Price is required")]
+    [Range(0.01, 999999.99, ErrorMessage = "Price must be between 0.01 and 999999.99")]
+    [Display(Name = "Price (EGP)")]
     public decimal Price { get; set; }
 
-    [Range(0.01, 999999.99, ErrorMessage = "سعر الخصم يجب أن يكون بين 0.01 و 999999.99")]
-    [Display(Name = "سعر الخصم (اختياري)")]
+    [Range(0.01, 999999.99, ErrorMessage = "Discounted price must be between 0.01 and 999999.99")]
+    [Display(Name = "Discounted Price (Optional)")]
     public decimal? DiscountedPrice { get; set; }
 
-    [Required(ErrorMessage = "التصنيف مطلوب")]
-    [Display(Name = "التصنيف")]
+    [Required(ErrorMessage = "Category is required")]
+    [Display(Name = "Category")]
     public string Category { get; set; } = string.Empty;
 
-    [Display(Name = "التصنيف الفرعي")]
+    [Display(Name = "Sub Category")]
     public string? SubCategory { get; set; }
 
-    [Display(Name = "المقاس")]
+    [Display(Name = "Size")]
     public string? Size { get; set; }
 
-    [Display(Name = "اللون")]
+    [Display(Name = "Color")]
     public string? Color { get; set; }
 
-    [Display(Name = "الخامة")]
+    [Display(Name = "Material")]
     public string? Material { get; set; }
 
-    [Display(Name = "العلامة التجارية")]
+    [Display(Name = "Brand")]
     public string? Brand { get; set; }
 
-    [Required(ErrorMessage = "الكمية المتوفرة مطلوبة")]
-    [Range(0, 10000, ErrorMessage = "الكمية يجب أن تكون بين 0 و 10000")]
-    [Display(Name = "الكمية المتوفرة")]
+    [Required(ErrorMessage = "Stock quantity is required")]
+    [Range(0, 10000, ErrorMessage = "Quantity must be between 0 and 10000")]
+    [Display(Name = "Stock Quantity")]
     public int StockQuantity { get; set; }
 
-    [Display(Name = "متاح للبيع")]
+    [Display(Name = "Available for Sale")]
     public bool IsAvailable { get; set; }
 
-    [Display(Name = "منتج مميز")]
+    [Display(Name = "Featured Product")]
     public bool IsFeatured { get; set; }
 
-    [Display(Name = "تحديث الصورة الأساسية")]
+    [Display(Name = "Update Primary Image")]
     public IFormFile? NewPrimaryImage { get; set; }
 
-    [Display(Name = "إضافة صور جديدة")]
+    [Display(Name = "Add New Images")]
     public List<IFormFile>? NewAdditionalImages { get; set; }
 
     public bool HasCurrentPrimaryImage { get; set; }
     public int CurrentAdditionalImagesCount { get; set; }
 
-    [Display(Name = "عنوان SEO")]
+    [Display(Name = "SEO Title")]
     [StringLength(200)]
     public string? MetaTitle { get; set; }
 
-    [Display(Name = "وصف SEO")]
+    [Display(Name = "SEO Description")]
     [StringLength(500)]
     public string? MetaDescription { get; set; }
 }

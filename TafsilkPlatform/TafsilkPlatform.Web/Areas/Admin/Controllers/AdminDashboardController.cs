@@ -39,7 +39,7 @@ public class AdminDashboardController : BaseController
             var activeOrders = await _db.Orders.CountAsync(o =>
                 o.Status != OrderStatus.Delivered &&
                o.Status != OrderStatus.Cancelled);
-            
+
             var totalSales = await _db.Orders
                   .Where(o => o.Status == OrderStatus.Delivered)
                   .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
@@ -66,7 +66,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading admin dashboard");
-            TempData["Error"] = "حدث خطأ أثناء تحميل لوحة التحكم";
+            TempData["Error"] = "An error occurred while loading the dashboard";
             return View(new DashboardHomeViewModel());
         }
     }
@@ -89,7 +89,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading users page");
-            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المستخدمين";
+            TempData["Error"] = "An error occurred while loading the users page";
             return View(new List<User>());
         }
     }
@@ -110,7 +110,7 @@ public class AdminDashboardController : BaseController
 
             if (user == null)
             {
-                TempData["Error"] = "المستخدم غير موجود";
+                TempData["Error"] = "User not found";
                 return RedirectToAction(nameof(Users));
             }
 
@@ -135,7 +135,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading user details for {UserId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحميل تفاصيل المستخدم";
+            TempData["Error"] = "An error occurred while loading user details";
             return RedirectToAction(nameof(Users));
         }
     }
@@ -153,14 +153,14 @@ public class AdminDashboardController : BaseController
             var user = await _db.Users.FindAsync(id);
             if (user == null)
             {
-                TempData["Error"] = "المستخدم غير موجود";
+                TempData["Error"] = "User not found";
                 return RedirectToAction(nameof(Users));
             }
 
             // Prevent suspending other admins
             if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
             {
-                TempData["Error"] = "لا يمكن تعليق حساب المسؤول";
+                TempData["Error"] = "Cannot suspend admin account";
                 return RedirectToAction(nameof(UserDetails), new { id });
             }
 
@@ -170,14 +170,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("User {UserId} suspended by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "تم تعليق حساب المستخدم بنجاح";
+            TempData["Success"] = "User account suspended successfully";
 
             return RedirectToAction(nameof(UserDetails), new { id });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error suspending user {UserId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تعليق الحساب";
+            TempData["Error"] = "An error occurred while suspending the account";
             return RedirectToAction(nameof(UserDetails), new { id });
         }
     }
@@ -195,7 +195,7 @@ public class AdminDashboardController : BaseController
             var user = await _db.Users.FindAsync(id);
             if (user == null)
             {
-                TempData["Error"] = "المستخدم غير موجود";
+                TempData["Error"] = "User not found";
                 return RedirectToAction(nameof(Users));
             }
 
@@ -205,14 +205,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("User {UserId} activated by admin", id);
-            TempData["Success"] = "تم تفعيل حساب المستخدم بنجاح";
+            TempData["Success"] = "User account activated successfully";
 
             return RedirectToAction(nameof(UserDetails), new { id });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error activating user {UserId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تفعيل الحساب";
+            TempData["Error"] = "An error occurred while activating the account";
             return RedirectToAction(nameof(UserDetails), new { id });
         }
     }
@@ -230,14 +230,14 @@ public class AdminDashboardController : BaseController
             var user = await _db.Users.FindAsync(id);
             if (user == null)
             {
-                TempData["Error"] = "المستخدم غير موجود";
+                TempData["Error"] = "User not found";
                 return RedirectToAction(nameof(Users));
             }
 
             // Prevent deleting other admins
             if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
             {
-                TempData["Error"] = "لا يمكن حذف حساب المسؤول";
+                TempData["Error"] = "Cannot delete admin account";
                 return RedirectToAction(nameof(UserDetails), new { id });
             }
 
@@ -249,14 +249,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogWarning("User {UserId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "تم حذف حساب المستخدم بنجاح";
+            TempData["Success"] = "User account deleted successfully";
 
             return RedirectToAction(nameof(Users));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting user {UserId}", id);
-            TempData["Error"] = "حدث خطأ أثناء حذف الحساب";
+            TempData["Error"] = "An error occurred while deleting the account";
             return RedirectToAction(nameof(UserDetails), new { id });
         }
     }
@@ -277,21 +277,21 @@ public class AdminDashboardController : BaseController
 
             if (user == null)
             {
-                TempData["Error"] = "المستخدم غير موجود";
+                TempData["Error"] = "User not found";
                 return RedirectToAction(nameof(Users));
             }
 
             var newRole = await _db.Roles.FindAsync(newRoleId);
             if (newRole == null)
             {
-                TempData["Error"] = "الدور المحدد غير موجود";
+                TempData["Error"] = "Selected role not found";
                 return RedirectToAction(nameof(UserDetails), new { id });
             }
 
             // Prevent changing admin roles
             if (user.Role?.Name == "Admin" || newRole.Name == "Admin")
             {
-                TempData["Error"] = "لا يمكن تغيير دور المسؤول";
+                TempData["Error"] = "Cannot change admin role";
                 return RedirectToAction(nameof(UserDetails), new { id });
             }
 
@@ -301,14 +301,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("User {UserId} role updated to {RoleName} by admin", id, newRole.Name);
-            TempData["Success"] = $"تم تحديث دور المستخدم إلى {newRole.Name} بنجاح";
+            TempData["Success"] = $"User role updated to {newRole.Name} successfully";
 
             return RedirectToAction(nameof(UserDetails), new { id });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user {UserId} role", id);
-            TempData["Error"] = "حدث خطأ أثناء تحديث الدور";
+            TempData["Error"] = "An error occurred while updating the role";
             return RedirectToAction(nameof(UserDetails), new { id });
         }
     }
@@ -316,14 +316,14 @@ public class AdminDashboardController : BaseController
     [HttpGet]
     public IActionResult TailorVerification()
     {
-        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
+        TempData["Info"] = "System simplified - Tailor verification not required";
         return RedirectToAction(nameof(Users));
     }
 
     [HttpGet]
     public IActionResult ReviewTailor(Guid id)
     {
-        TempData["Info"] = "تم تبسيط النظام - التحقق من الخياطين غير مطلوب";
+        TempData["Info"] = "System simplified - Tailor verification not required";
         return RedirectToAction(nameof(Users));
     }
 
@@ -336,7 +336,7 @@ public class AdminDashboardController : BaseController
             var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
             if (tailor == null)
             {
-                TempData["Error"] = "الخياط غير موجود";
+                TempData["Error"] = "Tailor not found";
                 return RedirectToAction(nameof(Users));
             }
 
@@ -344,13 +344,13 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Tailor {TailorId} verified by admin. Notes: {Notes}", id, notes ?? "None");
-            TempData["Success"] = "تم توثيق حساب الخياط بنجاح";
+            TempData["Success"] = "Tailor account verified successfully";
             return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error approving tailor {TailorId}", id);
-            TempData["Error"] = "حدث خطأ أثناء توثيق الخياط";
+            TempData["Error"] = "An error occurred while verifying the tailor";
             return RedirectToAction(nameof(Users));
         }
     }
@@ -364,7 +364,7 @@ public class AdminDashboardController : BaseController
             var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
             if (tailor == null)
             {
-                TempData["Error"] = "الخياط غير موجود";
+                TempData["Error"] = "Tailor not found";
                 return RedirectToAction(nameof(Users));
             }
 
@@ -374,13 +374,13 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Tailor {TailorId} rejected/unverified by admin. Reason: {Reason}", id, reason ?? "None");
-            TempData["Success"] = "تم إلغاء توثيق الخياط";
+            TempData["Success"] = "Tailor verification cancelled";
             return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error rejecting tailor {TailorId}", id);
-            TempData["Error"] = "حدث خطأ أثناء إلغاء توثيق الخياط";
+            TempData["Error"] = "An error occurred while cancelling tailor verification";
             return RedirectToAction(nameof(Users));
         }
     }
@@ -402,7 +402,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading portfolio review page");
-            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة مراجعة الصور";
+            TempData["Error"] = "An error occurred while loading the portfolio review page";
             return View(new List<PortfolioImage>());
         }
     }
@@ -420,7 +420,7 @@ public class AdminDashboardController : BaseController
             var image = await _db.PortfolioImages.FindAsync(id);
             if (image == null)
             {
-                TempData["Error"] = "الصورة غير موجودة";
+                TempData["Error"] = "Image not found";
                 return RedirectToAction(nameof(PortfolioReview));
             }
 
@@ -428,14 +428,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogWarning("Portfolio image {ImageId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "تم حذف الصورة بنجاح";
+            TempData["Success"] = "Image deleted successfully";
 
             return RedirectToAction(nameof(PortfolioReview));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting portfolio image {ImageId}", id);
-            TempData["Error"] = "حدث خطأ أثناء حذف الصورة";
+            TempData["Error"] = "An error occurred while deleting the image";
             return RedirectToAction(nameof(PortfolioReview));
         }
     }
@@ -458,7 +458,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading orders page");
-            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة الطلبات";
+            TempData["Error"] = "An error occurred while loading the orders page";
             return View(new List<Order>());
         }
     }
@@ -476,13 +476,13 @@ public class AdminDashboardController : BaseController
             var order = await _db.Orders.FindAsync(id);
             if (order == null)
             {
-                TempData["Error"] = "الطلب غير موجود";
+                TempData["Error"] = "Order not found";
                 return RedirectToAction(nameof(Orders));
             }
 
             if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
             {
-                TempData["Error"] = "لا يمكن إلغاء هذا الطلب";
+                TempData["Error"] = "Cannot cancel this order";
                 return RedirectToAction(nameof(Orders));
             }
 
@@ -490,14 +490,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogWarning("Order {OrderId} cancelled by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "تم إلغاء الطلب بنجاح";
+            TempData["Success"] = "Order cancelled successfully";
 
             return RedirectToAction(nameof(Orders));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error cancelling order {OrderId}", id);
-            TempData["Error"] = "حدث خطأ أثناء إلغاء الطلب";
+            TempData["Error"] = "An error occurred while cancelling the order";
             return RedirectToAction(nameof(Orders));
         }
     }
@@ -542,7 +542,7 @@ public class AdminDashboardController : BaseController
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading products page");
-            TempData["Error"] = "حدث خطأ أثناء تحميل صفحة المنتجات";
+            TempData["Error"] = "An error occurred while loading the products page";
             return View(new List<Product>());
         }
     }
@@ -560,7 +560,7 @@ public class AdminDashboardController : BaseController
             var product = await _db.Products.FindAsync(id);
             if (product == null)
             {
-                TempData["Error"] = "المنتج غير موجود";
+                TempData["Error"] = "Product not found";
                 return RedirectToAction(nameof(Products));
             }
 
@@ -569,14 +569,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable} by admin", id, product.IsAvailable);
-            TempData["Success"] = $"تم {(product.IsAvailable ? "تفعيل" : "إيقاف")} المنتج بنجاح";
+            TempData["Success"] = $"Product {(product.IsAvailable ? "activated" : "deactivated")} successfully";
 
             return RedirectToAction(nameof(Products));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling product availability {ProductId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحديث حالة المنتج";
+            TempData["Error"] = "An error occurred while updating product status";
             return RedirectToAction(nameof(Products));
         }
     }
@@ -594,7 +594,7 @@ public class AdminDashboardController : BaseController
             var product = await _db.Products.FindAsync(id);
             if (product == null)
             {
-                TempData["Error"] = "المنتج غير موجود";
+                TempData["Error"] = "Product not found";
                 return RedirectToAction(nameof(Products));
             }
 
@@ -605,14 +605,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogWarning("Product {ProductId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "تم حذف المنتج بنجاح";
+            TempData["Success"] = "Product deleted successfully";
 
             return RedirectToAction(nameof(Products));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            TempData["Error"] = "حدث خطأ أثناء حذف المنتج";
+            TempData["Error"] = "An error occurred while deleting the product";
             return RedirectToAction(nameof(Products));
         }
     }
@@ -630,13 +630,13 @@ public class AdminDashboardController : BaseController
             var product = await _db.Products.FindAsync(id);
             if (product == null)
             {
-                TempData["Error"] = "المنتج غير موجود";
+                TempData["Error"] = "Product not found";
                 return RedirectToAction(nameof(Products));
             }
 
             if (newStock < 0)
             {
-                TempData["Error"] = "الكمية يجب أن تكون أكبر من أو تساوي صفر";
+                TempData["Error"] = "Quantity must be greater than or equal to zero";
                 return RedirectToAction(nameof(Products));
             }
 
@@ -652,14 +652,14 @@ public class AdminDashboardController : BaseController
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Product {ProductId} stock updated to {Stock} by admin", id, newStock);
-            TempData["Success"] = "تم تحديث المخزون بنجاح";
+            TempData["Success"] = "Stock updated successfully";
 
             return RedirectToAction(nameof(Products));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating product stock {ProductId}", id);
-            TempData["Error"] = "حدث خطأ أثناء تحديث المخزون";
+            TempData["Error"] = "An error occurred while updating stock";
             return RedirectToAction(nameof(Products));
         }
     }
@@ -669,21 +669,21 @@ public class AdminDashboardController : BaseController
     [HttpGet]
     public IActionResult Disputes()
     {
-        TempData["Info"] = "ميزة النزاعات غير متاحة حالياً";
+        TempData["Info"] = "Disputes feature is currently unavailable";
         return View();
     }
 
     [HttpGet]
     public IActionResult Refunds()
     {
-        TempData["Info"] = "ميزة طلبات الاسترداد غير متاحة حالياً";
+        TempData["Info"] = "Refunds feature is currently unavailable";
         return View();
     }
 
     [HttpGet]
     public IActionResult Reviews()
     {
-        TempData["Info"] = "تم تبسيط النظام - التقييمات غير متاحة";
+        TempData["Info"] = "System simplified - Reviews not available";
         return RedirectToAction(nameof(Orders));
     }
 
@@ -697,14 +697,14 @@ public class AdminDashboardController : BaseController
     [HttpGet]
     public IActionResult Notifications()
     {
-        TempData["Info"] = "تم تبسيط النظام - الإشعارات غير متاحة";
+        TempData["Info"] = "System simplified - Notifications not available";
         return View(new List<string>());
     }
 
     [HttpGet]
     public IActionResult AuditLogs()
     {
-        TempData["Info"] = "ميزة سجلات التدقيق قيد التطوير";
+        TempData["Info"] = "Audit logs feature is under development";
         return View();
     }
 
@@ -714,7 +714,7 @@ public class AdminDashboardController : BaseController
     [HttpGet]
     public IActionResult ViewVerificationDocument(Guid tailorId, string documentType)
     {
-        TempData["Info"] = "تم تبسيط النظام - وثائق التحقق غير متاحة";
+        TempData["Info"] = "System simplified - Verification documents not available";
         return RedirectToAction(nameof(Users));
     }
 }

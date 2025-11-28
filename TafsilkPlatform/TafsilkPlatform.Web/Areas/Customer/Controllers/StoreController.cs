@@ -8,7 +8,7 @@ using TafsilkPlatform.Web.Interfaces;
 namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [Route("[controller]")]
+    [Route("/Store")]
     public class StoreController : Controller
     {
         private readonly IStoreService _storeService;
@@ -74,14 +74,14 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             if (product == null)
             {
                 _logger.LogWarning("Product {ProductId} not found, returning fallback view", id);
-                TempData["Error"] = "المنتج غير موجود أو لم يعد متوفراً";
+                TempData["Error"] = "Product not found or no longer available";
 
                 // Return fallback model to avoid view NREs
                 var fallback = new TafsilkPlatform.Models.ViewModels.Store.ProductViewModel
                 {
                     ProductId = id,
-                    Name = "منتج غير متوفر",
-                    Description = "لا توجد تفاصيل لهذا المنتج حالياً.",
+                    Name = "Product Unavailable",
+                    Description = "No details available for this product.",
                     Price = 0,
                     DiscountedPrice = null,
                     Category = string.Empty,
@@ -128,18 +128,18 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 
                 if (success)
                 {
-                    TempData["Success"] = "تم إضافة المنتج إلى السلة بنجاح";
+                    TempData["Success"] = "Product added to cart successfully";
                     return RedirectToAction(nameof(Cart));
                 }
 
                 // ✅ Better error messages (like Amazon)
-                TempData["Error"] = "فشل إضافة المنتج إلى السلة. قد يكون المنتج غير متوفر أو الكمية المطلوبة غير متاحة.";
+                TempData["Error"] = "Failed to add product to cart. Product might be unavailable or requested quantity exceeds stock.";
                 return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in AddToCart for product {ProductId}", request.ProductId);
-                TempData["Error"] = "حدث خطأ أثناء إضافة المنتج. يرجى المحاولة مرة أخرى.";
+                TempData["Error"] = "An error occurred while adding the product. Please try again.";
                 return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
             }
         }
@@ -176,7 +176,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
         {
             var customerId = await GetCustomerIdAsync();
             await _storeService.ClearCartAsync(customerId);
-            TempData["Success"] = "تم إفراغ السلة بنجاح";
+            TempData["Success"] = "Cart cleared successfully";
             return RedirectToAction(nameof(Cart));
         }
 
@@ -191,7 +191,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             if (checkoutData == null || !checkoutData.Cart.Items.Any())
             {
                 _logger.LogWarning("Checkout requested but cart is empty for customer {CustomerId}", customerId);
-                TempData["Error"] = "سلة التسوق فارغة أو حدث خطأ أثناء تحميل بيانات السلة";
+                TempData["Error"] = "Cart is empty or an error occurred while loading cart data";
 
                 // Return a safe fallback CheckoutViewModel so the view can render and show friendly message
                 var fallbackCheckout = new TafsilkPlatform.Models.ViewModels.Store.CheckoutViewModel
@@ -228,8 +228,8 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 
                 // Show first 3 errors to user
                 var errorMessage = errors.Any()
-                    ? "يرجى إكمال جميع الحقول المطلوبة: " + string.Join("، ", errors.Take(3))
-                    : "يرجى إكمال جميع الحقول المطلوبة";
+                    ? "Please complete all required fields: " + string.Join(", ", errors.Take(3))
+                    : "Please complete all required fields";
 
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -254,7 +254,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                 {
                     _logger.LogWarning("Empty cart for customer {CustomerId} during checkout", customerId);
 
-                    var emptyCartMessage = "السلة فارغة. يرجى إضافة منتجات قبل إتمام الطلب";
+                    var emptyCartMessage = "Cart is empty. Please add items before checking out";
 
                     // ✅ Check if AJAX request
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -266,13 +266,26 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     return RedirectToAction(nameof(Cart));
                 }
 
-                // ✅ SIMPLIFIED: Force Cash on Delivery
-                request.PaymentMethod = "CashOnDelivery";
+                // ✅ SIMPLIFIED: Force Cash on Delivery (REMOVED)
+                // request.PaymentMethod = "CashOnDelivery";
 
                 var (success, orderId, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
 
                 if (success && orderId.HasValue)
                 {
+                    // ✅ CHECK FOR STRIPE PAYMENT
+                    if (request.PaymentMethod == "CreditCard")
+                    {
+                        _logger.LogInformation("Redirecting to Stripe payment for order {OrderId}", orderId.Value);
+
+                        if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                        {
+                            return Json(new { success = true, redirectUrl = $"/payments/process?orderId={orderId.Value}" });
+                        }
+
+                        return RedirectToAction("ProcessPayment", "Payments", new { orderId = orderId.Value });
+                    }
+
                     _logger.LogInformation("Cash order {OrderId} confirmed successfully for customer {CustomerId}", orderId.Value, customerId);
 
                     // ✅ NEW: Return JSON for AJAX requests
@@ -288,7 +301,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                             orderNumber = orderId.Value.ToString().Substring(0, 8).ToUpper(),
                             orderDate = DateTimeOffset.UtcNow.ToString("dd/MM/yyyy - HH:mm"),
                             totalAmount = order?.TotalAmount ?? 0,
-                            paymentMethod = "الدفع عند الاستلام"
+                            paymentMethod = "Cash on Delivery"
                         });
                     }
 
@@ -299,7 +312,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                 }
 
                 // ✅ Better error messages
-                var errorMsg = errorMessage ?? "فشل إتمام الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
+                var errorMsg = errorMessage ?? "Order failed. Please try again or contact support.";
 
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -315,7 +328,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             {
                 _logger.LogError(ex, "Unauthorized access in ProcessCheckout");
 
-                var authMessage = "يرجى تسجيل الدخول أولاً";
+                var authMessage = "Please login first";
 
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -330,7 +343,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             {
                 _logger.LogError(ex, "Error in ProcessCheckout for customer");
 
-                var genericError = "حدث خطأ أثناء معالجة الطلب. يرجى المحاولة مرة أخرى أو الاتصال بالدعم.";
+                var genericError = "An error occurred while processing the order. Please try again or contact support.";
 
                 // ✅ Check if AJAX request
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -373,13 +386,13 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     {
                         OrderId = orderId,
                         OrderNumber = orderId.ToString().Substring(0, 8).ToUpper(),
-                        TotalAmount = 0, // Will be shown as "سيتم تحديثه قريباً"
-                        PaymentMethod = "الدفع عند الاستلام",
+                        TotalAmount = 0, // Will be shown as "Will be updated soon"
+                        PaymentMethod = "Cash on Delivery",
                         OrderDate = DateTimeOffset.UtcNow,
                         EstimatedDeliveryDays = 3
                     };
 
-                    TempData["Info"] = "تم تأكيد طلبك بنجاح! سيتم تحديث التفاصيل قريباً.";
+                    TempData["Info"] = "Order confirmed successfully! Details will be updated soon.";
                     return View(fallbackModel);
                 }
 
@@ -389,7 +402,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     OrderId = orderId,
                     OrderNumber = orderId.ToString().Substring(0, 8).ToUpper(),
                     TotalAmount = order.TotalAmount,
-                    PaymentMethod = "الدفع عند الاستلام",
+                    PaymentMethod = "Cash on Delivery",
                     OrderDate = order.OrderDate,
                     EstimatedDeliveryDays = 3 // Default 3 days
                 };
@@ -403,7 +416,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading payment success page for order {OrderId}", orderId);
-                TempData["Success"] = "تم تأكيد طلبك بنجاح!";
+                TempData["Success"] = "Order confirmed successfully!";
                 // ✅ FIXED: Fallback to MyOrders if success page fails
                 return RedirectToAction("MyOrders", "Orders");
             }

@@ -34,26 +34,17 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<Payment> Payment { get; set; }
     public virtual DbSet<PortfolioImage> PortfolioImages { get; set; }
     public virtual DbSet<TailorService> TailorServices { get; set; }
-    public virtual DbSet<AppSetting> AppSettings { get; set; }
+
     // ✅ IDEMPOTENCY: Idempotency keys for preventing duplicate requests
     public virtual DbSet<IdempotencyKey> IdempotencyKeys { get; set; }
 
-    // ✅ NEW: Loyalty and rewards system
-    public virtual DbSet<CustomerLoyalty> CustomerLoyalties { get; set; }
-    public virtual DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; }
 
-    // ✅ NEW: Saved measurements for faster rebooking
-    public virtual DbSet<CustomerMeasurement> CustomerMeasurements { get; set; }
-
-    // ✅ NEW: Complaints and support system
-    public virtual DbSet<Complaint> Complaints { get; set; }
-    public virtual DbSet<ComplaintAttachment> ComplaintAttachments { get; set; }
 
     // ✅ ECOMMERCE: Products and shopping cart
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public virtual DbSet<CartItem> CartItems { get; set; }
-    public virtual DbSet<ProductReview> ProductReviews { get; set; }
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -85,7 +76,7 @@ public partial class ApplicationDbContext : DbContext
 
         // Check if using SQLite
         var isSqlite = Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true;
-        
+
         if (isSqlite)
         {
             // SQLite defaults
@@ -181,9 +172,12 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.FullName).HasMaxLength(255);
             entity.Property(e => e.Gender).HasMaxLength(20);
             entity.Property(e => e.Bio).HasMaxLength(1000);
-            entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
-            entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
-            entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
+
+            // Add check constraint for Gender
+            entity.ToTable(t => t.HasCheckConstraint(
+                "CK_CustomerProfiles_Gender",
+                "[Gender] IS NULL OR [Gender] IN ('Male', 'Female')"
+            ));
 
             entity.HasOne(d => d.User)
                 .WithOne(p => p.CustomerProfile)
@@ -211,7 +205,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.Longitude).HasColumnType("decimal(11, 8)");
             entity.Property(e => e.PricingRange).HasMaxLength(100);
             entity.Property(e => e.ShopName).HasMaxLength(255);
+#pragma warning disable CS0618
             entity.Property(e => e.ProfilePictureUrl).HasMaxLength(500);
+#pragma warning restore CS0618
             entity.Property(e => e.ProfilePictureContentType).HasMaxLength(100);
             entity.Property(e => e.ProfilePictureData).HasColumnType(blobColumnType);
 
@@ -252,7 +248,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(o => o.TailorId).IsRequired();
 
             entity.HasOne(o => o.Customer)
-                          .WithMany(c => c.orders)
+                          .WithMany(c => c.Orders)
               .HasForeignKey(o => o.CustomerId)
                  .OnDelete(DeleteBehavior.NoAction);
 
@@ -266,7 +262,7 @@ public partial class ApplicationDbContext : DbContext
   .HasForeignKey(oi => oi.OrderId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            entity.HasMany(o => o.orderImages)
+            entity.HasMany(o => o.OrderImages)
       .WithOne(oi => oi.Order)
      .HasForeignKey(oi => oi.OrderId)
   .OnDelete(DeleteBehavior.NoAction);
@@ -356,18 +352,6 @@ public partial class ApplicationDbContext : DbContext
                 });
 
         // OrderImages Entity - Fix shadow property warning
-        modelBuilder.Entity<OrderImages>(entity =>
-          {
-              entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_OrderImages_OrderId");
-
-              entity.HasOne(oi => oi.Order)
-         .WithMany(o => o.orderImages)
-      .HasForeignKey(oi => oi.OrderId)
-             .HasPrincipalKey(o => o.OrderId)
-          .OnDelete(DeleteBehavior.NoAction);
-          });
-
-        // ✅ IDEMPOTENCY: IdempotencyKey Entity Configuration
         modelBuilder.Entity<IdempotencyKey>(entity =>
           {
               entity.ToTable("IdempotencyKeys");
@@ -386,137 +370,11 @@ public partial class ApplicationDbContext : DbContext
               entity.HasIndex(e => e.UserId).HasDatabaseName("IX_IdempotencyKeys_UserId");
           });
 
-        // ✅ NEW: CustomerLoyalty Entity Configuration
-        modelBuilder.Entity<CustomerLoyalty>(entity =>
-           {
-               entity.ToTable("CustomerLoyalty");
-               entity.HasKey(e => e.Id).HasName("PK_CustomerLoyalty");
 
-               entity.Property(e => e.Id).ValueGeneratedOnAdd();
-               entity.Property(e => e.Tier).HasMaxLength(50).HasDefaultValue("Bronze");
-               entity.Property(e => e.ReferralCode).HasMaxLength(20);
-               entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
-               entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerLoyalty_CustomerId").IsUnique();
-               entity.HasIndex(e => e.ReferralCode).HasDatabaseName("IX_CustomerLoyalty_ReferralCode");
 
-               entity.HasOne(l => l.Customer)
-       .WithOne(c => c.Loyalty)
-              .HasForeignKey<CustomerLoyalty>(l => l.CustomerId)
-     .OnDelete(DeleteBehavior.NoAction);
-           });
 
-        // ✅ NEW: LoyaltyTransaction Entity Configuration
-        modelBuilder.Entity<LoyaltyTransaction>(entity =>
-      {
-          entity.ToTable("LoyaltyTransactions");
-          entity.HasKey(e => e.Id).HasName("PK_LoyaltyTransactions");
 
-          entity.Property(e => e.Id).ValueGeneratedOnAdd();
-          entity.Property(e => e.Type).IsRequired().HasMaxLength(20);
-          entity.Property(e => e.Description).HasMaxLength(200);
-          entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
-
-          entity.HasIndex(e => e.CustomerLoyaltyId).HasDatabaseName("IX_LoyaltyTransactions_CustomerLoyaltyId");
-          entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_LoyaltyTransactions_CreatedAt");
-
-          entity.HasOne(t => t.CustomerLoyalty)
-           .WithMany(l => l.Transactions)
-         .HasForeignKey(t => t.CustomerLoyaltyId)
-           .OnDelete(DeleteBehavior.NoAction);
-      });
-
-        // ✅ NEW: CustomerMeasurement Entity Configuration
-        modelBuilder.Entity<CustomerMeasurement>(entity =>
-   {
-       entity.ToTable("CustomerMeasurements");
-       entity.HasKey(e => e.Id).HasName("PK_CustomerMeasurements");
-
-       entity.Property(e => e.Id).ValueGeneratedOnAdd();
-       entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
-       entity.Property(e => e.GarmentType).HasMaxLength(50);
-       entity.Property(e => e.CustomMeasurementsJson).HasMaxLength(2000);
-       entity.Property(e => e.Notes).HasMaxLength(500);
-       entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
-
-       // Decimal precision for measurements
-       entity.Property(e => e.Chest).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.Waist).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.Hips).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.ShoulderWidth).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.SleeveLength).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.InseamLength).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.OutseamLength).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.NeckCircumference).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.ArmLength).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.ThighCircumference).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.ThobeLength).HasColumnType("decimal(5,2)");
-       entity.Property(e => e.AbayaLength).HasColumnType("decimal(5,2)");
-
-       entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_CustomerMeasurements_CustomerId");
-
-       entity.HasOne(m => m.Customer)
-    .WithMany(c => c.SavedMeasurements)
-     .HasForeignKey(m => m.CustomerId)
-    .OnDelete(DeleteBehavior.NoAction);
-   });
-
-        // ✅ NEW: Complaint Entity Configuration
-        modelBuilder.Entity<Complaint>(entity =>
-          {
-              entity.ToTable("Complaints");
-              entity.HasKey(e => e.Id).HasName("PK_Complaints");
-
-              entity.Property(e => e.Id).ValueGeneratedOnAdd();
-              entity.Property(e => e.Subject).IsRequired().HasMaxLength(100);
-              entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
-              entity.Property(e => e.ComplaintType).HasMaxLength(50).HasDefaultValue("Other");
-              entity.Property(e => e.DesiredResolution).HasMaxLength(50);
-              entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Open");
-              entity.Property(e => e.Priority).HasMaxLength(20).HasDefaultValue("Medium");
-              entity.Property(e => e.AdminResponse).HasMaxLength(2000);
-              entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
-
-              entity.HasIndex(e => e.OrderId).HasDatabaseName("IX_Complaints_OrderId");
-              entity.HasIndex(e => e.CustomerId).HasDatabaseName("IX_Complaints_CustomerId");
-              entity.HasIndex(e => e.TailorId).HasDatabaseName("IX_Complaints_TailorId");
-              entity.HasIndex(e => e.Status).HasDatabaseName("IX_Complaints_Status");
-
-              entity.HasOne(c => c.Order)
-        .WithMany(o => o.Complaints)
-  .HasForeignKey(c => c.OrderId)
-       .OnDelete(DeleteBehavior.NoAction);
-
-              entity.HasOne(c => c.Customer)
-         .WithMany(cp => cp.Complaints)
-    .HasForeignKey(c => c.CustomerId)
-           .OnDelete(DeleteBehavior.NoAction);
-
-              entity.HasOne(c => c.Tailor)
-             .WithMany()
-            .HasForeignKey(c => c.TailorId)
-      .OnDelete(DeleteBehavior.NoAction);
-          });
-
-        // ✅ NEW: ComplaintAttachment Entity Configuration
-        modelBuilder.Entity<ComplaintAttachment>(entity =>
-        {
-            entity.ToTable("ComplaintAttachments");
-            entity.HasKey(e => e.Id).HasName("PK_ComplaintAttachments");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd();
-            entity.Property(e => e.FileData).HasColumnType(blobColumnType);
-            entity.Property(e => e.ContentType).HasMaxLength(100);
-            entity.Property(e => e.FileName).HasMaxLength(255);
-            entity.Property(e => e.UploadedAt).HasDefaultValueSql(utcNowDefaultSql);
-
-            entity.HasIndex(e => e.ComplaintId).HasDatabaseName("IX_ComplaintAttachments_ComplaintId");
-
-            entity.HasOne(a => a.Complaint)
-       .WithMany(c => c.Attachments)
-   .HasForeignKey(a => a.ComplaintId)
-      .OnDelete(DeleteBehavior.NoAction);
-        });
 
         // ✅ ECOMMERCE: Product Entity
         modelBuilder.Entity<Product>(entity =>
@@ -572,25 +430,7 @@ public partial class ApplicationDbContext : DbContext
                       .OnDelete(DeleteBehavior.NoAction);
         });
 
-        // ✅ ECOMMERCE: ProductReview Entity
-        modelBuilder.Entity<ProductReview>(entity =>
-        {
-            entity.HasKey(e => e.ReviewId);
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
 
-            entity.HasIndex(e => e.ProductId);
-            entity.HasIndex(e => e.CustomerId);
-
-            entity.HasOne(r => r.Product)
-                 .WithMany(p => p.Reviews)
-           .HasForeignKey(r => r.ProductId)
-        .OnDelete(DeleteBehavior.NoAction);
-
-            entity.HasOne(r => r.Customer)
-     .WithMany(c => c.ProductReviews)
-          .HasForeignKey(r => r.CustomerId)
-     .OnDelete(DeleteBehavior.NoAction);
-        });
 
         // Ensure all foreign keys use NoAction to prevent multiple cascade path errors
         foreach (var foreignKey in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))

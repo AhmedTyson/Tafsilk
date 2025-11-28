@@ -1,6 +1,14 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
 @{
     ViewBag.Title = "Login | Tafsilk";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    // Check if Google OAuth is properly configured (not placeholder)
+    var googleClientSecret = Configuration["Authentication:Google:ClientSecret"];
+    var isGoogleEnabled = !string.IsNullOrEmpty(googleClientSecret) && 
+                         !googleClientSecret.Contains("YOUR_") &&
+                         !googleClientSecret.Contains("6X2W6X2W");
 }
 
 @section Styles {
@@ -46,6 +54,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
+            
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
 
             <form asp-action="Login" asp-controller="Account" method="post" id="loginForm">
                 @Html.AntiForgeryToken()
@@ -57,14 +73,17 @@
                     </div>
                 }
 
-                <button type="button" class="btn-google" onclick="location.href='@Url.Action("GoogleLogin", "Account")'">
-                    <i class="fab fa-google text-danger"></i>
-                    Continue with Google
-                </button>
+                @if (isGoogleEnabled)
+                {
+                    <button type="button" class="btn-google" onclick="location.href='@Url.Action("GoogleLogin", "Account")'">
+                        <i class="fab fa-google text-danger"></i>
+                        Continue with Google
+                    </button>
 
-                <div class="divider">
-                    <span>OR</span>
-                </div>
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+                }
 
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address</label>

@@ -64,7 +64,7 @@
                                     <small class="text-muted d-block">
                                         <i class="fas fa-dollar-sign"></i> Total Amount
                                     </small>
-                                    <strong class="h4 text-primary" id="successTotalAmount">@Model.Cart.Total.ToString("N2") SAR</strong>
+                                    <strong class="h4 text-primary" id="successTotalAmount">@Model.Cart.Total.ToString("N2") EGP</strong>
                                 </div>
                             </div>
                         </div>
@@ -75,7 +75,7 @@
                                 <div>
                                     <strong>Important Note:</strong>
                                     <p class="mb-0">
-                                        Please prepare the due amount (<span id="successAmount">@Model.Cart.Total.ToString("N2")</span> SAR) in cash upon receiving the order from the courier.
+                                        Please prepare the due amount (<span id="successAmount">@Model.Cart.Total.ToString("N2")</span> EGP) in cash upon receiving the order from the courier.
                                     </p>
                                 </div>
                             </div>
@@ -232,14 +232,14 @@
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <span class="input-group-text">+966</span>
+                                        <span class="input-group-text">+20</span>
                                         <input type="tel" class="form-control" id="phone" 
                                                name="ShippingAddress.PhoneNumber" 
                                                value="@Model.ShippingAddress.PhoneNumber" 
-                                               pattern="[0-9]{9}" placeholder="5xxxxxxxx" required>
+                                               pattern="01[0-9]{9}" maxlength="11" placeholder="01xxxxxxxxx" required>
                                     </div>
-                                    <div class="invalid-feedback">Please enter a valid 9-digit phone number</div>
-                                    <small class="text-muted">Enter 9 digits without leading zero (e.g., 512345678)</small>
+                                    <div class="invalid-feedback">Please enter a valid Egyptian phone number</div>
+                                    <small class="text-muted">Enter 11 digits (e.g., 01012345678)</small>
                                 </div>
                                 
                                 <div class="col-12">
@@ -255,14 +255,15 @@
                                     <label for="city" class="form-label">City <span class="text-danger">*</span></label>
                                     <select class="form-select" id="city" name="ShippingAddress.City" required>
                                         <option value="">Select City</option>
-                                        <option value="Riyadh" selected="@(selectedCity == "Riyadh" || selectedCity == "الرياض")">Riyadh</option>
-                                        <option value="Jeddah" selected="@(selectedCity == "Jeddah" || selectedCity == "جدة")">Jeddah</option>
-                                        <option value="Makkah" selected="@(selectedCity == "Makkah" || selectedCity == "مكة")">Makkah</option>
-                                        <option value="Madinah" selected="@(selectedCity == "Madinah" || selectedCity == "المدينة")">Madinah</option>
-                                        <option value="Dammam" selected="@(selectedCity == "Dammam" || selectedCity == "الدمام")">Dammam</option>
-                                        <option value="Khobar" selected="@(selectedCity == "Khobar" || selectedCity == "الخبر")">Khobar</option>
-                                        <option value="Taif" selected="@(selectedCity == "Taif" || selectedCity == "الطائف")">Taif</option>
-                                        <option value="Other" selected="@(selectedCity == "Other" || selectedCity == "أخرى")">Other</option>
+                                        <option value="Cairo" selected="@(selectedCity == "Cairo")">Cairo</option>
+                                        <option value="Giza" selected="@(selectedCity == "Giza")">Giza</option>
+                                        <option value="Alexandria" selected="@(selectedCity == "Alexandria")">Alexandria</option>
+                                        <option value="Shubra El Kheima" selected="@(selectedCity == "Shubra El Kheima")">Shubra El Kheima</option>
+                                        <option value="Port Said" selected="@(selectedCity == "Port Said")">Port Said</option>
+                                        <option value="Suez" selected="@(selectedCity == "Suez")">Suez</option>
+                                        <option value="Luxor" selected="@(selectedCity == "Luxor")">Luxor</option>
+                                        <option value="Aswan" selected="@(selectedCity == "Aswan")">Aswan</option>
+                                        <option value="Other" selected="@(selectedCity == "Other")">Other</option>
                                     </select>
                                     <div class="invalid-feedback">Please select a city</div>
                                 </div>
@@ -353,9 +354,9 @@
                                                     <span class="text-muted"> (@item.SelectedSize)</span>
                                                 }
                                                 <br/>
-                                                <small class="text-muted">@item.Quantity × @item.UnitPrice.ToString("N2") SAR</small>
+                                                <small class="text-muted">@item.Quantity × @item.UnitPrice.ToString("N2") EGP</small>
                                             </span>
-                                            <span class="fw-bold">@item.TotalPrice.ToString("N2") SAR</span>
+                                            <span class="fw-bold">@item.TotalPrice.ToString("N2") EGP</span>
                                         </div>
                                     }
                                 </div>
@@ -365,7 +366,7 @@
                             
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Subtotal:</span>
-                                <span>@Model.Cart.SubTotal.ToString("N2") SAR</span>
+                                <span>@Model.Cart.SubTotal.ToString("N2") EGP</span>
                             </div>
                             
                             <div class="d-flex justify-content-between mb-2">
@@ -377,21 +378,21 @@
                                     }
                                     else
                                     {
-                                        <text>@Model.Cart.ShippingCost.ToString("N2") SAR</text>
+                                        <text>@Model.Cart.ShippingCost.ToString("N2") EGP</text>
                                     }
                                 </span>
                             </div>
                             
                             <div class="d-flex justify-content-between mb-3">
-                                <span>VAT (15%):</span>
-                                <span>@Model.Cart.Tax.ToString("N2") SAR</span>
+                                <span>VAT (14%):</span>
+                                <span>@Model.Cart.Tax.ToString("N2") EGP</span>
                             </div>
                             
                             <hr class="my-3"/>
                             
                             <div class="d-flex justify-content-between mb-2">
                                 <strong class="h5">Total:</strong>
-                                <strong class="h4 text-primary">@Model.Cart.Total.ToString("N2") SAR</strong>
+                                <strong class="h4 text-primary">@Model.Cart.Total.ToString("N2") EGP</strong>
                             </div>
                             
                             <div class="alert alert-info small mb-3">
@@ -769,11 +770,10 @@
             if (phoneInput) {
                 phoneInput.addEventListener('input', function(e) {
                     let value = this.value.replace(/[^0-9]/g, '');
-                    if (value.startsWith('0')) value = value.substring(1);
-                    if (value.length > 9) value = value.substring(0, 9);
+                    if (value.length > 11) value = value.substring(0, 11);
                     this.value = value;
                     
-                    if (value.length === 9) {
+                    if (value.length === 11 && value.startsWith('01')) {
                         this.classList.remove('is-invalid');
                         this.classList.add('is-valid');
                     } else if (value.length > 0) {

@@ -131,7 +131,7 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
                 else
                 {
                     // Merge existing JSON with required keys (existing keys preserved)
-                    var existing = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(adminRole.Permissions) ?? new Dictionary<string, object>();
+                    var existing = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(adminRole.Permissions) ?? [];
                     foreach (var kv in requiredPermissions)
                     {
                         if (!existing.ContainsKey(kv.Key)) existing[kv.Key] = kv.Value;

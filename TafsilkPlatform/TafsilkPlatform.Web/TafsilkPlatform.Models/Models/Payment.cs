@@ -24,7 +24,7 @@ namespace TafsilkPlatform.Models.Models
         public Enums.PaymentType PaymentType { get; set; }
         public Enums.PaymentStatus PaymentStatus { get; set; }
         public Enums.TransactionType TransactionType { get; set; }
-        public DateTimeOffset PaidAt { get; set; } = DateTimeOffset.UtcNow;
+        public DateTimeOffset? PaidAt { get; set; } = DateTimeOffset.UtcNow;
 
         // ✅ NEW: Stripe integration fields
         /// <summary>
@@ -63,10 +63,10 @@ namespace TafsilkPlatform.Models.Models
         public string? CardBrand { get; set; }
 
         /// <summary>
-        /// Currency code (SAR, USD, EUR, etc.)
+        /// Currency code (EGP, USD, EUR, etc.)
         /// </summary>
         [MaxLength(3)]
-        public string Currency { get; set; } = "SAR";
+        public string Currency { get; set; } = "EGP";
 
         /// <summary>
         /// Whether 3D Secure was used

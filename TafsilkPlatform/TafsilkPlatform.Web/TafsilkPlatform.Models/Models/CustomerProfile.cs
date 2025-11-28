@@ -26,16 +26,6 @@ namespace TafsilkPlatform.Models.Models
         [StringLength(1000)]
         public string? Bio { get; set; }
 
-        [Obsolete("Use ProfilePictureData instead. This field is kept for backward compatibility.")]
-        public string? ProfilePictureUrl { get; set; }
-
-        // New properties for storing image in database
-        [MaxLength]
-        public byte[]? ProfilePictureData { get; set; }
-
-        [StringLength(100)]
-        public string? ProfilePictureContentType { get; set; }
-
         [Display(Name = "Date of Birth")]
         [DataType(DataType.Date)]
         [CustomValidation(typeof(CustomerProfile), nameof(ValidateDateOfBirth))]
@@ -53,26 +43,22 @@ namespace TafsilkPlatform.Models.Models
         [ForeignKey("UserId")]
         public virtual User User { get; set; } = null!;
 
-        public List<Order> orders { get; set; } = new();
-        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public List<Order> Orders { get; set; } = [];
+        public ICollection<Payment> Payments { get; set; } = [];
 
         // ✅ NEW: Shopping cart
         public virtual ShoppingCart? ShoppingCart { get; set; }
 
-        // ✅ NEW: Loyalty and rewards
-        public virtual CustomerLoyalty? Loyalty { get; set; }
 
-        // ✅ NEW: Saved measurements for faster rebooking
-        public virtual ICollection<CustomerMeasurement> SavedMeasurements { get; set; } = new List<CustomerMeasurement>();
 
-        // ✅ NEW: Complaints and support
-        public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
 
-        // ✅ NEW: Product reviews
-        public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
+
+
+
+
 
         // Custom validation method
-        public static ValidationResult? ValidateDateOfBirth(DateOnly? dateOfBirth, ValidationContext context)
+        public static ValidationResult? ValidateDateOfBirth(DateOnly? dateOfBirth, ValidationContext _)
         {
             if (dateOfBirth.HasValue)
             {

@@ -67,37 +67,38 @@ public class ProfileCompletionService : IProfileCompletionService
         {
        new ProfileCompletionItem
     {
-           Label = "الاسم الكامل",
+           Label = "Full Name",
           IsCompleted = !string.IsNullOrWhiteSpace(customer.FullName),
      Weight = 20,
        Icon = "fa-user"
    },
       new ProfileCompletionItem
             {
-        Label = "رقم الهاتف",
+        Label = "Phone Number",
     IsCompleted = !string.IsNullOrWhiteSpace(user.PhoneNumber),
       Weight = 15,
                 Icon = "fa-phone"
        },
     new ProfileCompletionItem
           {
-         Label = "البريد الإلكتروني مؤكد",
+         Label = "Email Verified",
          IsCompleted = user.EmailVerified,
          Weight = 15,
  ActionUrl = !user.EmailVerified ? "/Account/ResendVerificationEmail" : null,
   Icon = "fa-envelope-open-text"
   },
-     new ProfileCompletionItem
-{
-             Label = "صورة الملف الشخصي",
-  IsCompleted = customer.ProfilePictureData != null && customer.ProfilePictureData.Length > 0,
-            Weight = 10,
-      ActionUrl = "/Profiles/CustomerProfile",
-     Icon = "fa-camera"
-     },
+     // Profile picture item removed
+     // new ProfileCompletionItem
+     // {
+     //     Label = "Profile Picture",
+     //     IsCompleted = customer.ProfilePictureData != null && customer.ProfilePictureData.Length > 0,
+     //     Weight = 10,
+     //     ActionUrl = "/Profiles/CustomerProfile",
+     //     Icon = "fa-camera"
+     // },
   new ProfileCompletionItem
         {
- Label = "عنوان التوصيل",
+ Label = "Delivery Address",
      IsCompleted = user.UserAddresses.Any(),
       Weight = 20,
      ActionUrl = "/Profiles/ManageAddresses",
@@ -105,7 +106,7 @@ public class ProfileCompletionService : IProfileCompletionService
      },
      new ProfileCompletionItem
     {
-         Label = "تاريخ الميلاد",
+         Label = "Date of Birth",
        IsCompleted = customer.DateOfBirth.HasValue,
          Weight = 10,
      ActionUrl = "/Profiles/CustomerProfile",
@@ -113,7 +114,7 @@ public class ProfileCompletionService : IProfileCompletionService
 },
 new ProfileCompletionItem
             {
-   Label = "الجنس",
+   Label = "Gender",
            IsCompleted = !string.IsNullOrWhiteSpace(customer.Gender),
       Weight = 10,
              ActionUrl = "/Profiles/CustomerProfile",
@@ -154,14 +155,14 @@ new ProfileCompletionItem
         {
       new ProfileCompletionItem
      {
-     Label = "الاسم الكامل",
+     Label = "Full Name",
          IsCompleted = !string.IsNullOrWhiteSpace(tailor.FullName),
       Weight = 10,
                 Icon = "fa-user"
      },
             new ProfileCompletionItem
             {
-    Label = "اسم الورشة",
+    Label = "Workshop Name",
                 IsCompleted = !string.IsNullOrWhiteSpace(tailor.ShopName),
           Weight = 10,
  ActionUrl = "/Profiles/EditTailorProfile",
@@ -169,7 +170,7 @@ new ProfileCompletionItem
    },
             new ProfileCompletionItem
         {
-                Label = "رقم الهاتف",
+                Label = "Phone Number",
                 IsCompleted = !string.IsNullOrWhiteSpace(user.PhoneNumber),
       Weight = 10,
    ActionUrl = "/Profiles/EditTailorProfile",
@@ -177,7 +178,7 @@ new ProfileCompletionItem
      },
     new ProfileCompletionItem
             {
-    Label = "البريد الإلكتروني مؤكد",
+    Label = "Email Verified",
         IsCompleted = user.EmailVerified,
     Weight = 10,
         ActionUrl = !user.EmailVerified ? "/Account/ResendVerificationEmail" : null,
@@ -185,7 +186,7 @@ new ProfileCompletionItem
     },
             new ProfileCompletionItem
      {
-     Label = "العنوان والمدينة",
+     Label = "Address and City",
      IsCompleted = !string.IsNullOrWhiteSpace(tailor.Address) && !string.IsNullOrWhiteSpace(tailor.City),
                 Weight = 10,
     ActionUrl = "/Profiles/EditTailorProfile",
@@ -193,7 +194,7 @@ new ProfileCompletionItem
             },
         new ProfileCompletionItem
           {
-          Label = "وصف الورشة",
+          Label = "Workshop Description",
          IsCompleted = !string.IsNullOrWhiteSpace(tailor.ShopDescription),
     Weight = 5,
       ActionUrl = "/Profiles/EditTailorProfile",
@@ -201,7 +202,7 @@ new ProfileCompletionItem
        },
             new ProfileCompletionItem
         {
-   Label = "نبذة تعريفية",
+   Label = "Bio",
           IsCompleted = !string.IsNullOrWhiteSpace(tailor.Bio),
            Weight = 5,
                 ActionUrl = "/Profiles/EditTailorProfile",
@@ -209,7 +210,7 @@ new ProfileCompletionItem
  },
             new ProfileCompletionItem
     {
-            Label = "صورة الملف الشخصي",
+            Label = "Profile Picture",
        IsCompleted = tailor.ProfilePictureData != null && tailor.ProfilePictureData.Length > 0,
       Weight = 5,
      ActionUrl = "/Profiles/EditTailorProfile",
@@ -217,7 +218,7 @@ new ProfileCompletionItem
  },
    new ProfileCompletionItem
    {
-Label = "الخدمات المقدمة",
+Label = "Services Offered",
             IsCompleted = tailor.TailorServices.Any(s => !s.IsDeleted),
                 Weight = 20,
                 ActionUrl = "/TailorManagement/ManageServices",
@@ -225,7 +226,7 @@ Label = "الخدمات المقدمة",
      },
          new ProfileCompletionItem
       {
-   Label = "معرض الأعمال",
+   Label = "Portfolio",
              IsCompleted = tailor.PortfolioImages.Count(p => !p.IsDeleted) >= 3,
     Weight = 15,
          ActionUrl = "/TailorManagement/ManagePortfolio",

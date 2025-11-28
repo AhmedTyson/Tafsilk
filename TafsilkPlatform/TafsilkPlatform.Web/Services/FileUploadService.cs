@@ -30,12 +30,12 @@ public class FileUploadService : IFileUploadService
         // Basic validation for interface compliance
         await Task.CompletedTask;
         if (file == null || file.Length == 0)
-            return (false, "الملف فارغ أو غير موجود.");
+            return (false, "File is empty or not found.");
         if (file.Length > MaxFileSizeInBytes)
-            return (false, $"حجم الملف كبير جداً. الحد الأقصى {MaxFileSizeInBytes / (1024 * 1024)} ميجابايت.");
+            return (false, $"File size is too large. Maximum size is {MaxFileSizeInBytes / (1024 * 1024)} MB.");
         var extension = Path.GetExtension(file.FileName)?.ToLowerInvariant();
         if (string.IsNullOrEmpty(extension) || !_allowedExtensions.Contains(extension))
-            return (false, $"امتداد الملف غير مدعوم: {extension}");
+            return (false, $"File extension not supported: {extension}");
         return (true, null);
     }
 

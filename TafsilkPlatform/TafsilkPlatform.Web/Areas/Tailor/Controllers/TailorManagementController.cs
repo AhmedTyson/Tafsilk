@@ -38,7 +38,7 @@ public class TailorManagementController : Controller
         _environment = environment ?? throw new ArgumentNullException(nameof(environment));
     }
 
-    #region Portfolio Management (معرض الأعمال)
+    #region Portfolio Management
 
     /// <summary>
     /// View and manage portfolio gallery
@@ -1353,7 +1353,7 @@ public class TailorManagementController : Controller
         };
 
         PopulateProductFormViewBag();
-        
+
         return View(model);
     }
 
@@ -1372,7 +1372,7 @@ public class TailorManagementController : Controller
             _logger.LogCritical("AddProduct POST started. Model state valid: {IsValid}", ModelState.IsValid);
             if (model != null)
             {
-                _logger.LogCritical("Model received. PrimaryImage: {ImageName}, Size: {Size}", 
+                _logger.LogCritical("Model received. PrimaryImage: {ImageName}, Size: {Size}",
                     model.PrimaryImage?.FileName, model.PrimaryImage?.Length);
             }
             if (model == null)
@@ -1828,22 +1828,7 @@ public class TailorManagementController : Controller
         .Include(t => t.User)
        .FirstOrDefaultAsync(t => t.UserId == userId.Value);
     }
-    private List<string> GetServiceTypes()
-    {
-        return new List<string>
-        {
-        "Tailoring Men's Thobe",
-        "Tailoring Women's Dress",
-        "Tailoring Formal Suit",
-        "Tailoring Abaya",
-        "Tailoring Jalabiya",
-        "Alteration & Repair",
-        "Fashion Design",
-        "Custom Tailoring",
-        "Embroidery",
-        "Home Sewing"
- };
-    }
+
 
     private List<string> GetPortfolioCategories()
     {

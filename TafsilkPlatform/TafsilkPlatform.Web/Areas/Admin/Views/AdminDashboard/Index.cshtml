@@ -1,15 +1,15 @@
 @model TafsilkPlatform.Models.ViewModels.Admin.DashboardHomeViewModel
 @{
-    ViewData["Title"] = "لوحة التحكم";
+    ViewData["Title"] = "Dashboard";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
 }
 
 <div class="page-header">
-    <h1 class="page-title">لوحة التحكم</h1>
+    <h1 class="page-title">Dashboard</h1>
     <div class="page-actions">
         <button class="btn btn-outline" onclick="location.reload()">
             <i class="fas fa-sync-alt"></i>
-            <span>تحديث</span>
+            <span>Refresh</span>
         </button>
     </div>
 </div>
@@ -19,59 +19,59 @@
     <!-- Total Users -->
     <div class="card stat-widget">
         <div class="flex-between">
-            <span class="stat-label">إجمالي المستخدمين</span>
+            <span class="stat-label">Total Users</span>
             <i class="fas fa-users text-secondary"></i>
         </div>
         <div class="stat-value">@Model.TotalUsers.ToString("N0")</div>
         <div class="stat-trend up">
             <i class="fas fa-arrow-up"></i>
-            <span>12% زيادة عن الشهر الماضي</span>
+            <span>12% increase from last month</span>
         </div>
     </div>
 
     <!-- Active Orders -->
     <div class="card stat-widget">
         <div class="flex-between">
-            <span class="stat-label">الطلبات النشطة</span>
+            <span class="stat-label">Active Orders</span>
             <i class="fas fa-shopping-bag text-secondary"></i>
         </div>
         <div class="stat-value">@Model.ActiveOrders.ToString("N0")</div>
         <div class="stat-trend up">
             <i class="fas fa-arrow-up"></i>
-            <span>8% زيادة في الطلبات</span>
+            <span>8% increase in orders</span>
         </div>
     </div>
 
     <!-- Total Sales (Gross) -->
     <div class="card stat-widget">
         <div class="flex-between">
-            <span class="stat-label">إجمالي المبيعات</span>
+            <span class="stat-label">Total Sales</span>
             <i class="fas fa-money-bill-wave text-secondary"></i>
         </div>
         <div class="stat-value">@Model.TotalSales.ToString("C")</div>
         <div class="stat-trend up">
             <i class="fas fa-arrow-up"></i>
-            <span>إجمالي قيمة الطلبات</span>
+            <span>Total Order Value</span>
         </div>
     </div>
 
     <!-- Tafsilk Revenue (Commission) -->
     <div class="card stat-widget">
         <div class="flex-between">
-            <span class="stat-label">أرباح تفصيلك (العمولة)</span>
+            <span class="stat-label">Tafsilk Revenue (Commission)</span>
             <i class="fas fa-coins text-secondary"></i>
         </div>
         <div class="stat-value">@Model.TotalRevenue.ToString("C")</div>
         <div class="stat-trend up">
             <i class="fas fa-arrow-up"></i>
-            <span>صافي الربح (10%)</span>
+            <span>Net Profit (10%)</span>
         </div>
     </div>
 
     <!-- Pending Reviews -->
     <div class="card stat-widget">
         <div class="flex-between">
-            <span class="stat-label">صور للمراجعة</span>
+            <span class="stat-label">Images for Review</span>
             <i class="fas fa-images text-secondary"></i>
         </div>
         <div class="stat-value">@Model.PendingPortfolioReviews</div>
@@ -79,14 +79,14 @@
         {
             <div class="stat-trend down">
                 <i class="fas fa-exclamation-circle"></i>
-                <span>يحتاج لاتخاذ إجراء</span>
+                <span>Action Required</span>
             </div>
         }
         else
         {
             <div class="stat-trend text-secondary">
                 <i class="fas fa-check"></i>
-                <span>لا توجد مهام معلقة</span>
+                <span>No pending tasks</span>
             </div>
         }
     </div>
@@ -97,10 +97,10 @@
     <!-- Revenue Chart -->
     <div class="card">
         <div class="flex-between mb-4">
-            <h3 class="text-lg font-bold m-0">نظرة عامة على الإيرادات</h3>
+            <h3 class="text-lg font-bold m-0">Revenue Overview</h3>
             <select class="form-select" style="padding: 0.25rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
-                <option>هذا العام</option>
-                <option>آخر 6 أشهر</option>
+                <option>This Year</option>
+                <option>Last 6 Months</option>
             </select>
         </div>
         <div style="height: 300px;">
@@ -110,17 +110,17 @@
 
     <!-- Order Status -->
     <div class="card">
-        <h3 class="text-lg font-bold mb-4 m-0">حالة الطلبات</h3>
+        <h3 class="text-lg font-bold mb-4 m-0">Order Status</h3>
         <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
             <canvas id="ordersChart"></canvas>
         </div>
         <div class="mt-4 pt-4 border-top border-subtle">
             <div class="flex-between text-sm mb-2">
-                <span class="text-secondary">مكتمل</span>
+                <span class="text-secondary">Completed</span>
                 <span class="font-medium">65%</span>
             </div>
             <div class="flex-between text-sm">
-                <span class="text-secondary">قيد التنفيذ</span>
+                <span class="text-secondary">In Progress</span>
                 <span class="font-medium">20%</span>
             </div>
         </div>
@@ -130,8 +130,8 @@
 <!-- Recent Activity -->
 <div class="card">
     <div class="flex-between mb-4">
-        <h3 class="text-lg font-bold m-0">النشاط الحديث</h3>
-        <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="btn btn-sm btn-outline">عرض الكل</a>
+        <h3 class="text-lg font-bold m-0">Recent Activity</h3>
+        <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="btn btn-sm btn-outline">View All</a>
     </div>
     
     @if (Model.RecentActivity.Any())
@@ -139,9 +139,9 @@
         <table class="datagrid">
             <thead>
                 <tr>
-                    <th>المستخدم</th>
-                    <th>النشاط</th>
-                    <th>التاريخ</th>
+                    <th>User</th>
+                    <th>Activity</th>
+                    <th>Date</th>
                     <th>IP Address</th>
                 </tr>
             </thead>
@@ -169,7 +169,7 @@
     {
         <div class="text-center py-5 text-secondary">
             <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
-            <p>لا توجد أنشطة حديثة</p>
+            <p>No recent activity</p>
         </div>
     }
 </div>

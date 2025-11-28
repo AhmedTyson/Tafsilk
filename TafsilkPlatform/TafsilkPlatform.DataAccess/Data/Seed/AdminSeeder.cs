@@ -54,10 +54,12 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
                 adminUser.RoleId = adminRole.Id;
                 adminUser.IsActive = true;
                 adminUser.EmailVerified = true;
-                // If password not set or empty, set it to configured adminPassword
-                if (string.IsNullOrEmpty(adminUser.PasswordHash))
+                
+                // ✅ Ensure password matches configuration
+                if (string.IsNullOrEmpty(adminUser.PasswordHash) || !PasswordHasher.Verify(adminUser.PasswordHash, adminPassword))
                 {
                     adminUser.PasswordHash = PasswordHasher.Hash(adminPassword);
+                    logger.LogInformation("✅ Admin password updated to match configuration");
                 }
                 logger.LogInformation("✅ Admin user ensured: {Email}", adminEmail);
             }

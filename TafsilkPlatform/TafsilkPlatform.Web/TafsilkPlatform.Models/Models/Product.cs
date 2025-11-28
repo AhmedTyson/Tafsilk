@@ -94,8 +94,8 @@ namespace TafsilkPlatform.Models.Models
         public bool IsDeleted { get; set; } = false;
 
         // Navigation properties
-        public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
-        public virtual ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
-        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public virtual ICollection<CartItem> CartItems { get; set; } = [];
+
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = [];
     }
 }

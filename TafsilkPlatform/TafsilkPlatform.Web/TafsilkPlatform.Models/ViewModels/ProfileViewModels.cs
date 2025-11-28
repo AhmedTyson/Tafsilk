@@ -6,29 +6,29 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class UpdateCustomerProfileRequest
     {
-        [Required(ErrorMessage = "الاسم الكامل مطلوب")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "الاسم يجب أن يكون بين 3 و 100 حرف")]
+        [Required(ErrorMessage = "Full Name is required")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 100 characters")]
         public string FullName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
-        [Phone(ErrorMessage = "رقم هاتف غير صحيح")]
-        [RegularExpression(@"^01[0-2,5]\d{8}$", ErrorMessage = "رقم هاتف مصري غير صحيح")]
+        [Required(ErrorMessage = "Phone Number is required")]
+        [Phone(ErrorMessage = "Invalid Phone Number")]
+        [RegularExpression(@"^01[0-2,5]\d{8}$", ErrorMessage = "Invalid Egyptian Phone Number")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "الجنس مطلوب")]
+        [Required(ErrorMessage = "Gender is required")]
         public string Gender { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "المدينة مطلوبة")]
+        [Required(ErrorMessage = "City is required")]
         public string City { get; set; } = string.Empty;
 
         public string? District { get; set; }
 
-        [StringLength(500, ErrorMessage = "التفضيلات لا يمكن أن تتجاوز 500 حرف")]
+        [StringLength(500, ErrorMessage = "Preferences cannot exceed 500 characters")]
         public string? Preferences { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
 
-        [StringLength(500, ErrorMessage = "النبذة لا يمكن أن تتجاوز 500 حرف")]
+        [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
         public string? Bio { get; set; }
     }
 
@@ -36,32 +36,32 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class UpdateTailorProfileRequest
     {
-        [Required(ErrorMessage = "اسم المحل مطلوب")]
-        [StringLength(100, MinimumLength = 3, ErrorMessage = "اسم المحل يجب أن يكون بين 3 و 100 حرف")]
+        [Required(ErrorMessage = "Shop Name is required")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Shop Name must be between 3 and 100 characters")]
         public string ShopName { get; set; } = string.Empty;
 
         [StringLength(100)]
         public string? FullName { get; set; }
 
-        [Required(ErrorMessage = "النبذة مطلوبة")]
-        [StringLength(500, ErrorMessage = "النبذة لا يمكن أن تتجاوز 500 حرف")]
+        [Required(ErrorMessage = "Bio is required")]
+        [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters")]
         public string Bio { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "رقم الهاتف مطلوب")]
-        [Phone(ErrorMessage = "رقم هاتف غير صحيح")]
-        [RegularExpression(@"^01[0-2,5]\d{8}$", ErrorMessage = "رقم هاتف مصري غير صحيح")]
+        [Required(ErrorMessage = "Phone Number is required")]
+        [Phone(ErrorMessage = "Invalid Phone Number")]
+        [RegularExpression(@"^01[0-2,5]\d{8}$", ErrorMessage = "Invalid Egyptian Phone Number")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "العنوان مطلوب")]
-        [StringLength(255, ErrorMessage = "العنوان لا يمكن أن يتجاوز 255 حرف")]
+        [Required(ErrorMessage = "Address is required")]
+        [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
         public string Address { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "المدينة مطلوبة")]
+        [Required(ErrorMessage = "City is required")]
         public string City { get; set; } = string.Empty;
 
         public string? District { get; set; }
 
-        [Range(0, 60, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 60")]
+        [Range(0, 60, ErrorMessage = "Experience years must be between 0 and 60")]
         public int? ExperienceYears { get; set; }
 
         public string? SkillLevel { get; set; }
@@ -73,21 +73,21 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class AddAddressRequest
     {
-        [Required(ErrorMessage = "تسمية العنوان مطلوبة")]
-        [StringLength(50, ErrorMessage = "التسمية لا يمكن أن تتجاوز 50 حرف")]
+        [Required(ErrorMessage = "Label is required")]
+        [StringLength(50, ErrorMessage = "Label cannot exceed 50 characters")]
         public string Label { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "العنوان مطلوب")]
-        [StringLength(255, ErrorMessage = "العنوان لا يمكن أن يتجاوز 255 حرف")]
+        [Required(ErrorMessage = "Address is required")]
+        [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
         public string StreetAddress { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "المدينة مطلوبة")]
+        [Required(ErrorMessage = "City is required")]
         public string City { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "الحي مطلوب")]
+        [Required(ErrorMessage = "District is required")]
         public string District { get; set; } = string.Empty;
 
-        [StringLength(10, ErrorMessage = "الرمز البريدي لا يمكن أن يتجاوز 10 أحرف")]
+        [StringLength(10, ErrorMessage = "Postal Code cannot exceed 10 characters")]
         public string? PostalCode { get; set; }
 
         public bool IsDefault { get; set; }
@@ -101,21 +101,21 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class EditAddressRequest
     {
-        [Required(ErrorMessage = "تسمية العنوان مطلوبة")]
-        [StringLength(50, ErrorMessage = "التسمية لا يمكن أن تتجاوز 50 حرف")]
+        [Required(ErrorMessage = "Label is required")]
+        [StringLength(50, ErrorMessage = "Label cannot exceed 50 characters")]
         public string Label { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "العنوان مطلوب")]
-        [StringLength(255, ErrorMessage = "العنوان لا يمكن أن يتجاوز 255 حرف")]
+        [Required(ErrorMessage = "Address is required")]
+        [StringLength(255, ErrorMessage = "Address cannot exceed 255 characters")]
         public string StreetAddress { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "المدينة مطلوبة")]
+        [Required(ErrorMessage = "City is required")]
         public string City { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "الحي مطلوب")]
+        [Required(ErrorMessage = "District is required")]
         public string District { get; set; } = string.Empty;
 
-        [StringLength(10, ErrorMessage = "الرمز البريدي لا يمكن أن يتجاوز 10 أحرف")]
+        [StringLength(10, ErrorMessage = "Postal Code cannot exceed 10 characters")]
         public string? PostalCode { get; set; }
 
         public bool IsDefault { get; set; }
@@ -130,20 +130,20 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class AddServiceRequest
     {
-        [Required(ErrorMessage = "اسم الخدمة مطلوب")]
-        [StringLength(100, ErrorMessage = "اسم الخدمة لا يمكن أن يتجاوز 100 حرف")]
+        [Required(ErrorMessage = "Service Name is required")]
+        [StringLength(100, ErrorMessage = "Service Name cannot exceed 100 characters")]
         public string ServiceName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "الوصف مطلوب")]
-        [StringLength(500, ErrorMessage = "الوصف لا يمكن أن يتجاوز 500 حرف")]
+        [Required(ErrorMessage = "Description is required")]
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "السعر الأساسي مطلوب")]
-        [Range(1, 100000, ErrorMessage = "السعر يجب أن يكون بين 1 و 100,000 جنيه")]
+        [Required(ErrorMessage = "Base Price is required")]
+        [Range(1, 100000, ErrorMessage = "Price must be between 1 and 100,000 EGP")]
         public decimal BasePrice { get; set; }
 
-        [Required(ErrorMessage = "المدة التقديرية مطلوبة")]
-        [Range(1, 365, ErrorMessage = "المدة يجب أن تكون بين 1 و 365 يوم")]
+        [Required(ErrorMessage = "Estimated Duration is required")]
+        [Range(1, 365, ErrorMessage = "Duration must be between 1 and 365 days")]
         public int EstimatedDuration { get; set; }
 
         public string? ServiceType { get; set; }
@@ -153,20 +153,20 @@ namespace TafsilkPlatform.Models.ViewModels
 
     public class EditServiceRequest
     {
-        [Required(ErrorMessage = "اسم الخدمة مطلوب")]
-        [StringLength(100, ErrorMessage = "اسم الخدمة لا يمكن أن يتجاوز 100 حرف")]
+        [Required(ErrorMessage = "Service Name is required")]
+        [StringLength(100, ErrorMessage = "Service Name cannot exceed 100 characters")]
         public string ServiceName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "الوصف مطلوب")]
-        [StringLength(500, ErrorMessage = "الوصف لا يمكن أن يتجاوز 500 حرف")]
+        [Required(ErrorMessage = "Description is required")]
+        [StringLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "السعر الأساسي مطلوب")]
-        [Range(1, 100000, ErrorMessage = "السعر يجب أن يكون بين 1 و 100,000 جنيه")]
+        [Required(ErrorMessage = "Base Price is required")]
+        [Range(1, 100000, ErrorMessage = "Price must be between 1 and 100,000 EGP")]
         public decimal BasePrice { get; set; }
 
-        [Required(ErrorMessage = "المدة التقديرية مطلوبة")]
-        [Range(1, 365, ErrorMessage = "المدة يجب أن تكون بين 1 و 365 يوم")]
+        [Required(ErrorMessage = "Estimated Duration is required")]
+        [Range(1, 365, ErrorMessage = "Duration must be between 1 and 365 days")]
         public int EstimatedDuration { get; set; }
 
         public string? ServiceType { get; set; }

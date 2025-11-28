@@ -6,108 +6,108 @@ namespace TafsilkPlatform.Models.ViewModels;
 public class CompleteTailorProfileRequest
 {
     // Basic Information
-    [Required(ErrorMessage = "الاسم الكامل مطلوب")]
-    [Display(Name = "الاسم الكامل")]
+    [Required(ErrorMessage = "Full Name is required")]
+    [Display(Name = "Full Name")]
     public string FullName { get; set; } = string.Empty;
 
     // Identity Verification (OPTIONAL - for future implementation)
-    [StringLength(50, ErrorMessage = "رقم الهوية لا يمكن أن يتجاوز 50 حرفاً")]
-    [Display(Name = "رقم الهوية الوطنية / الإقامة")]
+    [StringLength(50, ErrorMessage = "National ID cannot exceed 50 characters")]
+    [Display(Name = "National ID / Residency Number")]
     public string? NationalIdNumber { get; set; }
 
     [StringLength(200)]
-    [Display(Name = "الاسم الكامل (كما هو مكتوب في الهوية)")]
+    [Display(Name = "Full Legal Name (as in ID)")]
     public string? FullLegalName { get; set; }
 
-    [Display(Name = "الجنسية")]
+    [Display(Name = "Nationality")]
     public string? Nationality { get; set; }
 
-    [Display(Name = "تاريخ الميلاد")]
+    [Display(Name = "Date of Birth")]
     [DataType(DataType.Date)]
     public DateTime? DateOfBirth { get; set; }
 
     // Business Information
-    [Required(ErrorMessage = "اسم الورشة مطلوب")]
-    [Display(Name = "اسم الورشة")]
+    [Required(ErrorMessage = "Workshop Name is required")]
+    [Display(Name = "Workshop Name")]
     public string WorkshopName { get; set; } = string.Empty;
 
-    [Display(Name = "رقم السجل التجاري (اختياري)")]
+    [Display(Name = "Commercial Registration Number (Optional)")]
     [StringLength(100)]
     public string? CommercialRegistrationNumber { get; set; }
 
-    [Display(Name = "رقم الرخصة المهنية (اختياري)")]
+    [Display(Name = "Professional License Number (Optional)")]
     [StringLength(100)]
     public string? ProfessionalLicenseNumber { get; set; }
 
-    [Required(ErrorMessage = "نوع الورشة مطلوب")]
-    [Display(Name = "نوع الورشة")]
+    [Required(ErrorMessage = "Workshop Type is required")]
+    [Display(Name = "Workshop Type")]
     public string WorkshopType { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "رقم الهاتف مطلوب")]
-    [Phone(ErrorMessage = "رقم الهاتف غير صحيح")]
-    [Display(Name = "رقم الهاتف")]
+    [Required(ErrorMessage = "Phone Number is required")]
+    [Phone(ErrorMessage = "Invalid Phone Number")]
+    [Display(Name = "Phone Number")]
     public string PhoneNumber { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "العنوان مطلوب")]
-    [Display(Name = "عنوان الورشة")]
+    [Required(ErrorMessage = "Address is required")]
+    [Display(Name = "Workshop Address")]
     public string Address { get; set; } = string.Empty;
 
-    [Display(Name = "المدينة")]
+    [Display(Name = "City")]
     public string? City { get; set; }
 
-    [Required(ErrorMessage = "وصف الورشة مطلوب")]
-    [Display(Name = "وصف الورشة والخدمات")]
+    [Required(ErrorMessage = "Workshop Description is required")]
+    [Display(Name = "Workshop Description and Services")]
     public string Description { get; set; } = string.Empty;
 
-    [Display(Name = "سنوات الخبرة")]
-    [Range(0, 100, ErrorMessage = "سنوات الخبرة يجب أن تكون بين 0 و 100")]
+    [Display(Name = "Years of Experience")]
+    [Range(0, 100, ErrorMessage = "Experience years must be between 0 and 100")]
     public int? ExperienceYears { get; set; }
 
     // Document uploads - OPTIONAL (for future implementation)
-    [Display(Name = "صورة الهوية الوطنية - الوجه الأمامي")]
+    [Display(Name = "National ID - Front")]
     public IFormFile? IdDocumentFront { get; set; }
 
-    [Display(Name = "صورة الهوية الوطنية - الوجه الخلفي (اختياري)")]
+    [Display(Name = "National ID - Back (Optional)")]
     public IFormFile? IdDocumentBack { get; set; }
 
     /// <summary>
     /// Alias for backward compatibility
     /// </summary>
-    [Display(Name = "صورة الهوية الشخصية أو السجل التجاري")]
+    [Display(Name = "Personal ID or Commercial Registration")]
     public IFormFile? IdDocument
     {
         get => IdDocumentFront;
         set => IdDocumentFront = value;
     }
 
-    [Display(Name = "صورة السجل التجاري (اختياري)")]
+    [Display(Name = "Commercial Registration (Optional)")]
     public IFormFile? CommercialRegistration { get; set; }
 
-    [Display(Name = "صورة الرخصة المهنية (اختياري)")]
+    [Display(Name = "Professional License (Optional)")]
     public IFormFile? ProfessionalLicense { get; set; }
 
-    [Display(Name = "صور من أعمالك السابقة (اختياري)")]
+    [Display(Name = "Portfolio Images (Optional)")]
     public List<IFormFile>? PortfolioImages { get; set; }
 
     /// <summary>
     /// Alias for PortfolioImages - work samples
     /// </summary>
-    [Display(Name = "عينات من الأعمال")]
+    [Display(Name = "Work Samples")]
     public List<IFormFile>? WorkSamples
     {
         get => PortfolioImages;
         set => PortfolioImages = value;
     }
 
-    [Display(Name = "وثائق إضافية (اختياري)")]
+    [Display(Name = "Additional Documents (Optional)")]
     public List<IFormFile>? AdditionalDocuments { get; set; }
 
-    [Display(Name = "ملاحظات إضافية (اختياري)")]
+    [Display(Name = "Additional Notes (Optional)")]
     [StringLength(500)]
     public string? AdditionalNotes { get; set; }
 
-    [Required(ErrorMessage = "يجب الموافقة على الشروط والأحكام")]
-    [Display(Name = "أوافق على الشروط والأحكام وسياسة الخصوصية")]
+    [Required(ErrorMessage = "You must agree to the Terms and Conditions")]
+    [Display(Name = "I agree to the Terms and Conditions and Privacy Policy")]
     public bool AgreeToTerms { get; set; }
 
     // User ID (set from authenticated user or registration)

@@ -11,12 +11,14 @@ public class UserRepository : EfRepository<User>, IUserRepository
         EF.CompileAsyncQuery((ApplicationDbContext db, string email) =>
             db.Users
                 .AsNoTracking()
-  .FirstOrDefault(u => u.Email == email));
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email == email));
 
     private static readonly Func<ApplicationDbContext, string, Task<User?>> _getByPhoneCompiledQuery =
         EF.CompileAsyncQuery((ApplicationDbContext db, string phone) =>
             db.Users
-    .AsNoTracking()
+                .AsNoTracking()
+                .Include(u => u.Role)
                 .FirstOrDefault(u => u.PhoneNumber == phone));
 
     private static readonly Func<ApplicationDbContext, string, Task<bool>> _isEmailUniqueCompiledQuery =

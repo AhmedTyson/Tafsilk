@@ -46,11 +46,10 @@ namespace TafsilkPlatform.Models.Models
         public Guid TailorId { get; set; }
         public required TailorProfile Tailor { get; set; }
 
-        public ICollection<OrderImages> orderImages { get; set; } = new List<OrderImages>();
-        public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
-        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<OrderImages> OrderImages { get; set; } = [];
+        public ICollection<OrderItem> Items { get; set; } = [];
+        public ICollection<Payment> Payments { get; set; } = [];
 
-        // ✅ NEW: Complaints
-        public virtual ICollection<Complaint> Complaints { get; set; } = new List<Complaint>();
+
     }
 }

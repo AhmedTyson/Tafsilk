@@ -10,7 +10,16 @@ namespace TafsilkPlatform.Models.Models
         /// For custom tailor orders: awaiting quote
         /// For store orders: order placed, payment pending
         /// </summary>
+        /// <summary>
+        /// Customer submitted order, awaiting tailor quote/confirmation
+        /// For custom tailor orders: awaiting quote
+        /// </summary>
         Pending = 0,
+
+        /// <summary>
+        /// For store orders: order placed, payment pending
+        /// </summary>
+        PendingPayment = 7,
 
         /// <summary>
         /// Tailor confirmed order and provided quote (custom orders)

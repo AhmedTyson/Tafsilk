@@ -1,119 +1,21 @@
 @model IEnumerable<TafsilkPlatform.Models.Models.Order>
 @{
-    ViewData["Title"] = "إدارة الطلبات";
+    ViewData["Title"] = "Order Management";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
 }
 
 <div class="page-header">
-    <h1 class="page-title">إدارة الطلبات</h1>
+    <h1 class="page-title">Order Management</h1>
     <div class="page-actions">
         <button class="btn btn-outline">
             <i class="fas fa-filter"></i>
-            <span>تصفية</span>
+            <span>Filter</span>
         </button>
         <button class="btn btn-primary">
             <i class="fas fa-download"></i>
-            <span>تصدير</span>
+            <span>Export</span>
         </button>
     </div>
-</div>
-
-<div class="card">
-    <table class="datagrid">
-        <thead>
-            <tr>
-                <th>رقم الطلب</th>
-                <th>العميل</th>
-                <th>الخياط</th>
-                <th>الحالة</th>
-                <th>السعر الكلي</th>
-                <th>العمولة (10%)</th>
-                <th>التاريخ</th>
-                <th>الإجراءات</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.Any())
-            {
-                <tr>
-                    <td colspan="8" class="text-center py-5 text-secondary">
-                        <i class="fas fa-shopping-bag fa-2x mb-2 opacity-25"></i>
-                        <p>لا توجد طلبات حتى الآن</p>
-                    </td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var order in Model)
-                {
-                    <tr>
-                        <td class="font-mono text-sm">#@order.OrderId.ToString().Substring(0, 8).ToUpper()</td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="avatar bg-brand-light text-brand-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                                    @(order.Customer.User.Email?.Substring(0, 1).ToUpper())
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <span class="font-medium text-primary">@order.Customer.FullName</span>
-                                    <span class="text-xs text-secondary">@order.Customer.User.Email</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="avatar bg-info-bg text-info-text rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                                    @(order.Tailor.ShopName?.Substring(0, 1).ToUpper())
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <span class="font-medium text-primary">@order.Tailor.ShopName</span>
-                                    <span class="text-xs text-secondary">@order.Tailor.User.Email</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            @{
-                                var statusClass = order.Status switch
-                                {
-                                    TafsilkPlatform.Models.Models.OrderStatus.Pending => "badge-warning",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Confirmed => "badge-info",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Processing => "badge-primary",
-                                    TafsilkPlatform.Models.Models.OrderStatus.ReadyForPickup => "badge-success",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Delivered => "badge-success",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "badge-danger",
-                                    _ => "badge-secondary"
-                                };
-                                
-                                var statusText = order.Status switch
-                                {
-                                    TafsilkPlatform.Models.Models.OrderStatus.Pending => "قيد الانتظار",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Confirmed => "مقبول",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Processing => "قيد التنفيذ",
-                                    TafsilkPlatform.Models.Models.OrderStatus.ReadyForPickup => "جاهز للاستلام",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Delivered => "تم التسليم",
-                                    TafsilkPlatform.Models.Models.OrderStatus.Cancelled => "ملغي",
-                                    _ => order.Status.ToString()
-                                };
-                            }
-                            <span class="badge @statusClass">@statusText</span>
-                        </td>
-                        <td class="font-medium">@order.TotalPrice.ToString("C")</td>
-                        <td class="text-success font-medium">@order.CommissionAmount.ToString("C")</td>
-                        <td class="text-sm">@order.CreatedAt.ToString("dd/MM/yyyy")</td>
-                        <td>
-                            @if (order.Status != TafsilkPlatform.Models.Models.OrderStatus.Cancelled && 
-                                 order.Status != TafsilkPlatform.Models.Models.OrderStatus.Delivered)
-                            {
-                                <form asp-action="CancelOrder" asp-route-id="@order.OrderId" method="post" 
-                                      onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الطلب؟');" class="d-inline">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-sm btn-outline text-danger border-danger" title="إلغاء الطلب">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </form>
-                            }
-                        </td>
-                    </tr>
-                }
             }
         </tbody>
     </table>
