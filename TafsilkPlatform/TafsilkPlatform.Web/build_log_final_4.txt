@@ -1,0 +1,14 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  TafsilkPlatform.Models -> C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\TafsilkPlatform.Models\bin\Debug\net9.0\TafsilkPlatform.Models.dll
+  TafsilkPlatform.Utility -> C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\TafsilkPlatform.Utility\bin\Debug\net9.0\TafsilkPlatform.Utility.dll
+  TafsilkPlatform.DataAccess -> C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\TafsilkPlatform.DataAccess\bin\Debug\net9.0\TafsilkPlatform.DataAccess.dll
+C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\Areas\Tailor\Controllers\TailorManagementController.cs(1821,5): error CS1028: Unexpected preprocessor directive [C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\TafsilkPlatform.Web.csproj]
+
+Build FAILED.
+
+C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\Areas\Tailor\Controllers\TailorManagementController.cs(1821,5): error CS1028: Unexpected preprocessor directive [C:\Users\ahmed\source\repos\AhmedTyson\Tafsilk\TafsilkPlatform\TafsilkPlatform.Web\TafsilkPlatform.Web.csproj]
+    0 Warning(s)
+    1 Error(s)
+
+Time Elapsed 00:00:05.02

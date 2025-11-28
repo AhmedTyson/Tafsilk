@@ -20,6 +20,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     private readonly bool _stripeEnabled;
     private readonly string? _stripeSecretKey;
     private readonly string? _stripeWebhookSecret;
+    private readonly string? _paymentMethodConfigurationId;
 
     public PaymentProcessorService(
         IUnitOfWork unitOfWork,
@@ -35,6 +36,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         _stripeEnabled = _configuration.GetValue<bool>("Payment:Stripe:Enabled", false);
         _stripeSecretKey = _configuration["Payment:Stripe:SecretKey"];
         _stripeWebhookSecret = _configuration["Payment:Stripe:WebhookSecret"];
+        _paymentMethodConfigurationId = _configuration["Payment:Stripe:PaymentMethodConfigurationId"];
 
         if (_stripeEnabled && string.IsNullOrEmpty(_stripeSecretKey))
         {
@@ -260,7 +262,22 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
             var options = new Stripe.Checkout.SessionCreateOptions
             {
-                PaymentMethodTypes = new List<string> { "card" },
+                // Use Payment Method Configuration from Dashboard (enables Cash App Pay, etc.)
+                PaymentMethodConfiguration = _paymentMethodConfigurationId ?? "pmc_1SVjwXFfjWhZZwelqjN5Gyh5",
+                
+                // ✅ APPLIED FROM GUIDE: Explicitly set payment method types
+                // PaymentMethodTypes = new List<string> { "card", "cashapp" },
+                
+                /*
+                PaymentMethodOptions = new Stripe.Checkout.SessionPaymentMethodOptionsOptions
+                {
+                    Card = new Stripe.Checkout.SessionPaymentMethodOptionsCardOptions
+                    {
+                        SetupFutureUsage = "off", // Helps reduce "Link" prominence
+                    },
+                },
+                */
+                // PaymentMethodTypes = new List<string> { "card" }, // Removed in favor of Configuration
                 LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
                 {
                     new Stripe.Checkout.SessionLineItemOptions
@@ -268,7 +285,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                         PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
                         {
                             UnitAmount = (long)(request.Amount * 100),
-                Currency = request.Currency?.ToLower() ?? "egp",
+                Currency = request.Currency?.ToLower() ?? "usd", // Changed to USD for Cash App Pay support
                             ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
                             {
                                 Name = request.Description ?? "Tafsilk Order",
@@ -321,7 +338,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(request.Amount * 100),
-                Currency = request.Currency?.ToLower() ?? "egp",
+                Currency = request.Currency?.ToLower() ?? "usd", // Changed to USD for Cash App Pay support
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true
@@ -341,6 +358,53 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     }
 
     /// <summary>
+    /// Create a Setup Intent for future payments (e.g. Cash App Pay)
+    /// </summary>
+    public async Task<Result<string>> CreateSetupIntentAsync(CreateSetupIntentRequest request)
+    {
+        return await ExecuteAsync(async () =>
+        {
+            await Task.CompletedTask;
+            ValidateNotEmpty(request.CustomerEmail, nameof(request.CustomerEmail));
+
+            if (!_stripeEnabled)
+            {
+                throw new InvalidOperationException("Stripe is not enabled. Please configure Stripe in appsettings.json");
+            }
+
+            var stripe = new StripeClient(_stripeSecretKey);
+            var options = new SetupIntentCreateOptions
+            {
+                Confirm = true,
+                Usage = "off_session",
+                ReturnUrl = request.ReturnUrl,
+                PaymentMethodTypes = new List<string> { request.PaymentMethodType },
+                PaymentMethodData = new SetupIntentPaymentMethodDataOptions
+                {
+                    Type = request.PaymentMethodType,
+                },
+                MandateData = new SetupIntentMandateDataOptions
+                {
+                    CustomerAcceptance = new SetupIntentMandateDataCustomerAcceptanceOptions
+                    {
+                        Type = "online",
+                        Online = new SetupIntentMandateDataCustomerAcceptanceOnlineOptions
+                        {
+                            IpAddress = "127.0.0.0", // In production, get from HttpContext
+                            UserAgent = "device"     // In production, get from HttpContext
+                        }
+                    }
+                }
+            };
+
+            var service = new SetupIntentService(stripe);
+            var setupIntent = await service.CreateAsync(options);
+
+            return setupIntent.ClientSecret;
+        }, "CreateSetupIntent");
+    }
+
+    /// <summary>
     /// Confirm Stripe payment from webhook
     /// </summary>
     public async Task<Result> ConfirmStripePaymentAsync(string json, string stripeSignature)
@@ -348,7 +412,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
         return await ExecuteAsync(async () =>
         {
             await Task.CompletedTask;
-            ValidateNotEmpty(paymentIntentId, nameof(paymentIntentId));
+            await Task.CompletedTask;
 
             if (!_stripeEnabled)
             {
@@ -448,6 +512,13 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                                 if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
                                 {
                                     order.Status = OrderStatus.Confirmed;
+
+                                    // Clear cart now that payment is confirmed
+                                    var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
+                                    if (cart != null)
+                                    {
+                                        await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                    }
                                 }
 
                                 await _unitOfWork.SaveChangesAsync();
@@ -683,6 +754,13 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                             if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
                             {
                                 order.Status = OrderStatus.Confirmed;
+
+                                // Clear cart now that payment is confirmed
+                                var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
+                                if (cart != null)
+                                {
+                                    await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                }
                             }
 
                             await _unitOfWork.SaveChangesAsync();

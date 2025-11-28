@@ -1,188 +1,453 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.ManagePortfolioViewModel
 
 @{
-    ViewData["Title"] = "Portfolio Management";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var breadcrumbs = new List<(string Text, string? Url)>
-    {
-        ("Dashboard", Url.Action("Tailor", "Dashboards")),
-        ("Portfolio", "")
-    };
-
-    // Safety: ensure model is not null to avoid NRE in views
-    var safeModel = Model != null ? Model : new TafsilkPlatform.Web.ViewModels.TailorManagement.ManagePortfolioViewModel();
-    var images = safeModel.Images != null ? safeModel.Images : new List<TafsilkPlatform.Web.ViewModels.TailorManagement.PortfolioItemDto>();
+    ViewData["Title"] = "Manage Portfolio";
+    Layout = "_Layout";
+    
+    // Safety checks
+    var safeModel = Model ?? new TafsilkPlatform.Web.ViewModels.TailorManagement.ManagePortfolioViewModel();
+    var images = safeModel.Images ?? new List<TafsilkPlatform.Web.ViewModels.TailorManagement.PortfolioItemDto>();
 }
 
-@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
-
-
-<div class="container-fluid tailor-management-container" dir="rtl">
+<div class="container py-4">
     <!-- Page Header -->
-    <div class="page-header">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-     <div>
-  <h1 class="page-title">
-    <i class="fas fa-images"></i>
-             Portfolio
-       </h1>
-            <p class="page-description">Manage your past work images to attract more customers</p>
-       </div>
-   <div class="d-flex gap-2">
-   <a asp-action="AddPortfolioImage" class="btn btn-primary">
-                    <i class="fas fa-plus-circle"></i>
-         Add New Image
-     </a>
-         <a asp-controller="Dashboards" asp-action="Tailor" class="btn btn-outline-secondary">
-        <i class="fas fa-arrow-right"></i>
-  Back
-        </a>
-  </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Manage Portfolio</h1>
+            <p class="text-muted">Showcase your best work to attract more customers</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Tailor" asp-controller="Dashboards" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPortfolioModal">
+                <i class="fas fa-plus me-2"></i>Add New Image
+            </a>
         </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="row g-4 mb-4">
-    <div class="col-md-4">
-            <div class="stat-card">
-        <div class="stat-icon primary">
- <i class="fas fa-images"></i>
-    </div>
-     <div class="stat-value">@(safeModel.TotalImages)</div>
-                <div class="stat-label">Total Images</div>
-  </div>
-        </div>
-  <div class="col-md-4">
- <div class="stat-card">
-              <div class="stat-icon success">
-        <i class="fas fa-star"></i>
-         </div>
- <div class="stat-value">@(safeModel.FeaturedCount)</div>
-     <div class="stat-label">Featured Images</div>
-            </div>
-      </div>
+    <div class="row g-3 mb-4">
         <div class="col-md-4">
-   <div class="stat-card">
-      <div class="stat-icon info">
-       <i class="fas fa-percentage"></i>
-    </div>
-      <div class="stat-value">@(safeModel.TotalImages) / @(safeModel.MaxAllowedImages)</div>
-<div class="stat-label">Images Used</div>
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Total Images</h6>
+                    <h2 class="mb-0">@safeModel.TotalImages</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Featured</h6>
+                    <h2 class="text-warning mb-0">@safeModel.FeaturedCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small fw-bold mb-2">Usage Limit</h6>
+                    <h2 class="text-primary mb-0">@safeModel.TotalImages / @safeModel.MaxAllowedImages</h2>
+                </div>
             </div>
         </div>
     </div>
 
- <!-- Portfolio Grid -->
-    @if (images.Any())
-    {
-  <div class="portfolio-grid">
-         @foreach (var image in images)
-          {
-      <div class="portfolio-card">
-                    <div class="position-relative">
-       <img src="@Url.Action("GetPortfolioImage", new { id = image.Id })" 
-          class="portfolio-image" 
-         alt="@(image.Title ?? "Image")">
-      
-              @if (image.IsFeatured)
-            {
-     <span class="position-absolute top-0 start-0 m-2 badge badge-warning">
-           <i class="fas fa-star"></i> Featured
-   </span>
-              }
+    <!-- Portfolio Grid -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Gallery Images</h5>
+                </div>
+                <div class="col-auto">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search images..." id="imageSearch">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         
- @if (image.IsBeforeAfter)
-         {
-           <span class="position-absolute top-0 end-0 m-2 badge badge-info">
-             Before/After
-       </span>
-         }
-      </div>
+        <div class="card-body">
+            @if (images.Any())
+            {
+                <div class="row g-4" id="portfolioGrid">
+                    @foreach (var image in images)
+                    {
+                        <div class="col-md-6 col-lg-4 col-xl-3 portfolio-item">
+                            <div class="card h-100 border shadow-sm">
+                                <div class="position-relative" style="height: 200px; overflow: hidden;">
+                                    <img src="@Url.Action("GetPortfolioImage", new { id = image.Id })" 
+                                         class="card-img-top w-100 h-100" 
+                                         style="object-fit: cover;" 
+                                         alt="@(image.Title ?? "Portfolio Image")">
+                                    
+                                    @if (image.IsFeatured)
+                                    {
+                                        <span class="position-absolute top-0 start-0 m-2 badge bg-warning text-dark shadow-sm">
+                                            <i class="fas fa-star me-1"></i>Featured
+                                        </span>
+                                    }
+                                    @if (image.IsBeforeAfter)
+                                    {
+                                        <span class="position-absolute top-0 end-0 m-2 badge bg-info text-white shadow-sm">
+                                            Before/After
+                                        </span>
+                                    }
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-title fw-bold text-truncate" title="@image.Title">@(image.Title ?? "Untitled")</h6>
+                                    
+                                    @if (!string.IsNullOrEmpty(image.Category))
+                                    {
+                                        <span class="badge bg-light text-dark border mb-2">@image.Category</span>
+                                    }
 
-        <div class="portfolio-content">
-           <h6 class="portfolio-title">@(image.Title ?? "Untitled")</h6>
-         
-      @if (!string.IsNullOrEmpty(image.Category))
-      {
-         <span class="badge badge-secondary mb-2">@image.Category</span>
-  }
-      
-      @if (!string.IsNullOrEmpty(image.Description))
-   {
-     <p class="portfolio-description">@image.Description</p>
-       }
-         
-             @if (image.EstimatedPrice.HasValue)
-         {
-           <p class="mb-2">
-         <strong>Estimated Price:</strong> 
-   <span class="text-primary">@image.EstimatedPrice.Value.ToString("N0") EGP</span>
-           </p>
-         }
+                                    @if (image.EstimatedPrice.HasValue)
+                                    {
+                                        <p class="card-text small mb-1">
+                                            <span class="text-muted">Est. Price:</span>
+                                            <span class="fw-bold text-primary">@image.EstimatedPrice.Value.ToString("N0") EGP</span>
+                                        </p>
+                                    }
+                                    
+                                    <p class="card-text small text-muted mb-0">
+                                        <i class="far fa-calendar-alt me-1"></i>@image.UploadedAt.ToString("MMM dd, yyyy")
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-white border-top-0 pt-0 pb-3">
+                                    <div class="d-grid gap-2">
+                                        <div class="btn-group w-100">
+                                            <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editPortfolioModal"
+                                                    data-id="@image.Id"
+                                                    data-title="@image.Title"
+                                                    data-category="@image.Category"
+                                                    data-description="@image.Description"
+                                                    data-price="@(image.EstimatedPrice?.ToString("F2") ?? "")"
+                                                    data-featured="@image.IsFeatured.ToString().ToLower()"
+                                                    data-beforeafter="@image.IsBeforeAfter.ToString().ToLower()"
+                                                    onclick="populateEditModal(this)">
+                                                <i class="fas fa-edit me-1"></i>Edit
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal-@image.Id">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        <form asp-action="ToggleFeatured" asp-route-id="@image.Id" method="post" class="w-100">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm w-100 @(image.IsFeatured ? "btn-warning" : "btn-outline-warning")">
+                                                <i class="fas fa-star me-1"></i>@(image.IsFeatured ? "Unfeature" : "Feature")
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
 
-           <small class="text-muted d-block mb-3">
-   <i class="fas fa-calendar"></i>
-            @image.UploadedAt.ToString("dd/MM/yyyy")
-  </small>
-
-  <div class="portfolio-actions">
-      <a asp-action="EditPortfolioImage" asp-route-id="@image.Id" 
-            class="btn btn-sm btn-outline-primary flex-fill">
-            <i class="fas fa-edit"></i> Edit
- </a>
-          <form asp-action="ToggleFeatured" asp-route-id="@image.Id" method="post" class="flex-fill">
-            @Html.AntiForgeryToken()
-                      <button type="submit" class="btn btn-sm btn-outline-warning w-100">
-           <i class="fas fa-star"></i> @(image.IsFeatured ? "Unfeature" : "Feature")
-          </button>
-            </form>
-         <button type="button" class="btn btn-sm btn-outline-danger" 
-    data-bs-toggle="modal" data-bs-target="#deleteModal-@image.Id">
-<i class="fas fa-trash"></i>
-    </button>
- </div>
-  </div>
-    </div>
-     
-     <!-- Delete Confirmation Modal -->
-       <div class="modal fade" id="deleteModal-@image.Id" tabindex="-1">
-         <div class="modal-dialog modal-dialog-centered">
-       <div class="modal-content">
-     <div class="modal-header">
-          <h5 class="modal-title">Confirm Deletion</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-         </div>
-    <div class="modal-body">
-           <p>Are you sure you want to delete this image?</p>
-                <p class="text-muted"><strong>@(image.Title ?? "Untitled")</strong></p>
-         </div>
-     <div class="modal-footer">
-       <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-    <form asp-action="DeletePortfolioImage" asp-route-id="@image.Id" method="post" class="d-inline">
-      @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger">
-        <i class="fas fa-trash"></i> Delete
-              </button>
-    </form>
-              </div>
-          </div>
-          </div>
-         </div>
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteModal-@image.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Delete Image</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Are you sure you want to delete <strong>@(image.Title ?? "this image")</strong>?</p>
+                                            <p class="text-danger small mb-0">This action cannot be undone.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form asp-action="DeletePortfolioImage" asp-route-id="@image.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <div class="mb-3">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                            <i class="fas fa-images fa-3x text-muted"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold">No images yet</h5>
+                    <p class="text-muted mb-4">Start building your portfolio to showcase your work.</p>
+                    <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPortfolioModal">
+                        <i class="fas fa-plus me-2"></i>Add First Image
+                    </a>
+                </div>
             }
         </div>
-    }
-    else
-    {
-        <div class="empty-state">
-  <div class="empty-state-icon">
-     <i class="fas fa-images"></i>
-            </div>
-     <h4 class="empty-state-title">No images in portfolio</h4>
-        <p class="empty-state-description">Start by adding images of your past work to attract more customers</p>
- <a asp-action="AddPortfolioImage" class="btn btn-primary btn-lg">
-         <i class="fas fa-plus-circle"></i>
-                Add First Image
-            </a>
     </div>
-    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $("#imageSearch").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#portfolioGrid .portfolio-item").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+
+            // Toastr Notifications
+            @if (TempData["Success"] != null)
+            {
+                <text>
+                toastr.success('@TempData["Success"]', 'Success', {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "timeOut": "3000"
+                });
+                </text>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                toastr.error('@TempData["Error"]', 'Error', {
+                    "closeButton": true,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "timeOut": "5000"
+                });
+                </text>
+            }
+        });
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#imagePreview').attr('src', e.target.result);
+                    $('#imagePreviewContainer').removeClass('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewEditImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#editImagePreview').attr('src', e.target.result);
+                    $('#editImagePreviewContainer').removeClass('d-none');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function populateEditModal(button) {
+            var btn = $(button);
+            var modal = $('#editPortfolioModal');
+            
+            modal.find('input[name="Id"]').val(btn.data('id'));
+            modal.find('input[name="Title"]').val(btn.data('title'));
+            modal.find('select[name="Category"]').val(btn.data('category'));
+            modal.find('textarea[name="Description"]').val(btn.data('description'));
+            modal.find('input[name="EstimatedPrice"]').val(btn.data('price'));
+            
+            modal.find('input[name="IsFeatured"]').prop('checked', btn.data('featured') === true);
+            modal.find('input[name="IsBeforeAfter"]').prop('checked', btn.data('beforeafter') === true);
+            
+            // Reset image preview
+            $('#editImagePreviewContainer').addClass('d-none');
+            modal.find('input[name="NewImageFile"]').val('');
+            
+            // Set form action URL dynamically
+            var actionUrl = '@Url.Action("EditPortfolioImage", "TailorManagement", new { area = "Tailor" })/' + btn.data('id');
+            $('#editPortfolioForm').attr('action', actionUrl);
+        }
+    </script>
+}
+
+<!-- Edit Portfolio Modal -->
+<div class="modal fade" id="editPortfolioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="fas fa-edit me-2 text-primary"></i>Edit Portfolio Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form method="post" enctype="multipart/form-data" id="editPortfolioForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" />
+                    <input type="hidden" name="TailorId" value="@safeModel.TailorId" />
+                    
+                    <div class="row g-3">
+                        <!-- Image Upload -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Change Image (Optional)</label>
+                            <div class="upload-area p-4 border rounded text-center bg-light" style="border-style: dashed !important;">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="mb-2">Click to replace current image</p>
+                                <input type="file" name="NewImageFile" class="form-control" accept="image/*" onchange="previewEditImage(this)">
+                                <div class="mt-3 d-none" id="editImagePreviewContainer">
+                                    <p class="small fw-bold mb-1">New Image Preview:</p>
+                                    <img id="editImagePreview" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Title & Category -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Title <span class="text-danger">*</span></label>
+                            <input type="text" name="Title" class="form-control" required maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Category</label>
+                            <select name="Category" class="form-select">
+                                <option value="">Select Category</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var category in (List<string>)ViewBag.Categories)
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea name="Description" class="form-control" rows="3" maxlength="500"></textarea>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estimated Price (EGP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">EGP</span>
+                                <input type="number" name="EstimatedPrice" class="form-control" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold d-block">Options</label>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="checkbox" name="IsFeatured" value="true">
+                                <label class="form-check-label">Featured Image</label>
+                            </div>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="checkbox" name="IsBeforeAfter" value="true">
+                                <label class="form-check-label">Before/After</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Portfolio Modal -->
+<div class="modal fade" id="addPortfolioModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold"><i class="fas fa-plus-circle me-2 text-primary"></i>Add New Portfolio Image</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form asp-action="AddPortfolioImage" method="post" enctype="multipart/form-data" id="addPortfolioForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="TailorId" value="@safeModel.TailorId" />
+                    
+                    <div class="row g-3">
+                        <!-- Image Upload -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Portfolio Image <span class="text-danger">*</span></label>
+                            <div class="upload-area p-4 border rounded text-center bg-light" style="border-style: dashed !important;">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="mb-2">Drag and drop your image here or click to browse</p>
+                                <input type="file" name="ImageFile" class="form-control" accept="image/*" required onchange="previewImage(this)">
+                                <div class="mt-3 d-none" id="imagePreviewContainer">
+                                    <img id="imagePreview" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Title & Category -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Title <span class="text-danger">*</span></label>
+                            <input type="text" name="Title" class="form-control" placeholder="e.g. Wedding Suit 2024" required maxlength="100">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Category</label>
+                            <select name="Category" class="form-select">
+                                <option value="">Select Category</option>
+                                @if (ViewBag.Categories != null)
+                                {
+                                    foreach (var category in (List<string>)ViewBag.Categories)
+                                    {
+                                        <option value="@category">@category</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Description</label>
+                            <textarea name="Description" class="form-control" rows="3" placeholder="Describe the work, materials used, etc." maxlength="500"></textarea>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Estimated Price (EGP)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">EGP</span>
+                                <input type="number" name="EstimatedPrice" class="form-control" placeholder="0.00" min="0" step="0.01">
+                            </div>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold d-block">Options</label>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="checkbox" name="IsFeatured" value="true" id="checkFeatured">
+                                <label class="form-check-label" for="checkFeatured">Featured Image</label>
+                            </div>
+                            <div class="form-check form-check-inline mt-2">
+                                <input class="form-check-input" type="checkbox" name="IsBeforeAfter" value="true" id="checkBeforeAfter">
+                                <label class="form-check-label" for="checkBeforeAfter">Before/After</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Save Image
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>

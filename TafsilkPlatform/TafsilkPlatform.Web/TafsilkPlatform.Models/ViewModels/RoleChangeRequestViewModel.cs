@@ -23,6 +23,5 @@ public class RoleChangeRequestViewModel
     [MaxLength(500, ErrorMessage = "Reason cannot exceed 500 characters")]
     public string? Reason { get; set; }
 
-    [Display(Name = "Business License Image")]
-    public IFormFile? BusinessLicenseImage { get; set; }
+
 }

@@ -638,9 +638,8 @@ namespace TafsilkPlatform.Web.Services
                      }
 
                      // Determine payment status
-                     var paymentStatus = request.PaymentMethod == "CreditCard"
-                         ? Enums.PaymentStatus.Pending
-                         : Enums.PaymentStatus.Completed;
+                     // Both Cash (waiting for delivery) and Card (waiting for Stripe) start as Pending
+                     var paymentStatus = Enums.PaymentStatus.Pending;
 
                      // Create payment record
                      var payment = new TafsilkPlatform.Models.Models.Payment
@@ -658,7 +657,7 @@ namespace TafsilkPlatform.Web.Services
                             : Enums.PaymentType.Cash,
                          PaymentStatus = paymentStatus,
                          TransactionType = Enums.TransactionType.Credit,
-                         PaidAt = paymentStatus == Enums.PaymentStatus.Completed ? DateTimeOffset.UtcNow : (DateTimeOffset?)null,
+                         PaidAt = null, // Not paid yet
                          Currency = "EGP",
                          Provider = request.PaymentMethod == "CreditCard" ? "Stripe" : "Internal",
                          Notes = request.PaymentMethod == "CashOnDelivery"
@@ -669,8 +668,12 @@ namespace TafsilkPlatform.Web.Services
                      // Use Context to add payment
                      _unitOfWork.Context.Payment.Add(payment);
 
-                     // Clear cart ONLY after successful order creation
-                     await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                     // Clear cart ONLY if payment is not CreditCard (Stripe)
+                     // For Stripe, we keep items in cart until payment is confirmed via webhook/success page
+                     if (request.PaymentMethod != "CreditCard")
+                     {
+                         await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                     }
 
                      // Save all changes
                      await _unitOfWork.SaveChangesAsync();
@@ -767,6 +770,66 @@ namespace TafsilkPlatform.Web.Services
                 _logger.LogError(ex, "Error getting order details for {OrderId}", orderId);
                 return null;
             }
+        }
+        public async Task<bool> CancelPendingOrderAsync(Guid orderId, Guid customerId)
+        {
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                // 1. Get order with items
+                var order = await _unitOfWork.Context.Orders
+                    .Include(o => o.Items)
+                    .Include(o => o.Payments) // Include payments to delete them
+                    .FirstOrDefaultAsync(o => o.OrderId == orderId && o.CustomerId == customerId);
+
+                if (order == null)
+                {
+                    _logger.LogWarning("Order {OrderId} not found for cancellation", orderId);
+                    return false;
+                }
+
+                // 2. Validate status (only pending orders can be cancelled this way)
+                if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.PendingPayment)
+                {
+                    _logger.LogWarning("Order {OrderId} status {Status} cannot be cancelled via this flow", orderId, order.Status);
+                    return false;
+                }
+
+                // 3. Return stock
+                // We don't need to restore to cart because we didn't clear it for CreditCard orders
+                foreach (var orderItem in order.Items)
+                {
+                    var product = await _unitOfWork.Context.Products
+                        .FirstOrDefaultAsync(p => p.ProductId == orderItem.ProductId);
+
+                    if (product != null)
+                    {
+                        product.StockQuantity += orderItem.Quantity;
+                        product.SalesCount -= orderItem.Quantity; // Revert sales count
+                        product.IsAvailable = product.StockQuantity > 0; // Make available if stock > 0
+                    }
+                }
+
+                // 4. Delete order (Cascade should handle items and payments, but let's be safe)
+                // Remove payments first if cascade not configured
+                if (order.Payments != null && order.Payments.Any())
+                {
+                    _unitOfWork.Context.Payment.RemoveRange(order.Payments);
+                }
+                
+                // Remove order items
+                if (order.Items != null && order.Items.Any())
+                {
+                    _unitOfWork.Context.OrderItems.RemoveRange(order.Items);
+                }
+
+                // Remove order
+                _unitOfWork.Context.Orders.Remove(order);
+
+                await _unitOfWork.SaveChangesAsync();
+                
+                _logger.LogInformation("Pending order {OrderId} cancelled and stock returned for customer {CustomerId}", orderId, customerId);
+                return true;
+            });
         }
     }
 }

@@ -46,16 +46,8 @@
                 </li>
                 
                 <!-- Categories Dropdown -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Categories
-                    </a>
-                    <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
-                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index">All Tailors</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index" asp-route-filter="Verified">Verified Tailors</a></li>
-                        <li><a class="dropdown-item" asp-area="" asp-controller="Tailors" asp-action="Index" asp-route-filter="TopRated">Top Rated</a></li>
-                    </ul>
+                <li class="nav-item">
+                    <a class="nav-link" asp-area="" asp-controller="Tailors" asp-action="Index">Tailors</a>
                 </li>
 
                 <li class="nav-item">

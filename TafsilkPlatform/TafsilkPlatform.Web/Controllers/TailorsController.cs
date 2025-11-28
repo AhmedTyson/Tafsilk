@@ -33,7 +33,7 @@ public class TailorsController : Controller
         {
             var query = _db.TailorProfiles
                 .Include(t => t.User)
-                .Where(t => t.IsVerified && t.User.IsActive && !t.User.IsDeleted);
+                .Where(t => t.User.IsActive && !t.User.IsDeleted);
 
             // Filter by city
             if (!string.IsNullOrEmpty(city))
@@ -72,7 +72,7 @@ public class TailorsController : Controller
 
             // Get available cities for filter
             var cities = await _db.TailorProfiles
- .Where(t => t.IsVerified && !string.IsNullOrEmpty(t.City))
+                .Where(t => !string.IsNullOrEmpty(t.City))
            .Select(t => t.City)
           .Distinct()
       .OrderBy(c => c)
@@ -80,7 +80,7 @@ public class TailorsController : Controller
 
             // Get available specializations for filter
             var specializations = await _db.TailorProfiles
-                 .Where(t => t.IsVerified && !string.IsNullOrEmpty(t.Specialization))
+                .Where(t => !string.IsNullOrEmpty(t.Specialization))
                .Select(t => t.Specialization)
              .Distinct()
                   .OrderBy(s => s)
@@ -125,12 +125,12 @@ public class TailorsController : Controller
                 return NotFound("Tailor not found");
             }
 
-            // Only show verified tailors to public
-            if (!tailor.IsVerified)
-            {
-                _logger.LogWarning("Attempt to view unverified tailor {TailorId}", id);
-                return NotFound("Tailor not found");
-            }
+            // Only show verified tailors to public - REMOVED per user request
+            // if (!tailor.IsVerified)
+            // {
+            //     _logger.LogWarning("Attempt to view unverified tailor {TailorId}", id);
+            //     return NotFound("Tailor not found");
+            // }
 
             // Reviews simplified - no database
             ViewBag.Reviews = new List<object>();
@@ -215,7 +215,7 @@ public class TailorsController : Controller
         {
             var tailorsQuery = _db.TailorProfiles
             .Include(t => t.User)
-                  .Where(t => t.IsVerified && t.User.IsActive && !t.User.IsDeleted);
+                  .Where(t => t.User.IsActive && !t.User.IsDeleted);
 
             if (!string.IsNullOrEmpty(query))
             {

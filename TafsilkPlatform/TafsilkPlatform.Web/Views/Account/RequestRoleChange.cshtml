@@ -199,7 +199,7 @@
                 </p>
             </div>
 
-            <form asp-action="RequestRoleChange" method="post" enctype="multipart/form-data">
+            <form asp-action="RequestRoleChange" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="TargetRole" value="Tailor" />
 
@@ -210,7 +210,7 @@
                         <li>Shop Address in Detail</li>
                         <li>Years of Experience in Tailoring</li>
                         <li>Reason for Request (at least 20 characters)</li>
-                        <li>(Optional) Business License Image</li>
+
                     </ul>
                 </div>
 
@@ -241,14 +241,7 @@
                     </small>
                 </div>
 
-                <div class="form-group">
-                    <label asp-for="BusinessLicenseImage" class="form-label">Business License Image (Optional)</label>
-                    <input asp-for="BusinessLicenseImage" class="form-control" type="file" accept="image/*" />
-                    <span asp-validation-for="BusinessLicenseImage" class="text-danger"></span>
-                    <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
-                        Uploading a business license image is recommended to increase your account credibility
-                    </small>
-                </div>
+
 
                 <div class="btn-group">
                     <button type="submit" class="btn-primary">

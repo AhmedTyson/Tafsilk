@@ -575,6 +575,16 @@ namespace TafsilkPlatform.Web.Services
             // ✅ FIXED: Add role-specific claims from already-loaded data
             AddRoleSpecificClaimsFromUser(claims, user);
 
+            // Ensure role-specific profile is loaded
+            if (user.Role?.Name == "Tailor" && user.TailorProfile == null)
+            {
+                await _db.Entry(user).Reference(u => u.TailorProfile).LoadAsync();
+            }
+            else if (user.Role?.Name == "Customer" && user.CustomerProfile == null)
+            {
+                await _db.Entry(user).Reference(u => u.CustomerProfile).LoadAsync();
+            }
+
             return await Task.FromResult(claims);
         }
 

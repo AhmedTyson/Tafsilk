@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
+using SendGrid;
+using SendGrid.Helpers.Mail;
 
 namespace TafsilkPlatform.Utility;
 
@@ -17,12 +19,14 @@ public interface IEmailService
 }
 
 /// <summary>
-/// Service for sending emails using SMTP
+/// Service for sending emails using SendGrid or SMTP (Fallback)
 /// </summary>
 public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
+    
+    // SMTP Settings
     private readonly string _smtpHost;
     private readonly int _smtpPort;
     private readonly string _fromEmail;
@@ -31,24 +35,29 @@ public class EmailService : IEmailService
     private readonly string _password;
     private readonly bool _enableSsl;
 
+    // SendGrid Settings
+    private readonly string _sendGridApiKey;
+
     public EmailService(
         IConfiguration configuration,
-     ILogger<EmailService> logger)
+        ILogger<EmailService> logger)
     {
         _configuration = configuration;
         _logger = logger;
 
-        // Load SMTP settings from configuration
-        _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
-        _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
+        // Load Email Settings
         _fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
         _fromName = _configuration["Email:FromName"] ?? "Tafsilk Platform";
+        
+        // SMTP
+        _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
+        _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
         _username = _configuration["Email:Username"] ?? "";
         _password = _configuration["Email:Password"] ?? "";
         _enableSsl = bool.Parse(_configuration["Email:EnableSsl"] ?? "true");
 
-        // ✅ FIXED: Only log email configuration warning once at startup (not on every request)
-        // This reduces log noise - the warning is logged in Program.cs during startup
+        // SendGrid
+        _sendGridApiKey = _configuration["Email:SendGridApiKey"] ?? "";
     }
 
     /// <summary>
@@ -82,17 +91,17 @@ public class EmailService : IEmailService
         <div class='header'>
             <div class='logo'>🔧 Tafsilk</div>
         </div>
-        <div class='title'>Hello {{fullName}},</div>
+        <div class='title'>Hello {fullName},</div>
         <div class='message'>
             <p>Thank you for registering with Tafsilk Platform.</p>
             <p>To verify your email address, please click the button below:</p>
         </div>
         <div style='text-align: center;'>
-            <a href='{{verificationUrl}}' class='button'>Verify Email</a>
+            <a href='{verificationUrl}' class='button'>Verify Email</a>
         </div>
         <div class='message' style='margin-top: 30px;'>
             <p><strong>Or copy the following link into your browser:</strong></p>
-            <p style='word-break: break-all; color: #2563eb;'>{{verificationUrl}}</p>
+            <p style='word-break: break-all; color: #2563eb;'>{verificationUrl}</p>
         </div>
         <div class='footer'>
             <p>© 2024 Tafsilk Platform - All rights reserved</p>
@@ -129,39 +138,39 @@ public class EmailService : IEmailService
     <style>
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }}
         .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
-  .header {{ text-align: center; margin-bottom: 30px; }}
-    .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
+        .header {{ text-align: center; margin-bottom: 30px; }}
+        .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
         .title {{ font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 20px; }}
         .message {{ font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 30px; }}
-     .button {{ display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }}
+        .button {{ display: inline-block; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }}
         .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
     </style>
 </head>
 <body>
     <div class='container'>
         <div class='header'>
-         <div class='logo'>🔧 Tafsilk</div>
-    </div>
-    <div class='title'>Hello {fullName},</div>
+            <div class='logo'>🔧 Tafsilk</div>
+        </div>
+        <div class='title'>Hello {fullName},</div>
         <div class='message'>
-      <p>We received a request to reset your password.</p>
-    <p>To reset your password, please click the button below:</p>
+            <p>We received a request to reset your password.</p>
+            <p>To reset your password, please click the button below:</p>
         </div>
         <div style='text-align: center;'>
-       <a href='{resetUrl}' class='button'>Reset Password</a>
+            <a href='{resetUrl}' class='button'>Reset Password</a>
         </div>
- <div class='message' style='margin-top: 30px;'>
+        <div class='message' style='margin-top: 30px;'>
             <p><strong>Or copy the following link into your browser:</strong></p>
-  <p style='word-break: break-all; color: #2563eb;'>{resetUrl}</p>
-  </div>
-        <div class='message'>
- <p style='color: #ef4444; font-weight: 600;'>⚠️ This link is valid for one hour only</p>
-  <p style='font-size: 14px; color: #6b7280;'>If you did not request a password reset, you can safely ignore this email.</p>
+            <p style='word-break: break-all; color: #2563eb;'>{resetUrl}</p>
         </div>
-<div class='footer'>
-        <p>© 2024 Tafsilk Platform - All rights reserved</p>
+        <div class='message'>
+            <p style='color: #ef4444; font-weight: 600;'>⚠️ This link is valid for one hour only</p>
+            <p style='font-size: 14px; color: #6b7280;'>If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+        <div class='footer'>
+            <p>© 2024 Tafsilk Platform - All rights reserved</p>
             <p>This email was sent automatically, please do not reply</p>
- </div>
+        </div>
     </div>
 </body>
 </html>";
@@ -186,7 +195,6 @@ public class EmailService : IEmailService
             {
                 "Customer" => "Customer",
                 "Tailor" => "Tailor",
-                // "Corporate" => "Corporate Customer", // REMOVED: Corporate feature
                 "Admin" => "Admin",
                 _ => "User"
             };
@@ -199,30 +207,30 @@ public class EmailService : IEmailService
     <meta charset='utf-8'>
     <style>
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }}
-   .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
         .header {{ text-align: center; margin-bottom: 30px; }}
         .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
         .title {{ font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 20px; }}
         .message {{ font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 30px; }}
         .button {{ display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; }}
-   .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
+        .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
     </style>
 </head>
 <body>
     <div class='container'>
-      <div class='header'>
- <div class='logo'>🎉 Tafsilk</div>
+        <div class='header'>
+            <div class='logo'>🎉 Tafsilk</div>
         </div>
         <div class='title'>Hello {fullName},</div>
         <div class='message'>
- <p>Welcome to Tafsilk Platform as a <strong>{roleText}</strong>!</p>
-          <p>Your email has been successfully verified and you can now enjoy all the platform features.</p>
+            <p>Welcome to Tafsilk Platform as a <strong>{roleText}</strong>!</p>
+            <p>Your email has been successfully verified and you can now enjoy all the platform features.</p>
         </div>
         <div style='text-align: center;'>
-     <a href='{_configuration["App:BaseUrl"]}' class='button'>Start Now</a>
+            <a href='{_configuration["App:BaseUrl"]}' class='button'>Start Now</a>
         </div>
         <div class='footer'>
-      <p>© 2024 Tafsilk Platform - All rights reserved</p>
+            <p>© 2024 Tafsilk Platform - All rights reserved</p>
         </div>
     </div>
 </body>
@@ -251,25 +259,25 @@ public class EmailService : IEmailService
     <meta charset='utf-8'>
     <style>
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; padding: 20px; }}
-     .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }}
         .header {{ text-align: center; margin-bottom: 30px; }}
         .logo {{ font-size: 32px; font-weight: 800; color: #2563eb; }}
- .message {{ font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 30px; }}
- .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
+        .message {{ font-size: 16px; color: #374151; line-height: 1.6; margin-bottom: 30px; }}
+        .footer {{ margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 14px; color: #6b7280; }}
     </style>
 </head>
 <body>
     <div class='container'>
         <div class='header'>
-    <div class='logo'>🔧 Tafsilk</div>
+            <div class='logo'>🔧 Tafsilk</div>
         </div>
         <div class='message'>
             {message}
         </div>
-     <div class='footer'>
+        <div class='footer'>
             <p>© 2024 Tafsilk Platform - All rights reserved</p>
         </div>
-  </div>
+    </div>
 </body>
 </html>";
 
@@ -283,18 +291,44 @@ public class EmailService : IEmailService
     }
 
     /// <summary>
-    /// Core email sending method
+    /// Core email sending method (SendGrid with SMTP Fallback)
     /// </summary>
     private async Task<bool> SendEmailAsync(string toEmail, string subject, string htmlBody)
     {
-        // Check if email is configured
+        // 1. Try SendGrid if API Key is present
+        if (!string.IsNullOrEmpty(_sendGridApiKey))
+        {
+            try
+            {
+                var client = new SendGridClient(_sendGridApiKey);
+                var from = new EmailAddress(_fromEmail, _fromName);
+                var to = new EmailAddress(toEmail);
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, null, htmlBody);
+                var response = await client.SendEmailAsync(msg);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Email sent successfully via SendGrid to {Email}", toEmail);
+                    return true;
+                }
+                else
+                {
+                    _logger.LogWarning("SendGrid failed with status code {StatusCode}. Falling back to SMTP.", response.StatusCode);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error sending email via SendGrid to {Email}. Falling back to SMTP.", toEmail);
+            }
+        }
+
+        // 2. Fallback to SMTP
         if (string.IsNullOrEmpty(_username) || string.IsNullOrEmpty(_password))
         {
-            _logger.LogWarning("Email service not configured. Skipping email to {Email}", toEmail);
-            // In development, just log the email instead of sending
+            _logger.LogWarning("SMTP not configured. Skipping email to {Email}", toEmail);
             _logger.LogInformation("EMAIL PREVIEW:\nTo: {Email}\nSubject: {Subject}\nBody: {Body}",
-      toEmail, subject, htmlBody[..Math.Min(200, htmlBody.Length)]);
-            return true; // Return true in development mode
+                toEmail, subject, htmlBody[..Math.Min(200, htmlBody.Length)]);
+            return true; // Simulate success in dev
         }
 
         try
@@ -316,17 +350,12 @@ public class EmailService : IEmailService
 
             await smtpClient.SendMailAsync(message);
 
-            _logger.LogInformation("Email sent successfully to {Email}", toEmail);
+            _logger.LogInformation("Email sent successfully via SMTP to {Email}", toEmail);
             return true;
-        }
-        catch (SmtpException ex)
-        {
-            _logger.LogError(ex, "SMTP error sending email to {Email}: {Error}", toEmail, ex.Message);
-            return false;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error sending email to {Email}", toEmail);
+            _logger.LogError(ex, "SMTP error sending email to {Email}", toEmail);
             return false;
         }
     }

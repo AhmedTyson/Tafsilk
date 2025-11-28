@@ -1,0 +1,297 @@
+@model TafsilkPlatform.Web.ViewModels.TailorManagement.AddProductViewModel
+
+@{
+    ViewData["Title"] = "Add New Product";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">Add New Product</h1>
+                <a asp-action="ManageProducts" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Products
+                </a>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-action="AddProduct" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4"></div>
+                        <input type="hidden" asp-for="TailorId" />
+
+                        <!-- Basic Information -->
+                        <h5 class="mb-3 text-primary">Basic Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="Name" class="form-label fw-bold"></label>
+                                <input asp-for="Name" class="form-control" placeholder="e.g., Luxury Silk Thobe" />
+                                <span asp-validation-for="Name" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Description" class="form-label fw-bold"></label>
+                                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe your product in detail..."></textarea>
+                                <span asp-validation-for="Description" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label fw-bold"></label>
+                                <select asp-for="Category" class="form-select">
+                                    <option value="">Select Category</option>
+                                    @if (ViewBag.Categories != null)
+                                    {
+                                        foreach (var category in ViewBag.Categories as List<string>)
+                                        {
+                                            <option value="@category">@category</option>
+                                        }
+                                    }
+                                </select>
+                                <span asp-validation-for="Category" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="SubCategory" class="form-label fw-bold"></label>
+                                <input asp-for="SubCategory" class="form-control" placeholder="e.g., Men's, Women's, Summer" />
+                                <span asp-validation-for="SubCategory" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Pricing & Inventory -->
+                        <h5 class="mb-3 text-primary">Pricing & Inventory</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label asp-for="Price" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">EGP</span>
+                                    <input asp-for="Price" class="form-control" type="number" step="0.01" min="0" />
+                                </div>
+                                <span asp-validation-for="Price" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="DiscountedPrice" class="form-label fw-bold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">EGP</span>
+                                    <input asp-for="DiscountedPrice" class="form-control" type="number" step="0.01" min="0" />
+                                </div>
+                                <span asp-validation-for="DiscountedPrice" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="StockQuantity" class="form-label fw-bold"></label>
+                                <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                                <span asp-validation-for="StockQuantity" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Details -->
+                        <h5 class="mb-3 text-primary">Product Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label asp-for="Size" class="form-label fw-bold"></label>
+                                <input asp-for="Size" class="form-control" placeholder="e.g., M, L, 42" />
+                                <span asp-validation-for="Size" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Color" class="form-label fw-bold"></label>
+                                <input asp-for="Color" class="form-control" placeholder="e.g., White, Navy" />
+                                <span asp-validation-for="Color" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Material" class="form-label fw-bold"></label>
+                                <input asp-for="Material" class="form-control" placeholder="e.g., Cotton, Silk" />
+                                <span asp-validation-for="Material" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Brand" class="form-label fw-bold"></label>
+                                <input asp-for="Brand" class="form-control" placeholder="e.g., Tafsilk" />
+                                <span asp-validation-for="Brand" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Images -->
+                        <h5 class="mb-3 text-primary">Images</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label asp-for="PrimaryImage" class="form-label fw-bold"></label>
+                                <input asp-for="PrimaryImage" class="form-control" type="file" accept="image/*" id="primaryImageInput" />
+                                <div class="form-text">Main image shown in listings. Max size 5MB.</div>
+                                <span asp-validation-for="PrimaryImage" class="text-danger small"></span>
+                                <div id="primaryImagePreview" class="mt-2" style="display:none;">
+                                    <img id="primaryImagePreviewImg" class="img-fluid rounded" style="max-height: 200px;" />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="AdditionalImages" class="form-label fw-bold"></label>
+                                <input asp-for="AdditionalImages" class="form-control" type="file" multiple accept="image/*" id="additionalImagesInput" />
+                                <div class="form-text">Upload up to 5 additional images for the gallery.</div>
+                                <span asp-validation-for="AdditionalImages" class="text-danger small"></span>
+                                <div id="additionalImagesPreview" class="row g-2 mt-2"></div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" />
+
+                        <!-- Settings -->
+                        <h5 class="mb-3 text-primary">Settings & SEO</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsAvailable" class="form-check-label fw-bold">Available for Sale</label>
+                                </div>
+                                <div class="form-text">If unchecked, product will be hidden from the store.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input asp-for="IsFeatured" class="form-check-input" type="checkbox" />
+                                    <label asp-for="IsFeatured" class="form-check-label fw-bold">Featured Product</label>
+                                </div>
+                                <div class="form-text">Highlight this product in your profile.</div>
+                            </div>
+
+                            <div class="col-12 mt-3">
+                                <label asp-for="MetaTitle" class="form-label fw-bold"></label>
+                                <input asp-for="MetaTitle" class="form-control" placeholder="SEO Title (Optional)" />
+                                <span asp-validation-for="MetaTitle" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="MetaDescription" class="form-label fw-bold"></label>
+                                <textarea asp-for="MetaDescription" class="form-control" rows="2" placeholder="SEO Description (Optional)"></textarea>
+                                <span asp-validation-for="MetaDescription" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-5">
+                            <a asp-action="ManageProducts" class="btn btn-light me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-5">Save Product</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <style>
+        /* Premium Form Styling */
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            border-color: #dee2e6;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #c9a227; /* Gold accent */
+            box-shadow: 0 0 0 0.25rem rgba(201, 162, 39, 0.15);
+        }
+
+        .input-group-text {
+            border-radius: 0.5rem 0 0 0.5rem;
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        /* Section Headers */
+        h5.text-primary {
+            color: #c9a227 !important; /* Override primary with Gold */
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem !important;
+        }
+
+        /* Image Upload Area */
+        input[type="file"] {
+            padding: 0.5rem;
+            background-color: #f8f9fa;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #1a1a1a;
+            border-color: #1a1a1a;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #c9a227;
+            border-color: #c9a227;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(201, 162, 39, 0.3);
+        }
+
+        .btn-light {
+            background-color: #f8f9fa;
+            border-color: #f8f9fa;
+            color: #6c757d;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-light:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function() {
+            // Image Preview for Primary Image
+            $("#primaryImageInput").change(function() {
+                if (this.files && this.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#primaryImagePreviewImg').attr('src', e.target.result);
+                        $('#primaryImagePreview').show();
+                    }
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+
+            // Image Preview for Additional Images
+            $("#additionalImagesInput").change(function() {
+                $('#additionalImagesPreview').empty();
+                if (this.files) {
+                    [].forEach.call(this.files, function(file) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            const col = $('<div>').addClass('col-md-3 position-relative');
+                            const img = $('<img>').attr('src', e.target.result)
+                                .addClass('img-fluid rounded')
+                                .css('max-height', '100px');
+                            col.append(img);
+                            $('#additionalImagesPreview').append(col);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            });
+        });
+    </script>
+}

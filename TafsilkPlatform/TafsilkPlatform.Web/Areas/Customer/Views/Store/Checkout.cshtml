@@ -311,43 +311,27 @@
                         </div>
                     </div>
 
-                    <!-- Payment Method -->
+                    <!-- Payment Method (Hidden, forced to Stripe) -->
+                    <input type="hidden" name="PaymentMethod" value="CreditCard" />
+                    
                     <div class="checkout-card">
                         <div class="checkout-header">
-                            <i class="fas fa-wallet"></i>
-                            <span>Payment Method</span>
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Secure Payment</span>
                         </div>
                         <div class="p-4">
-                            <div class="d-flex flex-column gap-3">
-                                <!-- Cash on Delivery -->
-                                <label class="payment-option selected" onclick="selectPayment('CashOnDelivery')">
-                                    <input type="radio" name="PaymentMethod" value="CashOnDelivery" checked>
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="payment-check"></div>
-                                        <i class="fas fa-money-bill-wave fa-2x text-success"></i>
-                                        <div>
-                                            <h6 class="mb-1 fw-bold">Cash on Delivery</h6>
-                                            <p class="mb-0 text-muted small">Pay cash when you receive your order</p>
-                                        </div>
-                                    </div>
-                                </label>
-
-                                <!-- Credit Card (Stripe) -->
-                                <label class="payment-option" onclick="selectPayment('CreditCard')">
-                                    <input type="radio" name="PaymentMethod" value="CreditCard">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="payment-check"></div>
-                                        <i class="fab fa-cc-stripe fa-2x text-primary"></i>
-                                        <div>
-                                            <h6 class="mb-1 fw-bold">Credit/Debit Card</h6>
-                                            <p class="mb-0 text-muted small">Secure payment via Stripe</p>
-                                        </div>
-                                        <div class="ms-auto d-flex gap-2">
-                                            <i class="fab fa-cc-visa fa-lg text-muted"></i>
-                                            <i class="fab fa-cc-mastercard fa-lg text-muted"></i>
-                                        </div>
-                                    </div>
-                                </label>
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fas fa-lock fa-2x text-success"></i>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">Secure Checkout</h6>
+                                    <p class="mb-0 text-muted small">You will be redirected to Stripe to complete your payment securely.</p>
+                                </div>
+                            </div>
+                            <div class="mt-3 d-flex gap-2 justify-content-center opacity-50">
+                                <i class="fab fa-cc-visa fa-lg"></i>
+                                <i class="fab fa-cc-mastercard fa-lg"></i>
+                                <i class="fab fa-cc-amex fa-lg"></i>
+                                <i class="fab fa-cc-stripe fa-lg"></i>
                             </div>
                         </div>
                     </div>
@@ -404,7 +388,7 @@
                         </div>
 
                         <button type="submit" id="submitBtn" class="btn btn-premium">
-                            Confirm Order
+                            Proceed to Payment
                         </button>
 
                         <div class="text-center mt-3">
@@ -421,20 +405,7 @@
 
 @section Scripts {
     <script>
-        function selectPayment(method) {
-            // Update visual selection
-            document.querySelectorAll('.payment-option').forEach(el => el.classList.remove('selected'));
-            const selectedOption = document.querySelector(`input[value="${method}"]`).closest('.payment-option');
-            if (selectedOption) selectedOption.classList.add('selected');
 
-            // Update button text
-            const btn = document.getElementById('submitBtn');
-            if (method === 'CreditCard') {
-                btn.textContent = 'Proceed to Payment';
-            } else {
-                btn.textContent = 'Confirm Order';
-            }
-        }
 
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('checkoutForm');

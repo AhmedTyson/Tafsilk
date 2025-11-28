@@ -47,6 +47,11 @@ public interface IPaymentProcessorService
     /// Verify a Checkout Session and update payment status if paid
     /// </summary>
     Task<Result<bool>> VerifyCheckoutSessionAsync(string sessionId);
+
+    /// <summary>
+    /// Create a Setup Intent for future payments (e.g. Cash App Pay)
+    /// </summary>
+    Task<Result<string>> CreateSetupIntentAsync(CreateSetupIntentRequest request);
 }
 
 /// <summary>
@@ -109,6 +114,16 @@ public class CreatePaymentIntentRequest
     public string Currency { get; set; } = "EGP";
     public string CustomerEmail { get; set; } = string.Empty;
     public string? Description { get; set; }
+}
+
+/// <summary>
+/// Create setup intent request
+/// </summary>
+public class CreateSetupIntentRequest
+{
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string PaymentMethodType { get; set; } = "cashapp";
+    public string ReturnUrl { get; set; } = string.Empty;
 }
 
 /// <summary>

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Models.Models;
+using TafsilkPlatform.Web.Interfaces;
 using TafsilkPlatform.Web.Services.Payment;
 
 namespace TafsilkPlatform.Web.Controllers;
@@ -16,17 +17,20 @@ public class PaymentsController : Controller
     private readonly ApplicationDbContext _db;
     private readonly ILogger<PaymentsController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IStoreService _storeService;
 
     public PaymentsController(
         IPaymentProcessorService paymentService,
         ApplicationDbContext db,
         ILogger<PaymentsController> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IStoreService storeService)
     {
         _paymentService = paymentService ?? throw new ArgumentNullException(nameof(paymentService));
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        _storeService = storeService ?? throw new ArgumentNullException(nameof(storeService));
     }
 
     /// <summary>
@@ -86,8 +90,8 @@ public class PaymentsController : Controller
             var isPaid = await _db.Payment.AnyAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
             if (isPaid)
             {
-                TempData["Success"] = "Order is already paid";
-                return RedirectToAction("OrderDetails", "Orders", new { id = orderId });
+                TempData["InfoMessage"] = "This order is already paid. Redirecting you to the store.";
+                return RedirectToAction("Index", "Store", new { area = "Customer" });
             }
 
             // Construct description from product names
@@ -107,7 +111,7 @@ public class PaymentsController : Controller
                 Amount = (decimal)order.TotalPrice,
                 Currency = "EGP",
                 SuccessUrl = $"{Request.Scheme}://{Request.Host}/payments/success?orderId={order.OrderId}&session_id={{CHECKOUT_SESSION_ID}}",
-                CancelUrl = $"{Request.Scheme}://{Request.Host}/Store/Checkout",
+                CancelUrl = $"{Request.Scheme}://{Request.Host}/payments/cancelled?orderId={order.OrderId}",
                 CustomerEmail = customer.User?.Email,
                 Description = description
             };
@@ -197,14 +201,42 @@ public class PaymentsController : Controller
             {
                 _logger.LogError(ex, "Error verifying checkout session {SessionId} for order {OrderId}", sessionId, orderId);
             }
+
         }
 
         return View(orderId);
     }
 
+    /// <summary>
+    /// Handle payment cancellation
+    /// Restores cart items and deletes the pending order
+    /// </summary>
+    [HttpGet("cancelled")]
+    public async Task<IActionResult> PaymentCancelled(Guid orderId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var success = await _storeService.CancelPendingOrderAsync(orderId, userId);
+        
+        if (success)
+        {
+            TempData["InfoMessage"] = "Payment cancelled. You can choose a different payment method.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] = "Payment cancelled, but we couldn't update the order status.";
+        }
+
+        return RedirectToAction("Index", "Store", new { area = "Customer" });
+    }
+
     private Guid GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
         {
             return userId;
@@ -212,3 +244,5 @@ public class PaymentsController : Controller
         return Guid.Empty;
     }
 }
+
+

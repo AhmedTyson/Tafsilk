@@ -38,7 +38,7 @@ public class TailorPortfolioController : Controller
         {
             var tailor = await _db.TailorProfiles
                 .Include(t => t.User)
-
+                .Include(t => t.TailorServices)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
             if (tailor == null)
@@ -65,6 +65,13 @@ public class TailorPortfolioController : Controller
             ViewBag.CompletedOrders = await _db.Orders.CountAsync(o =>
                 o.TailorId == id &&
                 o.Status == TafsilkPlatform.Models.Models.OrderStatus.Delivered);
+
+            // Fetch products for this tailor
+            var products = await _db.Products
+                .Where(p => p.TailorId == id && !p.IsDeleted && p.IsAvailable)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+            ViewBag.Products = products;
 
             return View(tailor);
         }

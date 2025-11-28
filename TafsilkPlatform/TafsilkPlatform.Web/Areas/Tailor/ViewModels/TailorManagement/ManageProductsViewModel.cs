@@ -11,9 +11,16 @@ public class ManageProductsViewModel
     public string TailorName { get; set; } = string.Empty;
     public List<ProductItemDto> Products { get; set; } = new();
     public int TotalProducts { get; set; }
-    public int ActiveProducts { get; set; }
+    public int AvailableProducts { get; set; }
     public int OutOfStockProducts { get; set; }
     public decimal TotalInventoryValue { get; set; }
+
+    // Pagination & Search
+    public int CurrentPage { get; set; }
+    public int TotalPages { get; set; }
+    public string? SearchTerm { get; set; }
+    public string? FilterCategory { get; set; }
+    public bool? FilterAvailability { get; set; }
 }
 
 /// <summary>
@@ -33,6 +40,7 @@ public class ProductItemDto
     public int SalesCount { get; set; }
     public double AverageRating { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public string? ImageUrl { get; set; }
     public bool HasImage { get; set; }
 }
 

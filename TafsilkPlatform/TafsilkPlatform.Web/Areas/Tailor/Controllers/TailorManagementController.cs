@@ -7,6 +7,7 @@ using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
 using TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 
@@ -16,27 +17,18 @@ namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 [Area("Tailor")]
 [Route("manage")]
 [Authorize(Roles = "Tailor")]
-public class TailorManagementController : Controller
+public partial class TailorManagementController(
+    ApplicationDbContext context,
+    ILogger<TailorManagementController> logger,
+    IFileUploadService fileUploadService,
+    ImageUploadService imageUploadService,
+    IWebHostEnvironment environment) : Controller
 {
-    private readonly ApplicationDbContext _context;
-    private readonly ILogger<TailorManagementController> _logger;
-    private readonly IFileUploadService _fileUploadService;
-    private readonly ImageUploadService _imageUploadService;
-    private readonly IWebHostEnvironment _environment;
-
-    public TailorManagementController(
-        ApplicationDbContext context,
-        ILogger<TailorManagementController> logger,
-        IFileUploadService fileUploadService,
-        ImageUploadService imageUploadService,
-        IWebHostEnvironment environment)
-    {
-        _context = context ?? throw new ArgumentNullException(nameof(context));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
-        _imageUploadService = imageUploadService ?? throw new ArgumentNullException(nameof(imageUploadService));
-        _environment = environment ?? throw new ArgumentNullException(nameof(environment));
-    }
+    private readonly ApplicationDbContext _context = context ?? throw new ArgumentNullException(nameof(context));
+    private readonly ILogger<TailorManagementController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IFileUploadService _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
+    private readonly ImageUploadService _imageUploadService = imageUploadService ?? throw new ArgumentNullException(nameof(imageUploadService));
+    private readonly IWebHostEnvironment _environment = environment ?? throw new ArgumentNullException(nameof(environment));
 
     #region Portfolio Management
 
@@ -53,7 +45,7 @@ public class TailorManagementController : Controller
             var tailor = await GetTailorProfileAsync(userId);
 
             if (tailor == null)
-                return NotFound("Profile not found");
+                return NotFound("We couldn't find your profile.");
 
             var portfolioImages = await _context.PortfolioImages
               .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
@@ -83,13 +75,14 @@ public class TailorManagementController : Controller
                 MaxAllowedImages = 50 // Configure as needed
             };
 
+            ViewBag.Categories = GetPortfolioCategories();
             ViewData["Title"] = "Manage Portfolio";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading portfolio management");
-            TempData["Error"] = "An error occurred while loading portfolio";
+            TempData["Error"] = "We couldn't load your portfolio. Please try again.";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -135,7 +128,7 @@ public class TailorManagementController : Controller
             {
                 _logger.LogWarning("Model binding failed - model is null");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "Failed to load data. Please try again.";
+                TempData["Error"] = "We couldn't load the form. Please refresh the page.";
                 return View(new AddPortfolioImageViewModel());
             }
 
@@ -148,14 +141,14 @@ public class TailorManagementController : Controller
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor not found for user {UserId}", userId);
-                TempData["Error"] = "Profile not found";
+                TempData["Error"] = "We couldn't find your profile. Please contact support.";
                 return RedirectToAction("Tailor", "Dashboards");
             }
 
             if (tailor.Id != model.TailorId)
             {
                 _logger.LogWarning("Unauthorized access attempt. UserId: {UserId}, TailorId: {TailorId}", userId, model.TailorId);
-                TempData["Error"] = "You are not authorized to add images";
+                TempData["Error"] = "You don't have permission to add images.";
                 return RedirectToAction("Tailor", "Dashboards");
             }
 
@@ -164,7 +157,7 @@ public class TailorManagementController : Controller
             {
                 _logger.LogWarning("Model state invalid for AddPortfolioImage");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "Please check input data and fix errors";
+                TempData["Error"] = "Please correct the errors below and try again.";
                 return View(model);
             }
 
@@ -174,7 +167,7 @@ public class TailorManagementController : Controller
                 _logger.LogWarning("Image file is null or empty");
                 ModelState.AddModelError(nameof(model.ImageFile), "Please select an image");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "Please select an image";
+                TempData["Error"] = "Please upload an image to continue.";
                 return View(model);
             }
 
@@ -198,7 +191,7 @@ public class TailorManagementController : Controller
                 ModelState.AddModelError(nameof(model.ImageFile),
                     $"Image size must be less than {maxFileSize / 1024 / 1024} MB");
                 ViewBag.Categories = GetPortfolioCategories();
-                TempData["Error"] = "Image size is too large";
+                TempData["Error"] = "Your image is too large. Please upload a file smaller than 10MB.";
                 return View(model);
             }
 
@@ -209,7 +202,7 @@ public class TailorManagementController : Controller
             if (currentImageCount >= 50)
             {
                 _logger.LogWarning("Image limit reached for tailor {TailorId}. Current count: {Count}", tailor.Id, currentImageCount);
-                TempData["Error"] = "You have reached the maximum image limit (50 images)";
+                TempData["Error"] = "You've reached the limit of 50 images. Please remove some to add new ones.";
                 return RedirectToAction(nameof(ManagePortfolio));
             }
 
@@ -329,8 +322,8 @@ public class TailorManagementController : Controller
                     _logger.LogInformation("✅ Portfolio image {ImageId} added and verified successfully for tailor {TailorId}. ImageSize: {Size} bytes",
                         portfolioImage.PortfolioImageId, tailor.Id, savedImage.ImageData?.Length ?? 0);
 
-                    TempData["Success"] = "Image added successfully to portfolio";
-                    return (IActionResult)RedirectToAction("Tailor", "Dashboards");
+                    TempData["Success"] = "Your image has been added to the portfolio!";
+                    return (IActionResult)RedirectToAction(nameof(ManagePortfolio));
                 }
                 catch (DbUpdateException dbEx)
                 {
@@ -347,7 +340,7 @@ public class TailorManagementController : Controller
 
                     ViewBag.Categories = GetPortfolioCategories();
                     ModelState.AddModelError("", "Database error. Please try again.");
-                    TempData["Error"] = "Database error. Please check data and try again.";
+                    TempData["Error"] = "Database error. Please check your data and try again.";
                     return (IActionResult)View(model);
                 }
                 catch (InvalidOperationException ioEx)
@@ -464,7 +457,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading portfolio image for editing");
-            TempData["Error"] = "Error loading image";
+            TempData["Error"] = "We couldn't load the image details.";
             return RedirectToAction(nameof(ManagePortfolio));
         }
     }
@@ -567,7 +560,7 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} updated for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "Image updated successfully";
+            TempData["Success"] = "Your image details have been updated.";
 
             return RedirectToAction(nameof(ManagePortfolio));
         }
@@ -607,14 +600,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Portfolio image {ImageId} deleted for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "Image deleted successfully";
+            TempData["Success"] = "The image has been removed from your portfolio.";
 
             return RedirectToAction(nameof(ManagePortfolio));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting portfolio image");
-            TempData["Error"] = "Error deleting image";
+            TempData["Error"] = "We couldn't delete the image. Please try again.";
             return RedirectToAction(nameof(ManagePortfolio));
         }
     }
@@ -700,12 +693,14 @@ public class TailorManagementController : Controller
             image.IsFeatured = !image.IsFeatured;
             await _context.SaveChangesAsync();
 
-            return Json(new { success = true, isFeatured = image.IsFeatured });
+            TempData["Success"] = image.IsFeatured ? "Image is now featured." : "Image is no longer featured.";
+            return RedirectToAction(nameof(ManagePortfolio));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error toggling featured status");
-            return Json(new { success = false, message = "An error occurred" });
+            TempData["Error"] = "We couldn't update the status. Please try again.";
+            return RedirectToAction(nameof(ManagePortfolio));
         }
     }
 
@@ -731,16 +726,18 @@ public class TailorManagementController : Controller
             // Base query
             var query = _context.Orders
                 .Include(o => o.Customer)
+                    .ThenInclude(c => c.User)
                 .Where(o => o.TailorId == tailor.Id);
 
             // Apply filters
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.Trim().ToLower();
+                // search = search.Trim().ToLower(); // Removed ToLower to use Like
+                search = search.Trim();
                 query = query.Where(o => 
                     o.OrderId.ToString().Contains(search) || 
-                    o.Customer.FullName.ToLower().Contains(search) ||
-                    o.Description.ToLower().Contains(search));
+                    EF.Functions.Like(o.Customer.FullName, $"%{search}%") ||
+                    EF.Functions.Like(o.Description, $"%{search}%"));
             }
 
             if (status.HasValue)
@@ -761,9 +758,7 @@ public class TailorManagementController : Controller
                     OrderId = o.OrderId,
                     OrderNumber = $"#{o.OrderId.ToString().Substring(0, 8).ToUpper()}",
                     CustomerName = o.Customer.FullName,
-                    CustomerImageUrl = o.Customer.ProfilePictureData != null && o.Customer.ProfilePictureData.Length > 0
-                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(o.Customer.ProfilePictureData)}"
-                        : null,
+                    CustomerImageUrl = null, // ProfilePictureData not available on User model
                     Description = o.Description,
                     TotalPrice = o.TotalPrice,
                     Status = o.Status,
@@ -794,7 +789,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading orders management");
-            TempData["Error"] = "Error loading orders";
+            TempData["Error"] = "We couldn't load your orders.";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -860,21 +855,16 @@ public class TailorManagementController : Controller
                 .Include(o => o.Customer)
                     .ThenInclude(c => c.User)
                 .Include(o => o.Items)
-                .Include(o => o.orderImages)
+                .Include(o => o.OrderImages)
                 .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
 
             if (order == null)
                 return NotFound();
 
-            // Return partial view or JSON. For now, let's return JSON to populate the modal dynamically
-            // or a PartialView if we create one. Let's stick to JSON for simplicity as per the HTML design which likely used JS.
-            // Actually, returning a PartialView is cleaner for Razor. I'll assume we might use a PartialView later, 
-            // but for now I will return JSON to match the likely JS implementation in the HTML file.
-            
             var details = new
             {
                 order.OrderId,
-                OrderNumber = $"#{order.OrderId.ToString().Substring(0, 8).ToUpper()}",
+                OrderNumber = $"#{order.OrderId.ToString()[..8].ToUpper()}",
                 CustomerName = order.Customer.FullName,
                 CustomerPhone = order.Customer.User.PhoneNumber,
                 CustomerEmail = order.Customer.User.Email,
@@ -884,7 +874,7 @@ public class TailorManagementController : Controller
                 CreatedAt = order.CreatedAt.ToString("dd/MM/yyyy"),
                 DueDate = order.DueDate?.ToString("dd/MM/yyyy") ?? "Not set",
                 order.MeasurementsJson,
-                Images = order.orderImages.Select(i => new { ImageUrl = i.ImgUrl, i.OrderImageId }).ToList(),
+                Images = order.OrderImages.Select(i => new { ImageUrl = i.ImgUrl, i.OrderImageId }).ToList(),
                 Items = order.Items.Select(i => new { ItemName = i.Description, i.Quantity, Price = i.UnitPrice }).ToList()
             };
 
@@ -930,11 +920,11 @@ public class TailorManagementController : Controller
                     Id = s.TailorServiceId,
                     ServiceName = s.ServiceName,
                     Description = s.Description,
-                    BasePrice = s.BasePrice,
-                    EstimatedDuration = s.EstimatedDuration
+                    BasePrice = (double)s.BasePrice,
+                    EstimatedDuration = s.EstimatedDuration.ToString()
                 }).ToList(),
                 TotalServices = services.Count,
-                AveragePrice = services.Any() ? services.Average(s => s.BasePrice) : 0
+                AveragePrice = (double)(services.Count > 0 ? services.Average(s => s.BasePrice) : 0)
             };
 
             ViewData["Title"] = "Manage Services";
@@ -943,7 +933,7 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading services management");
-            TempData["Error"] = "Error loading services";
+            TempData["Error"] = "We couldn't load your services.";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
@@ -1008,10 +998,10 @@ public class TailorManagementController : Controller
             {
                 TailorServiceId = Guid.NewGuid(),
                 TailorId = tailor.Id,
-                ServiceName = model.ServiceName,
-                Description = model.Description,
-                BasePrice = model.BasePrice,
-                EstimatedDuration = model.EstimatedDuration,
+                ServiceName = model.ServiceName ?? string.Empty,
+                Description = model.Description ?? string.Empty,
+                BasePrice = (decimal)model.BasePrice,
+                EstimatedDuration = int.TryParse(model.EstimatedDuration, out var d) ? d : 0,
                 IsDeleted = false
             };
 
@@ -1019,7 +1009,7 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service added for tailor {TailorId}", tailor.Id);
-            TempData["Success"] = "Service added successfully";
+            TempData["Success"] = "Your new service has been added!";
 
             return RedirectToAction(nameof(ManageServices));
         }
@@ -1059,8 +1049,8 @@ public class TailorManagementController : Controller
                 TailorId = tailor.Id,
                 ServiceName = service.ServiceName,
                 Description = service.Description,
-                BasePrice = service.BasePrice,
-                EstimatedDuration = service.EstimatedDuration
+                BasePrice = (double)service.BasePrice,
+                EstimatedDuration = service.EstimatedDuration.ToString()
             };
 
             ViewBag.ServiceTypes = GetServiceTypes();
@@ -1117,15 +1107,15 @@ public class TailorManagementController : Controller
             }
 
             // Update service
-            service.ServiceName = model.ServiceName;
-            service.Description = model.Description;
-            service.BasePrice = model.BasePrice;
-            service.EstimatedDuration = model.EstimatedDuration;
+            service.ServiceName = model.ServiceName ?? string.Empty;
+            service.Description = model.Description ?? string.Empty;
+            service.BasePrice = (decimal)model.BasePrice;
+            service.EstimatedDuration = int.TryParse(model.EstimatedDuration, out var d) ? d : 0;
 
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service {ServiceId} updated for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "Service updated successfully";
+            TempData["Success"] = "Service details have been updated.";
 
             return RedirectToAction(nameof(ManageServices));
         }
@@ -1165,14 +1155,14 @@ public class TailorManagementController : Controller
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Service {ServiceId} deleted for tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "Service deleted successfully";
+            TempData["Success"] = "The service has been removed.";
 
             return RedirectToAction(nameof(ManageServices));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting service");
-            TempData["Error"] = "Error deleting service";
+            TempData["Error"] = "We couldn't delete the service. Please try again.";
             return RedirectToAction(nameof(ManageServices));
         }
     }
@@ -1199,19 +1189,21 @@ public class TailorManagementController : Controller
             var services = await _context.TailorServices
      .Where(s => s.TailorId == tailor.Id && !s.IsDeleted)
               .OrderBy(s => s.ServiceName)
-       .ToListAsync();
+                .ToListAsync();
 
             var model = new ManagePricingViewModel
             {
                 TailorId = tailor.Id,
                 TailorName = tailor.FullName ?? "Tailor",
-                ServicePrices = services.Select(s => new ServicePriceDto
+                PricingTier = "Standard",
+                StandardServices = services.Select(s => new ServicePriceDto
                 {
                     ServiceId = s.TailorServiceId,
                     ServiceName = s.ServiceName,
-                    CurrentPrice = s.BasePrice,
-                    NewPrice = s.BasePrice
-                }).ToList()
+                    CurrentPrice = (double)s.BasePrice,
+                    NewPrice = (double)s.BasePrice
+                }).ToList(),
+                CustomServices = []
             };
 
             ViewData["Title"] = "Manage Pricing";
@@ -1220,67 +1212,23 @@ public class TailorManagementController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading pricing management");
-            TempData["Error"] = "Error loading pricing management";
+            TempData["Error"] = "We couldn't load your pricing settings.";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
 
-    /// <summary>
-    /// Update service prices
-    /// POST: /tailor/manage/pricing
-    /// </summary>
-    [HttpPost("pricing")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdatePricing(ManagePricingViewModel model)
-    {
-        try
-        {
-            var userId = User.GetUserId();
-            var tailor = await GetTailorProfileAsync(userId);
 
-            if (tailor == null || tailor.Id != model.TailorId)
-                return Unauthorized();
-
-            if (!ModelState.IsValid)
-                return View(model);
-
-            // Update service prices
-            foreach (var servicePrice in model.ServicePrices)
-            {
-                var service = await _context.TailorServices
-                      .FirstOrDefaultAsync(s => s.TailorServiceId == servicePrice.ServiceId && s.TailorId == tailor.Id);
-
-                if (service != null && servicePrice.NewPrice > 0)
-                {
-                    service.BasePrice = servicePrice.NewPrice;
-                }
-            }
-
-            await _context.SaveChangesAsync();
-
-            _logger.LogInformation("Prices updated for tailor {TailorId}", tailor.Id);
-            TempData["Success"] = "Prices updated successfully";
-
-            return RedirectToAction(nameof(ManageServices));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating pricing");
-            ModelState.AddModelError("", "Error updating prices");
-            return View(model);
-        }
-    }
 
     #endregion
 
-    #region Product Management (إدارة المنتجات)
+    #region Product Management
 
     /// <summary>
     /// View and manage products
     /// GET: /tailor/manage/products
     /// </summary>
     [HttpGet("products")]
-    public async Task<IActionResult> ManageProducts()
+    public async Task<IActionResult> ManageProducts(string? search = null, string? category = null, bool? isAvailable = null, int page = 1)
     {
         try
         {
@@ -1290,53 +1238,89 @@ public class TailorManagementController : Controller
             if (tailor == null)
                 return NotFound("Profile not found");
 
-            var products = await _context.Products
-                .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
+            var query = _context.Products
+                .Where(p => p.TailorId == tailor.Id && !p.IsDeleted);
+
+            // Filters
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(p => 
+                    EF.Functions.Like(p.Name, $"%{search}%") || 
+                    EF.Functions.Like(p.Description, $"%{search}%") ||
+                    EF.Functions.Like(p.Brand, $"%{search}%"));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                query = query.Where(p => p.Category == category);
+            }
+
+            if (isAvailable.HasValue)
+            {
+                query = query.Where(p => p.IsAvailable == isAvailable.Value);
+            }
+
+            // Pagination
+            int pageSize = 10;
+            var totalItems = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            page = Math.Max(1, Math.Min(page, totalPages > 0 ? totalPages : 1));
+
+            var products = await query
                 .OrderByDescending(p => p.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(p => new ProductItemDto
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Price = p.Price,
+                    DiscountedPrice = p.DiscountedPrice,
+                    Category = p.Category,
+                    StockQuantity = p.StockQuantity,
+                    IsAvailable = p.IsAvailable,
+                    ImageUrl = p.PrimaryImageData != null && p.PrimaryImageData.Length > 0 
+                        ? Url.Action("GetProductImage", "TailorManagement", new { id = p.ProductId }) 
+                        : p.PrimaryImageUrl,
+                    SalesCount = p.SalesCount,
+                    ViewCount = p.ViewCount
+                })
                 .ToListAsync();
 
             var model = new ManageProductsViewModel
             {
                 TailorId = tailor.Id,
                 TailorName = tailor.FullName ?? "Tailor",
-                Products = products.Select(p => new ProductItemDto
-                {
-                    ProductId = p.ProductId,
-                    Name = p.Name,
-                    Category = p.Category,
-                    Price = p.Price,
-                    DiscountedPrice = p.DiscountedPrice,
-                    StockQuantity = p.StockQuantity,
-                    IsAvailable = p.IsAvailable,
-                    IsFeatured = p.IsFeatured,
-                    ViewCount = p.ViewCount,
-                    SalesCount = p.SalesCount,
-                    AverageRating = p.AverageRating,
-                    CreatedAt = p.CreatedAt,
-                    HasImage = p.PrimaryImageData != null
-                }).ToList(),
-                TotalProducts = products.Count,
-                ActiveProducts = products.Count(p => p.IsAvailable && p.StockQuantity > 0),
-                OutOfStockProducts = products.Count(p => p.StockQuantity == 0),
-                TotalInventoryValue = products.Sum(p => p.Price * p.StockQuantity)
+                Products = products,
+                TotalProducts = totalItems,
+                AvailableProducts = await _context.Products.CountAsync(p => p.TailorId == tailor.Id && p.IsAvailable && !p.IsDeleted),
+                OutOfStockProducts = await _context.Products.CountAsync(p => p.TailorId == tailor.Id && p.StockQuantity == 0 && !p.IsDeleted),
+                TotalInventoryValue = await _context.Products
+                    .Where(p => p.TailorId == tailor.Id && !p.IsDeleted)
+                    .SumAsync(p => p.Price * p.StockQuantity),
+                SearchTerm = search,
+                FilterCategory = category,
+                FilterAvailability = isAvailable,
+                CurrentPage = page,
+                TotalPages = totalPages
             };
 
+            ViewBag.Categories = GetProductCategories();
             ViewData["Title"] = "Manage Products";
             return View(model);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading products management");
-            TempData["Error"] = "Error loading products";
+            TempData["Error"] = "We couldn't load your products.";
             return RedirectToAction("Tailor", "Dashboards");
         }
     }
 
-    /// <summary>
-    /// Add new product form
-    /// GET: /tailor/manage/products/add
+    /// GET: /tailor/manage/add-product
     /// </summary>
-    [HttpGet("products/add")]
+    [HttpGet("add-product")]
     public async Task<IActionResult> AddProduct()
     {
         var userId = User.GetUserId();
@@ -1348,189 +1332,154 @@ public class TailorManagementController : Controller
         var model = new AddProductViewModel
         {
             TailorId = tailor.Id,
-            IsAvailable = true,
-            StockQuantity = 1
+            IsAvailable = true // Default to available
         };
 
         PopulateProductFormViewBag();
-
         return View(model);
     }
 
     /// <summary>
     /// Save new product
-    /// POST: /tailor/manage/products/add
+    /// POST: /tailor/manage/add-product
     /// </summary>
-    [HttpPost("products/add")]
+    [HttpPost("add-product")]
     [ValidateAntiForgeryToken]
-    [RequestSizeLimit(12 * 1024 * 1024)]
-    [RequestFormLimits(MultipartBodyLengthLimit = 12 * 1024 * 1024, ValueLengthLimit = int.MaxValue)]
-    public async Task<IActionResult> AddProduct(AddProductViewModel? model)
+    [RequestSizeLimit(20 * 1024 * 1024)] // 20MB limit
+    public async Task<IActionResult> AddProduct(AddProductViewModel model)
     {
         try
         {
-            _logger.LogCritical("AddProduct POST started. Model state valid: {IsValid}", ModelState.IsValid);
-            if (model != null)
-            {
-                _logger.LogCritical("Model received. PrimaryImage: {ImageName}, Size: {Size}",
-                    model.PrimaryImage?.FileName, model.PrimaryImage?.Length);
-            }
-            if (model == null)
-            {
-                PopulateProductFormViewBag();
-                TempData["Error"] = "Failed to load data. Please try again.";
-                return View(new AddProductViewModel());
-            }
             var userId = User.GetUserId();
             var tailor = await GetTailorProfileAsync(userId);
-            if (tailor == null)
-            {
-                TempData["Error"] = "Profile not found";
-                return RedirectToAction("Tailor", "Dashboards");
-            }
-            if (tailor.Id != model.TailorId)
-            {
+
+            if (tailor == null || tailor.Id != model.TailorId)
                 return Unauthorized();
-            }
+
             if (!ModelState.IsValid)
             {
                 PopulateProductFormViewBag();
-                TempData["Error"] = "Please check input data and fix errors";
                 return View(model);
             }
-            int validImageCount = 0;
-            var (isImageValid, imageError) = await _imageUploadService.ValidateImageAsync(model.PrimaryImage);
-            if (!isImageValid)
+
+            // Validate Discounted Price
+            if (model.DiscountedPrice.HasValue && model.DiscountedPrice.Value >= model.Price)
             {
-                ModelState.AddModelError(nameof(model.PrimaryImage), imageError!);
+                ModelState.AddModelError(nameof(model.DiscountedPrice), "Discounted price must be less than the original price.");
                 PopulateProductFormViewBag();
-                TempData["Error"] = imageError;
                 return View(model);
             }
-            byte[] primaryImageData = Array.Empty<byte>();
+
+            // Validate Primary Image
+            var (isPrimaryValid, primaryError) = await ValidatePrimaryImageAsync(model.PrimaryImage);
+            if (!isPrimaryValid)
+            {
+                ModelState.AddModelError(nameof(model.PrimaryImage), primaryError!);
+                PopulateProductFormViewBag();
+                return View(model);
+            }
+
+            // Process Primary Image
+            byte[] primaryImageData;
             try
             {
-                primaryImageData = await _imageUploadService.ProcessImageWithSizeCheckAsync(model.PrimaryImage!);
-                validImageCount++;
+                primaryImageData = await ProcessPrimaryImageAsync(model.PrimaryImage!);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error processing primary image");
-                ModelState.AddModelError(nameof(model.PrimaryImage), "Error processing image. Please try again.");
+                ModelState.AddModelError(nameof(model.PrimaryImage), ex.Message);
                 PopulateProductFormViewBag();
-                TempData["Error"] = "Error processing image";
                 return View(model);
             }
-            var additionalImagesJson = await ProcessAdditionalImagesAsync(model.AdditionalImages);
-            if (validImageCount == 0)
-            {
-                TempData["Warning"] = "No images were accepted. Please check image type and size.";
-            }
+
+            // Process Additional Images
+            string? additionalImagesJson = await ProcessAdditionalImagesAsync(model.AdditionalImages);
+
+            // Create Entity
             var product = await CreateProductEntityAsync(model, tailor, primaryImageData, additionalImagesJson);
-            var strategy = _context.Database.CreateExecutionStrategy();
-            return await strategy.ExecuteAsync(async () =>
+
+            // Save to DB
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            // Verify Save
+            var (isSaved, savedProduct) = await VerifyProductSavedAsync(product.ProductId, product);
+            if (!isSaved)
             {
-                await using var transaction = await _context.Database.BeginTransactionAsync();
-                try
-                {
-                    _context.Products.Add(product);
-                    var saveResult = await _context.SaveChangesAsync();
-                    if (saveResult == 0)
-                    {
-                        await transaction.RollbackAsync();
-                        throw new InvalidOperationException("Failed to save product to database. No data saved.");
-                    }
-                    await transaction.CommitAsync();
-                    TempData["Success"] = $"Product '{product.Name}' added successfully and is now available in store";
-                    return (IActionResult)RedirectToAction("Tailor", "Dashboards");
-                }
-                catch (Exception ex)
-                {
-                    try { await transaction.RollbackAsync(); } catch { }
-                    _logger.LogError(ex, "Error during product save transaction");
-                    PopulateProductFormViewBag();
-                    ModelState.AddModelError("", "Unexpected error while saving product. Please try again.");
-                    TempData["Error"] = $"An error occurred: {ex.Message}";
-                    return (IActionResult)View(model);
-                }
-            });
+                TempData["Error"] = "Something went wrong. The product wasn't saved.";
+                return RedirectToAction(nameof(ManageProducts));
+            }
+
+            _logger.LogInformation("Product {ProductId} added successfully for tailor {TailorId}", product.ProductId, tailor.Id);
+            TempData["Success"] = "Your product has been added to the catalog!";
+
+            return RedirectToAction(nameof(ManageProducts));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Fatal error during product image upload");
-            TempData["Error"] = "Error uploading image. Please try again or choose a smaller image.";
+            _logger.LogError(ex, "Error adding product");
+            ModelState.AddModelError("", "Error adding product. Please try again.");
             PopulateProductFormViewBag();
-            return View(model ?? new AddProductViewModel());
+            return View(model);
         }
     }
 
     /// <summary>
-    /// Edit product
-    /// GET: /tailor/manage/products/edit/{id}
+    /// Edit product form
+    /// GET: /tailor/manage/edit-product/{id}
     /// </summary>
-    [HttpGet("products/edit/{id:guid}")]
+    [HttpGet("edit-product/{id:guid}")]
     public async Task<IActionResult> EditProduct(Guid id)
     {
-        try
+        var userId = User.GetUserId();
+        var tailor = await GetTailorProfileAsync(userId);
+
+        if (tailor == null)
+            return NotFound();
+
+        var product = await _context.Products
+            .Include(p => p.Tailor)
+            .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
+
+        if (product == null)
+            return NotFound();
+
+        var model = new EditProductViewModel
         {
-            var userId = User.GetUserId();
-            var tailor = await GetTailorProfileAsync(userId);
+            ProductId = product.ProductId,
+            TailorId = tailor.Id,
+            Name = product.Name,
+            Description = product.Description,
+            Price = product.Price,
+            DiscountedPrice = product.DiscountedPrice,
+            StockQuantity = product.StockQuantity,
+            Category = product.Category,
+            SubCategory = product.SubCategory,
+            Size = product.Size,
+            Color = product.Color,
+            Material = product.Material,
+            Brand = product.Brand,
+            IsAvailable = product.IsAvailable,
+            IsFeatured = product.IsFeatured,
+            MetaTitle = product.MetaTitle,
+            MetaDescription = product.MetaDescription,
+            HasCurrentPrimaryImage = product.PrimaryImageData != null,
+            CurrentAdditionalImagesCount = !string.IsNullOrEmpty(product.AdditionalImagesJson) 
+                ? product.AdditionalImagesJson.Split(";;", StringSplitOptions.RemoveEmptyEntries).Length 
+                : 0
+        };
 
-            if (tailor == null)
-                return NotFound();
-
-            var product = await _context.Products
-                .FirstOrDefaultAsync(p => p.ProductId == id && p.TailorId == tailor.Id && !p.IsDeleted);
-
-            if (product == null)
-                return NotFound("Product not found");
-
-            var additionalImagesCount = 0;
-            if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
-            {
-                additionalImagesCount = product.AdditionalImagesJson.Split(";;").Length;
-            }
-
-            var model = new EditProductViewModel
-            {
-                ProductId = product.ProductId,
-                TailorId = tailor.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                DiscountedPrice = product.DiscountedPrice,
-                Category = product.Category,
-                SubCategory = product.SubCategory,
-                Size = product.Size,
-                Color = product.Color,
-                Material = product.Material,
-                Brand = product.Brand,
-                StockQuantity = product.StockQuantity,
-                IsAvailable = product.IsAvailable,
-                IsFeatured = product.IsFeatured,
-                MetaTitle = product.MetaTitle,
-                MetaDescription = product.MetaDescription,
-                HasCurrentPrimaryImage = product.PrimaryImageData != null,
-                CurrentAdditionalImagesCount = additionalImagesCount
-            };
-
-            PopulateProductFormViewBag("Edit Product");
-            return View(model);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading product for editing");
-            TempData["Error"] = "Error loading product";
-            return RedirectToAction(nameof(ManageProducts));
-        }
+        PopulateProductFormViewBag("Edit Product");
+        return View(model);
     }
 
     /// <summary>
     /// Update product
-    /// POST: /tailor/manage/products/edit/{id}
+    /// POST: /tailor/manage/edit-product/{id}
     /// </summary>
-    [HttpPost("products/edit/{id:guid}")]
+    [HttpPost("edit-product/{id:guid}")]
     [ValidateAntiForgeryToken]
+    [RequestSizeLimit(20 * 1024 * 1024)]
     public async Task<IActionResult> EditProduct(Guid id, EditProductViewModel model)
     {
         try
@@ -1556,9 +1505,17 @@ public class TailorManagementController : Controller
                 return View(model);
             }
 
-            // Update product info
-            product.Name = model.Name;
-            product.Description = model.Description;
+            // Validate Discounted Price
+            if (model.DiscountedPrice.HasValue && model.DiscountedPrice.Value >= model.Price)
+            {
+                ModelState.AddModelError(nameof(model.DiscountedPrice), "Discounted price must be less than the original price.");
+                PopulateProductFormViewBag("Edit Product");
+                return View(model);
+            }
+
+            // Update fields
+            product.Name = model.Name.Trim();
+            product.Description = model.Description.Trim();
             product.Price = model.Price;
             product.DiscountedPrice = model.DiscountedPrice;
             product.Category = model.Category;
@@ -1570,55 +1527,56 @@ public class TailorManagementController : Controller
             product.StockQuantity = model.StockQuantity >= 0 ? model.StockQuantity : 0;
             product.IsAvailable = model.IsAvailable;
             product.IsFeatured = model.IsFeatured;
-            product.MetaTitle = model.MetaTitle ?? model.Name;
-            product.MetaDescription = model.MetaDescription;
+            product.MetaTitle = model.MetaTitle?.Trim();
+            product.MetaDescription = model.MetaDescription?.Trim();
             product.UpdatedAt = DateTimeOffset.UtcNow;
 
-            // Update primary image if provided
+            // Handle Primary Image Update
             if (model.NewPrimaryImage != null && model.NewPrimaryImage.Length > 0)
             {
-                if (!await _fileUploadService.IsValidImageAsync(model.NewPrimaryImage))
+                var (isValid, error) = await ValidatePrimaryImageAsync(model.NewPrimaryImage);
+                if (!isValid)
                 {
-                    ModelState.AddModelError(nameof(model.NewPrimaryImage), "Invalid file type");
+                    ModelState.AddModelError(nameof(model.NewPrimaryImage), error!);
                     PopulateProductFormViewBag("Edit Product");
                     return View(model);
                 }
 
-                using var ms = new MemoryStream();
-                await model.NewPrimaryImage.CopyToAsync(ms);
-                product.PrimaryImageData = ms.ToArray();
-                product.PrimaryImageContentType = model.NewPrimaryImage.ContentType;
+                try
+                {
+                    product.PrimaryImageData = await ProcessPrimaryImageAsync(model.NewPrimaryImage);
+                    product.PrimaryImageContentType = model.NewPrimaryImage.ContentType;
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(nameof(model.NewPrimaryImage), ex.Message);
+                    PopulateProductFormViewBag("Edit Product");
+                    return View(model);
+                }
             }
 
-            // Add new additional images if provided
-            if (model.NewAdditionalImages != null && model.NewAdditionalImages.Any())
+            // Handle Additional Images Update (Append)
+            if (model.NewAdditionalImages != null && model.NewAdditionalImages.Count > 0)
             {
-                var existingImages = new List<string>();
-                if (!string.IsNullOrEmpty(product.AdditionalImagesJson))
+                var newImagesJson = await ProcessAdditionalImagesAsync(model.NewAdditionalImages);
+                if (!string.IsNullOrEmpty(newImagesJson))
                 {
-                    existingImages = product.AdditionalImagesJson.Split(";;").ToList();
-                }
-
-                foreach (var image in model.NewAdditionalImages)
-                {
-                    if (existingImages.Count >= 5) break; // Max 5 total
-
-                    if (await _fileUploadService.IsValidImageAsync(image))
+                    if (string.IsNullOrEmpty(product.AdditionalImagesJson))
                     {
-                        using var ms = new MemoryStream();
-                        await image.CopyToAsync(ms);
-                        var base64 = Convert.ToBase64String(ms.ToArray());
-                        existingImages.Add($"{image.ContentType}|{base64}");
+                        product.AdditionalImagesJson = newImagesJson;
+                    }
+                    else
+                    {
+                        // Append to existing
+                        product.AdditionalImagesJson += ";;" + newImagesJson;
                     }
                 }
-
-                product.AdditionalImagesJson = existingImages.Any() ? string.Join(";;", existingImages) : null;
             }
 
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation("Product {ProductId} updated by tailor {TailorId}", id, tailor.Id);
-            TempData["Success"] = "Product updated successfully";
+            _logger.LogInformation("Product {ProductId} updated successfully for tailor {TailorId}", id, tailor.Id);
+            TempData["Success"] = "Product details have been updated.";
 
             return RedirectToAction(nameof(ManageProducts));
         }
@@ -1785,8 +1743,8 @@ public class TailorManagementController : Controller
             if (!string.IsNullOrEmpty(product.PrimaryImageUrl))
             {
                 // If it's a relative path starting with Attachments/, map it to absolute URL path
-                var url = product.PrimaryImageUrl.Replace("\\", "/");
-                if (!url.StartsWith("/")) url = "/" + url;
+                var url = product.PrimaryImageUrl.Replace('\\', '/');
+                if (!url.StartsWith('/')) url = "/" + url;
                 return Redirect(url);
             }
 
@@ -1830,23 +1788,23 @@ public class TailorManagementController : Controller
     }
 
 
-    private List<string> GetPortfolioCategories()
+    private static List<string> GetPortfolioCategories()
     {
-        return new List<string>
-        {
+        return
+        [
             "Wedding",
             "Casual",
             "Formal",
             "Traditional",
             "Modern",
             "Other"
-        };
+        ];
     }
 
-    private List<string> GetProductCategories()
+    private static List<string> GetProductCategories()
     {
-        return new List<string>
-        {
+        return
+        [
             "Men's Thobe",
             "Women's Dress",
             "Formal Suit",
@@ -1860,13 +1818,13 @@ public class TailorManagementController : Controller
             "Kids Wear",
             "Accessories",
             "Other"
-        };
+        ];
     }
 
-    private List<string> GetProductSubCategories()
+    private static List<string> GetProductSubCategories()
     {
-        return new List<string>
-        {
+        return
+        [
             "Men",
             "Women",
             "Kids",
@@ -1875,13 +1833,13 @@ public class TailorManagementController : Controller
             "Sports",
             "Traditional",
             "Modern"
-        };
+        ];
     }
 
-    private List<string> GetProductSizes()
+    private static List<string> GetProductSizes()
     {
-        return new List<string>
-        {
+        return
+        [
             "XS",
             "S",
             "M",
@@ -1890,13 +1848,13 @@ public class TailorManagementController : Controller
             "XXL",
             "XXXL",
             "Free Size"
-        };
+        ];
     }
 
-    private List<string> GetProductMaterials()
+    private static List<string> GetProductMaterials()
     {
-        return new List<string>
-        {
+        return
+        [
             "Cotton 100%",
             "Polyester",
             "Silk",
@@ -1907,28 +1865,28 @@ public class TailorManagementController : Controller
             "Chiffon",
             "Satin",
             "Velvet"
-        };
+        ];
     }
 
-    private string GenerateSlug(string text)
+    private static string GenerateSlug(string text)
     {
         if (string.IsNullOrWhiteSpace(text))
-            return Guid.NewGuid().ToString("N").Substring(0, 8);
+            return Guid.NewGuid().ToString("N")[..8];
 
         // Remove diacritics and convert to lowercase
         text = text.Trim().ToLowerInvariant();
 
         // Replace spaces and special characters with hyphens
-        text = System.Text.RegularExpressions.Regex.Replace(text, @"[^a-z0-9\u0600-\u06FF]+", "-");
+        text = SlugRegex().Replace(text, "-");
 
         // Remove leading/trailing hyphens
         text = text.Trim('-');
 
         // Limit length
         if (text.Length > 50)
-            text = text.Substring(0, 50).TrimEnd('-');
+            text = text[..50].TrimEnd('-');
 
-        return string.IsNullOrEmpty(text) ? Guid.NewGuid().ToString("N").Substring(0, 8) : text;
+        return string.IsNullOrEmpty(text) ? Guid.NewGuid().ToString("N")[..8] : text;
     }
 
     /// <summary>
@@ -1989,14 +1947,14 @@ public class TailorManagementController : Controller
         using var fileStream = image.OpenReadStream();
         var buffer = new byte[bufferSize];
         int read;
-        while ((read = await fileStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        while ((read = await fileStream.ReadAsync(buffer.AsMemory())) > 0)
         {
             totalRead += read;
             if (totalRead > maxSize)
             {
                 throw new ArgumentException($"Image size is too large. Maximum {maxSize / 1024 / 1024} MB");
             }
-            await memoryStream.WriteAsync(buffer, 0, read);
+            await memoryStream.WriteAsync(buffer.AsMemory(0, read));
         }
 
         var imageData = memoryStream.ToArray();
@@ -2011,7 +1969,7 @@ public class TailorManagementController : Controller
     /// </summary>
     private async Task<string?> ProcessAdditionalImagesAsync(List<IFormFile>? images)
     {
-        if (images == null || !images.Any())
+        if (images == null || images.Count == 0)
             return null;
 
         _logger.LogInformation("Processing {Count} additional images", images.Count);
@@ -2045,7 +2003,7 @@ public class TailorManagementController : Controller
             }
         }
 
-        if (additionalImagesBase64.Any())
+        if (additionalImagesBase64.Count > 0)
         {
             _logger.LogInformation("Processed {Count} additional images successfully", additionalImagesBase64.Count);
             return string.Join(";;", additionalImagesBase64);
@@ -2065,7 +2023,7 @@ public class TailorManagementController : Controller
         var existingSlug = await _context.Products.AnyAsync(p => p.Slug == slug && !p.IsDeleted);
         if (existingSlug)
         {
-            slug = $"{slug}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+            slug = $"{slug}-{Guid.NewGuid().ToString("N")[..6]}";
             _logger.LogInformation("Slug already exists, using unique slug: {Slug}", slug);
         }
 
@@ -2077,7 +2035,7 @@ public class TailorManagementController : Controller
         var metaDescription = !string.IsNullOrWhiteSpace(model.MetaDescription)
             ? model.MetaDescription.Trim()
             : (model.Description.Length > 160
-                ? model.Description.Substring(0, 160).Trim()
+                ? model.Description[..160].Trim()
                 : model.Description.Trim());
 
         var productId = Guid.NewGuid();
@@ -2087,8 +2045,8 @@ public class TailorManagementController : Controller
             ProductId = productId,
             Name = model.Name.Trim(),
             Description = model.Description.Trim(),
-            Price = model.Price,
-            DiscountedPrice = model.DiscountedPrice,
+            Price = (decimal)model.Price,
+            DiscountedPrice = (decimal?)model.DiscountedPrice,
             Category = model.Category,
             SubCategory = model.SubCategory?.Trim(),
             Size = model.Size?.Trim(),
@@ -2149,4 +2107,27 @@ public class TailorManagementController : Controller
     }
 
     #endregion
+
+
+
+    #region Helpers
+
+    private static List<SelectListItem> GetServiceTypes()
+    {
+        return
+        [
+            new SelectListItem { Value = "Alteration", Text = "Alteration" },
+            new SelectListItem { Value = "Repair", Text = "Repair" },
+            new SelectListItem { Value = "Custom Tailoring", Text = "Custom Tailoring" },
+            new SelectListItem { Value = "Measurements", Text = "Measurements" },
+            new SelectListItem { Value = "Consultation", Text = "Consultation" }
+        ];
+    }
+
+    [System.Text.RegularExpressions.GeneratedRegex(@"[^a-z0-9\u0600-\u06FF]+")]
+    private static partial System.Text.RegularExpressions.Regex SlugRegex();
+
+    #endregion
+
 }
+

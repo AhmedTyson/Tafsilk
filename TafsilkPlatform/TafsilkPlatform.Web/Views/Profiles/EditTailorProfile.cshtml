@@ -1,767 +1,357 @@
 @model TafsilkPlatform.Models.ViewModels.Tailor.EditTailorProfileViewModel
 
 @{
-    ViewData["Title"] = "Edit Profile";
+    ViewData["Title"] = "Tailor Account Settings";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-@section Styles {
-<style>
-    :root {
-        --primary-color: #2c5aa0;
-        --primary-hover: #1e3f73;
-        --primary-light: #e3f2fd;
-        --secondary-color: #f39c12;
-        --success-color: #27ae60;
-        --warning-color: #f39c12;
-        --error-color: #e74c3c;
-        --text-primary: #2c3e50;
-        --text-secondary: #7f8c8d;
-        --border-color: #e1e8ed;
-        --background-white: #ffffff;
-        --background-gray: #f8f9fa;
-        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-        --radius-md: 0.5rem;
-        --radius-lg: 0.75rem;
-    }
-
-    .edit-profile-page {
-        padding: 2rem 0;
-        background: var(--background-gray);
-        min-height: 100vh;
-    }
-
-    .page-header {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .page-title {
-        font-size: 1.875rem;
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
-    }
-
-    .page-subtitle {
-        font-size: 1.125rem;
-        color: var(--text-secondary);
-    }
-
-    .profile-layout {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 2rem;
-    }
-
-    @@media (min-width: 1024px) {
-        .profile-layout {
-            grid-template-columns: 1fr 350px;
-        }
-    }
-
-    .profile-form-section, .profile-sidebar {
-        background: var(--background-white);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .form-section {
-        margin-bottom: 2.5rem;
-        padding-bottom: 2rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .form-section:last-child {
-        margin-bottom: 0;
-        border-bottom: none;
-    }
-
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .section-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: var(--primary-color);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.125rem;
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-primary);
-    }
-
-    .form-row {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-
-    @@media (min-width: 768px) {
-        .form-row {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-
-    .form-row.single {
-        grid-template-columns: 1fr;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .form-label.required::after {
-        content: " *";
-        color: var(--error-color);
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        transition: all 0.3s;
-        font-family: inherit;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
-    }
-
-    .form-control:disabled {
-        background: var(--background-gray);
-        cursor: not-allowed;
-    }
-
-    textarea.form-control {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .input-group {
-        position: relative;
-    }
-
-    .input-group-icon {
-        position: absolute;
-        right: 0.75rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--text-secondary);
-    }
-
-    .input-group .form-control {
-        padding-right: 2.5rem;
-    }
-
-    .profile-picture-upload {
-        text-align: center;
-    }
-
-    .profile-picture-preview {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        margin: 0 auto 1rem;
-        overflow: hidden;
-        border: 3px solid var(--primary-color);
-        background: var(--background-gray);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        box-shadow: 0 2px 8px rgba(44,90,160,0.08);
-        transition: box-shadow 0.3s;
-    }
-
-    .profile-picture-preview img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        border-radius: 50%;
-        transition: box-shadow 0.3s;
-        box-shadow: 0 2px 8px rgba(44,90,160,0.12);
-    }
-
-    .profile-picture-preview i {
-        font-size: 3rem;
-        color: var(--primary-color);
-        opacity: 0.5;
-    }
-
-    .file-input-label.btn {
-        font-weight: 600;
-        font-size: 1rem;
-        cursor: pointer;
-        margin-top: 0.5rem;
-        margin-bottom: 0.5rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .btn-outline-secondary {
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .stat-card {
-        background: var(--background-gray);
-        border-radius: var(--radius-md);
-        padding: 1rem;
-        text-align: center;
-    }
-
-    .stat-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: 0.25rem;
-    }
-
-    .stat-label {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-    }
-
-    .verification-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-
-    .verification-badge.verified {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .verification-badge.pending {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .quick-links {
-        display: grid;
-        gap: 0.75rem;
-    }
-
-    .quick-link {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        color: var(--text-primary);
-        transition: all 0.3s;
-    }
-
-    .quick-link:hover {
-        background: var(--background-gray);
-        border-color: var(--primary-color);
-    }
-
-    .quick-link i {
-        color: var(--primary-color);
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 0.75rem 1.5rem;
-        border: none;
-        border-radius: var(--radius-md);
-        font-weight: 600;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s;
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .btn-outline {
-        background: transparent;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
-    }
-
-    .btn-outline:hover {
-        background: var(--primary-color);
-        color: white;
-    }
-
-    .btn-block {
-        width: 100%;
-        display: block;
-    }
-
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        justify-content: flex-end;
-        margin-top: 2rem;
-    }
-
-    .text-danger {
-        color: var(--error-color);
-        font-size: 0.875rem;
-        margin-top: 0.25rem;
-    }
-
-    .help-text {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        margin-top: 0.25rem;
-    }
-
-    .map-preview {
-        height: 200px;
-        background: var(--background-gray);
-        border-radius: var(--radius-md);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-secondary);
-        margin-top: 1rem;
-    }
-</style>
-}
-
-<div class="edit-profile-page">
-    <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1 class="page-title">Edit Profile</h1>
-            <p class="page-subtitle">Update your information and shop details</p>
-        </div>
-
-        <!-- Success/Error Messages -->
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        <form asp-action="EditTailorProfile" method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
-            @Html.HiddenFor(m => m.TailorId)
-            @Html.HiddenFor(m => m.UserId)
-
-            <div class="profile-layout">
-                <!-- Left Column: Form -->
-                <div class="profile-form-section">
-                    <!-- Personal Information -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <h2 class="section-title">Personal Information</h2>
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-body text-center p-4 bg-white">
+                    <div class="mb-4 position-relative d-inline-block">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto text-primary shadow-sm overflow-hidden" style="width: 120px; height: 120px;">
+                            @if (!string.IsNullOrWhiteSpace(Model.CurrentProfilePictureUrl))
+                            {
+                                <img src="@Model.CurrentProfilePictureUrl" alt="Profile" class="w-100 h-100" style="object-fit: cover;" />
+                            }
+                            else if (Model.CurrentProfilePictureData != null)
+                            {
+                                <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.TailorId })" alt="Profile" class="w-100 h-100" style="object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <i class="fas fa-user-tie fa-3x text-muted"></i>
+                            }
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="FullName" class="form-label required"></label>
-                                <input asp-for="FullName" class="form-control" placeholder="Enter Full Name" />
-                                <span asp-validation-for="FullName" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="PhoneNumber" class="form-label required"></label>
-                                <div class="input-group">
-                                    <span class="input-group-icon"><i class="fas fa-phone"></i></span>
-                                    <input asp-for="PhoneNumber" class="form-control" placeholder="e.g. 01012345678" />
-                                </div>
-                                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="Email" class="form-label"></label>
-                            <div class="input-group">
-                                <span class="input-group-icon"><i class="fas fa-envelope"></i></span>
-                                <input asp-for="Email" class="form-control" placeholder="example@email.com" disabled />
-                            </div>
-                            <p class="help-text">To change email, please contact support</p>
-                        </div>
-                    </div>
-
-                    <!-- Shop Details -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-store"></i>
-                            </div>
-                            <h2 class="section-title">Shop Details</h2>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="ShopName" class="form-label required"></label>
-                            <input asp-for="ShopName" class="form-control" placeholder="Shop Name or Store" />
-                            <span asp-validation-for="ShopName" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="ShopDescription" class="form-label"></label>
-                            <textarea asp-for="ShopDescription" class="form-control" placeholder="Short description of the shop and services provided"></textarea>
-                            <span asp-validation-for="ShopDescription" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="Specialization" class="form-label"></label>
-                                <select asp-for="Specialization" class="form-control">
-                                    <option value="">Select Specialization</option>
-                                    @foreach (var spec in ViewBag.Specializations as List<string>)
-                                    {
-                                        <option value="@spec">@spec</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="Specialization" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="YearsOfExperience" class="form-label"></label>
-                                <input asp-for="YearsOfExperience" type="number" class="form-control" placeholder="Years of Experience" min="0" max="100" />
-                                <span asp-validation-for="YearsOfExperience" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Location -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <h2 class="section-title">Location</h2>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="City" class="form-label"></label>
-                                <select asp-for="City" class="form-control">
-                                    <option value="">Select City</option>
-                                    @foreach (var city in ViewBag.Cities as List<string>)
-                                    {
-                                        <option value="@city">@city</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="City" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="District" class="form-label"></label>
-                                <input asp-for="District" class="form-control" placeholder="District or Area" />
-                                <span asp-validation-for="District" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="Address" class="form-label"></label>
-                            <textarea asp-for="Address" class="form-control" rows="2" placeholder="Detailed Address"></textarea>
-                            <span asp-validation-for="Address" class="text-danger"></span>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="Latitude" class="form-label"></label>
-                                <input asp-for="Latitude" type="number" step="0.000001" class="form-control" placeholder="Latitude" />
-                                <span asp-validation-for="Latitude" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="Longitude" class="form-label"></label>
-                                <input asp-for="Longitude" type="number" step="0.000001" class="form-control" placeholder="Longitude" />
-                                <span asp-validation-for="Longitude" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+                        @if (Model.IsVerified)
                         {
-                            <div class="map-preview">
-                                <i class="fas fa-map"></i>
-                                <span class="ms-2">Location: @Model.Latitude.Value.ToString("F6"), @Model.Longitude.Value.ToString("F6")</span>
-                            </div>
+                            <span class="position-absolute bottom-0 end-0 translate-middle p-2 bg-success border border-light rounded-circle" title="Verified Tailor" data-bs-toggle="tooltip">
+                                <span class="visually-hidden">Verified</span>
+                            </span>
                         }
                     </div>
-
-                    <!-- Bio & Business Hours -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <h2 class="section-title">Bio</h2>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="Bio" class="form-label"></label>
-                            <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Bio about you and your experience"></textarea>
-                            <span asp-validation-for="Bio" class="text-danger"></span>
-                            <p class="help-text">Max 1000 characters</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label asp-for="BusinessHours" class="form-label"></label>
-                            <input asp-for="BusinessHours" class="form-control" placeholder="e.g. Sat - Thu: 9 AM - 9 PM" />
-                            <span asp-validation-for="BusinessHours" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <!-- Social Media -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-share-alt"></i>
-                            </div>
-                            <h2 class="section-title">Social Media</h2>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="FacebookUrl" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-icon"><i class="fab fa-facebook"></i></span>
-                                    <input asp-for="FacebookUrl" class="form-control" placeholder="Facebook Page Link" />
-                                </div>
-                                <span asp-validation-for="FacebookUrl" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="InstagramUrl" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-icon"><i class="fab fa-instagram"></i></span>
-                                    <input asp-for="InstagramUrl" class="form-control" placeholder="Instagram Account Link" />
-                                </div>
-                                <span asp-validation-for="InstagramUrl" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label asp-for="TwitterUrl" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-icon"><i class="fab fa-twitter"></i></span>
-                                    <input asp-for="TwitterUrl" class="form-control" placeholder="Twitter Account Link" />
-                                </div>
-                                <span asp-validation-for="TwitterUrl" class="text-danger"></span>
-                            </div>
-
-                            <div class="form-group">
-                                <label asp-for="WebsiteUrl" class="form-label"></label>
-                                <div class="input-group">
-                                    <span class="input-group-icon"><i class="fas fa-globe"></i></span>
-                                    <input asp-for="WebsiteUrl" class="form-control" placeholder="Website Link" />
-                                </div>
-                                <span asp-validation-for="WebsiteUrl" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Profile Picture -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-camera"></i>
-                            </div>
-                            <h2 class="section-title">Profile Picture</h2>
-                        </div>
-                        <div class="profile-picture-upload">
-                            <div class="profile-picture-preview" id="picturePreview">
-                                @if (!string.IsNullOrWhiteSpace(Model.CurrentProfilePictureUrl))
-                                {
-                                    <img src="@Model.CurrentProfilePictureUrl"
-                                         alt="Profile Picture"
-                                         id="previewImage" />
-                                }
-                                else if (Model.CurrentProfilePictureData != null)
-                                {
-                                    <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.TailorId })"
-                                         alt="Profile Picture"
-                                         id="previewImage" />
-                                }
-                                else
-                                {
-                                    <i class="fas fa-user"></i>
-                                }
-                            </div>
-                            <div class="file-input-wrapper">
-                                <input type="file"
-                                       id="profilePictureInput"
-                                       name="ProfilePicture"
-                                       accept="image/*"
-                                       class="d-none"
-                                       onchange="previewProfilePicture(event)" />
-                                <label for="profilePictureInput" class="file-input-label btn btn-primary rounded-pill px-4">
-                                    <i class="fas fa-upload me-2"></i> Upload New Picture
-                                </label>
-                                <button type="button" class="btn btn-outline-secondary rounded-pill ms-2" onclick="removeProfilePicture()">
-                                    <i class="fas fa-times"></i> Remove Picture
-                                </button>
-                            </div>
-                            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
-                            <p class="help-text">Max size: 5MB | Supported types: JPG, PNG, GIF</p>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="form-actions">
-                        <a href="@Url.Action("TailorProfile", "Profiles")" class="btn btn-outline">
-                            <i class="fas fa-times me-2"></i>Cancel
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Save Changes
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right Column: Sidebar -->
-                <div class="profile-sidebar">
-                    <!-- Verification Status -->
+                    <h5 class="fw-bold mb-1">@Model.ShopName</h5>
+                    <p class="text-muted small mb-2">@Model.Specialization</p>
+                    
                     @if (Model.IsVerified)
                     {
-                        <div class="verification-badge verified">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Verified Account</span>
-                        </div>
-                        @if (Model.VerifiedAt.HasValue)
-                        {
-                            <p class="text-muted small">Verified at: @Model.VerifiedAt.Value.ToString("dd/MM/yyyy")</p>
-                        }
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 mb-3">
+                            <i class="fas fa-check-circle me-1"></i> Verified
+                        </span>
                     }
                     else
                     {
-                        <div class="verification-badge pending">
-                            <i class="fas fa-clock"></i>
-                            <span>Pending Verification</span>
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2 mb-3">
+                            <i class="fas fa-clock me-1"></i> Pending Verification
+                        </span>
+                    }
+
+                    <div class="d-flex justify-content-center gap-3 mb-2">
+                        <div class="text-center px-2">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Orders</small>
+                            <span class="fw-bold text-primary">@Model.TotalOrders</span>
+                        </div>
+                        <div class="vr opacity-25"></div>
+                        <div class="text-center px-2">
+                            <small class="text-muted d-block" style="font-size: 0.75rem;">Services</small>
+                            <span class="fw-bold text-primary">@Model.ServiceCount</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="list-group list-group-flush border-top-0 p-2 bg-white">
+                    <a href="@Url.Action("Tailor", "Dashboards")" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-tachometer-alt me-3 opacity-75"></i> 
+                        <span class="fw-medium">Dashboard</span>
+                    </a>
+                    <a href="@Url.Action("EditTailorProfile", "Profiles")" class="list-group-item list-group-item-action active rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-user-cog me-3 opacity-75"></i> 
+                        <span class="fw-medium">Account Settings</span>
+                    </a>
+                    <a href="@Url.Action("ManageProducts", "TailorManagement", new { area = "Tailor" })" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-box me-3 opacity-75"></i>
+                        <span class="fw-medium">Manage Products</span>
+                    </a>
+                    <a href="@Url.Action("ManagePortfolio", "TailorManagement", new { area = "Tailor" })" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-images me-3 opacity-75"></i>
+                        <span class="fw-medium">Manage Gallery</span>
+                    </a>
+                    <a href="@Url.Action("ChangePassword", "Account")" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-lock me-3 opacity-75"></i>
+                        <span class="fw-medium">Security</span>
+                    </a>
+                    <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { area = "Tailor", id = Model.TailorId })" target="_blank" class="list-group-item list-group-item-action rounded-3 mb-1 border-0 d-flex align-items-center px-3 py-2">
+                        <i class="fas fa-external-link-alt me-3 opacity-75"></i>
+                        <span class="fw-medium">View Public Profile</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h4 class="mb-0 fw-bold text-dark">Edit Profile</h4>
+                    <p class="text-muted small mb-0 mt-1">Update your shop information and preferences</p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }
 
-                    <!-- Statistics -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value">@Model.PortfolioCount</div>
-                            <div class="stat-label">Gallery Image</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">@Model.ServiceCount</div>
-                            <div class="stat-label">Service</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">@Model.CompletedOrders</div>
-                            <div class="stat-label">Completed Order</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value">@Model.AverageRating.ToString("F1")</div>
-                            <div class="stat-label">Rating</div>
-                        </div>
-                    </div>
+                    <form asp-action="EditTailorProfile" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        @Html.HiddenFor(m => m.TailorId)
+                        @Html.HiddenFor(m => m.UserId)
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-                    <!-- Quick Links -->
-                    <div class="quick-links">
-                        <a href="@Url.Action("Tailor", "Dashboards")" class="quick-link">
-                            <i class="fas fa-home"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="@Url.Action("ManagePortfolio", "Profiles")" class="quick-link">
-                            <i class="fas fa-images"></i>
-                            <span>Manage Gallery</span>
-                        </a>
-                        <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { area = "Tailor", id = Model.TailorId })" class="quick-link" target="_blank">
-                            <i class="fas fa-eye"></i>
-                            <span>View Public Profile</span>
-                        </a>
-                    </div>
+                        <!-- Profile Picture Upload -->
+                        <div class="mb-5 p-4 bg-light rounded-4 border border-dashed text-center">
+                            <label for="profilePicture" class="form-label fw-bold mb-3 d-block">Profile Picture</label>
+                            <div class="d-flex flex-column align-items-center">
+                                <label class="btn btn-outline-primary rounded-pill px-4">
+                                    <i class="fas fa-camera me-2"></i> Choose New Photo
+                                    <input type="file" asp-for="ProfilePicture" class="d-none" id="profilePicture" accept="image/*" onchange="previewImage(this)">
+                                </label>
+                                <span asp-validation-for="ProfilePicture" class="text-danger small mt-2"></span>
+                                <small class="text-muted mt-2">Recommended size: 500x500px. Max 2MB.</small>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-user me-2"></i>Personal Information</h5>
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FullName" class="form-control bg-light border-0" placeholder="Full Name" />
+                                    <label asp-for="FullName">Full Name</label>
+                                </div>
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" class="form-control bg-light border-0" placeholder="Phone Number" />
+                                    <label asp-for="PhoneNumber">Phone Number</label>
+                                </div>
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <input asp-for="Email" class="form-control bg-light border-0" placeholder="Email" disabled />
+                                    <label asp-for="Email">Email Address</label>
+                                </div>
+                                <small class="text-muted ms-2">Contact support to change your email.</small>
+                            </div>
+                        </div>
+
+                        <!-- Shop Details -->
+                        <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-store me-2"></i>Shop Details</h5>
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="ShopName" class="form-control bg-light border-0" placeholder="Shop Name" />
+                                    <label asp-for="ShopName">Shop Name</label>
+                                </div>
+                                <span asp-validation-for="ShopName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="Specialization" class="form-select bg-light border-0">
+                                        <option value="">Select Specialization</option>
+                                        @if (ViewBag.Specializations is List<string> specializations)
+                                        {
+                                            foreach (var spec in specializations)
+                                            {
+                                                <option value="@spec">@spec</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label asp-for="Specialization">Specialization</label>
+                                </div>
+                                <span asp-validation-for="Specialization" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="YearsOfExperience" type="number" class="form-control bg-light border-0" placeholder="Years of Experience" />
+                                    <label asp-for="YearsOfExperience">Years of Experience</label>
+                                </div>
+                                <span asp-validation-for="YearsOfExperience" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="BusinessHours" class="form-control bg-light border-0" placeholder="Business Hours" />
+                                    <label asp-for="BusinessHours">Business Hours</label>
+                                </div>
+                                <span asp-validation-for="BusinessHours" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="ShopDescription" class="form-control bg-light border-0" placeholder="Shop Description" style="height: 100px"></textarea>
+                                    <label asp-for="ShopDescription">Shop Description</label>
+                                </div>
+                                <span asp-validation-for="ShopDescription" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="Bio" class="form-control bg-light border-0" placeholder="Bio" style="height: 100px"></textarea>
+                                    <label asp-for="Bio">Bio / About You</label>
+                                </div>
+                                <span asp-validation-for="Bio" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-map-marker-alt me-2"></i>Location</h5>
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select asp-for="City" class="form-select bg-light border-0">
+                                        <option value="">Select City</option>
+                                        @if (ViewBag.Cities is List<string> cities)
+                                        {
+                                            foreach (var city in cities)
+                                            {
+                                                <option value="@city">@city</option>
+                                            }
+                                        }
+                                    </select>
+                                    <label asp-for="City">City</label>
+                                </div>
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="District" class="form-control bg-light border-0" placeholder="District" />
+                                    <label asp-for="District">District</label>
+                                </div>
+                                <span asp-validation-for="District" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <textarea asp-for="Address" class="form-control bg-light border-0" placeholder="Detailed Address" style="height: 80px"></textarea>
+                                    <label asp-for="Address">Detailed Address</label>
+                                </div>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Social Media -->
+                        <h5 class="fw-bold mb-3 text-primary"><i class="fas fa-share-alt me-2"></i>Social Media</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="FacebookUrl" class="form-control bg-light border-0" placeholder="Facebook URL" />
+                                    <label asp-for="FacebookUrl">Facebook URL</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="InstagramUrl" class="form-control bg-light border-0" placeholder="Instagram URL" />
+                                    <label asp-for="InstagramUrl">Instagram URL</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="TwitterUrl" class="form-control bg-light border-0" placeholder="Twitter URL" />
+                                    <label asp-for="TwitterUrl">Twitter URL</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input asp-for="WebsiteUrl" class="form-control bg-light border-0" placeholder="Website URL" />
+                                    <label asp-for="WebsiteUrl">Website URL</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-5">
+                            <button type="submit" class="btn btn-primary px-5 py-3 rounded-pill fw-bold shadow-sm transition-all">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <style>
+        /* Premium Card Styling */
+        .card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .list-group-item {
+            color: #6c757d;
+            transition: all 0.2s ease;
+        }
+        
+        .list-group-item:hover {
+            background-color: #f8f9fa;
+            color: var(--bs-primary);
+            transform: translateX(5px);
+        }
+        
+        .list-group-item.active {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+            color: var(--bs-primary);
+            border-color: transparent;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #fff;
+            box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.15);
+            border-color: rgba(var(--bs-primary-rgb), 0.3);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--bs-primary), #4a90e2);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3) !important;
+        }
+
+        .bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; color: #198754 !important; }
+        .bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; color: #ffc107 !important; }
+    </style>
     <script>
-        function previewProfilePicture(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const preview = document.getElementById('picturePreview');
-                    let img = document.getElementById('previewImage');
-                    if (!img) {
-                        img = document.createElement('img');
-                        img.id = 'previewImage';
-                        img.alt = 'Preview';
-                        img.style.width = '100%';
-                        img.style.height = '100%';
-                        img.style.objectFit = 'cover';
-                        preview.innerHTML = '';
-                        preview.appendChild(img);
-                    }
-                    img.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    // Update sidebar image if it exists
+                    var sidebarImg = document.querySelector('.card-body img');
+                    if (sidebarImg) sidebarImg.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
-        function removeProfilePicture() {
-            const input = document.getElementById('profilePictureInput');
-            input.value = '';
-            const preview = document.getElementById('picturePreview');
-            preview.innerHTML = '<i class="fas fa-user"></i>';
-        }
+        
+        $(document).ready(function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
     </script>
 }

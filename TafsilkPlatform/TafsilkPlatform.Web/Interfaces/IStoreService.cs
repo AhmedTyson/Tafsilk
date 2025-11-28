@@ -23,5 +23,10 @@ namespace TafsilkPlatform.Web.Interfaces
 
         // ✅ NEW: Order details for payment success
         Task<OrderSuccessDetailsViewModel?> GetOrderDetailsAsync(Guid orderId, Guid customerId);
+
+        /// <summary>
+        /// Cancel a pending order (used when payment is cancelled)
+        /// </summary>
+        Task<bool> CancelPendingOrderAsync(Guid orderId, Guid customerId);
     }
 }

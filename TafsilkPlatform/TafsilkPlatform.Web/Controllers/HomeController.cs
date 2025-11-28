@@ -7,10 +7,14 @@ namespace TafsilkPlatform.Web.Controllers;
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly Microsoft.AspNetCore.Identity.UI.Services.IEmailSender _emailSender;
+    private readonly IConfiguration _configuration;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, Microsoft.AspNetCore.Identity.UI.Services.IEmailSender emailSender, IConfiguration configuration)
     {
         _logger = logger;
+        _emailSender = emailSender;
+        _configuration = configuration;
     }
 
     public IActionResult Index()
@@ -31,12 +35,32 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Contact(string name, string email, string subject, string message)
+    public async Task<IActionResult> Contact(string name, string email, string subject, string message)
     {
-        // TODO: Implement email sending logic here
-        // For now, just show success message
-        TempData["SuccessMessage"] = "Thank you for contacting us! We'll get back to you shortly.";
-        _logger.LogInformation("Contact form submitted: {Name}, {Email}, Subject: {Subject}", name, email, subject);
+        try
+        {
+            var supportEmail = _configuration["SendGrid:FromEmail"] ?? "support@tafsilk.com";
+            var emailSubject = $"Contact Form: {subject}";
+            var emailBody = $@"
+                <h3>New Contact Form Submission</h3>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <hr/>
+                <p><strong>Message:</strong></p>
+                <p>{message}</p>
+            ";
+
+            await _emailSender.SendEmailAsync(supportEmail, emailSubject, emailBody);
+
+            TempData["SuccessMessage"] = "Thank you for contacting us! We'll get back to you shortly.";
+            _logger.LogInformation("Contact form submitted and email sent: {Name}, {Email}", name, email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending contact email");
+            TempData["ErrorMessage"] = "Sorry, something went wrong. Please try again later.";
+        }
 
         return RedirectToAction(nameof(Contact));
     }

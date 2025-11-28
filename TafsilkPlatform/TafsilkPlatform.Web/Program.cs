@@ -168,8 +168,8 @@ try
         {
             authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
           {
-              options.ClientId = googleClientId;
-              options.ClientSecret = googleClientSecret;
+              options.ClientId = googleClientId!;
+              options.ClientSecret = googleClientSecret!;
               options.CallbackPath = "/signin-google";
               options.SaveTokens = true;
 
@@ -288,6 +288,8 @@ try
     // Register AttachmentService (file storage helper)
     builder.Services.AddScoped<BLL.Services.Interfaces.IAttachmentService, BLL.Services.AttachmentService>();
     builder.Services.AddScoped<TafsilkPlatform.Utility.IEmailService, TafsilkPlatform.Utility.EmailService>();
+    // ✅ EMAIL: Register SendGrid Email Sender
+    builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, TafsilkPlatform.Web.Services.Email.EmailSender>();
     builder.Services.AddScoped<IProfileCompletionService, ProfileCompletionService>();
     builder.Services.AddScoped<IProfileService, ProfileService>();
     builder.Services.AddScoped<IValidationService, ValidationService>();
@@ -332,8 +334,8 @@ try
             options.EnableForHttps = true;
             options.Providers.Add<BrotliCompressionProvider>();
             options.Providers.Add<GzipCompressionProvider>();
-            options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
-            {
+            options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+            [
             "application/json",
             "application/javascript",
             "text/css",
@@ -342,7 +344,7 @@ try
             "text/xml",
             "application/xml",
             "image/svg+xml"
-            });
+            ]);
         });
 
         builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
@@ -369,7 +371,7 @@ try
             }
             else
             {
-                policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? Array.Empty<string>())
+                policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [])
                       .AllowAnyMethod()
                       .AllowAnyHeader()
                       .AllowCredentials();
@@ -382,44 +384,38 @@ try
         .AddDbContextCheck<ApplicationDbContext>(
             name: "database",
             failureStatus: Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy,
-            tags: new[] { "db", "sql", "ready" })
-        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "self" })
-        .AddCheck<TafsilkPlatform.Web.HealthChecks.AttachmentHealthCheck>("attachments", tags: new[] { "ready", "attachments" });
+            tags: ["db", "sql", "ready"])
+        .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: ["self"])
+        .AddCheck<TafsilkPlatform.Web.HealthChecks.AttachmentHealthCheck>("attachments", tags: ["ready", "attachments"]);
 
     // Authorization policies
-    builder.Services.AddAuthorization(options =>
-    {
-        options.AddPolicy("AdminPolicy", policy =>
+    builder.Services.AddAuthorizationBuilder()
+        .AddPolicy("AdminPolicy", policy =>
           {
               policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
               policy.RequireRole("Admin");
-          });
-
-        options.AddPolicy("TailorPolicy", policy =>
-       {
-           policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
-           policy.RequireRole("Tailor");
-       });
-
-        options.AddPolicy("VerifiedTailorPolicy", policy =>
+          })
+        .AddPolicy("TailorPolicy", policy =>
+        {
+            policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
+            policy.RequireRole("Tailor");
+        })
+        .AddPolicy("VerifiedTailorPolicy", policy =>
         {
             policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
             policy.RequireRole("Tailor");
             policy.RequireClaim("IsVerified", "True");
-        });
-
-        options.AddPolicy("CustomerPolicy", policy =>
+        })
+        .AddPolicy("CustomerPolicy", policy =>
         {
             policy.AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme);
             policy.RequireRole("Customer");
-        });
-
-        options.AddPolicy("AuthenticatedPolicy", policy =>
+        })
+        .AddPolicy("AuthenticatedPolicy", policy =>
           {
               policy.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme);
               policy.RequireAuthenticatedUser();
           });
-    });
 
     // Configure maximum upload sizes (Kestrel + FormOptions)
     // Default max upload size: 50 MB (can be overridden via configuration: Uploads:MaxRequestBodySizeBytes)
@@ -577,7 +573,7 @@ try
     if (app.Environment.IsDevelopment())
     {
         var urls = app.Urls;
-        if (urls.Any())
+        if (urls.Count > 0)
         {
             foreach (var url in urls)
             {

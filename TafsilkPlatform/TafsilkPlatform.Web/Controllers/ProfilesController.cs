@@ -118,7 +118,7 @@ public class ProfilesController : Controller
 
                         if (phoneExists)
                         {
-                            ModelState.AddModelError("PhoneNumber", "Phone number is already in use");
+                            ModelState.AddModelError("PhoneNumber", "This phone number is already registered to another account.");
 
                             // Reload user email for display
                             model.Email = user.Email;
@@ -139,14 +139,14 @@ public class ProfilesController : Controller
             var changesCount = await _db.SaveChangesAsync();
             _logger.LogInformation("Customer profile updated for user {UserId}. Changes saved: {ChangesCount}", userId, changesCount);
 
-            TempData["Success"] = "Profile updated successfully";
+            TempData["Success"] = "Your profile has been updated.";
 
             return RedirectToAction(nameof(CustomerProfile));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating customer profile");
-            TempData["Error"] = "An error occurred while saving data";
+            TempData["Error"] = "We couldn't save your changes. Please try again.";
             return RedirectToAction(nameof(CustomerProfile));
         }
     }
@@ -218,7 +218,7 @@ public class ProfilesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading customer profile");
-            TempData["Error"] = "An error occurred while loading profile";
+            TempData["Error"] = "We couldn't load your profile.";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -249,7 +249,7 @@ public class ProfilesController : Controller
             if (tailor == null)
             {
                 _logger.LogWarning("Tailor profile not found for user {UserId}", userId);
-                return NotFound("Profile not found");
+                return NotFound("We couldn't find your profile.");
             }
 
             ViewBag.ServiceCount = tailor.TailorServices.Count(s => !s.IsDeleted);
@@ -265,7 +265,7 @@ public class ProfilesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor profile");
-            TempData["Error"] = "An error occurred while loading profile";
+            TempData["Error"] = "We couldn't load your profile.";
             return RedirectToAction("Index", "Home");
         }
     }
@@ -290,7 +290,7 @@ public class ProfilesController : Controller
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
-                return NotFound("Profile not found");
+                return NotFound("We couldn't find your profile.");
 
             var model = new EditTailorProfileViewModel
             {
@@ -337,7 +337,7 @@ public class ProfilesController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading tailor profile for editing");
-            TempData["Error"] = "An error occurred while loading profile";
+            TempData["Error"] = "We couldn't load your profile.";
             return RedirectToAction(nameof(TailorProfile));
         }
     }
@@ -368,7 +368,7 @@ public class ProfilesController : Controller
                 .FirstOrDefaultAsync(t => t.UserId == userId);
 
             if (tailor == null)
-                return NotFound("Profile not found");
+                return NotFound("We couldn't find your profile.");
 
             // Ensure user is editing their own profile
             if (tailor.UserId != userId)
@@ -389,7 +389,7 @@ public class ProfilesController : Controller
 
                 if (phoneExists)
                 {
-                    ModelState.AddModelError(nameof(model.PhoneNumber), "Phone number is already in use");
+                    ModelState.AddModelError(nameof(model.PhoneNumber), "This phone number is already registered to another account.");
                     ViewBag.Cities = EgyptCities.GetAll();
                     ViewBag.Specializations = TailorSpecializations.GetAll();
                     return View(model);
@@ -427,7 +427,7 @@ public class ProfilesController : Controller
                 // Validate image
                 if (!await _fileUploadService.IsValidImageAsync(model.ProfilePicture))
                 {
-                    ModelState.AddModelError(nameof(model.ProfilePicture), "Invalid file type. Please select an image");
+                    ModelState.AddModelError(nameof(model.ProfilePicture), "Please upload a valid image file (JPG, PNG).");
                     ViewBag.Cities = EgyptCities.GetAll();
                     ViewBag.Specializations = TailorSpecializations.GetAll();
                     return View(model);
@@ -435,7 +435,7 @@ public class ProfilesController : Controller
 
                 if (model.ProfilePicture.Length > _fileUploadService.GetMaxFileSizeInBytes())
                 {
-                    ModelState.AddModelError(nameof(model.ProfilePicture), "File size is too large");
+                    ModelState.AddModelError(nameof(model.ProfilePicture), "Your image is too large. Please upload a file smaller than 5MB.");
                     return View(model);
                 }
 
@@ -475,14 +475,14 @@ public class ProfilesController : Controller
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Tailor profile updated for user {UserId}", userId);
-            TempData["Success"] = "Profile updated successfully";
+            TempData["Success"] = "Your profile has been updated.";
 
-            return RedirectToAction(nameof(TailorProfile));
+            return RedirectToAction(nameof(EditTailorProfile));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating tailor profile");
-            ModelState.AddModelError("", "An error occurred while updating profile");
+            ModelState.AddModelError("", "We couldn't update your profile. Please try again.");
             ViewBag.Cities = EgyptCities.GetAll();
             ViewBag.Specializations = TailorSpecializations.GetAll();
             return View(model);

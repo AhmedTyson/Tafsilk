@@ -62,6 +62,7 @@ body {
     margin-bottom: 10px;
     background: linear-gradient(45deg, #fff, #c9a227);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -294,7 +295,7 @@ body {
 }
 
 /* Buttons */
-.btn {
+.store-container .btn {
     padding: 8px 16px;
     border-radius: var(--radius-md);
     font-weight: 600;

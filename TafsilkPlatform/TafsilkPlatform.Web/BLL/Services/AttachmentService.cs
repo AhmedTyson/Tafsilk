@@ -42,7 +42,7 @@ namespace BLL.Services
         /// Uploads the file into wwwroot/Attachments/{folderName}.
         /// Validates the file first. Returns relative path on success.
         /// </summary>
-        public async Task<string> Upload(IFormFile file, string folderName)
+        public async Task<string?> Upload(IFormFile file, string folderName)
         {
             try
             {
