@@ -1,29 +1,22 @@
 @model TafsilkPlatform.Web.ViewModels.TailorManagement.AddProductViewModel
 @{
-    ViewData["Title"] = "إضافة منتج جديد";
+    ViewData["Title"] = "Add New Product";
     Layout = "~/Views/Shared/_Layout.cshtml";
-    var breadcrumbs = new List<(string Text, string? Url)>
-    {
-        ("لوحة التحكم", Url.Action("Tailor", "Dashboards")),
-        ("إدارة المنتجات", Url.Action("ManageProducts", "TailorManagement")),
-        ("إضافة منتج", "")
-    };
 }
 
-@await Html.PartialAsync("_Breadcrumb", breadcrumbs)
-
-<div class="container py-4" dir="rtl">
+<div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <!-- Header -->
-            <div class="mb-4">
-                <h1 class="h3 mb-2">
-                    <i class="fas fa-plus-circle"></i> إضافة منتج جديد
-                </h1>
-                <p class="text-muted">أضف منتجك إلى المتجر ليراه العملاء</p>
+            <div class="page-header mb-4">
+                <h2 class="page-title">
+                    <i class="fas fa-plus-circle text-primary"></i>
+                    Add New Product
+                </h2>
+                <p class="text-muted">Add your product to the store for customers to see</p>
             </div>
 
-            <form asp-action="AddProduct" asp-controller="TailorManagement" method="post" enctype="multipart/form-data" id="productForm">
+            <form asp-action="AddProduct" asp-controller="TailorManagement" asp-area="Tailor" method="post" enctype="multipart/form-data" id="productForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="TailorId" />
 
@@ -32,7 +25,7 @@
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                         <h5 class="alert-heading">
-                            <i class="fas fa-exclamation-triangle"></i> يرجى إصلاح الأخطاء التالية:
+                            <i class="fas fa-exclamation-triangle"></i> Please fix the following errors:
                         </h5>
                         <ul class="mb-0">
                             @foreach (var state in ViewData.ModelState)
@@ -50,7 +43,7 @@
                 @if (TempData["Error"] != null)
                 {
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> <strong>خطأ:</strong> @TempData["Error"]
+                        <i class="fas fa-exclamation-circle"></i> <strong>Error:</strong> @TempData["Error"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
@@ -58,30 +51,30 @@
                 @if (TempData["Success"] != null)
                 {
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i> <strong>نجح:</strong> @TempData["Success"]
+                        <i class="fas fa-check-circle"></i> <strong>Success:</strong> @TempData["Success"]
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
 
                 <!-- Basic Information -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
+                <div class="card product-card mb-4">
+                    <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-info-circle"></i> المعلومات الأساسية
+                            <i class="fas fa-info-circle"></i> Basic Information
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-8">
-                                <label asp-for="Name" class="form-label"></label>
-                                <input asp-for="Name" class="form-control" id="Name" />
+                                <label asp-for="Name" class="form-label">Product Name</label>
+                                <input asp-for="Name" class="form-control" id="Name" placeholder="Enter product name" />
                                 <span asp-validation-for="Name" class="text-danger" data-valmsg-for="Name"></span>
                             </div>
 
                             <div class="col-md-4">
-                                <label asp-for="Category" class="form-label"></label>
+                                <label asp-for="Category" class="form-label">Category</label>
                                 <select asp-for="Category" class="form-select" id="categorySelect">
-                                    <option value="">اختر التصنيف</option>
+                                    <option value="">Select Category</option>
                                     @foreach (var category in (ViewBag.Categories as List<string>) ?? new List<string>())
                                     {
                                         <option value="@category">@category</option>
@@ -91,46 +84,46 @@
                             </div>
 
                             <div class="col-12">
-                                <label asp-for="Description" class="form-label"></label>
-                                <textarea asp-for="Description" class="form-control" id="Description" rows="4"></textarea>
+                                <label asp-for="Description" class="form-label">Description</label>
+                                <textarea asp-for="Description" class="form-control" id="Description" rows="4" placeholder="Detailed product description"></textarea>
                                 <span asp-validation-for="Description" class="text-danger" data-valmsg-for="Description"></span>
-                                <small class="text-muted">وصف تفصيلي للمنتج، المميزات، الخامات، وما يميزه</small>
+                                <small class="text-muted">Detailed description of the product, features, materials, etc.</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Pricing & Stock -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-success text-white">
+                <div class="card product-card mb-4">
+                    <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-tag"></i> السعر والمخزون
+                            <i class="fas fa-tag"></i> Pricing & Stock
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-4">
-                                <label asp-for="Price" class="form-label"></label>
+                                <label asp-for="Price" class="form-label">Price</label>
                                 <div class="input-group">
-                                    <input asp-for="Price" type="number" step="0.01" class="form-control" id="Price" />
-                                    <span class="input-group-text">ريال</span>
+                                    <input asp-for="Price" type="number" step="0.01" class="form-control" id="Price" placeholder="0.00" />
+                                    <span class="input-group-text">EGP</span>
                                 </div>
                                 <span asp-validation-for="Price" class="text-danger" data-valmsg-for="Price"></span>
                             </div>
 
                             <div class="col-md-4">
-                                <label asp-for="DiscountedPrice" class="form-label"></label>
+                                <label asp-for="DiscountedPrice" class="form-label">Discounted Price</label>
                                 <div class="input-group">
-                                    <input asp-for="DiscountedPrice" type="number" step="0.01" class="form-control" id="DiscountedPrice" />
-                                    <span class="input-group-text">ريال</span>
+                                    <input asp-for="DiscountedPrice" type="number" step="0.01" class="form-control" id="DiscountedPrice" placeholder="0.00" />
+                                    <span class="input-group-text">EGP</span>
                                 </div>
                                 <span asp-validation-for="DiscountedPrice" class="text-danger" data-valmsg-for="DiscountedPrice"></span>
-                                <small class="text-muted d-block">اتركه فارغاً إذا لم يكن هناك خصم</small>
+                                <small class="text-muted d-block">Leave empty if no discount</small>
                             </div>
 
                             <div class="col-md-4">
-                                <label asp-for="StockQuantity" class="form-label"></label>
-                                <input asp-for="StockQuantity" type="number" class="form-control" id="StockQuantity" />
+                                <label asp-for="StockQuantity" class="form-label">Stock Quantity</label>
+                                <input asp-for="StockQuantity" type="number" class="form-control" id="StockQuantity" placeholder="Quantity" />
                                 <span asp-validation-for="StockQuantity" class="text-danger" data-valmsg-for="StockQuantity"></span>
                             </div>
                         </div>
@@ -139,35 +132,35 @@
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input asp-for="IsAvailable" class="form-check-input" type="checkbox" id="IsAvailable" />
-                                    <label asp-for="IsAvailable" class="form-check-label"></label>
+                                    <label asp-for="IsAvailable" class="form-check-label">Available for Sale</label>
                                 </div>
-                                <small class="text-muted d-block">إذا كان المنتج متاحاً للشراء الآن</small>
+                                <small class="text-muted d-block">If checked, product can be purchased immediately</small>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input asp-for="IsFeatured" class="form-check-input" type="checkbox" id="IsFeatured" />
-                                    <label asp-for="IsFeatured" class="form-check-label"></label>
+                                    <label asp-for="IsFeatured" class="form-check-label">Featured Product</label>
                                 </div>
-                                <small class="text-muted d-block">المنتجات المميزة تظهر في الصفحة الرئيسية</small>
+                                <small class="text-muted d-block">Featured products appear on the homepage</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Product Details -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-info text-white">
+                <div class="card product-card mb-4">
+                    <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-th-list"></i> تفاصيل المنتج
+                            <i class="fas fa-th-list"></i> Product Details
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label asp-for="SubCategory" class="form-label"></label>
+                                <label asp-for="SubCategory" class="form-label">Sub Category</label>
                                 <select asp-for="SubCategory" class="form-select" id="SubCategory">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var sub in (ViewBag.SubCategories as List<string>) ?? new List<string>())
                                     {
                                         <option value="@sub">@sub</option>
@@ -176,9 +169,9 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label asp-for="Size" class="form-label"></label>
+                                <label asp-for="Size" class="form-label">Size</label>
                                 <select asp-for="Size" class="form-select" id="Size">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var size in (ViewBag.Sizes as List<string>) ?? new List<string>())
                                     {
                                         <option value="@size">@size</option>
@@ -187,14 +180,14 @@
                             </div>
 
                             <div class="col-md-3">
-                                <label asp-for="Color" class="form-label"></label>
-                                <input asp-for="Color" class="form-control" placeholder="مثال: أبيض، أسود" id="Color" />
+                                <label asp-for="Color" class="form-label">Color</label>
+                                <input asp-for="Color" class="form-control" placeholder="e.g. White, Black" id="Color" />
                             </div>
 
                             <div class="col-md-3">
-                                <label asp-for="Material" class="form-label"></label>
+                                <label asp-for="Material" class="form-label">Material</label>
                                 <select asp-for="Material" class="form-select" id="Material">
-                                    <option value="">اختر (اختياري)</option>
+                                    <option value="">Select (Optional)</option>
                                     @foreach (var material in (ViewBag.Materials as List<string>) ?? new List<string>())
                                     {
                                         <option value="@material">@material</option>
@@ -203,37 +196,37 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="Brand" class="form-label"></label>
-                                <input asp-for="Brand" class="form-control" placeholder="اسم العلامة التجارية (اختياري)" id="Brand" />
+                                <label asp-for="Brand" class="form-label">Brand</label>
+                                <input asp-for="Brand" class="form-control" placeholder="Brand Name (Optional)" id="Brand" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Images -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-warning text-dark">
+                <div class="card product-card mb-4">
+                    <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-images"></i> صور المنتج
+                            <i class="fas fa-images"></i> Product Images
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="PrimaryImage" class="form-label"></label>
+                                <label asp-for="PrimaryImage" class="form-label">Primary Image</label>
                                 <input asp-for="PrimaryImage" type="file" class="form-control" accept="image/*" id="primaryImageInput" />
                                 <span asp-validation-for="PrimaryImage" class="text-danger" data-valmsg-for="PrimaryImage"></span>
-                                <small class="text-muted d-block mt-1">الصورة الرئيسية للمنتج (مطلوبة)</small>
+                                <small class="text-muted d-block mt-1">Main product image (Required)</small>
                                 
                                 <div id="primaryImagePreview" class="mt-3" style="display: none;">
-                                    <img id="primaryImagePreviewImg" src="" class="img-fluid rounded" style="max-height: 200px;" />
+                                    <img id="primaryImagePreviewImg" src="" class="img-fluid rounded shadow-sm" style="max-height: 200px;" />
                                 </div>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="AdditionalImages" class="form-label"></label>
+                                <label asp-for="AdditionalImages" class="form-label">Additional Images</label>
                                 <input asp-for="AdditionalImages" type="file" class="form-control" accept="image/*" multiple id="additionalImagesInput" />
-                                <small class="text-muted d-block mt-1">يمكنك إضافة حتى 5 صور إضافية (اختياري)</small>
+                                <small class="text-muted d-block mt-1">You can add up to 5 additional images (Optional)</small>
                                 
                                 <div id="additionalImagesPreview" class="mt-3 row g-2"></div>
                             </div>
@@ -241,49 +234,47 @@
 
                         <div class="alert alert-info mt-3">
                             <i class="fas fa-info-circle"></i>
-                            <strong>نصائح للصور:</strong>
+                            <strong>Image Tips:</strong>
                             <ul class="mb-0 mt-2">
-                                <li>استخدم صوراً واضحة وعالية الجودة</li>
-                                <li>اعرض المنتج من زوايا مختلفة</li>
-                                <li>الحجم الأقصى للصورة: 5 ميجابايت</li>
-                                <li>الصيغ المقبولة: JPG, PNG, GIF, WEBP</li>
+                                <li>Use clear, high-quality images</li>
+                                <li>Show product from different angles</li>
+                                <li>Max file size: 5 MB</li>
+                                <li>Accepted formats: JPG, PNG, GIF, WEBP</li>
                             </ul>
                         </div>
 
                         <!-- Compression & Upload Progress -->
                         <div id="imageCompressProgressContainer" class="mt-3" style="display:none;">
                             <div class="d-flex align-items-center mb-2">
-                                <strong class="me-2">جارٍ ضغط/تحضير الصور...</strong>
+                                <strong class="me-2">Compressing/Preparing images...</strong>
                                 <div id="compressSpinner" class="spinner-border spinner-border-sm text-primary me-2" role="status" aria-hidden="true"></div>
                                 <small id="compressStatusText" class="text-muted">0%</small>
                             </div>
                             <div class="progress" style="height:10px;">
-                                <div id="compressProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width:0%"></div>
+                                <div id="compressProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width:0%"></div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
                 <!-- SEO (Optional) -->
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-secondary text-white">
+                <div class="card product-card mb-4">
+                    <div class="card-header">
                         <h5 class="mb-0">
-                            <i class="fas fa-search"></i> تحسين محركات البحث (SEO)
-                            <small class="text-white-50">(اختياري)</small>
+                            <i class="fas fa-search"></i> SEO Optimization <small class="text-muted">(Optional)</small>
                         </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="MetaTitle" class="form-label"></label>
-                                <input asp-for="MetaTitle" class="form-control" placeholder="سيتم استخدام اسم المنتج إذا ترك فارغاً" id="MetaTitle" />
+                                <label asp-for="MetaTitle" class="form-label">Meta Title</label>
+                                <input asp-for="MetaTitle" class="form-control" placeholder="Product name will be used if empty" id="MetaTitle" />
                                 <span asp-validation-for="MetaTitle" class="text-danger" data-valmsg-for="MetaTitle"></span>
                             </div>
 
                             <div class="col-md-6">
-                                <label asp-for="MetaDescription" class="form-label"></label>
-                                <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="سيتم استخدام وصف المنتج إذا ترك فارغاً" id="MetaDescription"></textarea>
+                                <label asp-for="MetaDescription" class="form-label">Meta Description</label>
+                                <textarea asp-for="MetaDescription" class="form-control" rows="3" placeholder="Product description will be used if empty" id="MetaDescription"></textarea>
                                 <span asp-validation-for="MetaDescription" class="text-danger" data-valmsg-for="MetaDescription"></span>
                             </div>
                         </div>
@@ -291,14 +282,14 @@
                 </div>
 
                 <!-- Action Buttons -->
-                <div class="card shadow-sm">
+                <div class="card product-card">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <a href="@Url.Action("ManageProducts")" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> إلغاء
+                        <div class="d-flex justify-content-between gap-3">
+                            <a href="@Url.Action("ManageProducts", "TailorManagement", new { area = "Tailor" })" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Cancel
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                <i class="fas fa-save"></i> حفظ ونشر المنتج
+                                <i class="fas fa-save"></i> Save & Publish Product
                             </button>
                         </div>
                     </div>
@@ -319,9 +310,9 @@
             const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
             const MAX_ADDITIONAL_IMAGES = 5;
-            const MAX_DIMENSION = 1600; // compression downscale target
+            const MAX_DIMENSION = 1600;
             const JPEG_QUALITY = 0.78;
-            const SMALL_FILE_THRESHOLD = 200 * 1024; // 200KB - skip heavy compression
+            const SMALL_FILE_THRESHOLD = 200 * 1024;
 
             // Cached selectors
             const $primaryInput = $('#primaryImageInput');
@@ -340,11 +331,17 @@
                     alert(message);
                     return;
                 }
+                toastr.options = {
+                    closeButton: true,
+                    progressBar: true,
+                    positionClass: 'toast-top-right',
+                    timeOut: '5000'
+                };
                 switch (type) {
-                    case 'success': toastr.success(message, title || ''); break;
-                    case 'error': toastr.error(message, title || 'خطأ'); break;
-                    case 'warning': toastr.warning(message, title || 'تحذير'); break;
-                    default: toastr.info(message, title || '');
+                    case 'success': toastr.success(message, title || 'Success'); break;
+                    case 'error': toastr.error(message, title || 'Error'); break;
+                    case 'warning': toastr.warning(message, title || 'Warning'); break;
+                    default: toastr.info(message, title || 'Info');
                 }
             }
 
@@ -363,7 +360,7 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
             }
 
-            // IMAGE COMPRESSION UTIL
+            // IMAGE COMPRESSION
             function compressImageFile(file) {
                 return new Promise((resolve, reject) => {
                     try {
@@ -371,7 +368,6 @@
                             return reject(new Error('Not an image'));
                         }
 
-                        // Fast-path for small files
                         if (file.size <= SMALL_FILE_THRESHOLD) {
                             return resolve(file);
                         }
@@ -388,12 +384,7 @@
                                 const canvas = document.createElement('canvas');
                                 canvas.width = w; canvas.height = h;
                                 const ctx = canvas.getContext('2d');
-
-                                if (bitmap instanceof HTMLCanvasElement) {
-                                    ctx.drawImage(bitmap, 0, 0, w, h);
-                                } else {
-                                    ctx.drawImage(bitmap, 0, 0, w, h);
-                                }
+                                ctx.drawImage(bitmap, 0, 0, w, h);
 
                                 canvas.toBlob(function (blob) {
                                     try {
@@ -411,7 +402,6 @@
                                 processBitmap(bitmap, file.name);
                                 try { if (bitmap && bitmap.close) bitmap.close(); } catch (e) {}
                             }).catch(err => {
-                                // fallback to Image
                                 const reader = new FileReader();
                                 reader.onload = function (ev) {
                                     const img = new Image();
@@ -439,7 +429,6 @@
                 });
             }
 
-            // Update progress UI
             function setProgress(percent) {
                 try {
                     $progressContainer.show();
@@ -448,7 +437,6 @@
                 } catch (e) { console.warn(e); }
             }
 
-            // Compress an array of files sequentially and update progress
             async function compressFilesSequential(files, onProgress) {
                 const results = [];
                 for (let i = 0; i < files.length; i++) {
@@ -457,7 +445,6 @@
                         const compressed = await compressImageFile(file);
                         results.push(compressed);
                     } catch (err) {
-                        // On compression error, fallback to original file
                         console.warn('Compression failed for', file.name, err);
                         results.push(file);
                     }
@@ -468,7 +455,7 @@
                 return results;
             }
 
-            // Primary image preview (keep existing behavior)
+            // Primary image preview
             $primaryInput.on('change', function () {
                 const file = this.files && this.files[0];
                 $primaryPreview.hide();
@@ -477,13 +464,13 @@
                 if (!file) return;
 
                 if (!isAllowedImage(file)) {
-                    showToastr('error', 'نوع الملف غير صالح. يرجى اختيار صورة (JPG, PNG, GIF, WEBP)');
+                    showToastr('error', 'Invalid file type. Please select an image (JPG, PNG, GIF, WEBP)');
                     $primaryInput.val('');
                     return;
                 }
 
                 if (!isWithinSize(file)) {
-                    showToastr('error', `حجم الصورة كبير جداً. الحد الأقصى ${formatBytes(MAX_FILE_BYTES)}`);
+                    showToastr('error', `Image size too large. Max ${formatBytes(MAX_FILE_BYTES)}`);
                     $primaryInput.val('');
                     return;
                 }
@@ -494,55 +481,44 @@
                 $primaryPreviewImg.on('load', function () { try { URL.revokeObjectURL(url); } catch (e) {} });
             });
 
-            // Additional images preview (existing behavior)
+            // Additional images preview
             $additionalInput.on('change', function () {
                 let files = Array.from(this.files || []);
                 $additionalPreview.empty();
 
                 if (!files.length) return;
 
-                // Auto-promote: If primary is empty, move the first additional image to primary
                 if (!$primaryInput.val() && files.length > 0) {
                     const firstFile = files[0];
-                    
-                    // Assign to primary
                     const dtPrimary = new DataTransfer();
                     dtPrimary.items.add(firstFile);
                     $primaryInput[0].files = dtPrimary.files;
-                    $primaryInput.trigger('change'); // Trigger preview for primary
-                    
-                    showToastr('info', 'تم تعيين الصورة الأولى كصورة رئيسية تلقائياً');
-
-                    // Remove from additional
+                    $primaryInput.trigger('change');
+                    showToastr('info', 'First image automatically set as primary');
                     files.shift();
-                    
-                    // Update additional input
                     const dtAdditional = new DataTransfer();
                     files.forEach(f => dtAdditional.items.add(f));
                     this.files = dtAdditional.files;
-                    
-                    // If no files left, stop here
                     if (!files.length) return;
                 }
 
                 if (files.length > MAX_ADDITIONAL_IMAGES) {
-                    showToastr('warning', `يمكنك إضافة ${MAX_ADDITIONAL_IMAGES} صور كحد أقصى. سيتم استخدام أول ${MAX_ADDITIONAL_IMAGES} صور.`);
+                    showToastr('warning', `You can add max ${MAX_ADDITIONAL_IMAGES} images. Only first ${MAX_ADDITIONAL_IMAGES} will be used.`);
                 }
 
                 const allowed = [];
                 files.slice(0, MAX_ADDITIONAL_IMAGES).forEach((file, index) => {
                     if (!isAllowedImage(file)) {
-                        showToastr('error', `تم تجاهل ملف غير صالح: ${file.name}`);
+                        showToastr('error', `Invalid file ignored: ${file.name}`);
                         return;
                     }
                     if (!isWithinSize(file)) {
-                        showToastr('error', `تم تجاهل ملف كبير جداً: ${file.name} (${formatBytes(file.size)})`);
+                        showToastr('error', `Large file ignored: ${file.name} (${formatBytes(file.size)})`);
                         return;
                     }
                     allowed.push(file);
                 });
 
-                // show previews
                 allowed.forEach((file, idx) => {
                     const url = URL.createObjectURL(file);
                     const col = $(`<div class="col-md-3 col-6">
@@ -556,7 +532,6 @@
                 });
             });
 
-            // Delegate removal clicks for additional images
             $additionalPreview.on('click', '.remove-additional', function () {
                 try {
                     const idx = parseInt($(this).attr('data-index'));
@@ -573,7 +548,6 @@
                         input.files = dt.files;
                     } catch (e) { input.value = ''; }
 
-                    // rebuild preview
                     $additionalPreview.empty();
                     Array.from(input.files || []).forEach((file, newIdx) => {
                         const url = URL.createObjectURL(file);
@@ -589,7 +563,6 @@
                 } catch (err) { console.error('Error removing additional image', err); }
             });
 
-            // Centralized validation used before compression/submission
             function clearValidationSpans() { $('[data-valmsg-for]').each(function () { $(this).text(''); }); }
 
             function validateForm() {
@@ -597,44 +570,41 @@
                 const errors = [];
 
                 const name = $('#Name').val() ? $('#Name').val().toString().trim() : '';
-                if (!name) { errors.push('اسم المنتج مطلوب'); $('[data-valmsg-for="Name"]').text('اسم المنتج مطلوب'); }
+                if (!name) { errors.push('Product name is required'); $('[data-valmsg-for="Name"]').text('Product name is required'); }
 
                 const description = $('#Description').val() ? $('#Description').val().toString().trim() : '';
-                if (!description) { errors.push('وصف المنتج مطلوب'); $('[data-valmsg-for="Description"]').text('وصف المنتج مطلوب'); }
+                if (!description) { errors.push('Product description is required'); $('[data-valmsg-for="Description"]').text('Product description is required'); }
 
                 const price = parseFloat($('#Price').val());
-                if (isNaN(price) || price <= 0) { errors.push('السعر مطلوب ويجب أن يكون أكبر من صفر'); $('[data-valmsg-for="Price"]').text('السعر مطلوب ويجب أن يكون أكبر من صفر'); }
+                if (isNaN(price) || price <= 0) { errors.push('Price is required and must be greater than zero'); $('[data-valmsg-for="Price"]').text('Price is required and must be greater than zero'); }
 
                 const category = $('#categorySelect').val();
-                if (!category) { errors.push('التصنيف مطلوب'); $('[data-valmsg-for="Category"]').text('التصنيف مطلوب'); }
+                if (!category) { errors.push('Category is required'); $('[data-valmsg-for="Category"]').text('Category is required'); }
 
                 const stock = parseInt($('#StockQuantity').val());
-                if (isNaN(stock) || stock < 0) { errors.push('الكمية المتوفرة مطلوبة'); $('[data-valmsg-for="StockQuantity"]').text('الكمية المتوفرة مطلوبة'); }
+                if (isNaN(stock) || stock < 0) { errors.push('Stock quantity is required'); $('[data-valmsg-for="StockQuantity"]').text('Stock quantity is required'); }
 
                 const primaryFile = $primaryInput[0] && $primaryInput[0].files ? $primaryInput[0].files[0] : null;
-                if (!primaryFile) { errors.push('الصورة الأساسية مطلوبة'); $('[data-valmsg-for="PrimaryImage"]').text('الصورة الأساسية مطلوبة'); }
+                if (!primaryFile) { errors.push('Primary image is required'); $('[data-valmsg-for="PrimaryImage"]').text('Primary image is required'); }
                 else {
-                    if (!isAllowedImage(primaryFile)) { errors.push('نوع الصورة غير صالح'); $('[data-valmsg-for="PrimaryImage"]').text('نوع الصورة غير صالح'); }
-                    if (!isWithinSize(primaryFile)) { errors.push('حجم الصورة كبير جداً (أكثر من 5 ميجابايت)'); $('[data-valmsg-for="PrimaryImage"]').text('حجم الصورة كبير جداً'); }
+                    if (!isAllowedImage(primaryFile)) { errors.push('Invalid image type'); $('[data-valmsg-for="PrimaryImage"]').text('Invalid image type'); }
+                    if (!isWithinSize(primaryFile)) { errors.push('Image size too large (Max 5MB)'); $('[data-valmsg-for="PrimaryImage"]').text('Image size too large'); }
                 }
 
                 return errors;
             }
 
-            // NEW: Intercept submit to compress images then submit
             $form.on('submit', async function (e) {
                 try {
-                    if (window.formIsSubmitting) { e.preventDefault(); showToastr('warning', 'جاري معالجة الطلب، يرجى الانتظار...'); return false; }
+                    if (window.formIsSubmitting) { e.preventDefault(); showToastr('warning', 'Processing request, please wait...'); return false; }
 
                     const errors = validateForm();
-                    if (errors.length) { e.preventDefault(); showToastr('error', 'يرجى إصلاح الأخطاء المشار إليها باللون الأحمر'); const $first = $('.text-danger').filter(function() { return $(this).text().trim() !== ''; }).first(); if ($first.length && $first.offset()) { $('html, body').animate({ scrollTop: $first.offset().top - 100 }, 400); } return false; }
+                    if (errors.length) { e.preventDefault(); showToastr('error', 'Please fix the errors highlighted in red'); const $first = $('.text-danger').filter(function() { return $(this).text().trim() !== ''; }).first(); if ($first.length && $first.offset()) { $('html, body').animate({ scrollTop: $first.offset().top - 100 }, 400); } return false; }
 
-                    // Start compression process
-                    e.preventDefault(); // we'll submit programmatically after compression
+                    e.preventDefault();
                     window.formIsSubmitting = true;
-                    $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>جارٍ الحفظ...');
+                    $submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Saving...');
 
-                    // Build list of files to compress: primary + additional
                     const primaryFile = $primaryInput[0] && $primaryInput[0].files ? $primaryInput[0].files[0] : null;
                     const additionalFiles = $additionalInput[0] && $additionalInput[0].files ? Array.from($additionalInput[0].files) : [];
 
@@ -643,22 +613,17 @@
                     additionalFiles.slice(0, MAX_ADDITIONAL_IMAGES).forEach(f => filesToCompress.push({ type: 'additional', file: f }));
 
                     if (filesToCompress.length === 0) {
-                        // nothing to compress; submit normally
-                        $form.off('submit'); // remove handler to avoid loop
+                        $form.off('submit');
                         $form.submit();
                         return true;
                     }
 
-                    // Show progress
                     setProgress(0);
 
-                    // Compress sequentially and update progress
                     const originalFiles = filesToCompress.map(x => x.file);
                     const compressedFiles = await compressFilesSequential(originalFiles, (p) => setProgress(p));
 
-                    // Reassign compressed files back to inputs
                     try {
-                        // primary
                         if (primaryFile) {
                             const compPrimary = compressedFiles.shift();
                             if (compPrimary) {
@@ -666,7 +631,6 @@
                                 dt.items.add(compPrimary);
                                 $primaryInput[0].files = dt.files;
 
-                                // update preview
                                 const url = URL.createObjectURL(compPrimary);
                                 $primaryPreviewImg.attr('src', url);
                                 $primaryPreview.show();
@@ -674,8 +638,7 @@
                             }
                         }
 
-                        // additional
-                        const remaining = compressedFiles; // rest are additional
+                        const remaining = compressedFiles;
                         if (remaining && remaining.length) {
                             try {
                                 const dt2 = new DataTransfer();
@@ -685,7 +648,6 @@
                                 console.warn('DataTransfer not supported, additional input not replaced', e);
                             }
 
-                            // refresh previews
                             $additionalPreview.empty();
                             Array.from($additionalInput[0].files || []).forEach((file, idx) => {
                                 const url = URL.createObjectURL(file);
@@ -703,45 +665,27 @@
                         console.warn('Error assigning compressed files to inputs', err);
                     }
 
-                    // finalize progress
                     setProgress(100);
                     setTimeout(() => { $progressContainer.fadeOut(400); }, 600);
 
-                    // remove handler and submit
                     $form.off('submit');
                     $form.submit();
                     return true;
 
                 } catch (err) {
                     console.error('Submit/compression error', err);
-                    showToastr('error', 'حدث خطأ أثناء تجهيز الصور. سيتم محاولة الإرسال بدون ضغط.');
-                    // fallback: submit original files
+                    showToastr('error', 'Error preparing images. Trying to submit without compression.');
                     try { $form.off('submit'); $form.submit(); } catch (e) { console.error(e); }
                     return false;
                 }
             });
 
-            // Toastr RTL configuration executed once
-            if (typeof toastr !== 'undefined') {
-                toastr.options = Object.assign({}, toastr.options || {}, {
-                    closeButton: true,
-                    progressBar: true,
-                    positionClass: 'toast-top-left',
-                    timeOut: '5000',
-                    extendedTimeOut: '2000',
-                    showMethod: 'fadeIn',
-                    hideMethod: 'fadeOut',
-                    rtl: true
-                });
-            }
-
-            // Show TempData messages via toastr (if present)
             $(function () {
                 @if (TempData["Success"] != null) {
-                    <text>showToastr('success', '@Html.Raw(TempData["Success"])', 'نجح!');</text>
+                    <text>showToastr('success', '@Html.Raw(TempData["Success"])', 'Success!');</text>
                 }
                 @if (TempData["Error"] != null) {
-                    <text>showToastr('error', '@Html.Raw(TempData["Error"])', 'خطأ!');</text>
+                    <text>showToastr('error', '@Html.Raw(TempData["Error"])', 'Error!');</text>
                 }
             });
 
@@ -751,11 +695,281 @@
 
 @section Styles {
     <style>
+        :root {
+            --primary-gold: #C59228;
+            --primary-gold-hover: #B08020;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --text-dark: #334155;
+            --text-muted: #64748b;
+            --gold-glow: 0 0 15px rgba(232, 180, 76, 0.2);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+        }
+
+        .container {
+            background: transparent;
+        }
+
+        .page-header {
+            border-bottom: 2px solid var(--primary-gold);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            margin-bottom: 0.5rem;
+            text-shadow: none;
+            letter-spacing: 0.5px;
+        }
+
+        .page-title i {
+            margin-right: 0.5rem;
+            filter: drop-shadow(0 2px 4px rgba(232, 180, 76, 0.3));
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        /* Modern White Cards */
+        .product-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 4px 20px var(--shadow-color);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            border-color: var(--border-color);
+            box-shadow: 0 4px 20px var(--shadow-color);
+            transform: none;
+        }
+
+        .product-card .card-header {
+            background: white;
+            border-bottom: 1px solid var(--primary-gold);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .product-card .card-header h5 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary-gold);
+            display: flex;
+            align-items: center;
+        }
+
+        .product-card .card-header i {
+            margin-right: 0.5rem;
+        }
+
+        .product-card .card-body {
+            padding: 2rem;
+        }
+
+        /* Form Elements */
+        .form-label {
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
         .form-control:focus,
-        .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25); }
-        .card { border: none; }
-        .card-header { border-bottom: 2px solid rgba(255,255,255,0.2); }
-        #primaryImagePreview img, #additionalImagesPreview img { object-fit: cover; }
-        .form-check-input:checked { background-color: #198754; border-color: #198754; }
+        .form-select:focus {
+            background-color: white;
+            border-color: var(--primary-gold);
+            color: var(--text-dark);
+            box-shadow: 0 0 0 3px rgba(232, 180, 76, 0.15);
+        }
+
+        .form-select option {
+            background-color: white;
+            color: var(--text-dark);
+        }
+
+        .form-check-input {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            cursor: pointer;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-gold);
+            border-color: var(--primary-gold);
+            box-shadow: 0 2px 5px rgba(232, 180, 76, 0.4);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.2rem rgba(232, 180, 76, 0.25);
+        }
+
+        .form-check-label {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .input-group-text {
+            background: rgba(197, 146, 40, 0.1);
+            border-color: #dee2e6;
+            color: var(--primary-gold);
+            font-weight: 800;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-gold-hover) 100%);
+            border: none;
+            color: white;
+            padding: 0.875rem 2.5rem;
+            font-weight: 700;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(232, 180, 76, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-gold-hover) 0%, var(--primary-gold) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(232, 180, 76, 0.4);
+            color: white;
+        }
+
+        .btn-outline-secondary {
+            border: 2px solid #dee2e6;
+            color: var(--text-muted);
+            background: transparent;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #f8f9fa;
+            border-color: var(--text-dark);
+            color: var(--text-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Alerts */
+        .alert {
+            background: white;
+            border-radius: 0.75rem;
+            border-left: 4px solid;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .alert-danger {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+            color: #c0392b;
+        }
+
+        .alert-success {
+            border-left-color: #28a745;
+            background: #f0fff4;
+            color: #27ae60;
+        }
+
+        .alert-info {
+            border-left-color: #17a2b8;
+            background: #e1f5fe;
+            color: #0288d1;
+        }
+
+        /* Images */
+        .img-fluid {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        small.text-muted {
+            font-size: 0.875rem;
+            color: var(--text-muted) !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+
+        /* Progress Bar */
+        .progress {
+            background-color: #e9ecef;
+            border-radius: 1rem;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-gold) 0%, var(--primary-gold-hover) 100%);
+            box-shadow: 0 0 10px rgba(232, 180, 76, 0.3);
+        }
+
+        /* Spinner */
+        .spinner-border-sm {
+            color: white;
+        }
+
+        /* Animations */
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        .product-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .product-card .card-body {
+                padding: 1.5rem;
+            }
+        }
     </style>
 }

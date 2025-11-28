@@ -6,6 +6,7 @@ using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Utility.Extensions;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
+using TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 
@@ -705,6 +706,194 @@ public class TailorManagementController : Controller
         {
             _logger.LogError(ex, "Error toggling featured status");
             return Json(new { success = false, message = "An error occurred" });
+        }
+    }
+
+    #endregion
+
+    #region Order Management (إدارة الطلبات)
+
+    /// <summary>
+    /// View and manage orders
+    /// GET: /tailor/manage/orders
+    /// </summary>
+    [HttpGet("orders")]
+    public async Task<IActionResult> ManageOrders(string? search = null, OrderStatus? status = null)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return NotFound("Profile not found");
+
+            // Base query
+            var query = _context.Orders
+                .Include(o => o.Customer)
+                .Where(o => o.TailorId == tailor.Id);
+
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(o => 
+                    o.OrderId.ToString().Contains(search) || 
+                    o.Customer.FullName.ToLower().Contains(search) ||
+                    o.Description.ToLower().Contains(search));
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+
+            // Get stats (before filtering for accurate counts)
+            var allOrders = await _context.Orders
+                .Where(o => o.TailorId == tailor.Id)
+                .Select(o => new { o.Status, o.TotalPrice })
+                .ToListAsync();
+
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Select(o => new OrderItemDto
+                {
+                    OrderId = o.OrderId,
+                    OrderNumber = $"#{o.OrderId.ToString().Substring(0, 8).ToUpper()}",
+                    CustomerName = o.Customer.FullName,
+                    CustomerImageUrl = o.Customer.ProfilePictureData != null && o.Customer.ProfilePictureData.Length > 0
+                        ? $"data:image/jpeg;base64,{Convert.ToBase64String(o.Customer.ProfilePictureData)}"
+                        : null,
+                    Description = o.Description,
+                    TotalPrice = o.TotalPrice,
+                    Status = o.Status,
+                    CreatedAt = o.CreatedAt,
+                    DueDate = o.DueDate,
+                    IsNew = o.Status == OrderStatus.Pending,
+                    OrderType = o.OrderType
+                })
+                .ToListAsync();
+
+            var model = new ManageOrdersViewModel
+            {
+                TailorId = tailor.Id,
+                TailorName = tailor.FullName ?? "Tailor",
+                Orders = orders,
+                TotalOrders = allOrders.Count,
+                PendingOrders = allOrders.Count(o => o.Status == OrderStatus.Pending),
+                CompletedOrders = allOrders.Count(o => o.Status == OrderStatus.Delivered),
+                CancelledOrders = allOrders.Count(o => o.Status == OrderStatus.Cancelled),
+                TotalRevenue = allOrders.Where(o => o.Status == OrderStatus.Delivered).Select(o => o.TotalPrice).DefaultIfEmpty(0).Sum(),
+                SearchTerm = search,
+                FilterStatus = status
+            };
+
+            ViewData["Title"] = "Manage Orders";
+            return View(model);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error loading orders management");
+            TempData["Error"] = "Error loading orders";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+    }
+
+    /// <summary>
+    /// Update order status
+    /// POST: /tailor/manage/orders/update-status/{id}
+    /// </summary>
+    [HttpPost("orders/update-status/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateOrderStatus(Guid id, OrderStatus status)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
+
+            if (order == null)
+                return NotFound();
+
+            var oldStatus = order.Status;
+            order.Status = status;
+            
+            // If status changed to Delivered, update payment status if needed or trigger notifications
+            if (status == OrderStatus.Delivered && oldStatus != OrderStatus.Delivered)
+            {
+                // Logic for delivery completion
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Status updated successfully", newStatus = status.ToString() });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating order status");
+            return Json(new { success = false, message = "Error updating status" });
+        }
+    }
+
+    /// <summary>
+    /// Get order details for modal
+    /// GET: /tailor/manage/orders/details/{id}
+    /// </summary>
+    [HttpGet("orders/details/{id:guid}")]
+    public async Task<IActionResult> GetOrderDetails(Guid id)
+    {
+        try
+        {
+            var userId = User.GetUserId();
+            var tailor = await GetTailorProfileAsync(userId);
+
+            if (tailor == null)
+                return Unauthorized();
+
+            var order = await _context.Orders
+                .Include(o => o.Customer)
+                    .ThenInclude(c => c.User)
+                .Include(o => o.Items)
+                .Include(o => o.orderImages)
+                .FirstOrDefaultAsync(o => o.OrderId == id && o.TailorId == tailor.Id);
+
+            if (order == null)
+                return NotFound();
+
+            // Return partial view or JSON. For now, let's return JSON to populate the modal dynamically
+            // or a PartialView if we create one. Let's stick to JSON for simplicity as per the HTML design which likely used JS.
+            // Actually, returning a PartialView is cleaner for Razor. I'll assume we might use a PartialView later, 
+            // but for now I will return JSON to match the likely JS implementation in the HTML file.
+            
+            var details = new
+            {
+                order.OrderId,
+                OrderNumber = $"#{order.OrderId.ToString().Substring(0, 8).ToUpper()}",
+                CustomerName = order.Customer.FullName,
+                CustomerPhone = order.Customer.User.PhoneNumber,
+                CustomerEmail = order.Customer.User.Email,
+                order.Description,
+                order.TotalPrice,
+                Status = order.Status.ToString(),
+                CreatedAt = order.CreatedAt.ToString("dd/MM/yyyy"),
+                DueDate = order.DueDate?.ToString("dd/MM/yyyy") ?? "Not set",
+                order.MeasurementsJson,
+                Images = order.orderImages.Select(i => new { ImageUrl = i.ImgUrl, i.OrderImageId }).ToList(),
+                Items = order.Items.Select(i => new { ItemName = i.Description, i.Quantity, Price = i.UnitPrice }).ToList()
+            };
+
+            return Json(new { success = true, data = details });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting order details");
+            return Json(new { success = false, message = "Error loading details" });
         }
     }
 

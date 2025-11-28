@@ -14,18 +14,21 @@ public class FileUploadService : IFileUploadService
     public async Task<string> UploadProfilePictureAsync(IFormFile file, string userId)
     {
         // Dummy implementation for interface compliance
+        await Task.CompletedTask;
         return "";
     }
 
     public async Task<bool> DeleteProfilePictureAsync(string filePath)
     {
         // Dummy implementation for interface compliance
+        await Task.CompletedTask;
         return true;
     }
 
     public async Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile? file)
     {
         // Basic validation for interface compliance
+        await Task.CompletedTask;
         if (file == null || file.Length == 0)
             return (false, "الملف فارغ أو غير موجود.");
         if (file.Length > MaxFileSizeInBytes)
