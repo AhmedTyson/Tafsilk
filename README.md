@@ -42,24 +42,6 @@ A comprehensive, enterprise-grade tailoring services platform built with ASP.NET
 - **Admin Dashboard**: Comprehensive platform management and analytics
 
 ---
-
-## 🌟 Key Features
-
-### For Customers 👤
-
-- **🔍 Tailor Discovery**: Search and filter tailors by location, services, ratings, and availability
-
-- **🛒 Product Shopping**: Browse and purchase from an extensive catalog of tailoring products
-- **💳 Secure Payments**: Multiple payment methods including Stripe, Cash on Delivery
-- **📦 Order Tracking**: Real-time status updates from order placement to delivery
-- **⭐ Reviews & Ratings**: Rate and review both tailors and products
-- **👤 Profile Management**: Manage addresses, preferences, and saved measurements
-- **📊 Order History**: Complete view of past and current orders
-
-### For Tailors 🧑‍🎨
-
-- **🏪 Business Profile**: Showcase shop name, location, services, and portfolio
-- **📷 Portfolio Management**: Upload and organize work samples by category
 - **📋 Order Management**: Receive, process, and update custom tailoring orders
 - **🏷️ Product Listing**: Sell tailoring products through the integrated marketplace
 - **💰 Revenue Tracking**: Monitor earnings, commissions, and financial analytics
@@ -797,22 +779,6 @@ dotnet user-secrets set "Payment:Stripe:SecretKey" "sk_test_..."
 | GET | `/Store/Details/{id}` | Product details |
 | GET | `/Account/Login` | Login page |
 | POST | `/Account/Login` | Authenticate user |
-| GET | `/Account/Register` | Registration page |
-| POST | `/Account/Register` | Create new account |
-
-### Customer Endpoints (Requires Authentication)
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/Dashboards/Customer` | Customer dashboard |
-| GET | `/Orders/MyOrders` | View customer orders |
-| GET | `/Orders/CreateOrder/{tailorId}` | Create custom order |
-| POST | `/Orders/CreateOrder` | Submit custom order |
-| GET | `/Orders/Details/{id}` | Order details |
-| GET | `/Store/Cart` | Shopping cart |
-| POST | `/Store/AddToCart` | Add item to cart |
-| POST | `/Store/Checkout` | Initiate checkout |
-| GET | `/Profiles/Edit` | Edit profile |
 | POST | `/Profiles/UpdateProfile` | Update profile |
 
 ### Tailor Endpoints (Requires Tailor Role)

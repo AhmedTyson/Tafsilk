@@ -602,13 +602,90 @@
                     </div>
 
                     <div class="profile-actions">
-                        <div class="action-buttons">
-                            <a href="#" class="btn btn-primary">
-                                <i class="fas fa-calendar-check me-2"></i> Book Appointment
-                            </a>
-                            <a href="#" class="btn btn-outline">
-                                <i class="fas fa-comment-alt me-2"></i> Contact
-                            </a>
+                        <div class="action-buttons" style="width: 100%; display: block;">
+                            <button type="button" 
+                                    onclick="toggleContactInfo()"
+                                    style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 18px 24px; border-radius: 14px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
+                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'"
+                                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)'">
+                                <i class="fas fa-phone-alt" style="font-size: 1.2rem;"></i>
+                                <span>Contact Tailor</span>
+                                <i class="fas fa-chevron-down" id="contactChevron" style="margin-left: auto; transition: transform 0.3s;"></i>
+                            </button>
+                            
+                            <div id="contactInfoPanel" style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0;">
+                                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%); padding: 25px; border-radius: 16px; backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.1); margin-top: 15px;">
+                                    <h4 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-address-book" style="font-size: 1.1rem; color: var(--primary-color);"></i>
+                                        Contact Information
+                                    </h4>
+                                    
+                                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                                        @if (!string.IsNullOrEmpty(safeModel.User?.PhoneNumber))
+                                        {
+                                            <a href="tel:@safeModel.User.PhoneNumber" 
+                                               style="display: flex; align-items: center; gap: 15px; color: var(--text-primary); text-decoration: none; background: rgba(16, 185, 129, 0.1); padding: 16px 20px; border-radius: 12px; transition: all 0.3s; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.2);"
+                                               onmouseover="this.style.background='rgba(16, 185, 129, 0.2)'; this.style.transform='translateX(5px)'"
+                                               onmouseout="this.style.background='rgba(16, 185, 129, 0.1)'; this.style.transform='translateX(0)'">
+                                                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                                                    <i class="fas fa-phone" style="font-size: 1.2rem; color: white;"></i>
+                                                </div>
+                                                <div style="flex: 1;">
+                                                    <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 2px;">Phone</div>
+                                                    <div style="font-size: 1.05rem; font-weight: 700;">@safeModel.User.PhoneNumber</div>
+                                                </div>
+                                                <i class="fas fa-external-link-alt" style="opacity: 0.6; font-size: 0.9rem;"></i>
+                                            </a>
+                                        }
+                                        
+                                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                                            @if (!string.IsNullOrEmpty(safeModel.WhatsAppNumber))
+                                            {
+                                                var whatsappNumber = safeModel.WhatsAppNumber.Replace("+", "").Replace(" ", "").Replace("-", "");
+                                                <a href="https://wa.me/@whatsappNumber" target="_blank" rel="noopener"
+                                                   style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(37, 211, 102, 0.1); padding: 18px 12px; border-radius: 12px; color: var(--text-primary); text-decoration: none; transition: all 0.3s; border: 1px solid rgba(37, 211, 102, 0.2);"
+                                                   onmouseover="this.style.background='rgba(37, 211, 102, 0.2)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(37, 211, 102, 0.2)'"
+                                                   onmouseout="this.style.background='rgba(37, 211, 102, 0.1)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);">
+                                                        <i class="fab fa-whatsapp" style="font-size: 1.6rem; color: white;"></i>
+                                                    </div>
+                                                    <span style="font-size: 0.95rem; font-weight: 600;">WhatsApp</span>
+                                                </a>
+                                            }
+                                            
+                                            @if (!string.IsNullOrEmpty(safeModel.InstagramUrl))
+                                            {
+                                                <a href="@safeModel.InstagramUrl" target="_blank" rel="noopener"
+                                                   style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(193, 53, 132, 0.1); padding: 18px 12px; border-radius: 12px; color: var(--text-primary); text-decoration: none; transition: all 0.3s; border: 1px solid rgba(193, 53, 132, 0.2);"
+                                                   onmouseover="this.style.background='rgba(193, 53, 132, 0.2)'; this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 20px rgba(193, 53, 132, 0.2)'"
+                                                   onmouseout="this.style.background='rgba(193, 53, 132, 0.1)'; this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #e1306c 0%, #c13584 40%, #833ab4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(193, 53, 132, 0.4);">
+                                                        <i class="fab fa-instagram" style="font-size: 1.6rem; color: white;"></i>
+                                                    </div>
+                                                    <span style="font-size: 0.95rem; font-weight: 600;">Instagram</span>
+                                                </a>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <script>
+                                function toggleContactInfo() {
+                                    const panel = document.getElementById('contactInfoPanel');
+                                    const chevron = document.getElementById('contactChevron');
+                                    
+                                    if (panel.style.maxHeight === '0px' || panel.style.maxHeight === '') {
+                                        panel.style.maxHeight = panel.scrollHeight + 'px';
+                                        panel.style.marginTop = '15px';
+                                        chevron.style.transform = 'rotate(180deg)';
+                                    } else {
+                                        panel.style.maxHeight = '0px';
+                                        panel.style.marginTop = '0px';
+                                        chevron.style.transform = 'rotate(0deg)';
+                                    }
+                                }
+                            </script>
                         </div>
                     </div>
                 </div>

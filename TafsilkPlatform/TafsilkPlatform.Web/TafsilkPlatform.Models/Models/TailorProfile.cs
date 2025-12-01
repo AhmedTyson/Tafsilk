@@ -95,6 +95,11 @@ namespace TafsilkPlatform.Models.Models
         [Url]
         public string? WebsiteUrl { get; set; }
 
+        [StringLength(20)]
+        [Phone]
+        [Display(Name = "WhatsApp Number")]
+        public string? WhatsAppNumber { get; set; }
+
         // Profile Picture
         [Obsolete("Use ProfilePictureData instead. This field is kept for backward compatibility.")]
         public string? ProfilePictureUrl { get; set; }

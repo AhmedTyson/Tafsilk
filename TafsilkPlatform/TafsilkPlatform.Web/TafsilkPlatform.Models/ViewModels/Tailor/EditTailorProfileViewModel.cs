@@ -89,6 +89,11 @@ public class EditTailorProfileViewModel
     [Display(Name = "Instagram URL")]
     public string? InstagramUrl { get; set; }
 
+    [Phone(ErrorMessage = "Invalid WhatsApp Number")]
+    [StringLength(20)]
+    [Display(Name = "WhatsApp Number")]
+    public string? WhatsAppNumber { get; set; }
+
     [Url(ErrorMessage = "Invalid Twitter URL")]
     [Display(Name = "Twitter URL")]
     public string? TwitterUrl { get; set; }

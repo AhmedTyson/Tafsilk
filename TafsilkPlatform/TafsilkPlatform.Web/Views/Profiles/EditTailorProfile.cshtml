@@ -253,6 +253,15 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
+                                    <input asp-for="WhatsAppNumber" class="form-control bg-light border-0" placeholder="+201234567890" />
+                                    <label asp-for="WhatsAppNumber">
+                                        <i class="fab fa-whatsapp text-success"></i> WhatsApp Number
+                                    </label>
+                                </div>
+                                <small class="text-muted ms-2">Include country code (e.g., +20 for Egypt)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
                                     <input asp-for="TwitterUrl" class="form-control bg-light border-0" placeholder="Twitter URL" />
                                     <label asp-for="TwitterUrl">Twitter URL</label>
                                 </div>

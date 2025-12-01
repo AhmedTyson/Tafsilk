@@ -346,6 +346,98 @@
             </div>
         </div>
 
+        <!-- Contact Information Preview -->
+        <div style="margin-bottom: 2rem;">
+            <button type="button" 
+                    onclick="toggleContactInfo()"
+                    style="width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 18px 24px; border-radius: 14px; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(16, 185, 129, 0.3)'">
+                <i class="fas fa-phone-alt" style="font-size: 1.2rem;"></i>
+                <span>Preview Contact Information</span>
+                <i class="fas fa-chevron-down" id="contactChevron" style="margin-left: auto; transition: transform 0.3s;"></i>
+            </button>
+            
+            <div id="contactInfoPanel" style="max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out, margin-top 0.4s ease-out; margin-top: 0;">
+                <div style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%); padding: 25px; border-radius: 16px; backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 8px 32px rgba(0,0,0,0.1); margin-top: 15px;">
+                    <h4 style="margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-address-book" style="font-size: 1.1rem; color: var(--primary-color);"></i>
+                        How Customers Will Contact You
+                    </h4>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        @if (!string.IsNullOrEmpty(Model.User?.PhoneNumber))
+                        {
+                            <div style="display: flex; align-items: center; gap: 15px; background: rgba(16, 185, 129, 0.1); padding: 16px 20px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                                <div style="width: 45px; height: 45px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                                    <i class="fas fa-phone" style="font-size: 1.2rem; color: white;"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 2px;">Phone</div>
+                                    <div style="font-size: 1.05rem; font-weight: 700;">@Model.User.PhoneNumber</div>
+                                </div>
+                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="padding: 16px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; color: var(--text-primary);">
+                                <i class="fas fa-exclamation-triangle" style="color: #f39c12; margin-right: 8px;"></i>
+                                <strong>No phone number set.</strong> Add your phone number in Edit Profile.
+                            </div>
+                        }
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+                            @if (!string.IsNullOrEmpty(Model.WhatsAppNumber))
+                            {
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(37, 211, 102, 0.1); padding: 18px 12px; border-radius: 12px; border: 1px solid rgba(37, 211, 102, 0.2);">
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);">
+                                        <i class="fab fa-whatsapp" style="font-size: 1.6rem; color: white;"></i>
+                                    </div>
+                                    <span style="font-size: 0.95rem; font-weight: 600;">WhatsApp</span>
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(Model.InstagramUrl))
+                            {
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(193, 53, 132, 0.1); padding: 18px 12px; border-radius: 12px; border: 1px solid rgba(193, 53, 132, 0.2);">
+                                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #e1306c 0%, #c13584 40%, #833ab4 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(193, 53, 132, 0.4);">
+                                        <i class="fab fa-instagram" style="font-size: 1.6rem; color: white;"></i>
+                                    </div>
+                                    <span style="font-size: 0.95rem; font-weight: 600;">Instagram</span>
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (string.IsNullOrEmpty(Model.WhatsAppNumber) && string.IsNullOrEmpty(Model.InstagramUrl))
+                        {
+                            <div style="padding: 16px; background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 12px; color: var(--text-primary); text-align: center;">
+                                <i class="fas fa-info-circle" style="color: #f39c12; margin-right: 8px;"></i>
+                                Add WhatsApp or Instagram in Edit Profile for more contact options.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function toggleContactInfo() {
+                const panel = document.getElementById('contactInfoPanel');
+                const chevron = document.getElementById('contactChevron');
+                
+                if (panel.style.maxHeight === '0px' || panel.style.maxHeight === '') {
+                    panel.style.maxHeight = panel.scrollHeight + 'px';
+                    panel.style.marginTop = '15px';
+                    chevron.style.transform = 'rotate(180deg)';
+                } else {
+                    panel.style.maxHeight = '0px';
+                    panel.style.marginTop = '0px';
+                    chevron.style.transform = 'rotate(0deg)';
+                }
+            }
+        </script>
+
         <!-- Profile Information -->
         <div class="profile-section">
             <h2 class="section-title">
