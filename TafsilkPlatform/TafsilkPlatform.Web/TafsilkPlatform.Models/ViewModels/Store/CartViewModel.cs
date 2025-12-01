@@ -27,6 +27,13 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public string? SpecialInstructions { get; set; }
         public int StockAvailable { get; set; }
         public bool IsAvailable { get; set; }
+
+        // Tailor Information
+        public Guid TailorId { get; set; }
+        public string TailorName { get; set; } = string.Empty;
+        public string? ShopName { get; set; }
+        public string? TailorCity { get; set; }
+        public string? TailorDistrict { get; set; }
     }
 
     public class UpdateCartItemRequest

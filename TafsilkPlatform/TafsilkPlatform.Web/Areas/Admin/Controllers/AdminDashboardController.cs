@@ -75,6 +75,8 @@ public class AdminDashboardController : BaseController
                 ActiveOrders = activeOrders,
                 TotalSales = totalSales,
                 TotalRevenue = totalRevenue,
+                TotalCommission = totalRevenue,
+                TotalNetPayout = totalSales - totalRevenue,
                 RecentActivity = recentOrders,
                 // Pass chart data via ViewBag or extend ViewModel (using ViewBag for simplicity now)
             };

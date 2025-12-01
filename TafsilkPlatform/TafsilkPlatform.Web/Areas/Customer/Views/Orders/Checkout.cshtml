@@ -471,6 +471,12 @@
                                     <div class="flex-grow-1">
                                         <div class="text-white small fw-bold">@item.ProductName</div>
                                         <div class="text-white-50 small">@item.Quantity × @item.UnitPrice.ToString("N0")</div>
+                                        @if (!string.IsNullOrEmpty(item.ShopName) || !string.IsNullOrEmpty(item.TailorName))
+                                        {
+                                            <div class="text-white-50" style="font-size: 0.75rem;">
+                                                <i class="fas fa-store me-1"></i>@(item.ShopName ?? item.TailorName)
+                                            </div>
+                                        }
                                     </div>
                                     <div class="text-white small fw-bold">@item.TotalPrice.ToString("N0")</div>
                                 </div>

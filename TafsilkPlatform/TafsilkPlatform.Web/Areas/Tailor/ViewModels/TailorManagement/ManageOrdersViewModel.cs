@@ -12,6 +12,10 @@ public class ManageOrdersViewModel
     public int PendingOrders { get; set; }
     public int CompletedOrders { get; set; }
     public int CancelledOrders { get; set; }
+
+    /// <summary>
+    /// Net earnings for delivered orders (TotalPrice - Platform Commission)
+    /// </summary>
     public double TotalRevenue { get; set; }
 
     // Filters

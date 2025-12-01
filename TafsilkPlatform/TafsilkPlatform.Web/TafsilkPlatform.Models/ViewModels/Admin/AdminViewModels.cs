@@ -24,8 +24,10 @@ public class DashboardHomeViewModel
     public int PendingOrders { get; set; }
 
     // Revenue Metrics
-    public decimal TotalSales { get; set; } // Gross Sales
-    public decimal TotalRevenue { get; set; } // Net Commission
+    public decimal TotalSales { get; set; } // Gross Sales (Total Transaction Volume)
+    public decimal TotalRevenue { get; set; } // Platform Revenue (Commission)
+    public decimal TotalCommission { get; set; } // Explicit Commission (Same as TotalRevenue but for clarity)
+    public decimal TotalNetPayout { get; set; } // Net Payout to Tailors (Sales - Commission)
     public decimal RevenueToday { get; set; }
     public decimal RevenueThisWeek { get; set; }
     public decimal RevenueThisMonth { get; set; }

@@ -367,8 +367,8 @@ public class OrdersController : Controller
                 Orders = orders.Select(o => new OrderSummaryViewModel
                 {
                     OrderId = o.OrderId,
-                    TailorName = o.Tailor?.FullName ?? (o.OrderType == "StoreOrder" ? "Tafsilk Store" : "Tailor"),
-                    TailorShopName = o.Tailor?.ShopName ?? (o.OrderType == "StoreOrder" ? "Tafsilk Store" : null),
+                    TailorName = o.Tailor?.FullName ?? "Tailor",
+                    TailorShopName = o.Tailor?.ShopName,
                     ServiceType = o.OrderType ?? "Not Specified",
                     Status = o.Status,
                     StatusDisplay = GetStatusDisplay(o.Status),

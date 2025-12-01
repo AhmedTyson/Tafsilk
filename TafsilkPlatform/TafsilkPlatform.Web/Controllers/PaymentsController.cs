@@ -199,13 +199,17 @@ public class PaymentsController : Controller
         };
 
         // Fetch order details to populate the view model
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+        var order = await _db.Orders
+            .Include(o => o.Tailor)
+            .FirstOrDefaultAsync(o => o.OrderId == orderId);
         if (order != null)
         {
             model.OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(); // Or use a dedicated OrderNumber property if available
             model.OrderDate = order.CreatedAt;
             model.PaymentMethod = "Credit/Debit Card"; // Default for this controller
             model.Amount = (decimal)order.TotalPrice; // Ensure amount is set from order if not verified yet
+            model.TailorName = order.Tailor?.FullName;
+            model.TailorShopName = order.Tailor?.ShopName;
         }
 
         if (!string.IsNullOrEmpty(sessionId))

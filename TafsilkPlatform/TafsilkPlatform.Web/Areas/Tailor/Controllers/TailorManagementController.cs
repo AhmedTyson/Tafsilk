@@ -748,7 +748,7 @@ public partial class TailorManagementController(
             // Get stats (before filtering for accurate counts)
             var allOrders = await _context.Orders
                 .Where(o => o.TailorId == tailor.Id)
-                .Select(o => new { o.Status, o.TotalPrice })
+                .Select(o => new { o.Status, o.TotalPrice, o.CommissionAmount })
                 .ToListAsync();
 
             var orders = await query
@@ -778,7 +778,7 @@ public partial class TailorManagementController(
                 PendingOrders = allOrders.Count(o => o.Status == OrderStatus.Pending),
                 CompletedOrders = allOrders.Count(o => o.Status == OrderStatus.Delivered),
                 CancelledOrders = allOrders.Count(o => o.Status == OrderStatus.Cancelled),
-                TotalRevenue = allOrders.Where(o => o.Status == OrderStatus.Delivered).Select(o => o.TotalPrice).DefaultIfEmpty(0).Sum(),
+                TotalRevenue = allOrders.Where(o => o.Status == OrderStatus.Delivered).Select(o => o.TotalPrice - o.CommissionAmount).DefaultIfEmpty(0).Sum(),
                 SearchTerm = search,
                 FilterStatus = status
             };

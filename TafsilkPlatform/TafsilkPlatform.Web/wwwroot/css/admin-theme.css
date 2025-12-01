@@ -1,0 +1,333 @@
+/* ========================================
+   TAFSILK ADMIN THEME - DARK MODE ONLY
+   ======================================== */
+
+:root {
+    /* Color Palette - Dark Mode */
+    --primary: #D4AF37; /* Gold */
+    --primary-hover: #C5A028;
+    --primary-light: rgba(212, 175, 55, 0.15);
+    
+    --bg-body: #121212;
+    --bg-card: #1e1e1e;
+    --bg-input: #2c2c2c;
+    --bg-hover: #2a2a2a;
+    
+    --text-primary: #f8f9fa;
+    --text-secondary: #adb5bd;
+    --text-muted: #6c757d;
+    
+    --border-color: #333333;
+    --border-light: #444444;
+
+    /* Status Colors */
+    --success: #2ecc71;
+    --success-bg: rgba(46, 204, 113, 0.15);
+    --warning: #f1c40f;
+    --warning-bg: rgba(241, 196, 15, 0.15);
+    --danger: #e74c3c;
+    --danger-bg: rgba(231, 76, 60, 0.15);
+    --info: #3498db;
+    --info-bg: rgba(52, 152, 219, 0.15);
+
+    /* Spacing & Layout */
+    --sidebar-width: 260px;
+    --header-height: 70px;
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 8px 16px rgba(0,0,0,0.4);
+}
+
+/* Base Styles */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* Layout Containers */
+.dashboard-container {
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.card, .dashboard-card, .stat-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title, .dashboard-title {
+    color: var(--text-primary);
+    margin-bottom: 0;
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Stats Cards */
+.stat-card {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--bg-hover);
+    color: var(--primary);
+}
+
+.stat-icon.primary { background: var(--primary-light); color: var(--primary); }
+.stat-icon.success { background: var(--success-bg); color: var(--success); }
+.stat-icon.warning { background: var(--warning-bg); color: var(--warning); }
+.stat-icon.danger { background: var(--danger-bg); color: var(--danger); }
+.stat-icon.info { background: var(--info-bg); color: var(--info); }
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Tables */
+.table {
+    color: var(--text-primary);
+    border-color: var(--border-color);
+}
+
+.table thead th {
+    background-color: var(--bg-hover);
+    color: var(--primary);
+    border-bottom: 2px solid var(--border-color);
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+    color: var(--text-secondary);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Forms */
+.form-control, .form-select {
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 0.6rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-input);
+    border-color: var(--primary);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.25rem var(--primary-light);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+/* Buttons */
+.btn {
+    border-radius: var(--radius-md);
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #000;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    color: #000;
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: #000;
+}
+
+.btn-success { background-color: var(--success); border-color: var(--success); color: #fff; }
+.btn-danger { background-color: var(--danger); border-color: var(--danger); color: #fff; }
+.btn-info { background-color: var(--info); border-color: var(--info); color: #fff; }
+
+/* Badges */
+.badge {
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.badge.bg-success, .status-badge.online { background-color: var(--success-bg) !important; color: var(--success) !important; }
+.badge.bg-warning, .status-badge.warning { background-color: var(--warning-bg) !important; color: var(--warning) !important; }
+.badge.bg-danger, .status-badge.banned { background-color: var(--danger-bg) !important; color: var(--danger) !important; }
+.badge.bg-info, .status-badge.info { background-color: var(--info-bg) !important; color: var(--info) !important; }
+.badge.bg-primary { background-color: var(--primary-light) !important; color: var(--primary) !important; }
+.badge.bg-secondary { background-color: var(--bg-hover) !important; color: var(--text-muted) !important; }
+
+/* Lists */
+.list-group-item {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    background: var(--bg-hover);
+    color: var(--primary);
+}
+
+.action-btn i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+/* Pagination */
+.pagination-btn {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.pagination-btn:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--primary);
+}
+
+.pagination-btn.active {
+    background-color: var(--primary);
+    color: #000;
+    border-color: var(--primary);
+}
+
+/* Modals */
+.modal-content {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+.modal-header, .modal-footer {
+    border-color: var(--border-color);
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Timeline */
+.timeline-item:not(:last-child)::before {
+    background: var(--border-color);
+}

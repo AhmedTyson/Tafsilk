@@ -407,7 +407,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// <summary>
     /// Confirm Stripe payment from webhook
     /// </summary>
-    public async Task<Result> ConfirmStripePaymentAsync(string json, string stripeSignature)
+    public async Task<Result> ConfirmStripePaymentAsync(string json, string? stripeSignature)
     {
         return await ExecuteAsync(async () =>
         {

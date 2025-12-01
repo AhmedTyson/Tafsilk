@@ -954,6 +954,7 @@ public class AccountController(
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "OAuth authentication failed for provider {Provider}", provider);
             TempData["ErrorMessage"] = "We encountered an error while logging you in. Please try again.";
             return RedirectToAction(nameof(Login));
         }
