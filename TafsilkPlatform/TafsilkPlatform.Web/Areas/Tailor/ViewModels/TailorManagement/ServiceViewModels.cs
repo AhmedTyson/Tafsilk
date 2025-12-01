@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
 
@@ -83,7 +82,7 @@ public class ServicePriceDto
     public Guid ServiceId { get; set; }
     public string ServiceName { get; set; } = string.Empty;
     public double CurrentPrice { get; set; }
-    
+
     [Range(0, 100000, ErrorMessage = "Price must be valid")]
     public double NewPrice { get; set; }
 }

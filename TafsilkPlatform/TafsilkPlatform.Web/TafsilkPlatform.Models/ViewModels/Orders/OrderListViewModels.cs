@@ -34,4 +34,5 @@ public class OrderSummaryViewModel
     public DateTimeOffset? DueDate { get; set; }
     public decimal TotalPrice { get; set; }
     public bool IsPaid { get; set; }
+    public string PaymentMethod { get; set; } = string.Empty;
 }

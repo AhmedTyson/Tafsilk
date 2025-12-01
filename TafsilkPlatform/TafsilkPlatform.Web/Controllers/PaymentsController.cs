@@ -169,7 +169,7 @@ public class PaymentsController : Controller
 
         try
         {
-            var result = await _paymentService.ConfirmStripePaymentAsync(json, signature);
+            var result = await _paymentService.ConfirmStripePaymentAsync(json, signature.ToString());
             if (result.IsSuccess)
             {
                 return Ok();
@@ -190,21 +190,56 @@ public class PaymentsController : Controller
     [HttpGet("success")]
     public async Task<IActionResult> PaymentSuccess(Guid orderId, [FromQuery(Name = "session_id")] string? sessionId)
     {
+        var model = new TafsilkPlatform.Models.ViewModels.Payments.PaymentSuccessViewModel
+        {
+            OrderId = orderId,
+            IsSuccess = false,
+            Message = "Payment verification failed or pending.",
+            PaymentStatus = "Pending"
+        };
+
+        // Fetch order details to populate the view model
+        var order = await _db.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
+        if (order != null)
+        {
+            model.OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(); // Or use a dedicated OrderNumber property if available
+            model.OrderDate = order.CreatedAt;
+            model.PaymentMethod = "Credit/Debit Card"; // Default for this controller
+            model.Amount = (decimal)order.TotalPrice; // Ensure amount is set from order if not verified yet
+        }
+
         if (!string.IsNullOrEmpty(sessionId))
         {
             try
             {
                 // Verify payment status directly from Stripe (in case webhook is delayed)
-                await _paymentService.VerifyCheckoutSessionAsync(sessionId);
+                var result = await _paymentService.VerifyCheckoutSessionAsync(sessionId);
+                if (result.IsSuccess && result.Value)
+                {
+                    model.IsSuccess = true;
+                    model.Message = "Payment completed successfully!";
+                    model.PaymentStatus = "Completed";
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error verifying checkout session {SessionId} for order {OrderId}", sessionId, orderId);
             }
-
+        }
+        else
+        {
+            // Fallback: Check database if session_id is missing (e.g. direct navigation)
+            var payment = await _db.Payment.FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+            if (payment != null)
+            {
+                model.IsSuccess = true;
+                model.Message = "Payment completed successfully!";
+                model.PaymentStatus = "Completed";
+                model.Amount = payment.Amount;
+            }
         }
 
-        return View(orderId);
+        return View(model);
     }
 
     /// <summary>
@@ -221,7 +256,7 @@ public class PaymentsController : Controller
         }
 
         var success = await _storeService.CancelPendingOrderAsync(orderId, userId);
-        
+
         if (success)
         {
             TempData["InfoMessage"] = "Payment cancelled. You can choose a different payment method.";

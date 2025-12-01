@@ -815,7 +815,7 @@ namespace TafsilkPlatform.Web.Services
                 {
                     _unitOfWork.Context.Payment.RemoveRange(order.Payments);
                 }
-                
+
                 // Remove order items
                 if (order.Items != null && order.Items.Any())
                 {
@@ -826,7 +826,7 @@ namespace TafsilkPlatform.Web.Services
                 _unitOfWork.Context.Orders.Remove(order);
 
                 await _unitOfWork.SaveChangesAsync();
-                
+
                 _logger.LogInformation("Pending order {OrderId} cancelled and stock returned for customer {CustomerId}", orderId, customerId);
                 return true;
             });

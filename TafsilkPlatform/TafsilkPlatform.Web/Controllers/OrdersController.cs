@@ -375,11 +375,14 @@ public class OrdersController : Controller
                     CreatedAt = o.CreatedAt,
                     DueDate = o.DueDate,
                     TotalPrice = (decimal)o.TotalPrice,
-                    IsPaid = o.Payments.Any(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
+                    IsPaid = o.Payments.Any(p => p.PaymentStatus == Enums.PaymentStatus.Completed),
+                    PaymentMethod = o.Payments.Any(p => p.PaymentType == Enums.PaymentType.Card)
+                        ? "Credit/Debit Card"
+                        : "Cash on Delivery"
                 }).ToList()
             };
 
-            return View(model);
+            return View("~/Areas/Customer/Views/Orders/MyOrders.cshtml", model);
         }
         catch (Exception ex)
         {
@@ -466,26 +469,12 @@ public class OrdersController : Controller
                             : null
                 }).ToList(),
 
-                // Payment info
-                IsPaid = order.Payments.Any(p => p.PaymentStatus == Enums.PaymentStatus.Completed),
-                PaymentAmount = order.Payments
-                 .Where(p => p.PaymentStatus == Enums.PaymentStatus.Completed)
-                .Sum(p => p.Amount),
-
-                // Images
-                ReferenceImages = order.OrderImages.Select(img => new OrderImageViewModel
-                {
-                    ImageId = img.OrderImageId,
-                    ContentType = img.ContentType,
-                    ImgUrl = string.IsNullOrWhiteSpace(img.ImgUrl) ? null : img.ImgUrl
-                }).ToList(),
-
                 // User role
                 IsCustomer = customer != null && order.CustomerId == customer.Id,
                 IsTailor = tailor != null && order.TailorId == tailor.Id
             };
 
-            return View(model);
+            return View("~/Areas/Customer/Views/Orders/OrderDetails.cshtml", model);
         }
         catch (Exception ex)
         {
@@ -809,6 +798,7 @@ public class OrdersController : Controller
         return status switch
         {
             OrderStatus.Pending => "Pending",
+            OrderStatus.PendingPayment => "Pending Payment",
             OrderStatus.Confirmed => "Confirmed",
             OrderStatus.Processing => "Processing",
             OrderStatus.Shipped => "Shipped",
@@ -824,11 +814,12 @@ public class OrdersController : Controller
         // Define valid status transitions
         var validTransitions = new Dictionary<OrderStatus, List<OrderStatus>>
  {
-      { OrderStatus.Pending, new List<OrderStatus> { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.Cancelled } },
-       { OrderStatus.Confirmed, new List<OrderStatus> { OrderStatus.Processing, OrderStatus.Cancelled } },
+            { OrderStatus.Pending, new List<OrderStatus> { OrderStatus.Confirmed, OrderStatus.Processing, OrderStatus.Cancelled } },
+            { OrderStatus.PendingPayment, new List<OrderStatus> { OrderStatus.Confirmed, OrderStatus.Cancelled } },
+            { OrderStatus.Confirmed, new List<OrderStatus> { OrderStatus.Processing, OrderStatus.Cancelled } },
             { OrderStatus.Processing, new List<OrderStatus> { OrderStatus.Shipped, OrderStatus.ReadyForPickup, OrderStatus.Cancelled } },
-       { OrderStatus.Shipped, new List<OrderStatus> { OrderStatus.Delivered, OrderStatus.ReadyForPickup } },
-   { OrderStatus.ReadyForPickup, new List<OrderStatus> { OrderStatus.Delivered } },
+            { OrderStatus.Shipped, new List<OrderStatus> { OrderStatus.Delivered, OrderStatus.ReadyForPickup } },
+            { OrderStatus.ReadyForPickup, new List<OrderStatus> { OrderStatus.Delivered } },
             { OrderStatus.Delivered, new List<OrderStatus>() },
             { OrderStatus.Cancelled, new List<OrderStatus>() }
    };

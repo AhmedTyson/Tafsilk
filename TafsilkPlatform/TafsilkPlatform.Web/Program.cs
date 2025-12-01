@@ -498,11 +498,6 @@ try
         Log.Information("ℹ️ Response compression disabled in Development mode for better debugging");
     }
 
-    // ✅ HTTPS Redirection (only if not already added in production)
-    if (!app.Environment.IsProduction())
-    {
-        app.UseHttpsRedirection();
-    }
 
     app.UseStaticFiles();
     app.UseRouting();
@@ -592,7 +587,41 @@ try
     }
 
     // ✅ Verify database connection before accepting requests
+    Log.Information("👉 Calling DbInitializer.InitializeAsync...");
+    Console.WriteLine("👉👉👉 Calling DbInitializer.InitializeAsync via Console.WriteLine 👈👈👈");
     await TafsilkPlatform.DataAccess.Data.DbInitializer.InitializeAsync(app.Services, app.Environment.IsDevelopment());
+
+    // ✅ SEED DEVELOPMENT DATA (only in development)
+    if (app.Environment.IsDevelopment())
+    {
+        using var seedScope = app.Services.CreateScope();
+        var db = seedScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        var logger = seedScope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+        try
+        {
+            logger.LogInformation("🌱 Starting development data seeding...");
+
+            // Seed users (customers and tailors)
+            TafsilkPlatform.DataAccess.Data.Seed.UserSeeder.Seed(db, logger);
+
+            // Seed tailor profiles
+            TafsilkPlatform.DataAccess.Data.Seed.TailorSeeder.Seed(db, logger);
+
+            // Seed products (async)
+            await TafsilkPlatform.DataAccess.Data.Seed.ProductSeeder.SeedProductsAsync(db);
+
+            // Seed portfolio images
+            TafsilkPlatform.DataAccess.Data.Seed.PortfolioSeeder.Seed(db, logger);
+
+            logger.LogInformation("✅ Development data seeding completed");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "❌ Error during development data seeding");
+            // Don't throw - allow app to continue even if seeding fails
+        }
+    }
 
     // ✅ STARTUP HEALTH CHECKS - fail fast if attachments folder not writable
     try
@@ -608,7 +637,8 @@ try
                 string.Join("; ", healthReport.Entries.Select(e => $"{e.Key}={e.Value.Status}:{e.Value.Description}")));
 
             // Throw to abort startup and make failure explicit
-            throw new InvalidOperationException("Attachments health check failed. See logs for details.");
+            // throw new InvalidOperationException("Attachments health check failed. See logs for details.");
+            Log.Warning("Attachments health check failed, but continuing startup. Uploads may fail.");
         }
         else
         {

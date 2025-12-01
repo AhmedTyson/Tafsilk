@@ -18,9 +18,28 @@
         
         <div class="vr h-50 mx-2 text-secondary opacity-25"></div>
 
-        <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-sm btn-outline">
-            <i class="fas fa-external-link-alt"></i>
-            <span>Main Site</span>
-        </a>
+        <div class="dropdown">
+            <button class="btn btn-text d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
+                </div>
+                <span class="d-none d-md-block text-sm font-medium">@User.Identity?.Name</span>
+                <i class="fas fa-chevron-down text-xs text-secondary"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="userDropdown">
+                <li><h6 class="dropdown-header">Signed in as <br><strong>@User.Identity?.Name</strong></h6></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-user-circle me-2"></i> Profile</a></li>
+                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form asp-controller="Account" asp-action="Logout" asp-area="" method="post" class="d-inline">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </div>
 </header>

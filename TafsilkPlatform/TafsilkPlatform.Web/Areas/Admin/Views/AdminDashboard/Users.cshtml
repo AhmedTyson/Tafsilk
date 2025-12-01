@@ -1,204 +1,213 @@
 @model IEnumerable<TafsilkPlatform.Models.Models.User>
 @{
-    ViewData["Title"] = "User Management";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
+    ViewData["Title"] = "Users";
+    var currentStatus = ViewBag.CurrentStatus as string ?? "all";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
 }
 
-<div class="page-header">
-    <h1 class="page-title">User Management</h1>
-    <div class="page-actions">
-        <button class="btn btn-outline">
-            <i class="fas fa-filter"></i>
-            <span>Filter</span>
-        </button>
-        <button class="btn btn-primary">
-            <i class="fas fa-plus"></i>
-            <span>Add User</span>
-        </button>
+<div class="glass-card shadow-4 rounded-lg p-4 sm:p-6 xl:p-8 my-6 mx-4">
+    <div class="mb-1 w-full">
+        <div class="mb-4">
+            <nav class="flex mb-5" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-2">
+                    <li class="inline-flex items-center">
+                        <a href="@Url.Action("Index", "AdminDashboard")" class="text-gray-400 hover:text-white inline-flex items-center">
+                            <svg class="w-5 h-5 mr-2.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                            <span class="text-gray-500 ml-1 md:ml-2 text-sm font-medium" aria-current="page">Users</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="text-xl sm:text-2xl font-semibold text-white">All Users</h1>
+        </div>
+        <div class="sm:flex">
+            <div class="hidden sm:flex items-center sm:divide-x sm:divide-gray-700 mb-3 sm:mb-0">
+                <form class="lg:pr-3" action="@Url.Action("Users")" method="GET">
+                    <input type="hidden" name="status" value="@currentStatus" />
+                    <label for="users-search" class="sr-only">Search</label>
+                    <div class="mt-1 relative lg:w-64 xl:w-96">
+                        <input type="text" name="search" id="users-search" value="@currentSearch" class="bg-gray-800 border border-gray-600 text-white sm:text-sm rounded-lg focus:ring-cyan-600 focus:border-cyan-600 block w-full p-2.5" placeholder="Search for users">
+                    </div>
+                </form>
+                <div class="flex space-x-1 pl-0 sm:pl-2 mt-3 sm:mt-0">
+                    <a href="@Url.Action("Users", new { status = "all" })" class="text-gray-400 hover:text-white cursor-pointer p-1 hover:bg-gray-700 rounded inline-flex justify-center @(currentStatus == "all" ? "bg-gray-700 text-white" : "")">
+                        All
+                    </a>
+                    <a href="@Url.Action("Users", new { status = "active" })" class="text-gray-400 hover:text-white cursor-pointer p-1 hover:bg-gray-700 rounded inline-flex justify-center @(currentStatus == "active" ? "bg-gray-700 text-white" : "")">
+                        Active
+                    </a>
+                    <a href="@Url.Action("Users", new { status = "banned" })" class="text-gray-400 hover:text-white cursor-pointer p-1 hover:bg-gray-700 rounded inline-flex justify-center @(currentStatus == "banned" ? "bg-gray-700 text-white" : "")">
+                        Banned
+                    </a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 sm:space-x-3 ml-auto">
+                <a href="@Url.Action("Create", "Users", new { area = "Admin" })" class="w-1/2 text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium inline-flex items-center justify-center rounded-lg text-sm px-3 py-2 text-center sm:w-auto">
+                    <svg class="-ml-1 mr-2 h-6 w-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+                    Add user
+                </a>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="card">
-    <table class="datagrid">
-        <thead>
-            <tr>
-                <th>User</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Email Verified</th>
-                <th>Registration Date</th>
-                <th>Last Login</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (!Model.Any())
-            {
-                <tr>
-                    <td colspan="7" class="text-center py-5 text-secondary">
-                        <i class="fas fa-users-slash fa-2x mb-2 opacity-25"></i>
-                        <p>No users found</p>
-                    </td>
-                </tr>
-            }
-            else
-            {
-                @foreach (var user in Model)
-                {
-                    var isOnline = user.LastLoginAt.HasValue && 
-                                 (DateTime.UtcNow - user.LastLoginAt.Value).TotalMinutes < 30;
-                    var isBanned = !user.IsActive;
-
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="avatar bg-brand-light text-brand-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                                    @if (user.TailorProfile?.ProfilePictureData != null)
+    <div class="flex flex-col mt-8">
+        <div class="overflow-x-auto rounded-lg">
+            <div class="align-middle inline-block min-w-full">
+                <div class="shadow overflow-hidden sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-700 glass-table">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Name/Email
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Role
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Joined
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-transparent divide-y divide-gray-700">
+                        @foreach (var item in Model)
+                        {
+                            <tr class="hover:bg-gray-100">
+                                <td class="p-4 flex items-center whitespace-nowrap space-x-6 mr-12 lg:mr-0">
+                                    <div class="h-10 w-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
+                                        @(item.Email?.Substring(0, 1).ToUpper() ?? "U")
+                                    </div>
+                                    <div class="text-sm font-normal text-gray-400">
+                                        <div class="text-base font-semibold text-white">
+                                            @if (item.CustomerProfile != null)
+                                            {
+                                                @item.CustomerProfile.FullName
+                                            }
+                                            else if (item.TailorProfile != null)
+                                            {
+                                                @item.TailorProfile.ShopName
+                                            }
+                                            else
+                                            {
+                                                <span class="italic">No Profile</span>
+                                            }
+                                        </div>
+                                        <div class="text-sm font-normal text-gray-400">@item.Email</div>
+                                    </div>
+                                </td>
+                                <td class="p-4 whitespace-nowrap text-base font-medium text-white">@item.Role?.Name</td>
+                                <td class="p-4 whitespace-nowrap text-base font-normal text-white">
+                                    <div class="flex items-center">
+                                        @if (item.IsBanned)
+                                        {
+                                            <div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div>
+                                            <span>Banned</span>
+                                        }
+                                        else
+                                        {
+                                            <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>
+                                            <span>Active</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="p-4 whitespace-nowrap text-base font-medium text-white">@item.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td class="p-4 whitespace-nowrap space-x-2">
+                                    @if (!item.IsBanned)
                                     {
-                                        <img src="@Url.Action("ProfilePicture", "Account", new { id = user.Id })" 
-                                             alt="@user.Email" class="rounded-circle" style="width: 100%; height: 100%; object-fit: cover;" />
+                                        <button type="button" onclick="openBanModal('@item.Id', '@item.Email')" class="text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-4 focus:ring-yellow-200 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2 text-center">
+                                            <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                            Ban
+                                        </button>
                                     }
                                     else
                                     {
-                                        @(user.Email?.Substring(0, 1).ToUpper())
-                                    }
-                                </div>
-                                <div class="d-flex flex-column">
-                                    <span class="font-medium text-primary">
-                                        @(user.CustomerProfile?.FullName ?? user.TailorProfile?.FullName ?? "User")
-                                    </span>
-                                    <span class="text-xs text-secondary">@user.Email</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            @{
-                                var roleBadgeClass = user.Role?.Name switch {
-                                    "Admin" => "badge-danger",
-                                    "Tailor" => "badge-warning",
-                                    _ => "badge-success"
-                                };
-                                var roleText = user.Role?.Name switch
-                                {
-                                    "Customer" => "Customer",
-                                    "Tailor" => "Tailor",
-                                    "Admin" => "Admin",
-                                    _ => "Unknown"
-                                };
-                            }
-                            <span class="badge @roleBadgeClass">@roleText</span>
-                        </td>
-                        <td>
-                            @if (isBanned)
-                            {
-                                <span class="badge badge-danger">Banned</span>
-                            }
-                            else if (isOnline)
-                            {
-                                <span class="badge badge-success">Online</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-secondary" style="background: var(--surface-3); color: var(--text-secondary);">Offline</span>
-                            }
-                        </td>
-                        <td>
-                            @if (user.EmailVerified)
-                            {
-                                <i class="fas fa-check-circle text-success" title="Verified"></i>
-                            }
-                            else
-                            {
-                                <i class="fas fa-times-circle text-danger" title="Unverified"></i>
-                            }
-                        </td>
-                        <td class="text-sm">@user.CreatedAt.ToString("yyyy/MM/dd")</td>
-                        <td class="text-sm">
-                            @(user.LastLoginAt.HasValue ? user.LastLoginAt.Value.ToString("yyyy/MM/dd HH:mm") : "-")
-                        </td>
-                        <td>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline text-primary border-primary" 
-                                        onclick="viewUserDetails('@user.Id')" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-
-                                @if (user.Role?.Name != "Admin")
-                                {
-                                    if (isBanned)
-                                    {
-                                        <form method="post" asp-action="UnbanUser" asp-route-userId="@user.Id" class="d-inline">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-outline text-success border-success" title="Unban User">
-                                                <i class="fas fa-user-check"></i>
+                                        <form asp-action="UnbanUser" method="post" class="inline">
+                                            <input type="hidden" name="userId" value="@item.Id" />
+                                            <button type="submit" class="text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:ring-green-200 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2 text-center">
+                                                <svg class="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Unban
                                             </button>
                                         </form>
                                     }
-                                    else
-                                    {
-                                        <button class="btn btn-sm btn-outline text-danger border-danger" 
-                                                onclick="confirmBan('@user.Id', '@(user.Email)')" title="Ban User">
-                                            <i class="fas fa-ban"></i>
-                                        </button>
-                                    }
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-    
-    <!-- Pagination -->
-    @if (ViewBag.TotalPages > 1)
-    {
-        <div class="p-3 border-top border-subtle d-flex justify-content-center gap-2">
-            <button class="btn btn-sm btn-outline" 
-                    disabled="@(ViewBag.CurrentPage == 1)"
-                    onclick="location.href='?page=@(ViewBag.CurrentPage - 1)&search=@ViewBag.SearchTerm&role=@ViewBag.RoleFilter&status=@ViewBag.StatusFilter'">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-
-            @for (int i = 1; i <= ViewBag.TotalPages; i++)
-            {
-                <button class="btn btn-sm @(i == ViewBag.CurrentPage ? "btn-primary" : "btn-outline")"
-                        onclick="location.href='?page=@i&search=@ViewBag.SearchTerm&role=@ViewBag.RoleFilter&status=@ViewBag.StatusFilter'">
-                    @i
-                </button>
-            }
-
-            <button class="btn btn-sm btn-outline" 
-                    disabled="@(ViewBag.CurrentPage == ViewBag.TotalPages)"
-                    onclick="location.href='?page=@(ViewBag.CurrentPage + 1)&search=@ViewBag.SearchTerm&role=@ViewBag.RoleFilter&status=@ViewBag.StatusFilter'">
-                <i class="fas fa-chevron-left"></i>
-            </button>
+                                    
+                                    <button type="button" onclick="openDeleteModal('@item.Id', '@item.Email')" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2 text-center">
+                                        <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
-    }
+    </div>
 </div>
 
-<!-- Ban Confirmation Modal -->
-<div class="modal fade" id="banModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="border-radius: var(--radius-lg); border: none; box-shadow: var(--shadow-lg);">
-            <div class="modal-header border-bottom border-subtle">
-                <h5 class="modal-title font-bold">Confirm Ban</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Ban Modal -->
+<div id="ban-user-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center p-4 w-full md:inset-0 h-modal md:h-full bg-gray-900 bg-opacity-50">
+    <div class="relative w-full max-w-md h-full md:h-auto">
+        <div class="relative bg-white rounded-lg shadow">
+            <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="closeBanModal()">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to ban <span id="ban-user-email" class="font-bold"></span>?</h3>
+                
+                <form asp-action="BanUser" method="post">
+                    <input type="hidden" name="userId" id="ban-user-id" />
+                    
+                    <div class="mb-4 text-left">
+                        <label for="ban-reason" class="block mb-2 text-sm font-medium text-gray-900">Reason</label>
+                        <input type="text" name="reason" id="ban-reason" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+                    </div>
+                    
+                    <div class="mb-4 text-left">
+                        <label for="ban-days" class="block mb-2 text-sm font-medium text-gray-900">Duration (Days, leave empty for permanent)</label>
+                        <input type="number" name="days" id="ban-days" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+
+                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                        Yes, I'm sure
+                    </button>
+                    <button type="button" onclick="closeBanModal()" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">No, cancel</button>
+                </form>
             </div>
-            <div class="modal-body">
-                <p>Are you sure you want to ban user <span id="banUserEmail" class="font-bold text-primary"></span>?</p>
-                <form id="banForm" method="post" asp-action="BanUser">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="banUserId" name="userId" />
-                    <div class="mb-3">
-                        <label class="form-label text-sm font-medium">Ban Reason</label>
-                        <textarea name="reason" class="form-control" rows="3" required 
-                                  style="background: var(--surface-2); border: 1px solid var(--border-subtle);"></textarea>
-                    </div>
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" style="background: var(--danger-bg); color: var(--danger-text); border: none;">Confirm Ban</button>
-                    </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="delete-user-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center p-4 w-full md:inset-0 h-modal md:h-full bg-gray-900 bg-opacity-50">
+    <div class="relative w-full max-w-md h-full md:h-auto">
+        <div class="relative bg-white rounded-lg shadow">
+            <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="closeDeleteModal()">
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                <span class="sr-only">Close modal</span>
+            </button>
+            <div class="p-6 text-center">
+                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete <span id="delete-user-email" class="font-bold"></span>?</h3>
+                <p class="mb-5 text-sm text-gray-500">This action is irreversible (soft delete).</p>
+                
+                <form asp-action="DeleteUser" method="post">
+                    <input type="hidden" name="userId" id="delete-user-id" />
+                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
+                        Yes, I'm sure
+                    </button>
+                    <button type="button" onclick="closeDeleteModal()" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">No, cancel</button>
                 </form>
             </div>
         </div>
@@ -207,14 +216,28 @@
 
 @section Scripts {
     <script>
-        function confirmBan(userId, email) {
-            document.getElementById('banUserId').value = userId;
-            document.getElementById('banUserEmail').textContent = email;
-            new bootstrap.Modal(document.getElementById('banModal')).show();
+        function openBanModal(userId, email) {
+            document.getElementById('ban-user-id').value = userId;
+            document.getElementById('ban-user-email').textContent = email;
+            document.getElementById('ban-user-modal').classList.remove('hidden');
+            document.getElementById('ban-user-modal').classList.add('flex');
         }
 
-        function viewUserDetails(userId) {
-            window.location.href = '@Url.Action("UserDetails", "AdminDashboard")?id=' + userId;
+        function closeBanModal() {
+            document.getElementById('ban-user-modal').classList.add('hidden');
+            document.getElementById('ban-user-modal').classList.remove('flex');
+        }
+
+        function openDeleteModal(userId, email) {
+            document.getElementById('delete-user-id').value = userId;
+            document.getElementById('delete-user-email').textContent = email;
+            document.getElementById('delete-user-modal').classList.remove('hidden');
+            document.getElementById('delete-user-modal').classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-user-modal').classList.add('hidden');
+            document.getElementById('delete-user-modal').classList.remove('flex');
         }
     </script>
 }

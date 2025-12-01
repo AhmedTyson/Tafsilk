@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Net.Mail;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Net;
+using System.Net.Mail;
 
 namespace TafsilkPlatform.Utility;
 
@@ -25,7 +25,7 @@ public class EmailService : IEmailService
 {
     private readonly IConfiguration _configuration;
     private readonly ILogger<EmailService> _logger;
-    
+
     // SMTP Settings
     private readonly string _smtpHost;
     private readonly int _smtpPort;
@@ -48,7 +48,7 @@ public class EmailService : IEmailService
         // Load Email Settings
         _fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
         _fromName = _configuration["Email:FromName"] ?? "Tafsilk Platform";
-        
+
         // SMTP
         _smtpHost = _configuration["Email:SmtpHost"] ?? "smtp.gmail.com";
         _smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");

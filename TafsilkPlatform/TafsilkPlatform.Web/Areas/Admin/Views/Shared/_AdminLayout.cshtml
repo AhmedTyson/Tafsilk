@@ -1,241 +1,104 @@
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Tafsilk Admin Dashboard">
     <title>@ViewData["Title"] - Tafsilk Admin</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
-    <!-- Bootstrap (if needed for grid/utilities inside content) -->
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Admin Dashboard CSS (Premium Theme) -->
-    <link rel="stylesheet" href="~/css/admin-dashboard-new.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/admin-theme-premium.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+    </style>
+    <link rel="stylesheet" href="~/css/windster.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/windster/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/windster/favicon-16x16.png">
     
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for icons if needed, though Windster uses SVGs mostly -->
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- Bootstrap & Site Styles (from _Layout.cshtml) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/navbar.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TafsilkPlatform.Web.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-dark.css" asp-append-version="true" />
     
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="admin-dashboard">
+<body class="bg-gray-900">
 
-<!-- Sidebar Backdrop for Mobile -->
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <!-- Navbar -->
+    <partial name="_Navbar" />
 
-<!-- Sidebar Navigation -->
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-cut"></i>
-            </div>
-            <span class="logo-text">Tafsilk</span>
-        </div>
-        <button class="sidebar-close" id="sidebarClose" aria-label="Close Menu">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-    
-    <nav class="sidebar-nav">
-        <ul class="nav-list">
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
-                <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-home"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" || ViewContext.RouteData.Values["Action"]?.ToString() == "UserDetails" ? "active" : "")">
-                <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-users"></i>
-                    <span class="nav-text">User Management</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PortfolioReview" ? "active" : "")">
-                <a href="@Url.Action("PortfolioReview", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-images"></i>
-                    <span class="nav-text">Portfolio Review</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
-                <a href="@Url.Action("Orders", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="nav-text">Orders</span>
-                </a>
-            </li>
-             <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
-                <a href="@Url.Action("Products", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-box-open"></i>
-                    <span class="nav-text">Products</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Disputes" ? "active" : "")">
-                <a href="@Url.Action("Disputes", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span class="nav-text">Dispute Resolution</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Refunds" ? "active" : "")">
-                <a href="@Url.Action("Refunds", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <span class="nav-text">Refund Requests</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Reviews" ? "active" : "")">
-                <a href="@Url.Action("Reviews", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-star"></i>
-                    <span class="nav-text">Review Management</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
-                <a href="@Url.Action("Analytics", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-chart-line"></i>
-                    <span class="nav-text">Reports & Statistics</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Notifications" ? "active" : "")">
-                <a href="@Url.Action("Notifications", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-bell"></i>
-                    <span class="nav-text">Notification Center</span>
-                </a>
-            </li>
-            <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")">
-                <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="nav-link">
-                    <i class="fas fa-clipboard-list"></i>
-                    <span class="nav-text">Audit Logs</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
+    <div class="flex overflow-hidden pt-16">
 
-    <div class="sidebar-footer">
-        <a href="@Url.Action("Index", "Home", new { area = "" })" class="btn btn-outline-light btn-block">
-            <i class="fas fa-home"></i>
-            <span class="nav-text">Back to Site</span>
-        </a>
-    </div>
-</aside>
-
-<!-- Main Wrapper -->
-<div class="main-wrapper">
-    <!-- Top Navigation Bar -->
-    <header class="topbar">
-        <div class="topbar-left">
-            <button class="sidebar-toggle" id="sidebarToggle" aria-label="Open Menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="breadcrumb">
-                <i class="fas fa-home"></i>
-                <span class="breadcrumb-separator">/</span>
-                <span class="breadcrumb-item active">@ViewData["Title"]</span>
-            </div>
-        </div>
-        
-        <div class="topbar-right">
-            <!-- Quick Search -->
-            <div class="topbar-search">
-                <input type="text" placeholder="Quick Search..." aria-label="Search" />
-                <i class="fas fa-search"></i>
-            </div>
-
-            <!-- Notifications -->
-            <div class="topbar-item">
-                <button class="topbar-btn" id="notificationBtn" aria-label="Notifications">
-                    <i class="fas fa-bell"></i>
-                    <span class="badge-dot"></span>
-                </button>
-            </div>
-
-            <!-- User Menu -->
-            <div class="topbar-item user-menu">
-                <button class="user-menu-toggle" id="userMenuToggle">
-                    <div class="user-avatar">
-                        <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true" alt="Admin" />
-                    </div>
-                    <div class="user-info">
-                        <span class="user-name">@(User.Identity?.Name ?? "Admin")</span>
-                        <span class="user-role">System Admin</span>
-                    </div>
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-
-                <div class="user-menu-dropdown" id="userMenuDropdown">
-                    <div class="user-menu-header">
-                        <div class="user-avatar-large">
-                            <img src="https://ui-avatars.com/api/?name=@Uri.EscapeDataString(User.Identity?.Name ?? "Admin")&background=2c5aa0&color=fff&bold=true&size=64" alt="Admin" />
-                        </div>
-                        <div class="user-details">
-                            <strong>@(User.Identity?.Name ?? "Admin")</strong>
-                            <span>@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "admin@tafsilk.com")</span>
-                        </div>
-                    </div>
-                    <div class="user-menu-body">
-                        <a href="#" class="user-menu-item">
-                            <i class="fas fa-user"></i>
-                            <span>Profile</span>
-                        </a>
-                        <a href="#" class="user-menu-item">
-                            <i class="fas fa-cog"></i>
-                            <span>Settings</span>
-                        </a>
-                    </div>
-                    <div class="user-menu-footer">
-                        <form asp-controller="Account" asp-action="Logout" asp-area="" method="post">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-logout btn-block">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Logout</span>
-                            </button>
-                        </form>
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed hidden z-20 h-full top-0 left-0 pt-16 flex lg:flex flex-shrink-0 flex-col w-64 transition-width duration-75" aria-label="Sidebar">
+            <div class="relative flex-1 flex flex-col min-h-0 border-r border-gray-700 pt-0">
+                <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                    <div class="flex-1 px-3 divide-y space-y-1">
+                        <ul class="space-y-2 pb-2">
+                            <li>
+                                <a href="/Admin/AdminDashboard" class="text-base text-gray-300 font-normal rounded-lg flex items-center p-2 hover:bg-gray-700 hover:text-white group">
+                                    <svg class="w-6 h-6 text-gray-400 group-hover:text-white transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg>
+                                    <span class="ml-3">Dashboard</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/AdminDashboard/Products" class="text-base text-gray-300 font-normal rounded-lg hover:bg-gray-700 hover:text-white flex items-center p-2 group">
+                                    <svg class="w-6 h-6 text-gray-400 flex-shrink-0 group-hover:text-white transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path></svg>
+                                    <span class="ml-3 flex-1 whitespace-nowrap">Products</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/AdminDashboard/Orders" class="text-base text-gray-300 font-normal rounded-lg hover:bg-gray-700 hover:text-white flex items-center p-2 group">
+                                    <svg class="w-6 h-6 text-gray-400 flex-shrink-0 group-hover:text-white transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path><path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path></svg>
+                                    <span class="ml-3 flex-1 whitespace-nowrap">Orders</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/AdminDashboard/Users" class="text-base text-gray-300 font-normal rounded-lg hover:bg-gray-700 hover:text-white flex items-center p-2 group">
+                                    <svg class="w-6 h-6 text-gray-400 flex-shrink-0 group-hover:text-white transition duration-75" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                    <span class="ml-3 flex-1 whitespace-nowrap">Users</span>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
+        </aside>
+
+        <div class="bg-gray-900 opacity-50 hidden fixed inset-0 z-10" id="sidebarBackdrop"></div>
+
+        <div id="main-content" class="h-full w-full relative overflow-y-auto lg:ml-64">
+            <main>
+                @RenderBody()
+            </main>
+
+            <footer class="md:flex md:items-center md:justify-between shadow rounded-lg p-4 md:p-6 xl:p-8 my-6 mx-4">
+                <p class="text-center text-sm text-gray-500 my-10">
+                    &copy; 2025 Tafsilk. All rights reserved.
+                </p>
+            </footer>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="main-content" id="mainContent">
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i> @TempData["Success"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i> @TempData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
-        @if (TempData["Info"] != null)
-        {
-            <div class="alert alert-info alert-dismissible fade show" role="alert">
-                <i class="fas fa-info-circle me-2"></i> @TempData["Info"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        }
+    </div>
 
-        @RenderBody()
-    </main>
-</div>
-
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- Scripts -->
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
-
-@await RenderSectionAsync("Scripts", required: false)
+    <script src="https://buttons.github.io/buttons.js"></script>
+    <script src="https://buttons.github.io/buttons.js"></script>
+    <script src="~/js/windster.js"></script>
+    
+    <!-- Scripts from _Layout.cshtml -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

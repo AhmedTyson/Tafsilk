@@ -13,21 +13,7 @@
 
 <div class="container-fluid py-4" dir="rtl">
     <!-- Success/Error Messages -->
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i> <strong>Success:</strong> @TempData["Success"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-    
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle"></i> <strong>Error:</strong> @TempData["Error"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+
 
     <!-- Header -->
     <div class="row mb-4">

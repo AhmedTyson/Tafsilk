@@ -32,6 +32,7 @@
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
+    --radius-full: 9999px;
     
     /* --- Shadows --- */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -298,12 +299,72 @@ body {
     color: var(--text-primary);
 }
 
+.btn-sm {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+}
+
 /* Utilities */
 .grid-cols-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
 .flex-between { display: flex; justify-content: space-between; align-items: center; }
+.mb-2 { margin-bottom: 0.5rem; }
 .mb-4 { margin-bottom: 1.5rem; }
+.mb-5 { margin-bottom: 2rem; }
+.mb-6 { margin-bottom: 2.5rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-6 { margin-top: 1.5rem; }
+.p-0 { padding: 0 !important; }
+.p-2 { padding: 0.5rem; }
+.p-4 { padding: 1rem; }
+.p-5 { padding: 1.25rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.py-12 { padding-top: 3rem; padding-bottom: 3rem; }
+
+.text-xs { font-size: 0.75rem; }
 .text-sm { font-size: 0.875rem; }
+.text-lg { font-size: 1.125rem; }
+.text-2xl { font-size: 1.5rem; }
+.text-3xl { font-size: 1.875rem; }
+
 .font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+.uppercase { text-transform: uppercase; }
+.tracking-wider { letter-spacing: 0.05em; }
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-gray-900 { color: #111827; }
+
+.bg-surface-2 { background-color: var(--surface-2); }
+.bg-surface-3 { background-color: var(--surface-3); }
+
+.rounded-full { border-radius: 9999px; }
+.w-full { width: 100%; }
+.w-8 { width: 2rem; }
+.h-8 { height: 2rem; }
+.w-12 { width: 3rem; }
+.h-12 { height: 3rem; }
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.gap-2 { gap: 0.5rem; }
+.gap-3 { gap: 0.75rem; }
+
+.hover\:shadow-md:hover { box-shadow: var(--shadow-md); }
+.transition-all { transition: all 0.2s; }
+.transition-colors { transition: background-color 0.2s; }
+.hover\:bg-surface-2:hover { background-color: var(--surface-2); }
+
+.border-b { border-bottom: 1px solid var(--border-subtle); }
+.divide-y > * + * { border-top: 1px solid var(--border-subtle); }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+.overflow-hidden { overflow: hidden; }
 
 /* --- Mobile Menu Toggle --- */
 .mobile-menu-toggle {

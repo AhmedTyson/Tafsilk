@@ -161,7 +161,7 @@ namespace TafsilkPlatform.Web.Services
                 {
                     Success = false,
                     Message = result.Error,
-                    Errors = new List<string> { result.Error }
+                    Errors = new List<string> { result.Error ?? "Unknown error" }
                 };
             }
         }

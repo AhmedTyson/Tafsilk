@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using System.Drawing;
+using System.Drawing.Imaging;
 using TafsilkPlatform.Models.Models;
 
 namespace TafsilkPlatform.DataAccess.Data.Seed
@@ -7,255 +9,200 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
     {
         public static async Task SeedProductsAsync(ApplicationDbContext context)
         {
-            if (await context.Products.AnyAsync())
+            // Check if products already exist
+            var existingProducts = await context.Products.ToListAsync();
+            if (existingProducts.Any())
             {
-                return; // Already seeded
+                // Clear existing products - need to handle foreign key constraints
+                // First remove cart items and order items that reference products
+                var productIds = existingProducts.Select(p => p.ProductId).ToList();
+                var cartItems = await context.CartItems.Where(ci => productIds.Contains(ci.ProductId)).ToListAsync();
+                var orderItems = await context.OrderItems.Where(oi => oi.ProductId.HasValue && productIds.Contains(oi.ProductId.Value)).ToListAsync();
+
+                context.CartItems.RemoveRange(cartItems);
+                context.OrderItems.RemoveRange(orderItems);
+                context.Products.RemoveRange(existingProducts);
+                await context.SaveChangesAsync();
+
+                Console.WriteLine($"✅ Cleared {existingProducts.Count} existing products, {cartItems.Count} cart items, {orderItems.Count} order items");
             }
 
-            // Get a system tailor or create one
-            var systemTailor = await context.TailorProfiles.FirstOrDefaultAsync();
-            if (systemTailor == null)
+            var tailors = await context.TailorProfiles.ToListAsync();
+            if (!tailors.Any())
             {
-                Console.WriteLine("⚠️ No tailor found. Please create at least one tailor before seeding products.");
+                Console.WriteLine("⚠️ No tailors found. Please seed tailors first.");
                 return;
             }
 
-            var products = new List<Product>
-{
-          // Traditional Thobes
-       new Product
-     {
-        Name = "Classic White Thobe",
-     Description = "Traditional Saudi white thobe made from premium cotton fabric. Perfect for daily wear and special occasions.",
-        Price = 250.00m,
-        Category = "Thobe",
-         SubCategory = "Men's",
-        Size = "L",
-        Color = "White",
-  Material = "100% Cotton",
-    Brand = "Tafsilk Premium",
-    StockQuantity = 50,
-    IsAvailable = true,
-   IsFeatured = true,
-       Slug = "classic-white-thobe",
-        MetaTitle = "Classic White Thobe - Premium Saudi Traditional Wear",
-              MetaDescription = "Buy authentic Saudi white thobe online. Made from premium cotton for comfort and style.",
-      TailorId = systemTailor.Id
-      },
-          new Product
-        {
-        Name = "Embroidered Thobe - Black",
-       Description = "Elegant black thobe with intricate embroidery on collar and cuffs. Premium quality fabric with modern cut.",
-                  Price = 450.00m,
-     DiscountedPrice = 380.00m,
-          Category = "Thobe",
-               SubCategory = "Men's",
-  Size = "XL",
-               Color = "Black",
-        Material = "Premium Polyester Blend",
-   Brand = "Tafsilk Luxury",
-         StockQuantity = 30,
-            IsAvailable = true,
-         IsFeatured = true,
-      Slug = "embroidered-thobe-black",
-   MetaTitle = "Black Embroidered Thobe - Luxury Traditional Wear",
-  TailorId = systemTailor.Id
-  },
-                
-        // Abayas
-     new Product
-       {
-      Name = "Classic Black Abaya",
-       Description = "Elegant and modest black abaya perfect for everyday wear. Made from breathable fabric for comfort.",
-     Price = 180.00m,
-    Category = "Abaya",
-          SubCategory = "Women's",
-         Size = "M",
-       Color = "Black",
-    Material = "Crepe Fabric",
-    Brand = "Tafsilk Modest",
-         StockQuantity = 75,
-          IsAvailable = true,
-            IsFeatured = true,
-          Slug = "classic-black-abaya",
- MetaTitle = "Classic Black Abaya - Modest Fashion",
-        TailorId = systemTailor.Id
-    },
-   new Product
-       {
-  Name = "Embellished Abaya - Navy Blue",
-  Description = "Beautiful navy blue abaya with delicate embellishments and pearl details. Perfect for special occasions.",
-   Price = 550.00m,
-         DiscountedPrice = 475.00m,
-   Category = "Abaya",
-            SubCategory = "Women's",
-   Size = "L",
-   Color = "Navy Blue",
-               Material = "Premium Nida Fabric",
-              Brand = "Tafsilk Luxury",
-                StockQuantity = 25,
-           IsAvailable = true,
-          IsFeatured = true,
-    Slug = "embellished-abaya-navy",
-              TailorId = systemTailor.Id
-          },
-    
-                // Suits
-             new Product
-                {
-  Name = "Business Suit - Charcoal Grey",
-     Description = "Professional 2-piece business suit in charcoal grey. Tailored fit with modern styling.",
-         Price = 1200.00m,
-Category = "Suit",
-           SubCategory = "Men's",
-   Size = "L",
-           Color = "Charcoal Grey",
-     Material = "Wool Blend",
-     Brand = "Tafsilk Executive",
-    StockQuantity = 20,
-     IsAvailable = true,
-               IsFeatured = false,
-      Slug = "business-suit-charcoal",
-      TailorId = systemTailor.Id
-                },
-         new Product
-                {
-      Name = "Wedding Suit - Navy",
-        Description = "Luxurious 3-piece navy suit perfect for weddings and formal events. Includes jacket, waistcoat, and trousers.",
-   Price = 1800.00m,
-        DiscountedPrice = 1550.00m,
-    Category = "Suit",
-     SubCategory = "Men's",
-           Size = "M",
-      Color = "Navy Blue",
-         Material = "Premium Wool",
-          Brand = "Tafsilk Luxury",
- StockQuantity = 15,
-         IsAvailable = true,
-     IsFeatured = true,
-         Slug = "wedding-suit-navy",
-        TailorId = systemTailor.Id
-        },
-     
-    // Traditional Wear
-new Product
-     {
-          Name = "Children's Thobe - White",
-            Description = "Adorable white thobe for boys. Comfortable and perfect for Eid and special occasions.",
-  Price = 120.00m,
-   Category = "Traditional",
-    SubCategory = "Children's",
-   Size = "S",
-         Color = "White",
-   Material = "Soft Cotton",
-      Brand = "Tafsilk Kids",
-              StockQuantity = 60,
-           IsAvailable = true,
-          IsFeatured = false,
-       Slug = "childrens-thobe-white",
-   TailorId = systemTailor.Id
-             },
-   new Product
-    {
-        Name = "Traditional Saudi Bisht - Brown",
-          Description = "Authentic Saudi bisht in rich brown color with golden trim. Worn over thobe for special occasions.",
-          Price = 850.00m,
-        Category = "Traditional",
-       SubCategory = "Men's",
-          Color = "Brown",
-        Material = "Fine Wool",
-           Brand = "Tafsilk Heritage",
-         StockQuantity = 12,
-         IsAvailable = true,
-     IsFeatured = true,
-            Slug = "traditional-bisht-brown",
-  TailorId = systemTailor.Id
-     },
-         
-    // Accessories
-              new Product
-        {
-Name = "Premium Shemagh - Red & White",
-       Description = "Traditional Saudi shemagh in red and white pattern. High-quality cotton fabric.",
-             Price = 65.00m,
-    Category = "Accessories",
-        Color = "Red & White",
-          Material = "100% Cotton",
-             Brand = "Tafsilk Accessories",
-              StockQuantity = 100,
-     IsAvailable = true,
-             IsFeatured = false,
-   Slug = "shemagh-red-white",
-                    TailorId = systemTailor.Id
-   },
-     new Product
-    {
-              Name = "Leather Belt - Black",
-  Description = "Genuine leather belt in classic black. Perfect complement to thobes and suits.",
-Price = 95.00m,
-          Category = "Accessories",
-      Color = "Black",
- Material = "Genuine Leather",
- Brand = "Tafsilk Accessories",
- StockQuantity = 80,
-      IsAvailable = true,
-         IsFeatured = false,
-           Slug = "leather-belt-black",
-   TailorId = systemTailor.Id
-       },
-        
-            // Special Edition
-   new Product
-      {
-       Name = "Ramadan Special Thobe - Cream",
-  Description = "Limited edition Ramadan thobe in elegant cream color. Features special embroidery and premium fabric.",
-   Price = 380.00m,
-       DiscountedPrice = 320.00m,
-   Category = "Thobe",
-           SubCategory = "Men's",
-    Size = "L",
-     Color = "Cream",
-       Material = "Premium Cotton Blend",
- Brand = "Tafsilk Special Edition",
-        StockQuantity = 5,
-          IsAvailable = true,
-          IsFeatured = true,
-           Slug = "ramadan-thobe-cream",
-     TailorId = systemTailor.Id
-     },
-       new Product
- {
-         Name = "Designer Abaya - Burgundy",
-   Description = "Contemporary designer abaya in rich burgundy color. Modern cut with elegant draping.",
-    Price = 680.00m,
-        Category = "Abaya",
-         SubCategory = "Women's",
-          Size = "M",
-   Color = "Burgundy",
-         Material = "Designer Crepe",
-    Brand = "Tafsilk Designer",
-           StockQuantity = 18,
-             IsAvailable = true,
-          IsFeatured = true,
-      Slug = "designer-abaya-burgundy",
-   TailorId = systemTailor.Id
-         }
-            };
-
-            // Set random ratings for variety
+            var allProducts = new List<Product>();
             var random = new Random();
-            foreach (var product in products)
+
+            foreach (var tailor in tailors)
             {
-                product.AverageRating = Math.Round(3.5 + (random.NextDouble() * 1.5), 1); // 3.5 - 5.0
-                product.ReviewCount = random.Next(5, 50);
-                product.SalesCount = random.Next(10, 200);
-                product.ViewCount = random.Next(100, 1000);
+                // Generate 3-8 products per tailor
+                int productCount = random.Next(3, 9);
+
+                for (int i = 0; i < productCount; i++)
+                {
+                    var template = GetRandomProductTemplate(random);
+
+                    // Customize template for this tailor
+                    var product = new Product
+                    {
+                        Name = template.Name, // Could append tailor name if desired
+                        Description = template.Description,
+                        Price = template.Price * (decimal)(0.8 + (random.NextDouble() * 0.4)), // Vary price +/- 20%
+                        Category = template.Category,
+                        SubCategory = template.SubCategory,
+                        Size = template.Size,
+                        Color = template.Color,
+                        Material = template.Material,
+                        Brand = tailor.ShopName ?? "Tafsilk Collection",
+                        StockQuantity = random.Next(5, 50),
+                        IsAvailable = true,
+                        IsFeatured = random.NextDouble() > 0.8, // 20% chance of being featured
+                        Slug = $"{template.Slug}-{Guid.NewGuid().ToString().Substring(0, 8)}", // Ensure unique slug
+                        MetaTitle = template.MetaTitle,
+                        MetaDescription = template.MetaDescription,
+                        TailorId = tailor.Id,
+                        AverageRating = Math.Round(3.5 + (random.NextDouble() * 1.5), 1),
+                        ReviewCount = random.Next(5, 50),
+                        SalesCount = random.Next(10, 200),
+                        ViewCount = random.Next(100, 1000),
+                        PrimaryImageData = GenerateProductImage(template.Name, template.Color)
+                    };
+
+                    if (random.NextDouble() > 0.7)
+                    {
+                        product.DiscountedPrice = product.Price * 0.85m; // 15% discount
+                    }
+
+                    allProducts.Add(product);
+                }
             }
 
-            await context.Products.AddRangeAsync(products);
+            await context.Products.AddRangeAsync(allProducts);
             await context.SaveChangesAsync();
 
-            Console.WriteLine($"✅ Seeded {products.Count} products successfully!");
+            Console.WriteLine($"✅ Seeded {allProducts.Count} products for {tailors.Count} tailors successfully!");
+        }
+
+        private static byte[] GenerateProductImage(string text, string? colorName)
+        {
+            try
+            {
+                int width = 400;
+                int height = 500; // Portrait aspect ratio for products
+
+                using (Bitmap bitmap = new Bitmap(width, height))
+                using (Graphics graphics = Graphics.FromImage(bitmap))
+                {
+                    // Background color based on product color name (simplified)
+                    Color bgColor = GetColorFromString(colorName);
+
+                    // Fill background
+                    using (Brush brush = new SolidBrush(bgColor))
+                    {
+                        graphics.FillRectangle(brush, 0, 0, width, height);
+                    }
+
+                    // Add some texture/pattern
+                    using (Pen pen = new Pen(Color.FromArgb(30, Color.White), 2))
+                    {
+                        graphics.DrawLine(pen, 0, 0, width, height);
+                        graphics.DrawLine(pen, width, 0, 0, height);
+                    }
+
+                    // Draw text
+                    string displayText = text.Length > 20 ? text.Substring(0, 20) + "..." : text;
+                    using (Font font = new Font(FontFamily.GenericSansSerif, 24, FontStyle.Bold))
+                    using (Brush textBrush = new SolidBrush(Color.White))
+                    {
+                        SizeF textSize = graphics.MeasureString(displayText, font);
+                        graphics.DrawString(displayText, font, textBrush, (width - textSize.Width) / 2, (height - textSize.Height) / 2);
+                    }
+
+                    using (MemoryStream ms = new MemoryStream())
+                    {
+                        bitmap.Save(ms, ImageFormat.Png);
+                        return ms.ToArray();
+                    }
+                }
+            }
+            catch
+            {
+                return Array.Empty<byte>();
+            }
+        }
+
+        private static Color GetColorFromString(string? colorName)
+        {
+            if (string.IsNullOrEmpty(colorName)) return Color.Gray;
+
+            string lower = colorName.ToLower();
+            if (lower.Contains("white")) return Color.LightGray;
+            if (lower.Contains("black")) return Color.FromArgb(40, 40, 40);
+            if (lower.Contains("blue")) return Color.SteelBlue;
+            if (lower.Contains("red")) return Color.IndianRed;
+            if (lower.Contains("green")) return Color.SeaGreen;
+            if (lower.Contains("brown")) return Color.SaddleBrown;
+            if (lower.Contains("cream")) return Color.Beige;
+            if (lower.Contains("grey") || lower.Contains("gray")) return Color.DimGray;
+            if (lower.Contains("burgundy")) return Color.Maroon;
+
+            return Color.SlateGray;
+        }
+
+        private static ProductTemplate GetRandomProductTemplate(Random random)
+        {
+            var templates = new List<ProductTemplate>
+            {
+                // Traditional Egyptian Wear
+                new() { Name = "Men's Galabeya", Description = "Traditional Egyptian galabeya made from breathable cotton.", Price = 180.00m, Category = "Traditional", SubCategory = "Men's", Size = "L", Color = "White", Material = "Cotton", Slug = "mens-galabeya" },
+                new() { Name = "Embroidered Galabeya", Description = "Elegant embroidered galabeya perfect for special occasions.", Price = 320.00m, Category = "Traditional", SubCategory = "Men's", Size = "L", Color = "Beige", Material = "Linen Blend", Slug = "embroidered-galabeya" },
+                
+                // Suits
+                new() { Name = "Business Suit", Description = "Professional 2-piece suit perfect for office wear.", Price = 1200.00m, Category = "Suit", SubCategory = "Men's", Size = "M", Color = "Charcoal", Material = "Wool Blend", Slug = "business-suit" },
+                new() { Name = "Wedding Suit", Description = "Luxurious 3-piece suit for weddings and formal events.", Price = 1800.00m, Category = "Suit", SubCategory = "Men's", Size = "L", Color = "Navy", Material = "Premium Wool", Slug = "wedding-suit" },
+                new() { Name = "Casual Blazer", Description = "Smart-casual blazer for everyday elegance.", Price = 650.00m, Category = "Casual", SubCategory = "Men's", Size = "M", Color = "Gray", Material = "Cotton Blend", Slug = "casual-blazer" },
+                
+                // Dresses
+                new() { Name = "Evening Dress", Description = "Elegant evening dress for special occasions.", Price = 850.00m, Category = "Dress", SubCategory = "Women's", Size = "M", Color = "Burgundy", Material = "Silk Blend", Slug = "evening-dress" },
+                new() { Name = "Cocktail Dress", Description = "Stylish cocktail dress perfect for parties.", Price = 620.00m, Category = "Dress", SubCategory = "Women's", Size = "S", Color = "Black", Material = "Chiffon", Slug = "cocktail-dress" },
+                new() { Name = "Casual Summer Dress", Description = "Light and comfortable summer dress.", Price = 380.00m, Category = "Dress", SubCategory = "Women's", Size = "M", Color = "Floral", Material = "Cotton", Slug = "summer-dress" },
+                new() { Name = "Maxi Dress", Description = "Flowing maxi dress for elegant everyday wear.", Price = 450.00m, Category = "Dress", SubCategory = "Women's", Size = "L", Color = "Navy Blue", Material = "Jersey", Slug = "maxi-dress" },
+                
+                // Casual Wear
+                new() { Name = "Casual Shirt", Description = "Comfortable casual shirt for everyday wear.", Price = 220.00m, Category = "Casual", SubCategory = "Men's", Size = "L", Color = "Blue", Material = "Cotton", Slug = "casual-shirt" },
+                new() { Name = "Linen Pants", Description = "Breathable linen pants perfect for summer.", Price = 280.00m, Category = "Casual", SubCategory = "Men's", Size = "M", Color = "Beige", Material = "Linen", Slug = "linen-pants" },
+                new() { Name = "Polo Shirt", Description = "Classic polo shirt in premium cotton.", Price = 180.00m, Category = "Casual", SubCategory = "Men's", Size = "M", Color = "White", Material = "Pique Cotton", Slug = "polo-shirt" },
+                
+                // Women's Traditional & Modern
+                new() { Name = "Modern Kaftan", Description = "Contemporary kaftan with elegant design.", Price = 520.00m, Category = "Traditional", SubCategory = "Women's", Size = "One Size", Color = "Turquoise", Material = "Silk Blend", Slug = "modern-kaftan" },
+                new() { Name = "Embroidered Tunic", Description = "Beautiful embroidered tunic for modest fashion.", Price = 340.00m, Category = "Casual", SubCategory = "Women's", Size = "M", Color = "Cream", Material = "Cotton", Slug = "embroidered-tunic" },
+                
+                // Accessories
+                new() { Name = "Leather Belt", Description = "Genuine leather belt in classic design.", Price = 120.00m, Category = "Accessories", SubCategory = "Unisex", Size = "Adjustable", Color = "Brown", Material = "Leather", Slug = "leather-belt" },
+                new() { Name = "Silk Scarf", Description = "Elegant silk scarf with traditional patterns.", Price = 95.00m, Category = "Accessories", SubCategory = "Women's", Size = "Standard", Color = "Multi", Material = "Silk", Slug = "silk-scarf" }
+            };
+
+
+            return templates[random.Next(templates.Count)];
+        }
+
+        private class ProductTemplate
+        {
+            public string Name { get; set; } = "";
+            public string Description { get; set; } = "";
+            public decimal Price { get; set; }
+            public string Category { get; set; } = "";
+            public string SubCategory { get; set; } = "";
+            public string Size { get; set; } = "";
+            public string Color { get; set; } = "";
+            public string Material { get; set; } = "";
+            public string Slug { get; set; } = "";
+            public string MetaTitle => $"{Name} - Tafsilk";
+            public string MetaDescription => Description;
         }
     }
 }

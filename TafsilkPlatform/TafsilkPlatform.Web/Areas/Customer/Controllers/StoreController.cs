@@ -63,7 +63,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             var result = await _storeService.GetProductsAsync(
         category, search, page, 12, sortBy, minPrice, maxPrice);
 
-            return View(result);
+            return View("~/Areas/Customer/Views/Shop/Index.cshtml", result);
         }
 
         // GET: /Store/Product/guid
@@ -92,10 +92,10 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     TailorId = Guid.Empty
                 };
 
-                return View(fallback);
+                return View("~/Areas/Customer/Views/Shop/ProductDetails.cshtml", fallback);
             }
 
-            return View(product);
+            return View("~/Areas/Customer/Views/Shop/ProductDetails.cshtml", product);
         }
 
         // GET: /Store/Cart
@@ -106,7 +106,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             var customerId = await GetCustomerIdAsync();
             var cart = await _storeService.GetCartAsync(customerId);
 
-            return View(cart ?? new CartViewModel());
+            return View("~/Areas/Customer/Views/Shop/Cart.cshtml", cart ?? new CartViewModel());
         }
 
         // POST: /Store/AddToCart
@@ -202,11 +202,12 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     PaymentMethod = "CashOnDelivery"
                 };
 
-                return View(fallbackCheckout);
+                return View("~/Areas/Customer/Views/Orders/Checkout.cshtml", fallbackCheckout);
             }
 
-            return View(checkoutData);
+            return View("~/Areas/Customer/Views/Orders/Checkout.cshtml", checkoutData);
         }
+
 
         // POST: /Store/ProcessCheckout
         [Authorize(Policy = "CustomerPolicy")]
@@ -308,7 +309,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     // ✅ Traditional redirect for non-AJAX
                     TempData["OrderSuccess"] = "true";
                     TempData["OrderId"] = orderId.Value.ToString();
-                    return RedirectToAction(nameof(PaymentSuccess), new { orderId = orderId.Value });
+                    return RedirectToAction(nameof(OrderConfirmed), new { orderId = orderId.Value });
                 }
 
                 // ✅ Better error messages
@@ -356,47 +357,30 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             }
         }
 
-        // GET: /Store/PaymentSuccess/{orderId}
+        // GET: /Store/OrderConfirmed/{orderId}
         [Authorize(Policy = "CustomerPolicy")]
-        [HttpGet("PaymentSuccess/{orderId:guid}")]
-        public async Task<IActionResult> PaymentSuccess(Guid orderId)
+        [HttpGet("OrderConfirmed/{orderId:guid}")]
+        public async Task<IActionResult> OrderConfirmed(Guid orderId)
         {
             try
             {
                 var customerId = await GetCustomerIdAsync();
 
-                // ✅ FIXED: Verify this is from a successful checkout (prevent direct URL access after order completion)
+                // Verify this is from a successful checkout
                 var orderSuccessFlag = TempData["OrderSuccess"]?.ToString();
                 if (orderSuccessFlag != "true")
                 {
-                    _logger.LogWarning("Payment success page accessed without checkout completion for order {OrderId}", orderId);
+                    _logger.LogWarning("Order confirmed page accessed without checkout completion for order {OrderId}", orderId);
                 }
 
-                // ✅ FIXED: Try to get order details, but don't fail if order not found immediately
-                // (might be a timing issue with database transaction)
                 var order = await _storeService.GetOrderDetailsAsync(orderId, customerId);
 
                 if (order == null)
                 {
-                    // ✅ FIXED: If order not found, still show success page with basic info
-                    // This handles cases where order was just created and might not be immediately available
-                    _logger.LogWarning("Order {OrderId} not found for customer {CustomerId}, showing success page anyway", orderId, customerId);
-
-                    var fallbackModel = new PaymentSuccessViewModel
-                    {
-                        OrderId = orderId,
-                        OrderNumber = orderId.ToString().Substring(0, 8).ToUpper(),
-                        TotalAmount = 0, // Will be shown as "Will be updated soon"
-                        PaymentMethod = "Cash on Delivery",
-                        OrderDate = DateTimeOffset.UtcNow,
-                        EstimatedDeliveryDays = 3
-                    };
-
-                    TempData["Info"] = "Order confirmed successfully! Details will be updated soon.";
-                    return View(fallbackModel);
+                    _logger.LogWarning("Order {OrderId} not found for customer {CustomerId}", orderId, customerId);
+                    return RedirectToAction("MyOrders", "Orders");
                 }
 
-                // ✅ Create success view model with actual order data
                 var model = new PaymentSuccessViewModel
                 {
                     OrderId = orderId,
@@ -404,20 +388,17 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                     TotalAmount = order.TotalAmount,
                     PaymentMethod = "Cash on Delivery",
                     OrderDate = order.OrderDate,
-                    EstimatedDeliveryDays = 3 // Default 3 days
+                    EstimatedDeliveryDays = 3
                 };
 
-                // ✅ Clear the success flag
                 TempData.Remove("OrderSuccess");
                 TempData.Remove("OrderId");
 
-                return View(model);
+                return View("~/Areas/Customer/Views/Orders/OrderConfirmed.cshtml", model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading payment success page for order {OrderId}", orderId);
-                TempData["Success"] = "Order confirmed successfully!";
-                // ✅ FIXED: Fallback to MyOrders if success page fails
+                _logger.LogError(ex, "Error loading order confirmed page for order {OrderId}", orderId);
                 return RedirectToAction("MyOrders", "Orders");
             }
         }

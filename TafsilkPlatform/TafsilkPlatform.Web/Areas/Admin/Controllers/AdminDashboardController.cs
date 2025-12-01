@@ -8,9 +8,6 @@ using TafsilkPlatform.Web.Controllers.Base;
 
 namespace TafsilkPlatform.Web.Areas.Admin.Controllers;
 
-/// <summary>
-/// Admin Dashboard Controller - Simplified version for basic admin functionality
-/// </summary>
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
 public class AdminDashboardController : BaseController
@@ -19,702 +16,225 @@ public class AdminDashboardController : BaseController
 
     public AdminDashboardController(
         ApplicationDbContext db,
-      ILogger<AdminDashboardController> logger) : base(logger)
+        ILogger<AdminDashboardController> logger) : base(logger)
     {
         _db = db;
     }
 
-    /// <summary>
-    /// Admin Dashboard Home
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> Index()
     {
         try
         {
-            // Get basic counts
+            // Gather key metrics
             var totalUsers = await _db.Users.CountAsync(u => !u.IsDeleted);
-            var totalCustomers = await _db.CustomerProfiles.CountAsync();
-            var totalTailors = await _db.TailorProfiles.CountAsync();
             var activeOrders = await _db.Orders.CountAsync(o =>
                 o.Status != OrderStatus.Delivered &&
-               o.Status != OrderStatus.Cancelled);
+                o.Status != OrderStatus.Cancelled);
 
             var totalSales = await _db.Orders
-                  .Where(o => o.Status == OrderStatus.Delivered)
-                  .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
+                .Where(o => o.Status == OrderStatus.Delivered)
+                .SumAsync(o => (decimal?)o.TotalPrice) ?? 0;
 
             var totalRevenue = await _db.Orders
-                  .Where(o => o.Status == OrderStatus.Delivered)
-                  .SumAsync(o => (decimal?)o.CommissionAmount) ?? 0;
+                .Where(o => o.Status == OrderStatus.Delivered)
+                .SumAsync(o => (decimal?)o.CommissionAmount) ?? 0;
+
+            // Get recent activity (Recent Orders for now)
+            var recentOrders = await _db.Orders
+                .Include(o => o.Customer).ThenInclude(c => c.User)
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(5)
+                .Select(o => new ActivityLogDto
+                {
+                    Id = o.OrderId,
+                    ActivityType = "New Order",
+                    Description = $"Order #{o.OrderId.ToString().Substring(0, 8)} placed by {o.Customer.FullName}",
+                    Timestamp = o.CreatedAt.DateTime,
+                    UserEmail = o.Customer.User.Email
+                })
+                .ToListAsync();
+
+            // Chart Data: Sales Last 7 Days
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var salesData = await _db.Orders
+                .Where(o => o.Status == OrderStatus.Delivered && o.CreatedAt >= sevenDaysAgo)
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(g => new { Date = g.Key, Total = g.Sum(o => o.TotalPrice) })
+                .ToListAsync();
+
+            // Chart Data: Order Status Distribution
+            var statusData = await _db.Orders
+                .GroupBy(o => o.Status)
+                .Select(g => new { Status = g.Key, Count = g.Count() })
+                .ToListAsync();
 
             var viewModel = new DashboardHomeViewModel
             {
                 TotalUsers = totalUsers,
-                TotalCustomers = totalCustomers,
-                TotalTailors = totalTailors,
-                PendingTailorVerifications = 0, // Simplified - no verification
-                PendingPortfolioReviews = 0,
                 ActiveOrders = activeOrders,
                 TotalSales = totalSales,
                 TotalRevenue = totalRevenue,
-                RecentActivity = new List<ActivityLogDto>()
+                RecentActivity = recentOrders,
+                // Pass chart data via ViewBag or extend ViewModel (using ViewBag for simplicity now)
             };
+
+            ViewBag.SalesDates = salesData.Select(s => s.Date.ToString("MMM dd")).ToArray();
+            ViewBag.SalesValues = salesData.Select(s => s.Total).ToArray();
+            ViewBag.StatusLabels = statusData.Select(s => s.Status.ToString()).ToArray();
+            ViewBag.StatusValues = statusData.Select(s => s.Count).ToArray();
 
             return View(viewModel);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error loading admin dashboard");
-            TempData["Error"] = "An error occurred while loading the dashboard";
             return View(new DashboardHomeViewModel());
         }
     }
 
     [HttpGet]
-    public async Task<IActionResult> Users()
+    public async Task<IActionResult> Users(string status = "all", string search = "")
     {
-        try
-        {
-            var users = await _db.Users
-               .Include(u => u.Role)
-                 .Include(u => u.CustomerProfile)
-           .Include(u => u.TailorProfile)
+        var query = _db.Users
+            .Include(u => u.Role)
+            .Include(u => u.CustomerProfile)
+            .Include(u => u.TailorProfile)
             .Where(u => !u.IsDeleted)
-               .OrderByDescending(u => u.CreatedAt)
+            .AsQueryable();
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.ToLower();
+            query = query.Where(u =>
+                u.Email.ToLower().Contains(search) ||
+                (u.CustomerProfile != null && u.CustomerProfile.FullName.ToLower().Contains(search)) ||
+                (u.TailorProfile != null && u.TailorProfile.ShopName.ToLower().Contains(search))
+            );
+        }
+
+        // Filter
+        var now = DateTime.UtcNow;
+        if (status == "active")
+        {
+            query = query.Where(u => u.BannedAt == null || (u.BanExpiresAt != null && u.BanExpiresAt <= now));
+        }
+        else if (status == "banned")
+        {
+            query = query.Where(u => u.BannedAt != null && (u.BanExpiresAt == null || u.BanExpiresAt > now));
+        }
+
+        var users = await query
+            .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 
-            return View(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading users page");
-            TempData["Error"] = "An error occurred while loading the users page";
-            return View(new List<User>());
-        }
+        ViewBag.CurrentStatus = status;
+        ViewBag.CurrentSearch = search;
+
+        return View(users);
     }
 
-    [HttpGet]
-    public async Task<IActionResult> UserDetails(Guid id)
-    {
-        try
-        {
-            var user = await _db.Users
-            .Include(u => u.Role)
-               .Include(u => u.CustomerProfile)
-                .Include(u => u.TailorProfile)
-                    .ThenInclude(t => t.TailorServices)
-                .Include(u => u.TailorProfile)
-                    .ThenInclude(t => t.PortfolioImages)
-          .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-            {
-                TempData["Error"] = "User not found";
-                return RedirectToAction(nameof(Users));
-            }
-
-            // Load orders for this user (either as customer or tailor)
-            if (user.Role?.Name == "Customer")
-            {
-                ViewBag.Orders = await _db.Orders
-                    .Where(o => o.CustomerId == user.CustomerProfile.Id)
-                    .OrderByDescending(o => o.CreatedAt)
-                    .ToListAsync();
-            }
-            else if (user.Role?.Name == "Tailor")
-            {
-                ViewBag.Orders = await _db.Orders
-                    .Where(o => o.TailorId == user.TailorProfile.Id)
-                    .OrderByDescending(o => o.CreatedAt)
-                    .ToListAsync();
-            }
-
-            return View(user);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading user details for {UserId}", id);
-            TempData["Error"] = "An error occurred while loading user details";
-            return RedirectToAction(nameof(Users));
-        }
-    }
-
-    /// <summary>
-    /// Suspend a user account
-    /// POST: /Admin/AdminDashboard/SuspendUser/{id}
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SuspendUser(Guid id, string? reason)
+    public async Task<IActionResult> BanUser(Guid userId, string reason, int? days)
     {
-        try
-        {
-            var user = await _db.Users.FindAsync(id);
-            if (user == null)
-            {
-                TempData["Error"] = "User not found";
-                return RedirectToAction(nameof(Users));
-            }
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound();
 
-            // Prevent suspending other admins
-            if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
-            {
-                TempData["Error"] = "Cannot suspend admin account";
-                return RedirectToAction(nameof(UserDetails), new { id });
-            }
+        user.BannedAt = DateTime.UtcNow;
+        user.BanReason = reason;
+        user.BanExpiresAt = days.HasValue ? DateTime.UtcNow.AddDays(days.Value) : null;
 
-            user.IsActive = false;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("User {UserId} suspended by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "User account suspended successfully";
-
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error suspending user {UserId}", id);
-            TempData["Error"] = "An error occurred while suspending the account";
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-    }
-
-    /// <summary>
-    /// Activate a suspended user account
-    /// POST: /Admin/AdminDashboard/ActivateUser/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ActivateUser(Guid id)
-    {
-        try
-        {
-            var user = await _db.Users.FindAsync(id);
-            if (user == null)
-            {
-                TempData["Error"] = "User not found";
-                return RedirectToAction(nameof(Users));
-            }
-
-            user.IsActive = true;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("User {UserId} activated by admin", id);
-            TempData["Success"] = "User account activated successfully";
-
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error activating user {UserId}", id);
-            TempData["Error"] = "An error occurred while activating the account";
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-    }
-
-    /// <summary>
-    /// Soft delete a user account
-    /// POST: /Admin/AdminDashboard/DeleteUser/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteUser(Guid id, string? reason)
-    {
-        try
-        {
-            var user = await _db.Users.FindAsync(id);
-            if (user == null)
-            {
-                TempData["Error"] = "User not found";
-                return RedirectToAction(nameof(Users));
-            }
-
-            // Prevent deleting other admins
-            if (user.RoleId == await _db.Roles.Where(r => r.Name == "Admin").Select(r => r.Id).FirstOrDefaultAsync())
-            {
-                TempData["Error"] = "Cannot delete admin account";
-                return RedirectToAction(nameof(UserDetails), new { id });
-            }
-
-            // Soft delete
-            user.IsDeleted = true;
-            user.IsActive = false;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _db.SaveChangesAsync();
-
-            _logger.LogWarning("User {UserId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "User account deleted successfully";
-
-            return RedirectToAction(nameof(Users));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting user {UserId}", id);
-            TempData["Error"] = "An error occurred while deleting the account";
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-    }
-
-    /// <summary>
-    /// Update user role
-    /// POST: /Admin/AdminDashboard/UpdateUserRole/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateUserRole(Guid id, Guid newRoleId)
-    {
-        try
-        {
-            var user = await _db.Users
-            .Include(u => u.Role)
-             .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user == null)
-            {
-                TempData["Error"] = "User not found";
-                return RedirectToAction(nameof(Users));
-            }
-
-            var newRole = await _db.Roles.FindAsync(newRoleId);
-            if (newRole == null)
-            {
-                TempData["Error"] = "Selected role not found";
-                return RedirectToAction(nameof(UserDetails), new { id });
-            }
-
-            // Prevent changing admin roles
-            if (user.Role?.Name == "Admin" || newRole.Name == "Admin")
-            {
-                TempData["Error"] = "Cannot change admin role";
-                return RedirectToAction(nameof(UserDetails), new { id });
-            }
-
-            user.RoleId = newRoleId;
-            user.UpdatedAt = DateTime.UtcNow;
-
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("User {UserId} role updated to {RoleName} by admin", id, newRole.Name);
-            TempData["Success"] = $"User role updated to {newRole.Name} successfully";
-
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating user {UserId} role", id);
-            TempData["Error"] = "An error occurred while updating the role";
-            return RedirectToAction(nameof(UserDetails), new { id });
-        }
-    }
-
-    [HttpGet]
-    public IActionResult TailorVerification()
-    {
-        TempData["Info"] = "System simplified - Tailor verification not required";
-        return RedirectToAction(nameof(Users));
-    }
-
-    [HttpGet]
-    public IActionResult ReviewTailor(Guid id)
-    {
-        TempData["Info"] = "System simplified - Tailor verification not required";
+        await _db.SaveChangesAsync();
         return RedirectToAction(nameof(Users));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ApproveTailor(Guid id, string? notes)
+    public async Task<IActionResult> UnbanUser(Guid userId)
     {
-        try
-        {
-            var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
-            if (tailor == null)
-            {
-                TempData["Error"] = "Tailor not found";
-                return RedirectToAction(nameof(Users));
-            }
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound();
 
-            tailor.Verify(DateTime.UtcNow);
-            await _db.SaveChangesAsync();
+        user.BannedAt = null;
+        user.BanReason = null;
+        user.BanExpiresAt = null;
 
-            _logger.LogInformation("Tailor {TailorId} verified by admin. Notes: {Notes}", id, notes ?? "None");
-            TempData["Success"] = "Tailor account verified successfully";
-            return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error approving tailor {TailorId}", id);
-            TempData["Error"] = "An error occurred while verifying the tailor";
-            return RedirectToAction(nameof(Users));
-        }
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Users));
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RejectTailor(Guid id, string? reason)
+    public async Task<IActionResult> DeleteUser(Guid userId)
     {
-        try
-        {
-            var tailor = await _db.TailorProfiles.Include(t => t.User).FirstOrDefaultAsync(t => t.Id == id);
-            if (tailor == null)
-            {
-                TempData["Error"] = "Tailor not found";
-                return RedirectToAction(nameof(Users));
-            }
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null) return NotFound();
 
-            tailor.IsVerified = false;
-            tailor.VerifiedAt = null;
-            tailor.UpdatedAt = DateTime.UtcNow;
-            await _db.SaveChangesAsync();
+        user.IsDeleted = true;
+        // Optionally anonymize data or handle related entities
 
-            _logger.LogInformation("Tailor {TailorId} rejected/unverified by admin. Reason: {Reason}", id, reason ?? "None");
-            TempData["Success"] = "Tailor verification cancelled";
-            return RedirectToAction(nameof(UserDetails), new { id = tailor.UserId });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error rejecting tailor {TailorId}", id);
-            TempData["Error"] = "An error occurred while cancelling tailor verification";
-            return RedirectToAction(nameof(Users));
-        }
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> PortfolioReview()
-    {
-        try
-        {
-            var images = await _db.PortfolioImages
-             .Include(p => p.Tailor)
-             .ThenInclude(t => t.User)
-                     .Where(p => !p.IsDeleted)
-                .OrderByDescending(p => p.UploadedAt)
-        .ToListAsync();
-
-            return View(images);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading portfolio review page");
-            TempData["Error"] = "An error occurred while loading the portfolio review page";
-            return View(new List<PortfolioImage>());
-        }
-    }
-
-    /// <summary>
-    /// Delete portfolio image (Admin action)
-    /// POST: /Admin/AdminDashboard/DeletePortfolioImage/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeletePortfolioImage(Guid id, string? reason)
-    {
-        try
-        {
-            var image = await _db.PortfolioImages.FindAsync(id);
-            if (image == null)
-            {
-                TempData["Error"] = "Image not found";
-                return RedirectToAction(nameof(PortfolioReview));
-            }
-
-            image.IsDeleted = true;
-            await _db.SaveChangesAsync();
-
-            _logger.LogWarning("Portfolio image {ImageId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "Image deleted successfully";
-
-            return RedirectToAction(nameof(PortfolioReview));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting portfolio image {ImageId}", id);
-            TempData["Error"] = "An error occurred while deleting the image";
-            return RedirectToAction(nameof(PortfolioReview));
-        }
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Users));
     }
 
     [HttpGet]
     public async Task<IActionResult> Orders()
     {
-        try
-        {
-            var orders = await _db.Orders
-           .Include(o => o.Customer)
-          .ThenInclude(c => c.User)
-                .Include(o => o.Tailor)
-                   .ThenInclude(t => t.User)
-             .OrderByDescending(o => o.CreatedAt)
-           .ToListAsync();
-
-            return View(orders);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading orders page");
-            TempData["Error"] = "An error occurred while loading the orders page";
-            return View(new List<Order>());
-        }
+        var orders = await _db.Orders
+            .Include(o => o.Customer).ThenInclude(c => c.User)
+            .Include(o => o.Tailor).ThenInclude(t => t.User)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+        return View(orders);
     }
 
-    /// <summary>
-    /// Cancel order (Admin action)
-    /// POST: /Admin/AdminDashboard/CancelOrder/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CancelOrder(Guid id, string? reason)
-    {
-        try
-        {
-            var order = await _db.Orders.FindAsync(id);
-            if (order == null)
-            {
-                TempData["Error"] = "Order not found";
-                return RedirectToAction(nameof(Orders));
-            }
-
-            if (order.Status == OrderStatus.Delivered || order.Status == OrderStatus.Cancelled)
-            {
-                TempData["Error"] = "Cannot cancel this order";
-                return RedirectToAction(nameof(Orders));
-            }
-
-            order.Status = OrderStatus.Cancelled;
-            await _db.SaveChangesAsync();
-
-            _logger.LogWarning("Order {OrderId} cancelled by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "Order cancelled successfully";
-
-            return RedirectToAction(nameof(Orders));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error cancelling order {OrderId}", id);
-            TempData["Error"] = "An error occurred while cancelling the order";
-            return RedirectToAction(nameof(Orders));
-        }
-    }
-
-    #region Product Management
-
-    /// <summary>
-    /// Manage products
-    /// GET: /Admin/AdminDashboard/Products
-    /// </summary>
     [HttpGet]
-    public async Task<IActionResult> Products(string? category = null, string? search = null, int page = 1)
+    public async Task<IActionResult> Products()
     {
-        try
-        {
-            var query = _db.Products.Where(p => !p.IsDeleted);
-
-            if (!string.IsNullOrEmpty(category))
-            {
-                query = query.Where(p => p.Category == category);
-            }
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
-            }
-
-            var products = await query
+        var products = await _db.Products
             .Include(p => p.Tailor)
-                     .OrderByDescending(p => p.CreatedAt)
-              .Skip((page - 1) * 20)
-              .Take(20)
-           .ToListAsync();
-
-            ViewBag.TotalProducts = await query.CountAsync();
-            ViewBag.CurrentPage = page;
-            ViewBag.Category = category;
-            ViewBag.Search = search;
-
-            return View(products);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error loading products page");
-            TempData["Error"] = "An error occurred while loading the products page";
-            return View(new List<Product>());
-        }
+            .Where(p => !p.IsDeleted)
+            .OrderByDescending(p => p.CreatedAt)
+            .ToListAsync();
+        return View(products);
     }
-
-    /// <summary>
-    /// Toggle product availability
-    /// POST: /Admin/AdminDashboard/ToggleProductAvailability/{id}
-    /// </summary>
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ToggleProductAvailability(Guid id)
+    public async Task<IActionResult> DeleteProduct(Guid productId)
     {
-        try
-        {
-            var product = await _db.Products.FindAsync(id);
-            if (product == null)
-            {
-                TempData["Error"] = "Product not found";
-                return RedirectToAction(nameof(Products));
-            }
+        var product = await _db.Products.FindAsync(productId);
+        if (product == null) return NotFound();
 
-            product.IsAvailable = !product.IsAvailable;
-            product.UpdatedAt = DateTimeOffset.UtcNow;
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("Product {ProductId} availability toggled to {IsAvailable} by admin", id, product.IsAvailable);
-            TempData["Success"] = $"Product {(product.IsAvailable ? "activated" : "deactivated")} successfully";
-
-            return RedirectToAction(nameof(Products));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error toggling product availability {ProductId}", id);
-            TempData["Error"] = "An error occurred while updating product status";
-            return RedirectToAction(nameof(Products));
-        }
+        product.IsDeleted = true;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(Products));
     }
 
-    /// <summary>
-    /// Delete product (Admin action)
-    /// POST: /Admin/AdminDashboard/DeleteProduct/{id}
-    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> OrderDetails(Guid id)
+    {
+        var order = await _db.Orders
+            .Include(o => o.Customer).ThenInclude(c => c.User)
+            .Include(o => o.Tailor).ThenInclude(t => t.User)
+            .Include(o => o.Items).ThenInclude(i => i.Product)
+            .FirstOrDefaultAsync(o => o.OrderId == id);
+
+        if (order == null) return NotFound();
+
+        return View(order);
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteProduct(Guid id, string? reason)
+    public async Task<IActionResult> UpdateOrderStatus(Guid orderId, OrderStatus status)
     {
-        try
-        {
-            var product = await _db.Products.FindAsync(id);
-            if (product == null)
-            {
-                TempData["Error"] = "Product not found";
-                return RedirectToAction(nameof(Products));
-            }
+        var order = await _db.Orders.FindAsync(orderId);
+        if (order == null) return NotFound();
 
-            // Soft delete
-            product.IsDeleted = true;
-            product.IsAvailable = false;
-            product.UpdatedAt = DateTimeOffset.UtcNow;
-            await _db.SaveChangesAsync();
-
-            _logger.LogWarning("Product {ProductId} deleted by admin. Reason: {Reason}", id, reason ?? "No reason provided");
-            TempData["Success"] = "Product deleted successfully";
-
-            return RedirectToAction(nameof(Products));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting product {ProductId}", id);
-            TempData["Error"] = "An error occurred while deleting the product";
-            return RedirectToAction(nameof(Products));
-        }
-    }
-
-    /// <summary>
-    /// Update product stock
-    /// POST: /Admin/AdminDashboard/UpdateProductStock/{id}
-    /// </summary>
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> UpdateProductStock(Guid id, int newStock)
-    {
-        try
-        {
-            var product = await _db.Products.FindAsync(id);
-            if (product == null)
-            {
-                TempData["Error"] = "Product not found";
-                return RedirectToAction(nameof(Products));
-            }
-
-            if (newStock < 0)
-            {
-                TempData["Error"] = "Quantity must be greater than or equal to zero";
-                return RedirectToAction(nameof(Products));
-            }
-
-            product.StockQuantity = newStock;
-            product.UpdatedAt = DateTimeOffset.UtcNow;
-
-            // Auto-disable if out of stock
-            if (newStock == 0)
-            {
-                product.IsAvailable = false;
-            }
-
-            await _db.SaveChangesAsync();
-
-            _logger.LogInformation("Product {ProductId} stock updated to {Stock} by admin", id, newStock);
-            TempData["Success"] = "Stock updated successfully";
-
-            return RedirectToAction(nameof(Products));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating product stock {ProductId}", id);
-            TempData["Error"] = "An error occurred while updating stock";
-            return RedirectToAction(nameof(Products));
-        }
-    }
-
-    #endregion
-
-    [HttpGet]
-    public IActionResult Disputes()
-    {
-        TempData["Info"] = "Disputes feature is currently unavailable";
-        return View();
-    }
-
-    [HttpGet]
-    public IActionResult Refunds()
-    {
-        TempData["Info"] = "Refunds feature is currently unavailable";
-        return View();
-    }
-
-    [HttpGet]
-    public IActionResult Reviews()
-    {
-        TempData["Info"] = "System simplified - Reviews not available";
-        return RedirectToAction(nameof(Orders));
-    }
-
-    [HttpGet]
-    public IActionResult Analytics()
-    {
-        // Removed as per user request
-        return RedirectToAction(nameof(Index));
-    }
-
-    [HttpGet]
-    public IActionResult Notifications()
-    {
-        TempData["Info"] = "System simplified - Notifications not available";
-        return View(new List<string>());
-    }
-
-    [HttpGet]
-    public IActionResult AuditLogs()
-    {
-        TempData["Info"] = "Audit logs feature is under development";
-        return View();
-    }
-
-    /// <summary>
-    /// View verification document (ID, commercial registration, etc.)
-    /// </summary>
-    [HttpGet]
-    public IActionResult ViewVerificationDocument(Guid tailorId, string documentType)
-    {
-        TempData["Info"] = "System simplified - Verification documents not available";
-        return RedirectToAction(nameof(Users));
+        order.Status = status;
+        await _db.SaveChangesAsync();
+        return RedirectToAction(nameof(OrderDetails), new { id = orderId });
     }
 }

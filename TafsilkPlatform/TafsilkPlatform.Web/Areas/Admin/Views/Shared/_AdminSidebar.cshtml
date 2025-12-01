@@ -5,38 +5,45 @@
     </div>
     
     <nav class="sidebar-nav">
-        <!-- Dashboard -->
+        <!-- Overview -->
+        <div class="nav-group-label">Overview</div>
         <div class="nav-group">
             <a href="@Url.Action("Index", "AdminDashboard", new { area = "Admin" })" 
                class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
-                <i class="fas fa-home"></i>
+                <i class="fas fa-chart-line w-8 text-center"></i>
                 <span>Dashboard</span>
             </a>
         </div>
 
-        <!-- Management -->
-        <div class="nav-group-label">Management</div>
+        <!-- Marketplace -->
+        <div class="nav-group-label">Marketplace</div>
         <div class="nav-group">
             <a href="@Url.Action("Orders", "AdminDashboard", new { area = "Admin" })" 
                class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
-                <i class="fas fa-shopping-bag"></i>
+                <i class="fas fa-shopping-bag w-8 text-center"></i>
                 <span>Orders</span>
-            </a>
-            <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" 
-               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" ? "active" : "")">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
             </a>
             <a href="@Url.Action("Products", "AdminDashboard", new { area = "Admin" })" 
                class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")">
-                <i class="fas fa-box"></i>
+                <i class="fas fa-box w-8 text-center"></i>
                 <span>Products</span>
             </a>
             <a href="@Url.Action("PortfolioReview", "AdminDashboard", new { area = "Admin" })" 
                class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "PortfolioReview" ? "active" : "")">
-                <i class="fas fa-images"></i>
+                <i class="fas fa-images w-8 text-center"></i>
                 <span>Portfolio Review</span>
             </a>
+        </div>
+
+        <!-- Users -->
+        <div class="nav-group-label">Users</div>
+        <div class="nav-group">
+            <a href="@Url.Action("Users", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Users" ? "active" : "")">
+                <i class="fas fa-users w-8 text-center"></i>
+                <span>All Users</span>
+            </a>
+            <!-- Placeholder for Tailors/Customers specific views if needed later -->
         </div>
 
         <!-- System -->
@@ -44,8 +51,13 @@
         <div class="nav-group">
             <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" 
                class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "AuditLogs" ? "active" : "")">
-                <i class="fas fa-history"></i>
+                <i class="fas fa-history w-8 text-center"></i>
                 <span>Audit Logs</span>
+            </a>
+            <a href="@Url.Action("Settings", "AdminDashboard", new { area = "Admin" })" 
+               class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
+                <i class="fas fa-cog w-8 text-center"></i>
+                <span>Settings</span>
             </a>
         </div>
     </nav>
@@ -55,8 +67,8 @@
             <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                 @(User.Identity?.Name?.Substring(0, 1).ToUpper() ?? "A")
             </div>
-            <div class="d-flex flex-column">
-                <span class="text-sm font-medium">@User.Identity?.Name</span>
+            <div class="d-flex flex-column overflow-hidden">
+                <span class="text-sm font-medium text-truncate">@User.Identity?.Name</span>
                 <span class="text-xs text-muted">System Admin</span>
             </div>
         </div>

@@ -264,10 +264,10 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             {
                 // Use Payment Method Configuration from Dashboard (enables Cash App Pay, etc.)
                 PaymentMethodConfiguration = _paymentMethodConfigurationId ?? "pmc_1SVjwXFfjWhZZwelqjN5Gyh5",
-                
+
                 // ✅ APPLIED FROM GUIDE: Explicitly set payment method types
                 // PaymentMethodTypes = new List<string> { "card", "cashapp" },
-                
+
                 /*
                 PaymentMethodOptions = new Stripe.Checkout.SessionPaymentMethodOptionsOptions
                 {

@@ -1,229 +1,141 @@
 @model TafsilkPlatform.Models.ViewModels.Admin.DashboardHomeViewModel
 @{
     ViewData["Title"] = "Dashboard";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
+    // Layout is handled by _ViewStart.cshtml
+    
+    var salesDates = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.SalesDates);
+    var salesValues = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.SalesValues);
+    var statusLabels = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.StatusLabels);
+    var statusValues = Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.StatusValues);
 }
 
-<div class="page-header">
-    <h1 class="page-title">Dashboard</h1>
-    <div class="page-actions">
-        <button class="btn btn-outline" onclick="location.reload()">
-            <i class="fas fa-sync-alt"></i>
-            <span>Refresh</span>
-        </button>
-    </div>
-</div>
-
-<!-- Stats Grid -->
-<div class="grid-cols-4 mb-4">
-    <!-- Total Users -->
-    <div class="card stat-widget">
-        <div class="flex-between">
-            <span class="stat-label">Total Users</span>
-            <i class="fas fa-users text-secondary"></i>
-        </div>
-        <div class="stat-value">@Model.TotalUsers.ToString("N0")</div>
-        <div class="stat-trend up">
-            <i class="fas fa-arrow-up"></i>
-            <span>12% increase from last month</span>
-        </div>
-    </div>
-
-    <!-- Active Orders -->
-    <div class="card stat-widget">
-        <div class="flex-between">
-            <span class="stat-label">Active Orders</span>
-            <i class="fas fa-shopping-bag text-secondary"></i>
-        </div>
-        <div class="stat-value">@Model.ActiveOrders.ToString("N0")</div>
-        <div class="stat-trend up">
-            <i class="fas fa-arrow-up"></i>
-            <span>8% increase in orders</span>
-        </div>
-    </div>
-
-    <!-- Total Sales (Gross) -->
-    <div class="card stat-widget">
-        <div class="flex-between">
-            <span class="stat-label">Total Sales</span>
-            <i class="fas fa-money-bill-wave text-secondary"></i>
-        </div>
-        <div class="stat-value">@Model.TotalSales.ToString("C")</div>
-        <div class="stat-trend up">
-            <i class="fas fa-arrow-up"></i>
-            <span>Total Order Value</span>
-        </div>
-    </div>
-
-    <!-- Tafsilk Revenue (Commission) -->
-    <div class="card stat-widget">
-        <div class="flex-between">
-            <span class="stat-label">Tafsilk Revenue (Commission)</span>
-            <i class="fas fa-coins text-secondary"></i>
-        </div>
-        <div class="stat-value">@Model.TotalRevenue.ToString("C")</div>
-        <div class="stat-trend up">
-            <i class="fas fa-arrow-up"></i>
-            <span>Net Profit (10%)</span>
-        </div>
-    </div>
-
-    <!-- Pending Reviews -->
-    <div class="card stat-widget">
-        <div class="flex-between">
-            <span class="stat-label">Images for Review</span>
-            <i class="fas fa-images text-secondary"></i>
-        </div>
-        <div class="stat-value">@Model.PendingPortfolioReviews</div>
-        @if (Model.PendingPortfolioReviews > 0)
-        {
-            <div class="stat-trend down">
-                <i class="fas fa-exclamation-circle"></i>
-                <span>Action Required</span>
+<div class="pt-6 px-4">
+    <div class="w-full grid grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+        
+        <!-- Main Chart Card (Removed) -->
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 2xl:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900">@Model.TotalSales.ToString("C0")</span>
+                    <h3 class="text-base font-normal text-gray-500">Total Sales</h3>
+                </div>
+                <div class="flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                    12.5%
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
             </div>
-        }
-        else
-        {
-            <div class="stat-trend text-secondary">
-                <i class="fas fa-check"></i>
-                <span>No pending tasks</span>
-            </div>
-        }
-    </div>
-</div>
+        </div>
 
-<!-- Charts & Activity -->
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
-    <!-- Revenue Chart -->
-    <div class="card">
-        <div class="flex-between mb-4">
-            <h3 class="text-lg font-bold m-0">Revenue Overview</h3>
-            <select class="form-select" style="padding: 0.25rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);">
-                <option>This Year</option>
-                <option>Last 6 Months</option>
-            </select>
-        </div>
-        <div style="height: 300px;">
-            <canvas id="revenueChart"></canvas>
-        </div>
-    </div>
-
-    <!-- Order Status -->
-    <div class="card">
-        <h3 class="text-lg font-bold mb-4 m-0">Order Status</h3>
-        <div style="height: 250px; display: flex; align-items: center; justify-content: center;">
-            <canvas id="ordersChart"></canvas>
-        </div>
-        <div class="mt-4 pt-4 border-top border-subtle">
-            <div class="flex-between text-sm mb-2">
-                <span class="text-secondary">Completed</span>
-                <span class="font-medium">65%</span>
+        <!-- Recent Activity Card -->
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="mb-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Recent Activity</h3>
+                    <span class="text-base font-normal text-gray-500">Latest platform events</span>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="#" class="text-sm font-medium text-cyan-600 hover:bg-gray-100 rounded-lg p-2">View all</a>
+                </div>
             </div>
-            <div class="flex-between text-sm">
-                <span class="text-secondary">In Progress</span>
-                <span class="font-medium">20%</span>
+            <div class="flex flex-col mt-8">
+                <div class="overflow-x-auto rounded-lg">
+                    <div class="align-middle inline-block min-w-full">
+                        <div class="shadow overflow-hidden sm:rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" class="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                                        <th scope="col" class="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white">
+                                    @if (Model.RecentActivity != null && Model.RecentActivity.Any())
+                                    {
+                                        foreach (var item in Model.RecentActivity.Take(5))
+                                        {
+                                            <tr>
+                                                <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
+                                                    <span class="font-semibold">@item.ActivityType</span>
+                                                    <div class="text-xs text-gray-500">@item.Description</div>
+                                                </td>
+                                                <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                                    @item.Timestamp.ToString("MMM dd, HH:mm")
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="2" class="p-4 text-center text-sm text-gray-500">No recent activity.</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Recent Activity -->
-<div class="card">
-    <div class="flex-between mb-4">
-        <h3 class="text-lg font-bold m-0">Recent Activity</h3>
-        <a href="@Url.Action("AuditLogs", "AdminDashboard", new { area = "Admin" })" class="btn btn-sm btn-outline">View All</a>
-    </div>
-    
-    @if (Model.RecentActivity.Any())
-    {
-        <table class="datagrid">
-            <thead>
-                <tr>
-                    <th>User</th>
-                    <th>Activity</th>
-                    <th>Date</th>
-                    <th>IP Address</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var activity in Model.RecentActivity)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <div class="avatar bg-surface-3 text-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px; font-size: 0.75rem;">
-                                    <i class="fas fa-user"></i>
-                                </div>
-                                <span class="font-medium">@activity.UserName</span>
-                            </div>
-                        </td>
-                        <td>@activity.Action</td>
-                        <td>@activity.Timestamp.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="text-sm font-mono text-tertiary">@activity.IpAddress</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <div class="text-center py-5 text-secondary">
-            <i class="fas fa-inbox fa-2x mb-2 opacity-25"></i>
-            <p>No recent activity</p>
+    <!-- Stats Cards -->
+    <div class="mt-4 w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        
+        <!-- Total Users -->
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900">@Model.TotalUsers.ToString("N0")</span>
+                    <h3 class="text-base font-normal text-gray-500">Total Users</h3>
+                </div>
+                <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                    32.9%
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
-    }
+
+        <!-- Active Orders -->
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900">@Model.ActiveOrders.ToString("N0")</span>
+                    <h3 class="text-base font-normal text-gray-500">Active Orders</h3>
+                </div>
+                <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                    14.6%
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Revenue -->
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900">@Model.TotalRevenue.ToString("C0")</span>
+                    <h3 class="text-base font-normal text-gray-500">Net Revenue</h3>
+                </div>
+                <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                    2.7%
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Chart (Removed) -->
 </div>
 
 @section Scripts {
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Chart Config
-            Chart.defaults.font.family = "'Inter', 'Cairo', sans-serif";
-            Chart.defaults.color = '#64748b';
-            
-            // Revenue Chart
-            new Chart(document.getElementById('revenueChart'), {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                    datasets: [{
-                        label: 'Revenue',
-                        data: [12000, 19000, 15000, 25000, 22000, 30000],
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { borderDash: [4, 4] }, beginAtZero: true },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-
-            // Orders Chart
-            new Chart(document.getElementById('ordersChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'Processing', 'Pending', 'Cancelled'],
-                    datasets: [{
-                        data: [65, 20, 10, 5],
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { legend: { display: false } }
-                }
-            });
-        });
-    </script>
+    <!-- Charts removed -->
 }

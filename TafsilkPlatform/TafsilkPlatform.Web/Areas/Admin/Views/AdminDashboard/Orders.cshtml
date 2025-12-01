@@ -1,22 +1,93 @@
 @model IEnumerable<TafsilkPlatform.Models.Models.Order>
 @{
-    ViewData["Title"] = "Order Management";
-    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout_v2.cshtml";
+    ViewData["Title"] = "Orders";
+    // Layout is handled by _ViewStart.cshtml
 }
 
-<div class="page-header">
-    <h1 class="page-title">Order Management</h1>
-    <div class="page-actions">
-        <button class="btn btn-outline">
-            <i class="fas fa-filter"></i>
-            <span>Filter</span>
-        </button>
-        <button class="btn btn-primary">
-            <i class="fas fa-download"></i>
-            <span>Export</span>
-        </button>
+<div class="glass-card shadow-4 rounded-lg p-4 sm:p-6 xl:p-8 my-6 mx-4">
+    <div class="mb-4 flex items-center justify-between">
+        <div>
+            <h3 class="text-xl font-bold text-white mb-2">All Orders</h3>
+            <span class="text-base font-normal text-gray-400">Manage all orders in the store</span>
+        </div>
+        <div class="flex-shrink-0">
+            <a href="#" class="text-sm font-medium text-cyan-600 hover:bg-gray-700 rounded-lg p-2">View all</a>
+        </div>
     </div>
-            }
-        </tbody>
-    </table>
+    <div class="flex flex-col mt-8">
+        <div class="overflow-x-auto rounded-lg">
+            <div class="align-middle inline-block min-w-full">
+                <div class="shadow overflow-hidden sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-700 glass-table">
+                        <thead class="bg-gray-800">
+                            <tr>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Order ID
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Customer
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Tailor
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Total
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-transparent divide-y divide-gray-700">
+                            @foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-gray-700">
+                                    <td class="p-4 whitespace-nowrap text-sm font-semibold text-white">
+                                        #@item.OrderId.ToString().Substring(0, 8)
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
+                                        @(item.Customer?.FullName ?? "Unknown")
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
+                                        @(item.Tailor?.ShopName ?? "Unknown")
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
+                                        @{
+                                            var statusColor = item.Status.ToString() switch
+                                            {
+                                                "Delivered" => "bg-green-100 text-green-800",
+                                                "Cancelled" => "bg-red-100 text-red-800",
+                                                "Pending" => "bg-yellow-100 text-yellow-800",
+                                                "Processing" => "bg-blue-100 text-blue-800",
+                                                _ => "bg-gray-100 text-gray-800"
+                                            };
+                                        }
+                                        <span class="@statusColor text-xs font-medium mr-2 px-2.5 py-0.5 rounded-md">@item.Status</span>
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap text-sm font-semibold text-white">
+                                        $@item.TotalPrice
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
+                                        @item.CreatedAt.ToString("MMM dd, yyyy")
+                                    </td>
+                                    <td class="p-4 whitespace-nowrap space-x-2">
+                                        <a href="@Url.Action("OrderDetails", "AdminDashboard", new { id = item.OrderId, area = "Admin" })" class="text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-3 py-2 text-center inline-flex items-center">
+                                            <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"></path><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"></path></svg>
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

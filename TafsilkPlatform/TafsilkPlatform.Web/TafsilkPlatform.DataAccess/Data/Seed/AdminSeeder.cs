@@ -71,7 +71,7 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
                     Id = Guid.NewGuid(),
                     UserId = adminUser.Id,
                     FullName = "Administrator",
-                    Gender = "Other",
+                    Gender = "Male",
                     City = "Admin City",
                     CreatedAt = DateTime.UtcNow
                 };

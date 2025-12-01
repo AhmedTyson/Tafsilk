@@ -66,7 +66,7 @@ public class AccountController(
 
         // Send email
         var callbackUrl = Url.Action(nameof(ResetPassword), "Account", new { token, email = user.Email }, Request.Scheme);
-        
+
         var message = $@"
             <h3>Reset your password</h3>
             <p>Please reset your password by clicking here: <a href='{callbackUrl}'>Reset Password</a></p>
@@ -111,8 +111,8 @@ public class AccountController(
         }
 
         // Verify token
-        if (user.PasswordResetToken != model.Token || 
-            !user.PasswordResetTokenExpires.HasValue || 
+        if (user.PasswordResetToken != model.Token ||
+            !user.PasswordResetTokenExpires.HasValue ||
             user.PasswordResetTokenExpires.Value < DateTime.UtcNow)
         {
             ModelState.AddModelError("", "Invalid or expired password reset token");
@@ -122,7 +122,7 @@ public class AccountController(
         // Reset password
         var hash = PasswordHasher.Hash(model.NewPassword);
         user.PasswordHash = hash;
-        
+
         // Clear token
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpires = null;

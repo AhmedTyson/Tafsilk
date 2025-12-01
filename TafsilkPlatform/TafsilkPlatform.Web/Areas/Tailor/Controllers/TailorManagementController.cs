@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TafsilkPlatform.DataAccess.Data;
 using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Utility.Extensions;
+using TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
 using TafsilkPlatform.Web.Services;
 using TafsilkPlatform.Web.ViewModels.TailorManagement;
-using TafsilkPlatform.Web.Areas.Tailor.ViewModels.TailorManagement;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 
@@ -734,8 +734,8 @@ public partial class TailorManagementController(
             {
                 // search = search.Trim().ToLower(); // Removed ToLower to use Like
                 search = search.Trim();
-                query = query.Where(o => 
-                    o.OrderId.ToString().Contains(search) || 
+                query = query.Where(o =>
+                    o.OrderId.ToString().Contains(search) ||
                     EF.Functions.Like(o.Customer.FullName, $"%{search}%") ||
                     EF.Functions.Like(o.Description, $"%{search}%"));
             }
@@ -818,7 +818,7 @@ public partial class TailorManagementController(
 
             var oldStatus = order.Status;
             order.Status = status;
-            
+
             // If status changed to Delivered, update payment status if needed or trigger notifications
             if (status == OrderStatus.Delivered && oldStatus != OrderStatus.Delivered)
             {
@@ -1245,8 +1245,8 @@ public partial class TailorManagementController(
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim();
-                query = query.Where(p => 
-                    EF.Functions.Like(p.Name, $"%{search}%") || 
+                query = query.Where(p =>
+                    EF.Functions.Like(p.Name, $"%{search}%") ||
                     EF.Functions.Like(p.Description, $"%{search}%") ||
                     EF.Functions.Like(p.Brand, $"%{search}%"));
             }
@@ -1280,8 +1280,8 @@ public partial class TailorManagementController(
                     Category = p.Category,
                     StockQuantity = p.StockQuantity,
                     IsAvailable = p.IsAvailable,
-                    ImageUrl = p.PrimaryImageData != null && p.PrimaryImageData.Length > 0 
-                        ? Url.Action("GetProductImage", "TailorManagement", new { id = p.ProductId }) 
+                    ImageUrl = p.PrimaryImageData != null && p.PrimaryImageData.Length > 0
+                        ? Url.Action("GetProductImage", "TailorManagement", new { id = p.ProductId })
                         : p.PrimaryImageUrl,
                     SalesCount = p.SalesCount,
                     ViewCount = p.ViewCount
@@ -1464,8 +1464,8 @@ public partial class TailorManagementController(
             MetaTitle = product.MetaTitle,
             MetaDescription = product.MetaDescription,
             HasCurrentPrimaryImage = product.PrimaryImageData != null,
-            CurrentAdditionalImagesCount = !string.IsNullOrEmpty(product.AdditionalImagesJson) 
-                ? product.AdditionalImagesJson.Split(";;", StringSplitOptions.RemoveEmptyEntries).Length 
+            CurrentAdditionalImagesCount = !string.IsNullOrEmpty(product.AdditionalImagesJson)
+                ? product.AdditionalImagesJson.Split(";;", StringSplitOptions.RemoveEmptyEntries).Length
                 : 0
         };
 

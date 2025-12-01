@@ -1,30 +1,266 @@
-@model Guid
+@model TafsilkPlatform.Models.ViewModels.Payments.PaymentSuccessViewModel
 @{
-    ViewData["Title"] = "Payment Successful";
+    ViewData["Title"] = Model.IsSuccess ? "Payment Successful" : "Payment Status";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container py-5 text-center">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-sm border-success">
-                <div class="card-body py-5">
-                    <div class="mb-4 text-success">
-                        <i class="fas fa-check-circle fa-5x"></i>
+        <div class="col-md-6 col-lg-5">
+            <!-- Success Animation Card -->
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 animate-up">
+                <div class="card-body p-0">
+                    <div class="@(Model.IsSuccess ? "bg-success" : "bg-warning") bg-gradient text-white p-5 text-center position-relative overflow-hidden">
+                        <!-- Decorative Circles -->
+                        <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-white opacity-10" style="width: 200px; height: 200px;"></div>
+                        <div class="position-absolute bottom-0 end-0 translate-middle-x rounded-circle bg-white opacity-10" style="width: 150px; height: 150px;"></div>
+                        
+                        <!-- Animated Icon -->
+                        <div class="mb-4">
+                            @if (Model.IsSuccess)
+                            {
+                                <div class="success-checkmark">
+                                    <div class="check-icon">
+                                        <span class="icon-line line-tip"></span>
+                                        <span class="icon-line line-long"></span>
+                                        <div class="icon-circle"></div>
+                                        <div class="icon-fix"></div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <i class="fas fa-clock fa-4x text-white opacity-75"></i>
+                            }
+                        </div>
+                        
+                        <h2 class="fw-bold mb-2">@ViewData["Title"]</h2>
+                        <p class="mb-0 opacity-90">@Model.Message</p>
                     </div>
-                    <h2 class="mb-3">Payment Successful!</h2>
-                    <p class="text-muted mb-4">Thank you for your payment. Your order has been confirmed.</p>
                     
-                    <div class="d-grid gap-2 col-8 mx-auto">
-                        <a asp-controller="Orders" asp-action="OrderDetails" asp-route-id="@Model" class="btn btn-primary">
-                            View Order Details
-                        </a>
-                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
-                            Back to Home
-                        </a>
+                    <!-- Receipt Style Details -->
+                    <div class="p-4 bg-white position-relative receipt-section">
+                        <!-- Receipt Jagged Edge Top -->
+                        <div class="receipt-edge-top"></div>
+                        
+                        <div class="text-center mb-4">
+                            <p class="text-muted small mb-1">ORDER NUMBER</p>
+                            <h4 class="fw-bold letter-spacing-1">#@Model.OrderNumber</h4>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dashed pb-3">
+                            <span class="text-muted">Date</span>
+                            <span class="fw-medium">@Model.OrderDate.ToString("dd MMM yyyy")</span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dashed pb-3">
+                            <span class="text-muted">Payment Method</span>
+                            <span class="fw-bold text-primary">
+                                <i class="fas fa-credit-card me-1"></i> @Model.PaymentMethod
+                            </span>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center pt-2">
+                            <span class="fw-bold fs-5">Total Amount</span>
+                            <span class="fw-bold fs-4 text-primary">@Model.Amount.ToString("N2") <small class="fs-6 text-muted">EGP</small></span>
+                        </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Info Alert -->
+            @if (Model.IsSuccess)
+            {
+                <div class="alert alert-success border-0 shadow-sm rounded-4 d-flex align-items-center mb-4 p-3 animate-up delay-100">
+                    <div class="rounded-circle bg-success-subtle p-3 me-3 text-success">
+                        <i class="fas fa-check-circle fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Payment Verified</h6>
+                        <small class="text-muted">Your transaction has been completed successfully.</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning border-0 shadow-sm rounded-4 d-flex align-items-center mb-4 p-3 animate-up delay-100">
+                    <div class="rounded-circle bg-warning-subtle p-3 me-3 text-warning">
+                        <i class="fas fa-exclamation-circle fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0 text-dark">Payment Pending</h6>
+                        <small class="text-muted">We are verifying your payment. It may take a few moments.</small>
+                    </div>
+                </div>
+            }
+
+            <!-- Actions -->
+            <div class="d-grid gap-3 animate-up delay-200">
+                <a asp-controller="Orders" asp-action="OrderDetails" asp-route-id="@Model.OrderId" class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow-sm transition-all hover-scale">
+                    View Order Details <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+                <a asp-controller="Store" asp-action="Index" asp-area="Customer" class="btn btn-outline-secondary btn-lg rounded-pill py-3 fw-bold transition-all hover-scale">
+                    Continue Shopping
+                </a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Confetti Canvas -->
+@if (Model.IsSuccess)
+{
+    <canvas id="confetti-canvas" class="position-fixed top-0 start-0 w-100 h-100 pe-none" style="z-index: 1050;"></canvas>
+}
+
+<style>
+    /* Animations */
+    .animate-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hover-scale:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    
+    .transition-all { transition: all 0.3s ease; }
+    
+    .letter-spacing-1 { letter-spacing: 1px; }
+    .border-dashed { border-style: dashed !important; }
+
+    /* Checkmark Animation */
+    .success-checkmark {
+        width: 80px;
+        height: 115px;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        border-radius: 50%;
+        box-sizing: content-box;
+        border: 4px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    .check-icon::before {
+        top: 3px;
+        left: -2px;
+        width: 30px;
+        transform-origin: 100% 50%;
+        border-radius: 100px 0 0 100px;
+    }
+    
+    .check-icon::after {
+        top: 0;
+        left: 30px;
+        width: 60px;
+        transform-origin: 0 50%;
+        border-radius: 0 100px 100px 0;
+        animation: rotate-circle 4.25s ease-in;
+    }
+    
+    .icon-line {
+        height: 5px;
+        background-color: #fff;
+        display: block;
+        border-radius: 2px;
+        position: absolute;
+        z-index: 10;
+    }
+    
+    .line-tip {
+        top: 46px;
+        left: 14px;
+        width: 25px;
+        transform: rotate(45deg);
+        animation: icon-line-tip 0.75s;
+    }
+    
+    .line-long {
+        top: 38px;
+        right: 8px;
+        width: 47px;
+        transform: rotate(-45deg);
+        animation: icon-line-long 0.75s;
+    }
+    
+    .icon-circle {
+        top: -4px;
+        left: -4px;
+        z-index: 10;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        position: absolute;
+        box-sizing: content-box;
+        border: 4px solid rgba(255, 255, 255, 0.5);
+    }
+    
+    .icon-fix {
+        top: 8px;
+        width: 5px;
+        left: 26px;
+        z-index: 1;
+        height: 85px;
+        position: absolute;
+        transform: rotate(-45deg);
+    }
+
+    @@keyframes icon-line-tip {
+        0% { width: 0; left: 1px; top: 19px; }
+        54% { width: 0; left: 1px; top: 19px; }
+        70% { width: 50px; left: -8px; top: 37px; }
+        84% { width: 17px; left: 21px; top: 48px; }
+        100% { width: 25px; left: 14px; top: 46px; }
+    }
+
+    @@keyframes icon-line-long {
+        0% { width: 0; right: 46px; top: 54px; }
+        65% { width: 0; right: 46px; top: 54px; }
+        84% { width: 55px; right: 0px; top: 35px; }
+        100% { width: 47px; right: 8px; top: 38px; }
+    }
+</style>
+
+@if (Model.IsSuccess)
+{
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Trigger Confetti
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function random(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var interval = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(interval);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        });
+    </script>
+}

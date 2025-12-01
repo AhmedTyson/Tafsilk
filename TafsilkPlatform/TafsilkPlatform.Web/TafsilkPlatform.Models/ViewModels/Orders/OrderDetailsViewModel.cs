@@ -33,6 +33,7 @@ public class OrderDetailsViewModel
     // Payment Information
     public bool IsPaid { get; set; }
     public decimal PaymentAmount { get; set; }
+    public string PaymentMethod { get; set; } = string.Empty;
 
     // Images
     public List<OrderImageViewModel> ReferenceImages { get; set; } = new();

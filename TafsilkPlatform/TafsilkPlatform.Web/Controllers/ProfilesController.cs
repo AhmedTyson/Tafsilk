@@ -561,6 +561,73 @@ public class ProfilesController : Controller
 
     */
 
+    #region Public Tailor Search
+
+    /// <summary>
+    /// Search and browse all tailors (public - no auth required)
+    /// GET: /Profiles/SearchTailors
+    /// </summary>
+    [HttpGet]
+    [Route("/Profiles/SearchTailors")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SearchTailors(string? city = null, string? serviceType = null, int page = 1)
+    {
+        try
+        {
+            int pageSize = 12;
+
+            var query = _db.TailorProfiles
+                .Include(t => t.User)
+                .Include(t => t.PortfolioImages.Where(p => !p.IsDeleted))
+                .Include(t => t.TailorServices.Where(s => !s.IsDeleted))
+                .Where(t => t.User.IsActive && !t.User.IsDeleted);
+
+            // Filter by city
+            if (!string.IsNullOrEmpty(city))
+            {
+                query = query.Where(t => t.City != null && t.City.Contains(city));
+            }
+
+            // Filter by service type (specialization)
+            if (!string.IsNullOrEmpty(serviceType))
+            {
+                query = query.Where(t => t.Specialization != null && t.Specialization.Contains(serviceType));
+            }
+
+            // Order by rating
+            query = query.OrderByDescending(t => t.AverageRating)
+                        .ThenByDescending(t => t.IsVerified)
+                        .ThenBy(t => t.ShopName);
+
+            // Get total count for pagination
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            // Get tailors with pagination
+            var tailors = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Set ViewBag values
+            ViewBag.CurrentCity = city;
+            ViewBag.CurrentServiceType = serviceType;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalResults = totalCount;
+
+            return View(tailors);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching tailors");
+            TempData["Error"] = "We couldn't load the tailors list. Please try again.";
+            return View(new List<TailorProfile>());
+        }
+    }
+
+    #endregion
+
     #region Helper Methods
 
     /// <summary>

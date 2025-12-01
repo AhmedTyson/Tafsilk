@@ -21,7 +21,7 @@ public interface IPaymentProcessorService
     /// <summary>
     /// Confirm Stripe payment (webhook handler)
     /// </summary>
-    Task<Result> ConfirmStripePaymentAsync(string paymentIntentId, string stripeSignature);
+    Task<Result> ConfirmStripePaymentAsync(string json, string? stripeSignature);
 
     /// <summary>
     /// Process refund
