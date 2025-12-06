@@ -9,6 +9,7 @@ namespace TafsilkPlatform.Models.Models
         [Key]
         [Required]
         public Guid OrderId { get; set; }
+        public string OrderNumber { get; set; } = string.Empty; // ✅ NEW: User-friendly order number
         public required string Description { get; set; } // ✅ FIXED: Corrected typo from "Discription"
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
         public DateTimeOffset? DueDate { get; set; }

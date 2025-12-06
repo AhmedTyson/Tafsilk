@@ -20,8 +20,8 @@ namespace TafsilkPlatform.Web.Services.Email
             try
             {
                 var emailMessage = new MimeMessage();
-                var fromEmail = _configuration["EmailSettings:FromEmail"] ?? "noreply@tafsilk.com";
-                var fromName = _configuration["EmailSettings:FromName"] ?? "Tafsilk Platform";
+                var fromEmail = _configuration["Email:FromEmail"] ?? "noreply@tafsilk.com";
+                var fromName = _configuration["Email:FromName"] ?? "Tafsilk Platform";
 
                 emailMessage.From.Add(new MailboxAddress(fromName, fromEmail));
                 emailMessage.To.Add(new MailboxAddress("", email));
@@ -37,10 +37,10 @@ namespace TafsilkPlatform.Web.Services.Email
                 // Accept all SSL certificates (in case of self-signed certificates)
                 client.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                var smtpHost = _configuration["EmailSettings:Host"];
-                var smtpPort = int.Parse(_configuration["EmailSettings:Port"] ?? "587");
-                var smtpUser = _configuration["EmailSettings:Username"];
-                var smtpPass = _configuration["EmailSettings:Password"];
+                var smtpHost = _configuration["Email:SmtpHost"];
+                var smtpPort = int.Parse(_configuration["Email:SmtpPort"] ?? "587");
+                var smtpUser = _configuration["Email:SmtpUsername"];
+                var smtpPass = _configuration["Email:SmtpPassword"];
 
                 if (string.IsNullOrEmpty(smtpHost) || string.IsNullOrEmpty(smtpUser) || string.IsNullOrEmpty(smtpPass))
                 {

@@ -307,7 +307,7 @@
                 <div>
                     @if (Model.ProfilePictureData != null)
                     {
-                        <img src="@Url.Action("GetProfilePicture", "Tailors", new { id = Model.Id })" 
+                        <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = Model.Id })" 
                              alt="@Model.ShopName" 
                              class="tailor-avatar" />
                     }
@@ -330,24 +330,34 @@
                             </span>
                         }
                         <div class="rating-display">
-                            <div class="stars">
-                                @for (int i = 0; i < 5; i++)
-                                {
-                                    if (i < Math.Floor(Model.AverageRating))
+                            @if (Model.AverageRating == 0)
+                            {
+                                <div class="stars" style="color: #2ecc71;">
+                                    <i class="fas fa-thumbs-up"></i>
+                                </div>
+                                <span style="color: #2ecc71; font-weight: 700;">Recommended (New)</span>
+                            }
+                            else
+                            {
+                                <div class="stars">
+                                    @for (int i = 0; i < 5; i++)
                                     {
-                                        <i class="fas fa-star"></i>
+                                        if (i < Math.Floor(Model.AverageRating))
+                                        {
+                                            <i class="fas fa-star"></i>
+                                        }
+                                        else if (i < Model.AverageRating)
+                                        {
+                                            <i class="fas fa-star-half-alt"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-star"></i>
+                                        }
                                     }
-                                    else if (i < Model.AverageRating)
-                                    {
-                                        <i class="fas fa-star-half-alt"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="far fa-star"></i>
-                                    }
-                                }
-                            </div>
-                            <span>@Model.AverageRating.ToString("F1") (@reviewCount reviews)</span>
+                                </div>
+                                <span>@Model.AverageRating.ToString("F1") (@reviewCount reviews)</span>
+                            }
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-map-marker-alt"></i>

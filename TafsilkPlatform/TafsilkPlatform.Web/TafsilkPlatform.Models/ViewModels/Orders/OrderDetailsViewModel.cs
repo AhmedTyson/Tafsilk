@@ -44,6 +44,20 @@ public class OrderDetailsViewModel
 
     // Status Timeline
     public List<OrderStatusHistoryViewModel> StatusHistory { get; set; } = new();
+
+    // ✅ NEW: List of all tailors involved in this order (for multi-tailor orders)
+    public List<InvolvedTailorViewModel> InvolvedTailors { get; set; } = new();
+}
+
+public class InvolvedTailorViewModel
+{
+    public Guid TailorId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string ShopName { get; set; } = string.Empty;
+    public string? Phone { get; set; }
+    public byte[]? ProfilePictureData { get; set; }
+    public string? ProfilePictureContentType { get; set; }
+    public string? ProfileImageUrl { get; set; }
 }
 
 public class OrderItemViewModel
@@ -53,6 +67,21 @@ public class OrderItemViewModel
     public int Quantity { get; set; }
     public decimal Price { get; set; }
     public string? Notes { get; set; }
+
+    // ✅ NEW: Tailor info per item
+    public string? TailorName { get; set; }
+    public string? TailorShopName { get; set; }
+    public Guid? TailorId { get; set; }
+
+    // ✅ NEW: Product Details
+    public Guid? ProductId { get; set; }
+    public string? ProductImageUrl { get; set; }
+    public byte[]? ProductImageData { get; set; }
+    public string? ProductImageContentType { get; set; }
+    public string? SelectedSize { get; set; }
+    public string? SelectedColor { get; set; }
+    public string? Category { get; set; }
+    public string? Material { get; set; }
 }
 
 public class OrderImageViewModel

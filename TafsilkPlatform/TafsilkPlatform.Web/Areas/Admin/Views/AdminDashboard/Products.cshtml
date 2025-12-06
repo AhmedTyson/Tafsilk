@@ -1,117 +1,112 @@
 @model IEnumerable<TafsilkPlatform.Models.Models.Product>
 @{
     ViewData["Title"] = "Products";
-    // Layout is handled by _ViewStart.cshtml
 }
 
-<div class="glass-card shadow-4 rounded-lg p-4 sm:p-6 xl:p-8 my-6 mx-4">
-    <div class="mb-4 flex items-center justify-between">
-        <div>
-            <h3 class="text-xl font-bold text-white mb-2">All Products</h3>
-            <span class="text-base font-normal text-gray-400">Manage all products in the store</span>
-        </div>
-        <div class="flex-shrink-0">
-            <a href="#" class="text-sm font-medium text-cyan-600 hover:bg-gray-700 rounded-lg p-2">View all</a>
+<div class="glass-card p-4 my-4 container-fluid">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Products</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 text-white fw-bold text-uppercase" style="letter-spacing: 1px;">All Products</h1>
+                <p class="text-muted small mb-0">Manage all products in the store</p>
+            </div>
+
         </div>
     </div>
-    <div class="flex flex-col mt-8">
-        <div class="overflow-x-auto rounded-lg">
-            <div class="align-middle inline-block min-w-full">
-                <div class="shadow overflow-hidden sm:rounded-lg">
-                    <table class="min-w-full divide-y divide-gray-700 glass-table">
-                        <thead class="bg-gray-800">
-                            <tr>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Product Name
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Category
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Tailor
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Price
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Stock
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Status
-                                </th>
-                                <th scope="col" class="p-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-transparent divide-y divide-gray-700">
-                            @foreach (var item in Model)
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <form class="d-flex gap-2 flex-grow-1" style="max-width: 400px;" action="@Url.Action("Products")" method="GET">
+            <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control bg-dark text-white border-secondary" placeholder="Search products...">
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+            {
+                <a href="@Url.Action("Products")" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+    </div>
+
+    <div class="table-responsive rounded">
+        <table class="table table-hover glass-table mb-0 align-middle">
+            <thead class="bg-dark text-uppercase text-muted small">
+                <tr>
+                    <th class="py-3 ps-4">Product Name</th>
+                    <th class="py-3">Category</th>
+                    <th class="py-3">Tailor</th>
+                    <th class="py-3">Price</th>
+                    <th class="py-3">Stock</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3 text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="ps-4 fw-bold text-white">@item.Name</td>
+                        <td class="text-muted small">@item.Category</td>
+                        <td class="text-white small">@(item.Tailor?.ShopName ?? "Unknown")</td>
+                        <td class="fw-bold text-success font-monospace">EGP @item.Price</td>
+                        <td class="text-white">@item.StockQuantity</td>
+                        <td>
+                            @if (item.StockQuantity > 0)
                             {
-                                <tr class="hover:bg-gray-700">
-                                    <td class="p-4 whitespace-nowrap text-sm font-semibold text-white">
-                                        @item.Name
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
-                                        @item.Category
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
-                                        @(item.Tailor?.ShopName ?? "Unknown")
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap text-sm font-semibold text-white">
-                                        $@item.Price
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
-                                        @item.StockQuantity
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap text-sm font-normal text-gray-400">
-                                        <div class="flex items-center">
-                                            @if (item.StockQuantity > 0)
-                                            {
-                                                <div class="h-2.5 w-2.5 rounded-full bg-green-400 mr-2"></div>
-                                                <span>In Stock</span>
-                                            }
-                                            else
-                                            {
-                                                <div class="h-2.5 w-2.5 rounded-full bg-red-500 mr-2"></div>
-                                                <span>Out of Stock</span>
-                                            }
-                                        </div>
-                                    </td>
-                                    <td class="p-4 whitespace-nowrap space-x-2">
-                                        <button type="button" onclick="openDeleteModal('@item.ProductId', '@item.Name')" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-3 py-2 text-center">
-                                            <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success">
+                                    In Stock
+                                </span>
                             }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger">
+                                    Out of Stock
+                                </span>
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            <button type="button" 
+                                    class="btn btn-sm btn-outline-danger" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteProductModal"
+                                    onclick="setDeleteModal('@item.ProductId', '@item.Name')">
+                                <i class="fas fa-trash me-1"></i> Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center p-5 text-muted fst-italic">
+                            No products found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- Delete Modal -->
-<div id="delete-product-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center p-4 w-full md:inset-0 h-modal md:h-full bg-gray-900 bg-opacity-50">
-    <div class="relative w-full max-w-md h-full md:h-auto">
-        <div class="glass-card rounded-lg shadow">
-            <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" onclick="closeDeleteModal()">
-                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                <span class="sr-only">Close modal</span>
-            </button>
-            <div class="p-6 text-center">
-                <svg class="mx-auto mb-4 w-14 h-14 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <h3 class="mb-5 text-lg font-normal text-white">Are you sure you want to delete <span id="delete-product-name" class="font-bold"></span>?</h3>
-                <p class="mb-5 text-sm text-gray-400">This action is irreversible (soft delete).</p>
-                
-                <form asp-action="DeleteProduct" method="post">
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white" id="deleteProductModalLabel">Delete Product</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <i class="fas fa-exclamation-triangle text-warning fa-3x mb-3"></i>
+                <h4 class="text-white">Are you sure?</h4>
+                <p class="text-muted">Do you really want to delete <strong id="delete-product-name" class="text-danger"></strong>? <br>This process cannot be undone (Soft Delete).</p>
+            </div>
+            <div class="modal-footer border-secondary justify-content-center">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form asp-action="DeleteProduct" method="post" class="d-inline">
                     <input type="hidden" name="productId" id="delete-product-id" />
-                    <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                        Yes, I'm sure
-                    </button>
-                    <button type="button" onclick="closeDeleteModal()" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">No, cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
                 </form>
             </div>
         </div>
@@ -120,16 +115,9 @@
 
 @section Scripts {
     <script>
-        function openDeleteModal(productId, productName) {
-            document.getElementById('delete-product-id').value = productId;
-            document.getElementById('delete-product-name').textContent = productName;
-            document.getElementById('delete-product-modal').classList.remove('hidden');
-            document.getElementById('delete-product-modal').classList.add('flex');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('delete-product-modal').classList.add('hidden');
-            document.getElementById('delete-product-modal').classList.remove('flex');
+        function setDeleteModal(id, name) {
+            document.getElementById('delete-product-id').value = id;
+            document.getElementById('delete-product-name').textContent = name;
         }
     </script>
 }

@@ -44,6 +44,10 @@ public class TailorDashboardViewModel
 
     // Performance Metrics
     public PerformanceMetrics Performance { get; set; } = new();
+
+    // Chart Data
+    public string[] SalesDates { get; set; } = Array.Empty<string>();
+    public decimal[] SalesValues { get; set; } = Array.Empty<decimal>();
 }
 
 /// <summary>

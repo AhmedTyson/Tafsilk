@@ -93,11 +93,12 @@ try
 
     // ✅ AUTHENTICATION CONFIGURATION
     // Base authentication with Cookie as default
+    // IMPORTANT: Don't set DefaultChallengeScheme here to allow [AllowAnonymous] to work
     var authBuilder = builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        // DON'T set DefaultChallengeScheme - this prevents automatic redirects for [AllowAnonymous] actions
     });
 
     // Cookie authentication
@@ -115,6 +116,7 @@ try
         options.ExpireTimeSpan = TimeSpan.FromDays(14);
         options.SlidingExpiration = true;
     });
+
 
     // ✅ JWT authentication - SIMPLIFIED: Auto-detects from User Secrets or Environment
     var jwtKey = builder.Configuration["Jwt:Key"]
@@ -301,6 +303,7 @@ try
     builder.Services.AddHostedService<IdempotencyCleanupService>();
     // Register CacheService (using in-memory cache for single-instance deployments)
     builder.Services.AddMemoryCache();
+    builder.Services.AddResponseCaching();
     builder.Services.AddScoped<ICacheService, MemoryCacheService>();
 
     // ✅ GLOBAL EXCEPTION HANDLER - Catches all unhandled exceptions
@@ -313,6 +316,8 @@ try
     builder.Services.AddScoped<TafsilkPlatform.Web.Services.IPortfolioService, TafsilkPlatform.Web.Services.PortfolioService>();
     // ✅ PAYMENT: Register payment processor service (supports Cash + Stripe when configured)
     builder.Services.AddScoped<TafsilkPlatform.Web.Services.Payment.IPaymentProcessorService, TafsilkPlatform.Web.Services.Payment.PaymentProcessorService>();
+    // ✅ REVIEWS: Register review service
+    builder.Services.AddScoped<TafsilkPlatform.Web.Services.Interfaces.IReviewService, TafsilkPlatform.Web.Services.ReviewService>();
 
 
     // Register DateTime Service
@@ -498,8 +503,20 @@ try
         Log.Information("ℹ️ Response compression disabled in Development mode for better debugging");
     }
 
+    // ✅ RESPONSE CACHING
+    app.UseResponseCaching();
 
-    app.UseStaticFiles();
+    // ✅ STATIC FILES CACHING
+    var cachePeriod = app.Environment.IsDevelopment() ? "600" : "31536000"; // 10 mins (dev) vs 1 year (prod)
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            // Cache static assets
+            ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age={cachePeriod}");
+        }
+    });
+
     app.UseRouting();
 
     // ✅ HEALTH CHECKS ENDPOINT
@@ -614,6 +631,9 @@ try
             // Seed portfolio images
             TafsilkPlatform.DataAccess.Data.Seed.PortfolioSeeder.Seed(db, logger);
 
+            // Seed orders (including multi-tailor test)
+            TafsilkPlatform.DataAccess.Data.Seed.OrderSeeder.Seed(db, logger);
+
             logger.LogInformation("✅ Development data seeding completed");
         }
         catch (Exception ex)
@@ -621,6 +641,12 @@ try
             logger.LogError(ex, "❌ Error during development data seeding");
             // Don't throw - allow app to continue even if seeding fails
         }
+    }
+    else
+    {
+        // Production Mode: Only AdminSeeder runs (via DbInitializer), skipping all other seeders
+        Log.Information("ℹ️ Production Environment detected: Skipping development data seeding (Products, Orders, etc.)");
+        Log.Information("ℹ️ Only Admin User and Roles will be ensured via DbInitializer");
     }
 
     // ✅ STARTUP HEALTH CHECKS - fail fast if attachments folder not writable

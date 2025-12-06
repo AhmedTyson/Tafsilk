@@ -47,11 +47,26 @@ public class OrdersController : Controller
     #region Customer Order Viewing
 
     /// <summary>
+    /// Main orders page - Redirects based on role
+    /// GET: /orders
+    /// </summary>
+    [HttpGet("")]
+    public IActionResult Index()
+    {
+        if (User.IsInRole("Tailor"))
+        {
+            return RedirectToAction(nameof(TailorOrders));
+        }
+
+        return RedirectToAction(nameof(MyOrders));
+    }
+
+    /// <summary>
     /// View customer orders
     /// GET: /orders/my-orders
     /// </summary>
     [HttpGet("my-orders")]
-    [Authorize(Roles = "Customer,Corporate")]
+    [Authorize(Roles = "Customer")]
     public async Task<IActionResult> MyOrders()
     {
         try
@@ -84,6 +99,14 @@ public class OrdersController : Controller
                 Orders = orders.Select(o => new OrderSummaryViewModel
                 {
                     OrderId = o.OrderId,
+                    OrderNumber = !string.IsNullOrEmpty(o.OrderNumber) ? o.OrderNumber : o.OrderId.ToString().Substring(0, 8).ToUpper(),
+                    Items = o.Items.Select(i => new OrderItemViewModel
+                    {
+                        ItemId = i.OrderItemId,
+                        ServiceName = i.Description,
+                        Quantity = i.Quantity,
+                        Price = i.UnitPrice
+                    }).ToList(),
                     TailorName = o.Tailor?.FullName ?? "Tailor",
                     TailorShopName = o.Tailor?.ShopName,
                     ServiceType = o.OrderType ?? "Not Specified",
@@ -127,6 +150,8 @@ public class OrdersController : Controller
      .Include(o => o.Tailor)
                .ThenInclude(t => t.User)
              .Include(o => o.Items)
+                 .ThenInclude(i => i.Product)
+                     .ThenInclude(p => p.Tailor) // ✅ NEW: Include Tailor info for items
          .Include(o => o.Payments)
           .Include(o => o.OrderImages)
         .AsSplitQuery()
@@ -151,7 +176,7 @@ public class OrdersController : Controller
             var model = new OrderDetailsViewModel
             {
                 OrderId = order.OrderId,
-                OrderNumber = order.OrderId.ToString().Substring(0, 8).ToUpper(),
+                OrderNumber = !string.IsNullOrEmpty(order.OrderNumber) ? order.OrderNumber : order.OrderId.ToString().Substring(0, 8).ToUpper(),
                 Description = order.Description, // ✅ FIXED: Use correct property name
                 ServiceType = order.OrderType,
                 Status = order.Status,
@@ -183,13 +208,67 @@ public class OrdersController : Controller
                         ? i.SpecialInstructions
                         : (!string.IsNullOrEmpty(i.SelectedSize) || !string.IsNullOrEmpty(i.SelectedColor))
                             ? $"Size: {i.SelectedSize ?? "N/A"}, Color: {i.SelectedColor ?? "N/A"}"
-                            : null
+                            : null,
+                    // ✅ NEW: Populate tailor info
+                    TailorId = i.Product?.TailorId,
+                    TailorName = i.Product?.Tailor?.FullName,
+                    TailorShopName = i.Product?.Tailor?.ShopName,
+
+                    // ✅ NEW: Populate product info
+                    ProductId = i.ProductId,
+                    ProductImageUrl = i.Product?.PrimaryImageUrl,
+                    ProductImageData = i.Product?.PrimaryImageData,
+                    ProductImageContentType = i.Product?.PrimaryImageContentType,
+                    SelectedSize = i.SelectedSize,
+                    SelectedColor = i.SelectedColor,
+                    Category = i.Product?.Category,
+                    Material = i.Product?.Material
                 }).ToList(),
 
                 // User role
                 IsCustomer = customer != null && order.CustomerId == customer.Id,
-                IsTailor = tailor != null && order.TailorId == tailor.Id
+                IsTailor = tailor != null && order.TailorId == tailor.Id,
+
+                // Payment Info
+                IsPaid = order.Payments.Any(p => p.PaymentStatus == Enums.PaymentStatus.Completed),
+                PaymentMethod = order.Payments.Any(p => p.PaymentType == Enums.PaymentType.Card)
+                    ? "Credit/Debit Card"
+                    : "Cash on Delivery"
             };
+
+            // ✅ NEW: Populate involved tailors list
+            var uniqueTailors = order.Items
+                .Where(i => i.Product?.Tailor != null)
+                .Select(i => i.Product!.Tailor!)
+                .DistinctBy(t => t.Id)
+                .Select(t => new InvolvedTailorViewModel
+                {
+                    TailorId = t.Id,
+                    Name = t.FullName ?? "Tailor",
+                    ShopName = t.ShopName ?? "Tailor Shop",
+                    Phone = t.User?.PhoneNumber,
+                    ProfilePictureData = t.ProfilePictureData,
+                    ProfilePictureContentType = t.ProfilePictureContentType,
+                    ProfileImageUrl = t.ProfileImageUrl
+                })
+                .ToList();
+
+            // If no product-specific tailors found (e.g. custom order), use the main order tailor
+            if (!uniqueTailors.Any() && order.Tailor != null)
+            {
+                uniqueTailors.Add(new InvolvedTailorViewModel
+                {
+                    TailorId = order.Tailor.Id,
+                    Name = order.Tailor.FullName ?? "Tailor",
+                    ShopName = order.Tailor.ShopName ?? "Tailor Shop",
+                    Phone = order.Tailor.User?.PhoneNumber,
+                    ProfilePictureData = order.Tailor.ProfilePictureData,
+                    ProfilePictureContentType = order.Tailor.ProfilePictureContentType,
+                    ProfileImageUrl = order.Tailor.ProfileImageUrl
+                });
+            }
+
+            model.InvolvedTailors = uniqueTailors;
 
             return View("~/Areas/Customer/Views/Orders/OrderDetails.cshtml", model);
         }

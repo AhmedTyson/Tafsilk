@@ -12,16 +12,22 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
     public class StoreController : Controller
     {
         private readonly IStoreService _storeService;
+        private readonly TafsilkPlatform.Web.Services.Interfaces.IReviewService _reviewService;
         private readonly TafsilkPlatform.DataAccess.Repository.ICustomerRepository _customerRepository;
+        private readonly TafsilkPlatform.DataAccess.Repository.IUnitOfWork _unitOfWork;
         private readonly ILogger<StoreController> _logger;
 
         public StoreController(
                IStoreService storeService,
-    TafsilkPlatform.DataAccess.Repository.ICustomerRepository customerRepository,
+               TafsilkPlatform.Web.Services.Interfaces.IReviewService reviewService,
+               TafsilkPlatform.DataAccess.Repository.ICustomerRepository customerRepository,
+               TafsilkPlatform.DataAccess.Repository.IUnitOfWork unitOfWork,
                ILogger<StoreController> logger)
         {
             _storeService = storeService;
+            _reviewService = reviewService;
             _customerRepository = customerRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger;
         }
 
@@ -95,7 +101,92 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                 return View("~/Areas/Customer/Views/Shop/ProductDetails.cshtml", fallback);
             }
 
+            // ✅ REVIEWS: Fetch reviews and check permission
+            product.Reviews = await _reviewService.GetProductReviewsAsync(id);
+
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.GetUserId();
+                if (userId.HasValue)
+                {
+                    product.CanReview = await _reviewService.CanUserReviewProductAsync(userId.Value, id);
+                }
+            }
+
             return View("~/Areas/Customer/Views/Shop/ProductDetails.cshtml", product);
+        }
+
+        // POST: /Store/SubmitReview
+        [Authorize(Policy = "CustomerPolicy")]
+        [HttpPost("SubmitReview")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReview([FromForm] SubmitReviewRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Invalid review data.";
+                return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+            }
+
+            try
+            {
+                var userId = User.GetUserId();
+                if (!userId.HasValue) throw new UnauthorizedAccessException();
+
+                var canReview = await _reviewService.CanUserReviewProductAsync(userId.Value, request.ProductId);
+                if (!canReview)
+                {
+                    TempData["Error"] = "You can only review products you have purchased and haven't reviewed yet.";
+                    return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+                }
+
+                var customerId = await GetCustomerIdAsync();
+
+                var review = new TafsilkPlatform.Models.Models.Review
+                {
+                    ProductId = request.ProductId,
+                    CustomerId = customerId,
+                    Rating = request.Rating,
+                    Comment = request.Comment,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    IsVerifiedPurchase = true
+                };
+
+                await _reviewService.AddReviewAsync(review);
+                TempData["Success"] = "Review submitted successfully!";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error submitting review for product {ProductId}", request.ProductId);
+                TempData["Error"] = "An error occurred while submitting your review.";
+            }
+
+            return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
+        }
+
+        // GET: /Store/ProductImage/{id}
+        [HttpGet("ProductImage/{id}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetProductImage(Guid id)
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            if (product.PrimaryImageData != null && product.PrimaryImageData.Length > 0)
+            {
+                return File(product.PrimaryImageData, product.PrimaryImageContentType ?? "image/jpeg");
+            }
+
+            if (!string.IsNullOrEmpty(product.PrimaryImageUrl))
+            {
+                // Redirect to static file if URL is provided
+                return Redirect(product.PrimaryImageUrl);
+            }
+
+            return NotFound();
         }
 
         // GET: /Store/Cart
@@ -109,7 +200,6 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             return View("~/Areas/Customer/Views/Shop/Cart.cshtml", cart ?? new CartViewModel());
         }
 
-        // POST: /Store/AddToCart
         [Authorize(Policy = "CustomerPolicy")]
         [HttpPost("AddToCart")]
         [ValidateAntiForgeryToken]
@@ -117,6 +207,13 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
         {
             if (!ModelState.IsValid)
             {
+                var errors = string.Join("; ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = "Invalid request: " + errors });
+                }
+
                 TempData["Error"] = "Invalid request. Please check your input.";
                 return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
             }
@@ -128,18 +225,37 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 
                 if (success)
                 {
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(new { success = true, message = "Product added to cart successfully" });
+                    }
+
                     TempData["Success"] = "Product added to cart successfully";
-                    return RedirectToAction(nameof(Cart));
+                    // Stay on the same page (Product Details) instead of redirecting to Cart
+                    return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
                 }
 
-                // ✅ Better error messages (like Amazon)
-                TempData["Error"] = "Failed to add product to cart. Product might be unavailable or requested quantity exceeds stock.";
+                var errorMessage = "Failed to add product to cart. Product might be unavailable or requested quantity exceeds stock.";
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = errorMessage });
+                }
+
+                TempData["Error"] = errorMessage;
                 return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in AddToCart for product {ProductId}", request.ProductId);
-                TempData["Error"] = "An error occurred while adding the product. Please try again.";
+                var errorMsg = "An error occurred while adding the product. Please try again.";
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(new { success = false, message = errorMsg });
+                }
+
+                TempData["Error"] = errorMsg;
                 return RedirectToAction(nameof(ProductDetails), new { id = request.ProductId });
             }
         }
@@ -270,46 +386,50 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                 // ✅ SIMPLIFIED: Force Cash on Delivery (REMOVED)
                 // request.PaymentMethod = "CashOnDelivery";
 
-                var (success, orderId, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
+                var (success, orderIds, errorMessage) = await _storeService.ProcessCheckoutAsync(customerId, request);
 
-                if (success && orderId.HasValue)
+                if (success && orderIds != null && orderIds.Any())
                 {
+                    var orderIdsString = string.Join(",", orderIds);
+                    var firstOrderId = orderIds.First();
+
                     // ✅ CHECK FOR STRIPE PAYMENT
                     if (request.PaymentMethod == "CreditCard")
                     {
-                        _logger.LogInformation("Redirecting to Stripe payment for order {OrderId}", orderId.Value);
+                        _logger.LogInformation("Redirecting to Stripe payment for {OrderCount} orders. IDs: {OrderIds}", orderIds.Count, orderIdsString);
 
                         if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                         {
-                            return Json(new { success = true, redirectUrl = $"/payments/process?orderId={orderId.Value}" });
+                            return Json(new { success = true, redirectUrl = $"/payments/process?orderIds={orderIdsString}" });
                         }
 
-                        return RedirectToAction("ProcessPayment", "Payments", new { orderId = orderId.Value });
+                        return RedirectToAction("ProcessPayment", "Payments", new { orderIds = orderIdsString });
                     }
 
-                    _logger.LogInformation("Cash order {OrderId} confirmed successfully for customer {CustomerId}", orderId.Value, customerId);
+                    _logger.LogInformation("Cash orders confirmed successfully for customer {CustomerId}. IDs: {OrderIds}", customerId, orderIdsString);
 
                     // ✅ NEW: Return JSON for AJAX requests
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        // Get order details for response
-                        var order = await _storeService.GetOrderDetailsAsync(orderId.Value, customerId);
+                        // Get order details for response (using first order for simplicity in summary)
+                        var order = await _storeService.GetOrderDetailsAsync(firstOrderId, customerId);
 
                         return Json(new
                         {
                             success = true,
-                            orderId = orderId.Value,
-                            orderNumber = orderId.Value.ToString().Substring(0, 8).ToUpper(),
+                            orderId = firstOrderId, // Legacy support
+                            orderIds = orderIds,
+                            orderNumber = firstOrderId.ToString().Substring(0, 8).ToUpper(),
                             orderDate = DateTimeOffset.UtcNow.ToString("dd/MM/yyyy - HH:mm"),
-                            totalAmount = order?.TotalAmount ?? 0,
+                            totalAmount = order?.TotalAmount ?? 0, // This might need to be total of all orders
                             paymentMethod = "Cash on Delivery"
                         });
                     }
 
                     // ✅ Traditional redirect for non-AJAX
                     TempData["OrderSuccess"] = "true";
-                    TempData["OrderId"] = orderId.Value.ToString();
-                    return RedirectToAction(nameof(OrderConfirmed), new { orderId = orderId.Value });
+                    TempData["OrderIds"] = orderIdsString;
+                    return RedirectToAction(nameof(OrderConfirmed), new { orderIds = orderIdsString });
                 }
 
                 // ✅ Better error messages
@@ -357,10 +477,10 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             }
         }
 
-        // GET: /Store/OrderConfirmed/{orderId}
+        // GET: /Store/OrderConfirmed?orderIds=...
         [Authorize(Policy = "CustomerPolicy")]
-        [HttpGet("OrderConfirmed/{orderId:guid}")]
-        public async Task<IActionResult> OrderConfirmed(Guid orderId)
+        [HttpGet("OrderConfirmed")]
+        public async Task<IActionResult> OrderConfirmed(string? orderIds)
         {
             try
             {
@@ -370,35 +490,65 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
                 var orderSuccessFlag = TempData["OrderSuccess"]?.ToString();
                 if (orderSuccessFlag != "true")
                 {
-                    _logger.LogWarning("Order confirmed page accessed without checkout completion for order {OrderId}", orderId);
+                    _logger.LogWarning("Order confirmed page accessed without checkout completion flag");
                 }
 
-                var order = await _storeService.GetOrderDetailsAsync(orderId, customerId);
-
-                if (order == null)
+                if (string.IsNullOrEmpty(orderIds))
                 {
-                    _logger.LogWarning("Order {OrderId} not found for customer {CustomerId}", orderId, customerId);
+                    // Fallback to TempData if query param missing (e.g. redirect)
+                    orderIds = TempData["OrderIds"]?.ToString();
+                }
+
+                if (string.IsNullOrEmpty(orderIds))
+                {
+                    return RedirectToAction("MyOrders", "Orders");
+                }
+
+                var orderIdList = orderIds.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                          .Select(id => Guid.TryParse(id, out var g) ? g : Guid.Empty)
+                                          .Where(g => g != Guid.Empty)
+                                          .ToList();
+
+                if (!orderIdList.Any())
+                {
                     return RedirectToAction("MyOrders", "Orders");
                 }
 
                 var model = new PaymentSuccessViewModel
                 {
-                    OrderId = orderId,
-                    OrderNumber = orderId.ToString().Substring(0, 8).ToUpper(),
-                    TotalAmount = order.TotalAmount,
-                    PaymentMethod = "Cash on Delivery",
-                    OrderDate = order.OrderDate,
-                    EstimatedDeliveryDays = 3
+                    // Use first order for main display properties
+                    OrderId = orderIdList.First(),
+                    OrderNumber = orderIdList.First().ToString().Substring(0, 8).ToUpper(),
+                    PaymentMethod = "Cash on Delivery", // Default, updated below
+                    OrderDate = DateTimeOffset.UtcNow,
+                    EstimatedDeliveryDays = 3,
+                    Orders = new List<OrderSuccessDetailsViewModel>()
                 };
 
+                decimal totalAmount = 0;
+
+                foreach (var id in orderIdList)
+                {
+                    var order = await _storeService.GetOrderDetailsAsync(id, customerId);
+                    if (order != null)
+                    {
+                        model.Orders.Add(order);
+                        totalAmount += order.TotalAmount;
+                        model.PaymentMethod = order.PaymentMethod; // Update with actual method
+                        model.OrderDate = order.OrderDate;
+                    }
+                }
+
+                model.TotalAmount = totalAmount;
+
                 TempData.Remove("OrderSuccess");
-                TempData.Remove("OrderId");
+                TempData.Remove("OrderIds");
 
                 return View("~/Areas/Customer/Views/Orders/OrderConfirmed.cshtml", model);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading order confirmed page for order {OrderId}", orderId);
+                _logger.LogError(ex, "Error loading order confirmed page");
                 return RedirectToAction("MyOrders", "Orders");
             }
         }

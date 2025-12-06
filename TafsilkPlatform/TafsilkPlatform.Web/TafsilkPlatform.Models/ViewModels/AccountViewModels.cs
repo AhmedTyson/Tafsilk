@@ -28,3 +28,4 @@ public class ResetPasswordViewModel
     [Compare("NewPassword", ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
+

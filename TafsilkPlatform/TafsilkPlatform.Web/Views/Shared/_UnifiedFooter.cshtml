@@ -1,6 +1,5 @@
 @* 
-    Unified Footer - Two versions: Full and Minimal
-    Use minimal footer for auth pages (Login/Register)
+    Unified Footer - Premium Design
 *@
 
 @{
@@ -15,369 +14,389 @@
     <!-- Minimal Footer (for Auth pages) -->
     <footer class="minimal-footer">
         <div class="container">
-        <div class="minimal-footer-content">
-      <p>© @DateTime.Now.Year Tafsilk. All rights reserved</p>
-      <div class="minimal-footer-links">
-       <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
-     <a href="#">Terms of Use</a>
-     <a href="#">Help</a>
-  </div>
-  </div>
-    </div>
+            <div class="minimal-footer-content">
+                <p>© @DateTime.Now.Year Tafsilk. All rights reserved</p>
+                <div class="minimal-footer-links">
+                    <a asp-controller="Home" asp-action="Terms">Terms</a>
+                    <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+                    <a asp-controller="Home" asp-action="Contact">Contact</a>
+                </div>
+            </div>
+        </div>
     </footer>
 }
 else
 {
-    <!-- Full Footer (for all other pages) -->
-    <footer class="full-footer" id="contact">
-<div class="container">
-     <div class="footer-content">
-                <!-- About Section -->
-           <div class="footer-section">
-       <h3 class="footer-title">
- <i class="fas fa-cut"></i>
-       About Tafsilk
-             </h3>
-        <p class="footer-description">
-      A digital platform connecting you with skilled tailors in your area. We provide reliable tailoring services with transparent pricing and guaranteed quality.
-</p>
-   <div class="social-links">
-       <a href="#" aria-label="Facebook" title="Follow us on Facebook">
-       <i class="fab fa-facebook"></i>
- </a>
-  <a href="#" aria-label="Twitter" title="Follow us on Twitter">
-  <i class="fab fa-twitter"></i>
-</a>
-    <a href="#" aria-label="Instagram" title="Follow us on Instagram">
-      <i class="fab fa-instagram"></i>
-    </a>
- <a href="#" aria-label="LinkedIn" title="Follow us on LinkedIn">
-   <i class="fab fa-linkedin"></i>
-          </a>
-         </div>
+    <!-- Full Footer -->
+    <footer class="premium-footer">
+        <div class="footer-wave">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" class="wave-fill"></path>
+                <path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" class="wave-fill"></path>
+                <path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" class="wave-fill"></path>
+            </svg>
         </div>
 
-      <!-- Quick Links -->
-        <div class="footer-section">
-            <h3 class="footer-title">Quick Links</h3>
-           <ul class="footer-links">
-     <li><a href="@Url.Action("Index","Home")#home"><i class="fas fa-chevron-right"></i> Home</a></li>
-    <li><a href="@Url.Action("Index","Home")#how-it-works"><i class="fas fa-chevron-right"></i> How it Works</a></li>
-   <li><a href="@Url.Action("Index","Home")#tailors"><i class="fas fa-chevron-right"></i> Tailors</a></li>
-<li><a asp-controller="Account" asp-action="Register"><i class="fas fa-chevron-right"></i> Join as Tailor</a></li>
-       <li><a href="#"><i class="fas fa-chevron-right"></i> Pricing</a></li>
-     </ul>
-   </div>
+        <div class="container">
+            <div class="footer-content">
+                <!-- Brand Section -->
+                <div class="footer-section brand-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-cut"></i>
+                        <span>Tafsilk</span>
+                    </div>
+                    <p class="footer-tagline">Connecting you with elite artisans who craft perfection</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
 
- <!-- Legal & Support -->
-<div class="footer-section">
-            <h3 class="footer-title">Support</h3>
-         <ul class="footer-links">
-  <li><a asp-controller="Home" asp-action="Privacy"><i class="fas fa-chevron-right"></i> Privacy Policy</a></li>
-       <li><a href="#"><i class="fas fa-chevron-right"></i> Terms of Use</a></li>
-    <li><a href="#"><i class="fas fa-chevron-right"></i> Return Policy</a></li>
- <li><a href="#"><i class="fas fa-chevron-right"></i> FAQ</a></li>
-     <li><a href="#"><i class="fas fa-chevron-right"></i> Help Center</a></li>
-     </ul>
-  </div>
+                <!-- Quick Links -->
+                <div class="footer-section">
+                    <h3 class="footer-title">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="/Home/Index">Home</a></li>
+                        <li><a asp-controller="Tailors" asp-action="Index">Find Tailors</a></li>
+                        <li><a asp-controller="Store" asp-action="Index">Store</a></li>
+                        <li><a asp-controller="Account" asp-action="RequestRoleChange">Join as Tailor</a></li>
+                    </ul>
+                </div>
 
-<!-- Contact Info -->
- <div class="footer-section">
-        <h3 class="footer-title">Contact Us</h3>
-      <ul class="footer-contact">
-           <li>
-      <i class="fas fa-envelope"></i>
-             <div>
-         <strong>Email</strong>
-    <a href="mailto:info@tafsilk.com">info@@tafsilk.com</a>
-   </div>
-           </li>
-  <li>
-       <i class="fas fa-phone"></i>
-          <div>
-             <strong>Phone</strong>
-    <a href="tel:+201234567890">+20 123 456 7890</a>
-   </div>
-    </li>
-  <li>
-     <i class="fas fa-map-marker-alt"></i>
-  <div>
-  <strong>Address</strong>
-          <span>Cairo, Egypt</span>
-     </div>
-       </li>
-        </ul>
-        </div>
-      </div>
+                <!-- Support -->
+                <div class="footer-section">
+                    <h3 class="footer-title">Support</h3>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Contact">Contact Us</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                        <li><a asp-controller="Home" asp-action="Terms">Terms of Service</a></li>
+                        <li><a asp-controller="Home" asp-action="FAQ">Help & FAQ</a></li>
+                    </ul>
+                </div>
 
-     <div class="footer-bottom">
-       <div class="footer-bottom-content">
-         <p>© @DateTime.Now.Year Tafsilk. All rights reserved</p>
-    <div class="footer-badges">
-            <span class="badge-item">
- <i class="fas fa-shield-alt"></i>
-           Secure Payments
-            </span>
-       <span class="badge-item">
-   <i class="fas fa-check-circle"></i>
-       Guaranteed Quality
-        </span>
-           </div>
-  </div>
-   </div>
+                <!-- Contact -->
+                <div class="footer-section">
+                    <h3 class="footer-title">Get in Touch</h3>
+                    <ul class="footer-contact">
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:info@tafsilk.com">info@tafsilk.com</a>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+201234567890">+20 123 456 7890</a>
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Cairo, Egypt</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-content">
+                    <p>© @DateTime.Now.Year Tafsilk. All rights reserved.</p>
+                    <div class="footer-badges">
+                        <span><i class="fas fa-shield-alt"></i> Secure Payments</span>
+                        <span><i class="fas fa-check-circle"></i> Verified Tailors</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 }
 
 <style>
-    /* Minimal Footer (for Auth pages) */
-.minimal-footer {
-    background: #1f2937;
-        color: white;
-   padding: 1.5rem 0;
-   margin-top: auto;
+    /* Minimal Footer */
+    .minimal-footer {
+        background: #1f2937;
+        color: #fff;
+        padding: 1.5rem 0;
+        margin-top: auto;
     }
 
- .minimal-footer-content {
-   display: flex;
+    .minimal-footer-content {
+        display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-  gap: 1rem;
+        gap: 1rem;
     }
 
     .minimal-footer-content p {
         margin: 0;
         color: #d1d5db;
- font-size: 0.9375rem;
     }
 
-.minimal-footer-links {
+    .minimal-footer-links {
         display: flex;
         gap: 1.5rem;
-     flex-wrap: wrap;
-  }
+    }
 
     .minimal-footer-links a {
-    color: #d1d5db;
+        color: #d1d5db;
         text-decoration: none;
-        font-size: 0.9375rem;
-     transition: color 0.3s;
+        transition: color 0.3s;
     }
 
     .minimal-footer-links a:hover {
-   color: white;
+        color: #D4AF37;
     }
 
-    /* Full Footer */
-    .full-footer {
-        background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-   color: white;
-padding: 3rem 0 0 0;
-margin-top: 4rem;
+    /* Premium Footer */
+    .premium-footer {
+        position: relative;
+        background: linear-gradient(180deg, #0b1120 0%, #000 100%);
+        color: #f8f9fa;
+        margin-top: 4rem;
+        overflow: hidden;
+    }
+
+    .footer-wave {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 120px;
+        transform: translateY(-100%);
+    }
+
+    .footer-wave svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .wave-fill {
+        fill: #0b1120;
+    }
+
+    .premium-footer .container {
+        position: relative;
+        z-index: 1;
+        padding-top: 4rem;
     }
 
     .footer-content {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 2.5rem;
- margin-bottom: 2.5rem;
+        grid-template-columns: 2fr 1fr 1fr 1.5fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
     }
 
-    .footer-section {
-  text-align: left;
+    /* Brand Section */
+    .brand-section {
+        max-width: 350px;
     }
 
-    .footer-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 1.25rem;
-        color: white;
+    .footer-logo {
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #D4AF37;
+        margin-bottom: 1rem;
     }
 
-    .footer-description {
-        color: #d1d5db;
-   font-size: 0.9375rem;
-        line-height: 1.7;
-margin-bottom: 1.5rem;
+    .footer-logo i {
+        font-size: 1.5rem;
+    }
+
+    .footer-tagline {
+        color: #94a3b8;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
     }
 
     .social-links {
         display: flex;
-      gap: 0.75rem;
+        gap: 0.75rem;
     }
 
     .social-links a {
-        width: 40px;
- height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-   display: flex;
+        background: rgba(212, 175, 55, 0.1);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        display: flex;
         align-items: center;
-      justify-content: center;
-        color: white;
-   transition: all 0.3s;
-        font-size: 1.125rem;
+        justify-content: center;
+        color: #D4AF37;
+        transition: all 0.3s ease;
+        text-decoration: none;
     }
 
-.social-links a:hover {
-        background: #2563eb;
+    .social-links a:hover {
+        background: #D4AF37;
+        color: #000;
         transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    }
+
+    /* Footer Sections */
+    .footer-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1.25rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+    }
+
+    .footer-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 2px;
+        background: #D4AF37;
     }
 
     .footer-links {
         list-style: none;
-  padding: 0;
+        padding: 0;
         margin: 0;
     }
 
     .footer-links li {
-   margin-bottom: 0.75rem;
- }
+        margin-bottom: 0.75rem;
+    }
 
-  .footer-links a {
-        color: #d1d5db;
-   text-decoration: none;
-   transition: all 0.3s;
-  display: flex;
-  align-items: center;
-        gap: 0.5rem;
-        font-size: 0.9375rem;
+    .footer-links a {
+        color: #94a3b8;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+        font-size: 0.95rem;
     }
 
     .footer-links a:hover {
-    color: white;
+        color: #D4AF37;
         padding-left: 0.5rem;
     }
 
-    .footer-links a i {
-      font-size: 0.75rem;
-      opacity: 0.6;
-    }
-
+    /* Contact */
     .footer-contact {
         list-style: none;
-     padding: 0;
+        padding: 0;
         margin: 0;
     }
 
     .footer-contact li {
-     display: flex;
-        align-items: flex-start;
- gap: 1rem;
-        margin-bottom: 1.25rem;
-   color: #d1d5db;
-  }
-
-.footer-contact li i {
-    font-size: 1.25rem;
-        color: #2563eb;
-        margin-top: 0.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        color: #94a3b8;
+        font-size: 0.95rem;
     }
 
-.footer-contact li div {
-   display: flex;
-   flex-direction: column;
-   gap: 0.25rem;
-}
-
-.footer-contact li strong {
-      color: white;
-        font-size: 0.875rem;
+    .footer-contact li i {
+        color: #D4AF37;
+        font-size: 1.1rem;
+        width: 20px;
     }
 
-    .footer-contact li a {
-        color: #d1d5db;
- text-decoration: none;
-   transition: color 0.3s;
+    .footer-contact a {
+        color: #94a3b8;
+        text-decoration: none;
+        transition: color 0.3s;
     }
 
-    .footer-contact li a:hover {
-        color: white;
+    .footer-contact a:hover {
+        color: #D4AF37;
     }
 
- .footer-contact li span {
-    font-size: 0.9375rem;
-    }
-
+    /* Footer Bottom */
     .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
         padding: 1.5rem 0;
     }
 
     .footer-bottom-content {
         display: flex;
-  justify-content: space-between;
+        justify-content: space-between;
         align-items: center;
-    flex-wrap: wrap;
+        flex-wrap: wrap;
         gap: 1rem;
-  }
+    }
 
     .footer-bottom p {
         margin: 0;
-      color: #9ca3af;
-        font-size: 0.9375rem;
+        color: #6b7280;
+        font-size: 0.9rem;
     }
 
     .footer-badges {
         display: flex;
         gap: 1.5rem;
-     flex-wrap: wrap;
+        flex-wrap: wrap;
     }
 
-    .badge-item {
+    .footer-badges span {
         display: flex;
- align-items: center;
-     gap: 0.5rem;
-  color: #9ca3af;
-        font-size: 0.875rem;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
+        font-size: 0.85rem;
     }
 
-    .badge-item i {
-   color: #10b981;
+    .footer-badges i {
+        color: #10b981;
     }
 
-    /* Responsive Design */
+    /* Responsive */
+    @@media (max-width: 992px) {
+        .footer-content {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+        }
+
+        .brand-section {
+            max-width: 100%;
+        }
+    }
+
     @@media (max-width: 768px) {
         .minimal-footer-content,
-    .footer-bottom-content {
-       flex-direction: column;
-        text-align: center;
+        .footer-bottom-content {
+            flex-direction: column;
+            text-align: center;
         }
 
-     .minimal-footer-links,
+        .minimal-footer-links,
         .footer-badges {
-       justify-content: center;
-      }
+            justify-content: center;
+        }
 
         .footer-content {
-          grid-template-columns: 1fr;
-    gap: 2rem;
-      }
-
-.footer-section {
-         text-align: center;
-      }
-
-        .footer-title {
-       justify-content: center;
+            grid-template-columns: 1fr;
+            gap: 2rem;
         }
 
-  .social-links {
-       justify-content: center;
+        .footer-logo,
+        .social-links {
+            justify-content: center;
         }
 
-   .footer-links a,
-        .footer-contact li {
-justify-content: center;
+        .footer-title::after {
+            left: 50%;
+            transform: translateX(-50%);
         }
 
-  .full-footer {
-            padding: 2rem 0 0 0;
-      margin-top: 2rem;
+        .premium-footer .container {
+            padding-top: 3rem;
         }
-  }
+
+        .footer-wave {
+            height: 80px;
+        }
+    }
 </style>

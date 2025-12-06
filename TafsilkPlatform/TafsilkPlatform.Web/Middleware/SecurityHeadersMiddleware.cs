@@ -23,13 +23,14 @@ public class SecurityHeadersMiddleware
         // ✅ Content Security Policy
         if (!context.Response.Headers.ContainsKey("Content-Security-Policy"))
         {
+            // Allow fonts from Google, images from anywhere, and loose connections for dev tools
             context.Response.Headers.Append("Content-Security-Policy",
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
-                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
+                "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https: http:; " +
+                "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com; " +
                 "img-src 'self' data: https:; " +
-                "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; " +
-                "connect-src 'self';");
+                "font-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.gstatic.com https://fonts.googleapis.com; " +
+                "connect-src 'self' ws: http: https:;");
         }
 
         // ✅ Remove server header

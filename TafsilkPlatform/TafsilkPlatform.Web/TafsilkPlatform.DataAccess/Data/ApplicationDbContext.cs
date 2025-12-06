@@ -44,6 +44,7 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<Product> Products { get; set; }
     public virtual DbSet<ShoppingCart> ShoppingCarts { get; set; }
     public virtual DbSet<CartItem> CartItems { get; set; }
+    public virtual DbSet<Review> Reviews { get; set; }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -428,6 +429,27 @@ public partial class ApplicationDbContext : DbContext
                         .WithMany(p => p.CartItems)
                     .HasForeignKey(ci => ci.ProductId)
                       .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // ✅ ECOMMERCE: Review Entity
+        modelBuilder.Entity<Review>(entity =>
+        {
+            entity.HasKey(e => e.ReviewId);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql(utcNowDefaultSql);
+            entity.Property(e => e.Comment).HasMaxLength(1000);
+
+            entity.HasIndex(e => e.ProductId);
+            entity.HasIndex(e => e.CustomerId);
+
+            entity.HasOne(r => r.Product)
+                .WithMany() // Assuming Product doesn't have a Reviews collection yet, or we'll add it
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            entity.HasOne(r => r.Customer)
+                .WithMany()
+                .HasForeignKey(r => r.CustomerId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
 

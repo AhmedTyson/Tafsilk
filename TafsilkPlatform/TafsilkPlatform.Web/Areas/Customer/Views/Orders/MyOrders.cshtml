@@ -41,16 +41,16 @@
                                             <i class="fas @(order.ServiceType == "StoreOrder" ? "fa-shopping-bag" : "fa-cut") fs-5 text-dark"></i>
                                         </div>
                                         <div>
-                                            <h6 class="fw-bold mb-1">#@order.OrderId.ToString().Substring(0, 8).ToUpper()</h6>
+                                            <h6 class="fw-bold mb-1">#@order.OrderNumber</h6>
                                             <small class="text-muted">@order.CreatedAt.ToString("MMM dd, yyyy")</small>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Shop/Tailor -->
+                                <!-- Items Count (Replaces Tailor Name) -->
                                 <div class="col-md-3">
-                                    <small class="text-muted d-block mb-1">Shop / Tailor</small>
-                                    <span class="fw-bold text-dark">@(order.TailorShopName ?? order.TailorName)</span>
+                                    <small class="text-muted d-block mb-1">Items</small>
+                                    <span class="fw-bold text-dark">@order.Items.Count items</span>
                                 </div>
 
                                 <!-- Payment & Status -->

@@ -328,7 +328,7 @@
                 {
                     @if (Model.TailorId.HasValue)
                     {
-                        <a href="/portfolio/@Model.TailorId" class="tailor-card">
+                        <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { area = "Tailor", id = Model.TailorId })" class="tailor-card">
                             <div class="tailor-avatar">
                                 <i class="fas fa-user-tie"></i>
                             </div>
@@ -363,7 +363,7 @@
                 <div class="action-section">
                     @if (Model.IsAvailable && Model.StockQuantity > 0)
                     {
-                        <form asp-action="AddToCart" asp-controller="Store" asp-area="Customer" method="post">
+                        <form id="addToCartForm" onsubmit="addToCart(event)" asp-action="AddToCart" asp-controller="Store" asp-area="Customer" method="post">
                             <input type="hidden" name="ProductId" value="@Model.ProductId" />
                             
                             <div class="row g-3 align-items-end">
@@ -449,6 +449,120 @@
             </div>
         </div>
     </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="fw-bold mb-0">Customer Reviews</h3>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="fs-4 text-warning">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(Model.AverageRating))
+                            {
+                                <i class="fas fa-star"></i>
+                            }
+                            else
+                            {
+                                <i class="far fa-star"></i>
+                            }
+                        }
+                    </div>
+                    <span class="fw-bold fs-5">@Model.AverageRating.ToString("0.0")</span>
+                    <span class="text-muted">(@Model.ReviewCount reviews)</span>
+                </div>
+            </div>
+
+            @if (Model.CanReview)
+            {
+                <div class="card border-0 shadow-sm mb-5">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Write a Review</h5>
+                        <form asp-action="SubmitReview" asp-controller="Store" asp-area="Customer" method="post">
+                            <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                            
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Rating</label>
+                                <div class="rating-select">
+                                    <div class="btn-group" role="group" aria-label="Rating">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <input type="radio" class="btn-check" name="Rating" id="rating-@i" value="@i" required>
+                                            <label class="btn btn-outline-warning" for="rating-@i">
+                                                <i class="fas fa-star"></i> @i
+                                            </label>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold small">Your Review</label>
+                                <textarea name="Comment" class="form-control" rows="3" placeholder="Share your experience with this product..." maxlength="1000"></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark px-4">Submit Review</button>
+                        </form>
+                    </div>
+                </div>
+            }
+
+            @if (Model.Reviews.Any())
+            {
+                <div class="review-list">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="avatar-circle bg-light text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 50%;">
+                                            @(review.Customer.FullName?.FirstOrDefault() ?? 'C')
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold mb-0">@review.Customer.FullName</h6>
+                                            <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                        </div>
+                                    </div>
+                                    <div class="text-warning small">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            if (i <= review.Rating)
+                                            {
+                                                <i class="fas fa-star"></i>
+                                            }
+                                            else
+                                            {
+                                                <i class="far fa-star"></i>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                                @if (review.IsVerifiedPurchase)
+                                {
+                                    <div class="mb-2">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                            <i class="fas fa-check-circle me-1"></i> Verified Purchase
+                                        </span>
+                                    </div>
+                                }
+                                <p class="mb-0 text-muted">@review.Comment</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 bg-light rounded-3">
+                    <i class="far fa-comment-alt fs-1 text-muted mb-3"></i>
+                    <p class="text-muted mb-0">No reviews yet. Be the first to review this product!</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
 @section Scripts {
@@ -499,6 +613,70 @@
             
             mainImage.addEventListener('mouseleave', function() {
                 this.classList.remove('zoomed');
+            });
+        }
+
+
+        function addToCart(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Adding...';
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                if (data.success) {
+                    toastr.success(data.message || 'Added to cart');
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i> Added';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
+                    }, 2000);
+                    
+                    // Update cart count if function exists (it might be in layout)
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    } else {
+                         // Try to fetch manually if function not global
+                         fetch('/Store/api/cart/count')
+                            .then(res => res.json())
+                            .then(d => {
+                                const badge = document.querySelector('.cart-badge');
+                                if (badge) badge.textContent = d.count;
+                            })
+                            .catch(console.error);
+                    }
+                } else {
+                    toastr.error(data.message || 'Failed to add to cart');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                toastr.error('Failed to add to cart');
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
             });
         }
     </script>

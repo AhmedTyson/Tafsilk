@@ -1,1150 +1,872 @@
+@model TafsilkPlatform.Models.ViewModels.HomeViewModel
 @{
-    ViewData["Title"] = "Tafsilk - Best Tailors in Your Area | Tafsilk Platform";
-    ViewData["Description"] = "Discover the best tailors in your area with transparent prices and reliable quality. Browse their work, read reviews, and book your appointment easily.";
-    ViewData["Keywords"] = "tailors, tailoring, clothes, sewing, alterations, dresses, suits";
-}
-
-@section Meta {
-<!-- SEO Meta Tags -->
-    <meta name="description" content="@ViewData["Description"]" />
-    <meta name="keywords" content="@ViewData["Keywords"]" />
-    <meta name="author" content="Tafsilk" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="@ViewData["Title"]" />
-    <meta property="og:description" content="@ViewData["Description"]" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
-    <meta property="og:image" content="~/images/og-image.jpg" />
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@ViewData["Title"]" />
-    <meta name="twitter:description" content="@ViewData["Description"]" />
-    <meta name="twitter:image" content="~/images/twitter-card.jpg" />
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
+    ViewData["Title"] = "Tafsilk - Premium Tailoring Platform";
+    ViewData["Description"] = "Discover the best tailors in your area with transparent prices and reliable quality.";
 }
 
 @section Styles {
     <style>
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-light: #F4C430;
+            --gold-dark: #AA8C2C;
+            --dark-bg: #0f172a;
+            --dark-card: #1e293b;
+            --text-light: #f8f9fa;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: #0b1120;
+            color: var(--text-light);
+        }
+
         /* ========== HERO SECTION ========== */
         .hero {
             position: relative;
-            min-height: 75vh;
+            min-height: 85vh;
             display: flex;
             align-items: center;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
             overflow: hidden;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         }
 
-        .hero-video {
+        .hero::before {
+            content: '';
             position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            z-index: 0;
-            background: #0f172a;
-            opacity: 0;
-            transition: opacity 0.8s ease-in;
-        }
-
-        .hero-video.loaded {
-            opacity: 1;
-        }
-
-        /* Animated gradient fallback */
-        .hero-video-fallback {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            text-align: center;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            background-size: 200% 200%;
-            animation: gradientShift 8s ease infinite;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: clamp(18px, 3vw, 32px);
-            font-weight: 700;
-            line-height: 1.5;
-            z-index: 0;
-        }
-
-        @@keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .hero-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 41, 59, 0.80));
-            z-index: 1;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
             pointer-events: none;
         }
 
         .hero-content {
             position: relative;
             z-index: 2;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        @@keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .hero-title {
-            color: #ffffff;
-            font-size: clamp(1.75rem, 5vw, 3.5rem);
-            margin-bottom: var(--spacing-lg);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            line-height: 1.2;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            background: linear-gradient(to right, #fff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
         }
 
         .hero-subtitle {
-            color: rgba(255, 255, 255, 0.95);
-            font-size: clamp(1rem, 2.5vw, 1.375rem);
-            margin-bottom: var(--spacing-2xl);
-            line-height: 1.6;
-        }
-
-        /* ========== SEARCH WIDGET ========== */
-        .search-center {
-            margin-top: var(--spacing-2xl);
-        }
-
-        .search-widget {
-            background: rgba(255, 255, 255, 0.97);
-            backdrop-filter: blur(12px);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            max-width: 650px;
-            margin: 0 auto;
-            animation: slideInUp 0.6s ease-out 0.3s both;
-        }
-
-        @@keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .search-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 14px 18px;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            font-size: 16px;
-            font-family: var(--font-family);
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .search-btn {
-            padding: 14px 28px;
-            white-space: nowrap;
-        }
-
-        .search-options {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-            font-size: 14px;
-        }
-
-        .search-chip {
-            color: rgba(15, 23, 42, 0.75);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: var(--background-gray);
-            border: 1px solid var(--border-color);
-            border-radius: 999px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .search-chip:hover {
-            background: var(--border-color);
-            transform: translateY(-1px);
-        }
-
-        .search-chip input[type="checkbox"] {
-            margin: 0;
-        }
-
-        /* ========== TRUST BAR ========== */
-        .trust-bar {
-            background-color: var(--dark);
-            color: white;
-            text-align: center;
-            padding: 32px 0;
-            animation: fadeIn 1s ease-out 0.5s both;
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .trust-indicators {
-            display: flex;
-            justify-content: center;
-            gap: 48px;
-            flex-wrap: wrap;
-        }
-
-        .trust-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .trust-number {
-            font-size: var(--font-size-3xl);
-            font-weight: 800;
-            color: var(--text-white);
-            background: linear-gradient(135deg, #ffffff, #e0e0e0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .trust-label {
-            font-size: var(--font-size-sm);
-            color: rgba(255, 255, 255, 0.8);
-            max-width: 200px;
-        }
-
-        /* ========== SECTION COMMON STYLES ========== */
-        .value-props,
-        .featured-tailors,
-        .tailor-recruitment {
-            padding: var(--spacing-4xl) 0;
-        }
-
-        .how-it-works,
-        .service-categories {
-            background-color: var(--background-gray);
-            padding: var(--spacing-4xl) 0;
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: clamp(1.75rem, 4vw, 2.5rem);
-            font-weight: 700;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-primary);
-        }
-
-        .section-subtitle {
-            color: var(--text-secondary);
-            font-size: clamp(0.95rem, 2vw, 1.125rem);
-            text-align: center;
-            margin-bottom: var(--spacing-2xl);
+            font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+            color: var(--text-muted);
+            margin-bottom: 3rem;
             max-width: 700px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        /* ========== VALUE PROPOSITIONS ========== */
-        .props-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-xl);
-        }
-
-        @@media (min-width: 768px) {
-            .props-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .prop-card {
-            padding: var(--spacing-xl);
-            border-radius: var(--radius-lg);
-            background-color: var(--background-white);
-            box-shadow: var(--shadow-sm);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: flex-start;
-            gap: 18px;
-            border: 1px solid transparent;
-        }
-
-        .prop-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-color);
-        }
-
-        .prop-icon {
-            width: 56px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 14px;
-            font-size: 22px;
-            flex-shrink: 0;
-            transition: transform 0.3s ease;
-        }
-
-        .prop-card:hover .prop-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-
-        .prop-icon.price {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            color: var(--primary-color);
-        }
-
-        .prop-icon.quality {
-            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
-            color: var(--success-color);
-        }
-
-        .prop-icon.location {
-            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
-            color: var(--secondary-color);
-        }
-
-        .prop-content {
-            text-align: left; /* Changed from right for LTR */
-            flex: 1;
-        }
-
-        .prop-title {
-            font-size: var(--font-size-xl);
+        .btn-gold {
+            background: linear-gradient(45deg, var(--gold-primary), var(--gold-light));
+            color: #000;
             font-weight: 700;
-            margin-bottom: var(--spacing-sm);
-            color: var(--text-primary);
-        }
-
-        .prop-desc {
-            color: var(--text-secondary);
-            margin: 0;
-            line-height: 1.6;
-        }
-
-        /* ========== HOW IT WORKS ========== */
-        .steps-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: var(--spacing-xl);
-        }
-
-        @@media (min-width: 768px) {
-            .steps-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        .step-card {
-            background: var(--background-white);
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            text-align: center;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
         }
 
-        .step-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.5);
+            color: #000;
         }
 
-        .step-card:hover::before {
-            transform: scaleX(1);
+        /* ========== UTILITIES ========== */
+        .text-gold {
+            color: var(--gold-primary) !important;
+        }
+        
+        .bg-dark-glass {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
         }
 
-        .step-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
+        .border-gold {
+            border-color: var(--gold-primary) !important;
         }
 
-        .step-number {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-white);
+        .btn-outline-gold {
+            color: var(--gold-primary);
+            border: 2px solid var(--gold-primary);
+            font-weight: 700;
+            padding: 14px 30px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            background: transparent;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline-gold:hover {
+            background: var(--gold-primary);
+            color: #000;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .feature-icon-wrapper {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
+            background: rgba(212, 175, 55, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.75rem;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+        }
+
+        /* ========== TRUST BAR ========== */
+        .trust-bar {
+            background: #000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 40px 0;
+        }
+
+        .trust-number {
+            font-size: 3rem;
             font-weight: 800;
-            margin: 0 auto var(--spacing-lg);
-            box-shadow: 0 4px 12px rgba(44, 90, 160, 0.3);
-            transition: transform 0.3s ease;
+            color: var(--gold-primary);
+            display: block;
+            line-height: 1;
+            margin-bottom: 5px;
         }
 
-        .step-card:hover .step-number {
-            transform: scale(1.1) rotate(10deg);
+        .trust-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .step-title {
-            font-size: var(--font-size-xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-            color: var(--text-primary);
+        /* ========== SECTIONS ========== */
+        .section-title {
+            color: #fff;
+            font-weight: 800;
+            margin-bottom: 1rem;
         }
 
-        .step-desc {
-            color: var(--text-secondary);
-            margin: 0;
-            line-height: 1.7;
+        .section-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 4rem;
         }
 
-        /* ========== FEATURED TAILORS CAROUSEL ========== */
-        .carousel-container {
-            position: relative;
-            padding: 0 50px;
-        }
-
-        .carousel-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--background-white);
-            border: 2px solid var(--border-color);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 10;
-            box-shadow: var(--shadow-md);
-        }
-
-        .carousel-nav:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .carousel-nav.prev {
-            left: 0; /* Changed from right for LTR */
-        }
-
-        .carousel-nav.next {
-            right: 0; /* Changed from left for LTR */
-        }
-
-        .tailors-carousel {
-            display: flex;
-            gap: 24px;
-            overflow-x: auto;
-            scroll-behavior: smooth;
-            padding: 10px 0 20px;
-            scrollbar-width: thin;
-            scrollbar-color: var(--primary-color) var(--background-gray);
-        }
-
-        .tailors-carousel::-webkit-scrollbar {
-            height: 8px;
-        }
-
-        .tailors-carousel::-webkit-scrollbar-track {
-            background: var(--background-gray);
-            border-radius: 4px;
-        }
-
-        .tailors-carousel::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
-            border-radius: 4px;
-        }
-
-        /* Skeleton loader for tailor cards */
-        .tailor-card.skeleton {
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @@keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
+        /* ========== CARDS (Unified Design) ========== */
         .tailor-card {
-            min-width: 300px;
-            background: var(--background-white);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
             overflow: hidden;
             transition: all 0.3s ease;
-            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
         }
 
         .tailor-card:hover {
-            transform: translateY(-6px);
-            box-shadow: var(--shadow-xl);
-            border-color: var(--primary-color);
+            transform: translateY(-5px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tailor-image-wrapper {
+            position: relative;
+            padding-top: 125%; /* 4:5 Aspect Ratio matching store */
+            background: #1a1a1a;
+            overflow: hidden;
         }
 
         .tailor-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: cover;
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            transition: transform 0.3s ease;
-            loading: lazy;
+            transition: transform 0.5s ease;
         }
 
         .tailor-card:hover .tailor-image {
             transform: scale(1.05);
         }
 
-        .tailor-info {
-            padding: var(--spacing-lg);
+        .tailor-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            display: flex;
+            gap: 10px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 2;
         }
 
-        .tailor-name-row {
+        .tailor-card:hover .tailor-overlay {
+            transform: translateY(0);
+        }
+
+        .tailor-info {
+            padding: 20px;
+            flex-grow: 1;
             display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm);
+            flex-direction: column;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0) 0%, rgba(30, 41, 59, 0.5) 100%);
         }
 
         .tailor-name {
-            font-size: var(--font-size-lg);
+            color: #fff;
             font-weight: 700;
-            margin: 0;
-            flex: 1;
-            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
         }
 
-        .verified-badge {
-            background-color: var(--success-color);
-            color: var(--text-white);
-            padding: 4px 10px;
-            border-radius: var(--radius-sm);
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .tailor-rating {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        .rating {
-            color: var(--secondary-color);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .reviews {
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-        }
-
-        .tailor-specialty,
         .tailor-location {
-            color: var(--text-secondary);
-            font-size: var(--font-size-sm);
-            margin: var(--spacing-xs) 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
-        .tailor-card .btn {
-            width: 100%;
-            margin-top: var(--spacing-md);
+        .rating-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(4px);
+            color: var(--gold-primary);
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            z-index: 2;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        /* ========== SERVICE CATEGORIES ========== */
-        .categories-grid {
-            display: grid;
-            gap: 18px;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        }
-
-        @@media (min-width: 768px) {
-            .categories-grid {
-                grid-template-columns: repeat(5, 1fr);
-            }
-        }
-
+        /* ... existing styles ... */
+        
+        /* ========== CATEGORIES ========== */
         .category-card {
-            background-color: var(--background-white);
-            padding: 24px;
-            border-radius: var(--radius-lg);
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 30px;
             text-align: center;
-            box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
+            text-decoration: none;
+            display: block;
         }
 
         .category-card:hover {
-            background: var(--primary-light);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--dark-card) 0%, #2d3748 100%);
+            border-color: var(--gold-primary);
+            transform: translateY(-5px);
         }
 
         .category-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto var(--spacing-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--background-light);
-            border-radius: var(--radius-lg);
-            font-size: 28px;
-            color: var(--primary-color);
+            font-size: 2.5rem;
+            color: var(--gold-primary);
+            margin-bottom: 20px;
             transition: all 0.3s ease;
         }
 
         .category-card:hover .category-icon {
-            background: var(--primary-color);
-            color: white;
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.2);
+            color: #fff;
         }
 
         .category-title {
-            font-size: var(--font-size-base);
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-primary);
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
         }
 
-        .service-description {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            line-height: 1.5;
-        }
-
-        /* ========== TAILOR RECRUITMENT ========== */
-        .recruitment-content {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            color: white;
-            border-radius: var(--radius-xl);
-            padding: 48px 32px;
+        /* ========== HOW IT WORKS ========== */
+        .step-card {
             text-align: center;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
         }
 
-        .recruitment-content::before {
+        .step-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 50%;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .step-card:hover .step-icon-wrapper {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+
+        .step-number {
+            position: absolute;
+            top: 10px;
+            right: 50%;
+            transform: translateX(40px);
+            background: var(--gold-primary);
+            color: #000;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* ========== TRENDING PRODUCTS ========== */
+        .product-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-image {
+            height: 300px;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-info .btn {
+            margin-top: auto;
+        }
+
+        .product-price {
+            color: var(--gold-primary);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* ========== TESTIMONIALS ========== */
+        .testimonial-section {
+            background-image: url('/images/testimonial-bg.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .testimonial-section::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(11, 17, 32, 0.9);
         }
 
-        @@keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .recruitment-content > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        .recruitment-content .section-title {
-            color: white;
-            max-width: 800px;
-            margin: 0 auto var(--spacing-xl);
-            text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        .join-benefits {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-bottom: 28px;
-        }
-
-        .benefit-pill {
-            background: rgba(255, 255, 255, 0.2);
+        .testimonial-card {
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(10px);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 999px;
-            font-size: 0.95rem;
-            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 16px;
+            height: 100%;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .client-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .benefit-pill:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            border: 2px solid var(--gold-primary);
         }
 
-        .btn-dark {
-            background: var(--dark);
-            color: white;
-            padding: 16px 40px;
-            border-radius: var(--radius-lg);
-            font-weight: 700;
-            font-size: 1.125rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        /* ========== NEWSLETTER ========== */
+        .newsletter-section {
+            background-image: url('/images/newsletter-bg.png');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            padding: 80px 0;
         }
 
-        .btn-dark:hover {
-            background: #1e293b;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            color: white;
+        .newsletter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
         }
 
-        /* ========== MOBILE OPTIMIZATIONS ========== */
-        @@media (max-width: 767px) {
-            .hero {
-                min-height: 60vh;
-            }
+        .newsletter-form .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 50px;
+        }
 
-            .hero-title {
-                font-size: 1.75rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .search-widget {
-                padding: 18px;
-            }
-
-            .search-input-group {
-                flex-direction: column;
-            }
-
-            .search-btn {
-                width: 100%;
-            }
-
-            .trust-indicators {
-                gap: 24px;
-            }
-
-            .carousel-container {
-                padding: 0 10px;
-            }
-
-            .carousel-nav {
-                width: 38px;
-                height: 38px;
-            }
+        .newsletter-form .form-control:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--gold-primary);
+            box-shadow: none;
         }
     </style>
 }
 
-<!-- Hero Section -->
-<section class="hero">
-    <div class="hero-video-fallback">
-        Tafsilk Platform<br>Professional Tailoring
+<!-- Hero Carousel -->
+<div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
+    <div class="carousel-indicators">
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
     </div>
-    <video class="hero-video" autoplay muted loop playsinline poster="~/images/hero-poster.jpg" id="heroVideo">
-        <source src="~/videos/hero-bg.mp4" type="video/mp4">
-    </video>
-    <div class="hero-overlay"></div>
-    
-    <div class="container hero-content">
-        <div class="row justify-content-center text-center">
-            <div class="col-lg-10">
-                <h1 class="hero-title">Discover the Best Tailors in Your City</h1>
-                <p class="hero-subtitle">The first platform connecting you with professional tailors for custom designs and alterations with ease and trust.</p>
-                
-                <div class="search-center">
-                    <div class="search-widget">
-                        <form action="@Url.Action("Index", "Tailors")" method="get">
-                            <div class="search-input-group">
-                                <input type="text" name="q" class="search-input" placeholder="What are you looking for? (e.g., Suit, Dress, Alteration)" aria-label="Search">
-                                <button type="submit" class="btn btn-primary search-btn">
-                                    <i class="fas fa-search me-2"></i> Search Now
-                                </button>
-                            </div>
-                            
-                            <div class="search-options">
-                                <label class="search-chip">
-                                    <input type="checkbox" name="category" value="men">
-                                    <i class="fas fa-male"></i> Men
-                                </label>
-                                <label class="search-chip">
-                                    <input type="checkbox" name="category" value="women">
-                                    <i class="fas fa-female"></i> Women
-                                </label>
-                                <label class="search-chip">
-                                    <input type="checkbox" name="category" value="kids">
-                                    <i class="fas fa-child"></i> Kids
-                                </label>
-                                <label class="search-chip">
-                                    <input type="checkbox" name="category" value="uniforms">
-                                    <i class="fas fa-user-tie"></i> Uniforms
-                                </label>
-                            </div>
-                        </form>
+    <div class="carousel-inner">
+        <!-- Slide 1: Main -->
+        <div class="carousel-item active">
+            <section class="hero" style="background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);">
+                <div class="container hero-content text-center">
+                    <h1 class="hero-title">Masterful Tailoring,<br>Exquisite Style</h1>
+                    <p class="hero-subtitle">Connect with elite tailors who craft perfection. From bespoke suits to intricate alterations, experience luxury at your fingertips.</p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("Index", "Tailors")" class="btn btn-gold px-5">Find a Tailor</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Slide 2: Store -->
+        <div class="carousel-item">
+            <section class="hero" style="background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);">
+                <div class="container hero-content text-center">
+                    <h1 class="hero-title">Ready-to-Wear<br>Collection</h1>
+                    <p class="hero-subtitle">Discover unique, handcrafted garments available for immediate purchase. Quality you can trust, style you can wear today.</p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("Index", "Store", new { area = "Customer" })" class="btn btn-gold px-5">Shop Now</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <!-- Slide 3: Join -->
+        <div class="carousel-item">
+            <section class="hero" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);">
+                <div class="container hero-content text-center">
+                    <h1 class="hero-title">Join the Elite<br>Network</h1>
+                    <p class="hero-subtitle">Are you a master tailor? Showcase your work to thousands of clients and grow your business with Tafsilk.</p>
+                    <div class="mt-4">
+                        <a href="@Url.Action("RequestRoleChange", "Account")" class="btn btn-gold px-5">Join as Tailor</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<!-- Why Choose Us -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <img src="/images/why-choose-us.jpg" alt="Quality Tailoring" class="img-fluid rounded-4 shadow-lg" onerror="this.src='https://images.unsplash.com/photo-1598556776374-37d4d343e29c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+                    <div class="position-absolute bottom-0 start-0 m-4 p-4 bg-dark-glass rounded-3 border border-gold">
+                        <h4 class="text-gold mb-1">100%</h4>
+                        <p class="mb-0 text-white small">Satisfaction Guaranteed</p>
                     </div>
                 </div>
             </div>
+            <div class="col-lg-6">
+                <h2 class="section-title display-5 mb-4">Why Choose Tafsilk?</h2>
+                <p class="section-subtitle mb-5">Experience the difference of true craftsmanship and modern convenience.</p>
+                
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-check-circle text-gold fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h4 class="h5 text-white">Verified Artisans</h4>
+                        <p class="text-muted">Every tailor on our platform is vetted for quality, experience, and professionalism.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-shield-alt text-gold fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h4 class="h5 text-white">Secure Payments</h4>
+                        <p class="text-muted">Your transactions are protected with industry-standard security and escrow services.</p>
+                    </div>
+                </div>
+                
+                <div class="d-flex mb-4">
+                    <div class="flex-shrink-0">
+                        <div class="feature-icon-wrapper">
+                            <i class="fas fa-clock text-gold fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <h4 class="h5 text-white">Timely Delivery</h4>
+                        <p class="text-muted">Track your order progress in real-time and get your garments delivered on schedule.</p>
+                    </div>
+                </div>
+                
+                <a href="@Url.Action("Index", "Tailors")" class="btn btn-outline-gold px-4 mt-2">Explore Tailors</a>
+            </div>
         </div>
     </div>
+</section>
 </section>
 
 <!-- Trust Indicators -->
 <div class="trust-bar">
     <div class="container">
-        <div class="trust-indicators">
-            <div class="trust-item">
-                <span class="trust-number" data-count="300">300+</span>
-                <span class="trust-label">Trusted Tailors</span>
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <span class="trust-number" data-count="@Model.TrustedTailorsCount">@Model.TrustedTailorsCount</span>
+                <span class="trust-label">Elite Tailors</span>
             </div>
-            <div class="trust-item">
-                <span class="trust-number" data-count="15000">15k+</span>
-                <span class="trust-label">Completed Orders</span>
+            <div class="col-md-4">
+                <span class="trust-number" data-count="@Model.CompletedOrdersCount">@Model.CompletedOrdersCount</span>
+                <span class="trust-label">Masterpieces Created</span>
             </div>
-            <div class="trust-item">
-                <span class="trust-number">4.9</span>
+            <div class="col-md-4">
+                <span class="trust-number">@Model.AveragePlatformRating</span>
                 <span class="trust-label">Average Rating</span>
-            </div>
-            <div class="trust-item">
-                <span class="trust-number">24/7</span>
-                <span class="trust-label">Customer Support</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Value Propositions -->
-<section class="value-props">
-    <div class="container">
-        <div class="section-header text-center mb-5">
-            <h2 class="section-title">Why Choose Tafsilk?</h2>
-            <p class="section-subtitle">We provide a seamless and reliable experience for all your tailoring needs</p>
-        </div>
-        
-        <div class="props-grid">
-            <div class="prop-card">
-                <div class="prop-icon price">
-                    <i class="fas fa-tag"></i>
-                </div>
-                <div class="prop-content">
-                    <h3 class="prop-title">Transparent Pricing</h3>
-                    <p class="prop-desc">Know the cost upfront with no hidden fees. Compare prices and choose what suits your budget.</p>
-                </div>
-            </div>
-            
-            <div class="prop-card">
-                <div class="prop-icon quality">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <div class="prop-content">
-                    <h3 class="prop-title">Guaranteed Quality</h3>
-                    <p class="prop-desc">We deal only with verified professionals. Your satisfaction is our priority with a money-back guarantee.</p>
-                </div>
-            </div>
-            
-            <div class="prop-card">
-                <div class="prop-icon location">
-                    <i class="fas fa-map-marker-alt"></i>
-                </div>
-                <div class="prop-content">
-                    <h3 class="prop-title">Near You</h3>
-                    <p class="prop-desc">Find the best tailors in your neighborhood. Save time and effort with our smart location search.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section class="how-it-works">
-    <div class="container">
-        <h2 class="section-title">How Tafsilk Works</h2>
-        <p class="section-subtitle">Your journey to the perfect outfit in 3 simple steps</p>
-        
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <h3 class="step-title">Search & Compare</h3>
-                <p class="step-desc">Browse tailor profiles, view their portfolios, and read real customer reviews.</p>
-            </div>
-            
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <h3 class="step-title">Book & Measure</h3>
-                <p class="step-desc">Book an appointment online or request a home visit for measurements.</p>
-            </div>
-            
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <h3 class="step-title">Receive Your Order</h3>
-                <p class="step-desc">Get your custom-made outfit delivered to your doorstep or pick it up from the shop.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Featured Tailors -->
-<section class="featured-tailors">
-    <div class="container">
-        <h2 class="section-title">Featured Tailors</h2>
-        <p class="section-subtitle">Top-rated professionals ready to bring your ideas to life</p>
-        
-        <div class="carousel-container">
-            <button class="carousel-nav prev" id="prevBtn" aria-label="Previous">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            
-            <div class="tailors-carousel" id="tailorsCarousel">
-                <!-- Tailor cards will be loaded here via JS -->
-                @for (int i = 0; i < 4; i++)
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="section-title display-5">Featured Artisans</h2>
+            <p class="section-subtitle">Top-rated professionals selected for their craftsmanship</p>
+        </div>
+
+        <div class="row g-4">
+            @if (Model.FeaturedTailors.Any())
+            {
+                @foreach (var tailor in Model.FeaturedTailors)
                 {
-                    <div class="tailor-card skeleton">
-                        <div class="tailor-image"></div>
-                        <div class="tailor-info">
-                            <div style="height: 20px; background: #eee; margin-bottom: 10px; border-radius: 4px;"></div>
-                            <div style="height: 15px; background: #eee; width: 60%; margin-bottom: 15px; border-radius: 4px;"></div>
-                            <div style="height: 35px; background: #eee; border-radius: 4px;"></div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="tailor-card">
+                            <div class="tailor-image-wrapper">
+                                @if (tailor.ProfilePictureData != null || !string.IsNullOrEmpty(tailor.ProfileImageUrl))
+                                {
+                                    <img src="@Url.Action("GetTailorProfilePicture", "Profiles", new { id = tailor.Id })" class="tailor-image" alt="@tailor.ShopName" loading="lazy">
+                                }
+                                else
+                                {
+                                    <img src="/images/default-tailor.png" class="tailor-image" alt="@tailor.ShopName" loading="lazy" onerror="this.src='/images/default-tailor.png'">
+                                }
+                                
+                                <div class="rating-badge">
+                                    <i class="fas fa-star"></i> @tailor.AverageRating.ToString("0.0")
+                                </div>
+
+                                <div class="tailor-overlay">
+                                    <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { area = "Tailor", id = tailor.Id })" class="btn btn-gold w-100 rounded-pill fw-bold">
+                                        View Profile
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="tailor-info">
+                                <h3 class="tailor-name">@tailor.ShopName</h3>
+                                <div class="tailor-location">
+                                    <i class="fas fa-map-marker-alt text-gold"></i> @tailor.City
+                                </div>
+                                <p class="text-muted small mb-0 text-truncate">@tailor.FullName</p>
+                            </div>
                         </div>
                     </div>
                 }
-            </div>
-            
-            <button class="carousel-nav next" id="nextBtn" aria-label="Next">
-                <i class="fas fa-chevron-right"></i>
-            </button>
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No featured tailors available at the moment.</p>
+                </div>
+            }
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="@Url.Action("Index", "Tailors")" class="btn btn-outline-gold px-5">View All Tailors</a>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Styles -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="section-title display-5">Trending Styles</h2>
+            <p class="section-subtitle">Discover the latest masterpieces from our artisans</p>
+        </div>
+
+        <div class="row g-4">
+            @if (Model.TrendingProducts != null && Model.TrendingProducts.Any())
+            {
+                @foreach (var product in Model.TrendingProducts)
+                {
+                    <div class="col-md-6 col-lg-3">
+                        <div class="product-card h-100">
+                            <div class="position-relative overflow-hidden">
+                                @if (product.PrimaryImageData != null)
+                                {
+                                    <img src="@Url.Action("GetProductImage", "Store", new { area = "Customer", id = product.ProductId })" class="product-image" alt="@product.Name">
+                                }
+                                else if (!string.IsNullOrEmpty(product.PrimaryImageUrl))
+                                {
+                                    <img src="@product.PrimaryImageUrl" class="product-image" alt="@product.Name">
+                                }
+                                else
+                                {
+                                    <img src="/images/default-product.png" class="product-image" alt="@product.Name" onerror="this.src='/images/default-product.png'">
+                                }
+                                <div class="position-absolute top-0 end-0 m-3">
+                                    <span class="badge bg-gold text-dark fw-bold">
+                                        @product.Price.ToString("C0")
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="product-info">
+                                <h3 class="text-white h5 mb-1">@product.Name</h3>
+                                <p class="text-muted small mb-2">@product.Category</p>
+                                <a href="@Url.Action("ProductDetails", "Store", new { area = "Customer", id = product.ProductId })" class="btn btn-outline-light w-100 rounded-pill btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No trending styles available at the moment.</p>
+                </div>
+            }
         </div>
         
         <div class="text-center mt-5">
-            <a href="@Url.Action("Index", "Tailors")" class="btn btn-outline-primary btn-lg px-5 rounded-pill">
-                View All Tailors
-            </a>
+            <a href="@Url.Action("Index", "Store", new { area = "Customer" })" class="btn btn-gold px-5">Shop Collection</a>
         </div>
     </div>
 </section>
 
-<!-- Service Categories -->
-<section class="service-categories">
-    <div class="container">
-        <h2 class="section-title">Browse by Category</h2>
-        <p class="section-subtitle">Find the right specialist for your specific needs</p>
-        
-        <div class="categories-grid">
-            <a href="@Url.Action("Index", "Tailors", new { category = "suits" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-user-tie"></i>
-                </div>
-                <h3 class="category-title">Men's Suits</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "dresses" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-female"></i>
-                </div>
-                <h3 class="category-title">Evening Dresses</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "abayas" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-user-secret"></i>
-                </div>
-                <h3 class="category-title">Abayas</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "uniforms" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-vest"></i>
-                </div>
-                <h3 class="category-title">Uniforms</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "alterations" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-cut"></i>
-                </div>
-                <h3 class="category-title">Alterations</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "embroidery" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-palette"></i>
-                </div>
-                <h3 class="category-title">Embroidery</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "curtains" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-dungeon"></i>
-                </div>
-                <h3 class="category-title">Curtains</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "leather" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-mitten"></i>
-                </div>
-                <h3 class="category-title">Leather</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "kids" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-child"></i>
-                </div>
-                <h3 class="category-title">Kids Wear</h3>
-            </a>
-            
-            <a href="@Url.Action("Index", "Tailors", new { category = "wedding" })" class="category-card text-decoration-none">
-                <div class="category-icon">
-                    <i class="fas fa-ring"></i>
-                </div>
-                <h3 class="category-title">Wedding Dresses</h3>
-            </a>
+<!-- Categories -->
+<section class="py-5 bg-darker" style="background: #050914;">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h2 class="section-title display-5">Curated Categories</h2>
+            <p class="section-subtitle">Find the perfect specialist for your needs</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="@Url.Action("Index", "Tailors", new { category = "suits" })" class="category-card">
+                    <i class="fas fa-user-tie category-icon"></i>
+                    <h3 class="category-title">Suits</h3>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="@Url.Action("Index", "Tailors", new { category = "dresses" })" class="category-card">
+                    <i class="fas fa-female category-icon"></i>
+                    <h3 class="category-title">Dresses</h3>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="@Url.Action("Index", "Tailors", new { category = "abayas" })" class="category-card">
+                    <i class="fas fa-user-secret category-icon"></i>
+                    <h3 class="category-title">Abayas</h3>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="@Url.Action("Index", "Tailors", new { category = "alterations" })" class="category-card">
+                    <i class="fas fa-cut category-icon"></i>
+                    <h3 class="category-title">Alterations</h3>
+                </a>
+            </div>
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="@Url.Action("Index", "Tailors", new { category = "wedding" })" class="category-card">
+                    <i class="fas fa-ring category-icon"></i>
+                    <h3 class="category-title">Wedding</h3>
+                </a>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Recruitment Section -->
-<section class="tailor-recruitment">
-    <div class="container">
-        <div class="recruitment-content">
-            <h2 class="section-title">Are you a professional tailor?</h2>
-            <p class="section-subtitle text-white mb-4">Join Tafsilk today and grow your business</p>
-            
-            <div class="join-benefits">
-                <div class="benefit-pill">
-                    <i class="fas fa-check-circle"></i> Reach more customers
-                </div>
-                <div class="benefit-pill">
-                    <i class="fas fa-check-circle"></i> Manage orders easily
-                </div>
-                <div class="benefit-pill">
-                    <i class="fas fa-check-circle"></i> Guaranteed payments
+<!-- Testimonials -->
+<section class="testimonial-section py-5">
+    <div class="container py-5">
+        <div class="text-center mb-5 position-relative">
+            <h2 class="section-title display-5">Happy Clients</h2>
+            <p class="section-subtitle">Hear from those who experienced true elegance</p>
+        </div>
+
+        <div class="row g-4 position-relative">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"The attention to detail is unmatched. My wedding suit was perfect in every way. Highly recommended!"</p>
+                    <div class="client-info">
+                        <img src="https://ui-avatars.com/api/?name=Ahmed+Ali&background=D4AF37&color=000" alt="Client" class="client-avatar">
+                        <div>
+                            <h4 class="h6 text-white mb-0">Ahmed Ali</h4>
+                            <small class="text-muted">Riyadh, SA</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <a href="@Url.Action("RequestRoleChange", "Account")" class="btn btn-dark">
-                Join as a Tailor <i class="fas fa-arrow-right ms-2"></i>
-            </a>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Tafsilk made it so easy to find a tailor who understands traditional designs with a modern twist."</p>
+                    <div class="client-info">
+                        <img src="https://ui-avatars.com/api/?name=Sarah+M&background=D4AF37&color=000" alt="Client" class="client-avatar">
+                        <div>
+                            <h4 class="h6 text-white mb-0">Sarah M.</h4>
+                            <small class="text-muted">Jeddah, SA</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"Excellent service and timely delivery. The quality of the fabric and stitching is premium."</p>
+                    <div class="client-info">
+                        <img src="https://ui-avatars.com/api/?name=Fahad+K&background=D4AF37&color=000" alt="Client" class="client-avatar">
+                        <div>
+                            <h4 class="h6 text-white mb-0">Fahad K.</h4>
+                            <small class="text-muted">Dammam, SA</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="p-5 rounded-4 text-center" style="background: linear-gradient(135deg, var(--gold-primary) 0%, var(--gold-dark) 100%); color: #000;">
+                    <h2 class="display-5 fw-bold mb-3">Are you a Master Tailor?</h2>
+                    <p class="lead mb-4 fw-medium">Join our exclusive network of professionals and grow your business with Tafsilk.</p>
+                    <a href="@Url.Action("RequestRoleChange", "Account")" class="btn btn-dark btn-lg rounded-pill px-5 fw-bold">Join as a Tailor</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter-section">
+    <div class="container position-relative">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="section-title display-5 mb-4">Join the Elite</h2>
+                <p class="text-white mb-5">Subscribe to receive exclusive offers, style tips, and early access to new collections.</p>
+                <form class="newsletter-form d-flex gap-3 justify-content-center">
+                    <input type="email" class="form-control w-50" placeholder="Enter your email address">
+                    <button type="submit" class="btn btn-gold px-4">Subscribe</button>
+                </form>
+            </div>
         </div>
     </div>
 </section>
 
 @section Scripts {
     <script>
+        // Animate numbers
         document.addEventListener("DOMContentLoaded", function () {
-            // Video loading handling
-            const video = document.getElementById('heroVideo');
-            if (video) {
-                video.addEventListener('loadeddata', function() {
-                    this.classList.add('loaded');
-                    document.querySelector('.hero-video-fallback').style.opacity = '0';
-                });
-            }
-
-            // Load Featured Tailors
-            loadFeaturedTailors();
-            
-            // Carousel Navigation
-            const carousel = document.getElementById('tailorsCarousel');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            if (prevBtn && nextBtn && carousel) {
-                prevBtn.addEventListener('click', () => {
-                    carousel.scrollBy({ left: -320, behavior: 'smooth' });
-                });
-                
-                nextBtn.addEventListener('click', () => {
-                    carousel.scrollBy({ left: 320, behavior: 'smooth' });
-                });
-            }
-            
-            // Animate numbers
             const counters = document.querySelectorAll('.trust-number');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const target = entry.target;
-                        const count = target.getAttribute('data-count');
+                        const count = parseInt(target.getAttribute('data-count'));
                         if (count) {
-                            animateValue(target, 0, parseInt(count), 2000);
+                            animateValue(target, 0, count, 2000);
                             observer.unobserve(target);
                         }
                     }
                 });
             }, { threshold: 0.5 });
             
-            counters.forEach(counter => {
-                if (counter.getAttribute('data-count')) {
-                    observer.observe(counter);
-                }
-            });
+            counters.forEach(counter => observer.observe(counter));
         });
 
         function animateValue(obj, start, end, duration) {
@@ -1152,57 +874,12 @@
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
                 const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.innerHTML = Math.floor(progress * (end - start) + start) + (end > 1000 ? '+' : '');
+                obj.innerHTML = Math.floor(progress * (end - start) + start) + (end > 100 ? '+' : '');
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 }
             };
             window.requestAnimationFrame(step);
-        }
-
-        async function loadFeaturedTailors() {
-            const carousel = document.getElementById('tailorsCarousel');
-            
-            // Simulate API delay or fetch real data
-            // In a real app, you would fetch from an API endpoint
-            // const response = await fetch('/api/tailors/featured');
-            // const tailors = await response.json();
-            
-            // For now, we'll replace skeletons with static data after a short delay
-            setTimeout(() => {
-                const tailors = [
-                    { name: "Ahmed Hassan", specialty: "Men's Suits", rating: 4.9, reviews: 120, image: "/images/tailor1.jpg", location: "Nasr City, Cairo" },
-                    { name: "Sarah Mahmoud", specialty: "Evening Dresses", rating: 5.0, reviews: 85, image: "/images/tailor2.jpg", location: "Maadi, Cairo" },
-                    { name: "Khaled Ali", specialty: "Alterations & Repairs", rating: 4.8, reviews: 210, image: "/images/tailor3.jpg", location: "Giza" },
-                    { name: "Mona Zaki", specialty: "Abayas & Kaftans", rating: 4.9, reviews: 150, image: "/images/tailor4.jpg", location: "New Cairo" },
-                    { name: "Youssef Ibrahim", specialty: "Uniforms", rating: 4.7, reviews: 95, image: "/images/tailor5.jpg", location: "Dokki" }
-                ];
-                
-                carousel.innerHTML = tailors.map(tailor => `
-                    <div class="tailor-card" onclick="window.location.href='@Url.Action("Details", "Tailors")'">
-                        <img src="${tailor.image}" alt="${tailor.name}" class="tailor-image" onerror="this.src='https://via.placeholder.com/300x180?text=Tailor'">
-                        <div class="tailor-info">
-                            <div class="tailor-name-row">
-                                <h3 class="tailor-name">${tailor.name}</h3>
-                                <span class="verified-badge"><i class="fas fa-check-circle"></i> Verified</span>
-                            </div>
-                            <div class="tailor-rating">
-                                <div class="rating">
-                                    <i class="fas fa-star"></i> ${tailor.rating}
-                                </div>
-                                <span class="reviews">(${tailor.reviews} reviews)</span>
-                            </div>
-                            <div class="tailor-specialty">
-                                <i class="fas fa-cut"></i> ${tailor.specialty}
-                            </div>
-                            <div class="tailor-location">
-                                <i class="fas fa-map-marker-alt"></i> ${tailor.location}
-                            </div>
-                            <button class="btn btn-primary btn-sm">Book Appointment</button>
-                        </div>
-                    </div>
-                `).join('');
-            }, 1000);
         }
     </script>
 }

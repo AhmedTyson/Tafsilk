@@ -24,6 +24,8 @@ public class TailorOrdersViewModel
 public class OrderSummaryViewModel
 {
     public Guid OrderId { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
+    public List<OrderItemViewModel> Items { get; set; } = new();
     public string? CustomerName { get; set; }
     public string? TailorName { get; set; }
     public string? TailorShopName { get; set; }

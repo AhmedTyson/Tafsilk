@@ -476,7 +476,7 @@
                                 </a>
                                 @if (User.Identity.IsAuthenticated && User.IsInRole("Customer"))
                                 {
-                                    <button type="button" class="btn btn-accent" style="flex: 1;" onclick="addToCart('@product.ProductId')">
+                                    <button type="button" class="btn btn-accent" style="flex: 1;" onclick="addToCart('@product.ProductId', '@product.Name.Replace("'", "\\'")')">
                                         <i class="fas fa-shopping-cart"></i> Add
                                     </button>
                                 }
@@ -521,7 +521,7 @@
                 <div style="margin-top: 40px; display: flex; justify-content: center; gap: 8px;">
                     @for (int i = 1; i <= Model.TotalPages; i++)
                     {
-                        <a href="@Url.Action("Index", new { page = i, category = Model.Category, search = Model.SearchQuery, sortBy = Model.SortBy })"
+                        <a href="@Url.Action("Index", new { page = i, category = Model.Category, search = Model.SearchQuery, sortBy = Model.SortBy, minPrice = Model.MinPrice, maxPrice = Model.MaxPrice })"
                            class="btn @(i == Model.PageNumber ? "btn-primary" : "btn-outline-secondary")"
                            style="width: 40px; height: 40px; padding: 0;">
                             @i
@@ -536,7 +536,7 @@
                 <i class="fas fa-search" style="font-size: 3rem; color: var(--text-light); margin-bottom: 20px;"></i>
                 <h3 style="margin-bottom: 10px;">No products found</h3>
                 <p style="color: var(--text-secondary); margin-bottom: 20px;">Try adjusting your filters or search terms.</p>
-                <a href="@Url.Action("Index", "Store", new { area = "Customer" })" class="btn btn-primary">Clear Filters</a>
+                <button type="button" class="btn btn-primary" onclick="clearFilters('all')">Clear All Filters</button>
             </div>
         }
     </main>
@@ -544,7 +544,26 @@
 
 @section Scripts {
     <script>
-        function addToCart(productId) {
+        // Configure Toastr options
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        function addToCart(productId, productName) {
             const btn = event.target.closest('button');
             const originalContent = btn.innerHTML;
             btn.disabled = true;
@@ -559,20 +578,34 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value,
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => {
                 if (response.redirected) {
                     window.location.href = response.url;
-                } else {
-                    // Assuming success if no redirect (or handle JSON response)
-                    toastr.success('Added to cart');
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return; // Redirect case handled above
+
+                if (data.success) {
+                    toastr.success(`Successfully added <strong>${productName}</strong> to your cart!`, 'Added to Cart');
                     btn.innerHTML = '<i class="fas fa-check"></i>';
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerHTML = originalContent;
                     }, 2000);
+                    
+                    // Optional: Update cart count in navbar if exists
+                    updateCartCount(); 
+                } else {
+                    toastr.error(data.message || 'Failed to add to cart');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
                 }
             })
             .catch(err => {
@@ -583,11 +616,35 @@
             });
         }
 
+        function updateCartCount() {
+            fetch('/Store/api/cart/count')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.querySelector('.cart-badge'); // Adjust selector as needed
+                    if (badge) badge.textContent = data.count;
+                })
+                .catch(console.error);
+        }
+
+
         function clearFilters(type) {
             if (type === 'category') {
                 document.querySelector('input[name="category"][value=""]').checked = true;
                 document.getElementById('filterForm').submit();
+            } else if (type === 'all') {
+                window.location.href = '@Url.Action("Index", "Store", new { area = "Customer" })';
             }
         }
     </script>
+    
+    <style>
+        /* Force green color for success toast */
+        #toast-container > .toast-success {
+            background-color: #28a745 !important;
+            opacity: 1 !important;
+        }
+        .toast-message strong {
+            font-weight: 700;
+        }
+    </style>
 }

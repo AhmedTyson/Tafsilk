@@ -10,10 +10,6 @@ namespace TafsilkPlatform.Web.Middleware;
 /// Middleware to check user active status and verification/approval status
 /// CRITICAL FOR TAILORS: Ensures incomplete registrations are redirected to verification
 /// </summary>
-/// <summary>
-/// Middleware to check user active status and verification/approval status
-/// CRITICAL FOR TAILORS: Ensures incomplete registrations are redirected to verification
-/// </summary>
 public class UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddleware> logger)
 {
     private readonly RequestDelegate _next = next;
@@ -93,7 +89,7 @@ public class UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddle
                     // Allow limited access but show warning
                     if (path.Contains("/dashboards/tailor") ||
                          path.Contains("/tailormanagement") ||
-             path.Contains("/profiles/tailorprofile"))
+                         path.Contains("/profiles/tailorprofile"))
                     {
                         // Add a flag to show "pending approval" notice
                         context.Items["PendingApproval"] = true;
@@ -123,19 +119,28 @@ public class UserStatusMiddleware(RequestDelegate next, ILogger<UserStatusMiddle
     private static bool ShouldSkipMiddleware(string path)
     {
         return path.Contains("/account/login") ||
-      path.Contains("/account/logout") ||
-    path.Contains("/account/register") ||
-         path.Contains("/account/completetailorprofile") ||
-     path.Contains("/account/resendverificationemail") ||
- path.StartsWith("/css") ||
-     path.StartsWith("/js") ||
-path.StartsWith("/lib") ||
-      path.StartsWith("/images") ||
-      path.StartsWith("/uploads") ||
-      path.StartsWith("/favicon") ||
-path.StartsWith("/health") ||
-    path.StartsWith("/_framework") ||
-       path.StartsWith("/_vs");
+               path.Contains("/account/logout") ||
+               path.Contains("/account/register") ||
+               path.Contains("/account/completetailorprofile") ||
+               path.Contains("/account/resendverificationemail") ||
+               // Public pages that should always be accessible
+               path == "/" ||
+               path.Contains("/home") ||
+               path.Contains("/contact") ||
+               path.Contains("/privacy") ||
+               path.Contains("/portfolio/view") ||
+               path.Contains("/store") ||
+               path.Contains("/shop") ||
+               // Static resources
+               path.StartsWith("/css") ||
+               path.StartsWith("/js") ||
+               path.StartsWith("/lib") ||
+               path.StartsWith("/images") ||
+               path.StartsWith("/uploads") ||
+               path.StartsWith("/favicon") ||
+               path.StartsWith("/health") ||
+               path.StartsWith("/_framework") ||
+               path.StartsWith("/_vs");
     }
 
     private static async Task SignOutUser(HttpContext context)

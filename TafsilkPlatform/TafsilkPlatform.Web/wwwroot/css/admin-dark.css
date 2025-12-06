@@ -1,22 +1,37 @@
-/* Admin Dark Theme - Matching Auth Premium Style */
+/* Admin Dark Theme - Premium Glassmorphism */
 :root {
     --primary-gold: #D4AF37;
     --primary-gold-hover: #C5A028;
+    --primary-gold-light: rgba(212, 175, 55, 0.15);
     --dark-bg: #1a1a1a;
+    --dark-bg-alt: #0f0f0f;
     --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-bg-strong: rgba(255, 255, 255, 0.08);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     --text-light: #f8f9fa;
     --text-muted: #adb5bd;
+    --text-dark: #6c757d;
+    
+    /* Status Colors - Dark Theme Optimized */
+    --success-green: #2ecc71;
+    --success-bg: rgba(46, 204, 113, 0.15);
+    --warning-yellow: #f39c12;
+    --warning-bg: rgba(243, 156, 18, 0.15);
+    --danger-red: #e74c3c;
+    --danger-bg: rgba(231, 76, 60, 0.15);
+    --info-blue: #3498db;
+    --info-bg: rgba(52, 152, 219, 0.15);
 }
 
+/* Body & Background */
 body {
     background: radial-gradient(circle at top right, #2c2c2c, #121212) !important;
     color: var(--text-light) !important;
     min-height: 100vh;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Cards */
 .glass-card {
     background: var(--glass-bg) !important;
     backdrop-filter: blur(16px) !important;
@@ -27,9 +42,14 @@ body {
     color: var(--text-light) !important;
 }
 
+/* Tables */
 .glass-table {
     background: transparent !important;
     color: var(--text-light) !important;
+}
+
+.glass-table thead {
+    background: rgba(0, 0, 0, 0.3) !important;
 }
 
 .glass-table thead th {
@@ -39,15 +59,17 @@ body {
     text-transform: uppercase;
     font-size: 0.85rem;
     letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
 .glass-table tbody tr {
     border-bottom: 1px solid var(--glass-border) !important;
-    transition: background 0.2s;
+    transition: all 0.2s ease;
 }
 
 .glass-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.05) !important;
+    background: rgba(212, 175, 55, 0.08) !important;
+    transform: scale(1.002);
 }
 
 .glass-table td {
@@ -55,9 +77,9 @@ body {
     border-color: var(--glass-border) !important;
 }
 
-/* Sidebar Overrides */
+/* Sidebar */
 aside#sidebar {
-    background: rgba(20, 20, 20, 0.8) !important;
+    background: rgba(20, 20, 20, 0.9) !important;
     backdrop-filter: blur(10px);
     border-right: 1px solid var(--glass-border) !important;
 }
@@ -67,7 +89,7 @@ aside#sidebar .relative {
     border-right: none !important;
 }
 
-aside#sidebar .bg-white, aside#sidebar .bg-gray-900 {
+aside#sidebar .bg-white, aside#sidebar .bg-gray-900, aside#sidebar .bg-gray-800 {
     background: transparent !important;
 }
 
@@ -77,23 +99,30 @@ aside#sidebar a {
     text-decoration: none !important;
 }
 
-aside#sidebar a:hover, aside#sidebar a.active {
+aside#sidebar a:hover {
     background: rgba(212, 175, 55, 0.1) !important;
     color: var(--primary-gold) !important;
+}
+
+aside#sidebar a.router-link-active,
+aside#sidebar a.active {
+    background: var(--primary-gold-light) !important;
+    color: var(--primary-gold) !important;
+    border-left: 3px solid var(--primary-gold);
 }
 
 aside#sidebar svg {
     color: inherit !important;
 }
 
-/* Navbar Overrides */
+/* Navbar */
 nav.fixed {
-    background: rgba(20, 20, 20, 0.9) !important;
+    background: rgba(20, 20, 20, 0.95) !important;
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--glass-border) !important;
 }
 
-/* Content Area */
+/* Main Content */
 #main-content {
     background: transparent !important;
 }
@@ -107,40 +136,82 @@ nav.fixed {
     color: var(--text-muted) !important;
 }
 
+.text-gray-300 {
+    color: var(--text-light) !important;
+}
+
+.text-white {
+    color: #ffffff !important;
+}
+
 /* Buttons */
-.btn-primary, .btn-premium {
+.btn-primary, .btn-premium, .bg-cyan-600 {
     background: linear-gradient(45deg, var(--primary-gold), #b89628) !important;
     color: #000 !important;
     border: none !important;
     font-weight: 700 !important;
+    transition: all 0.2s;
 }
 
-.btn-primary:hover, .btn-premium:hover {
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3) !important;
-    transform: translateY(-1px);
+.btn-primary:hover, .btn-premium:hover, .bg-cyan-600:hover {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4) !important;
+    transform: translateY(-2px);
+    filter: brightness(1.1);
 }
 
-.btn-danger {
+.btn-danger, .bg-red-600 {
     background: rgba(220, 53, 69, 0.2) !important;
     border: 1px solid rgba(220, 53, 69, 0.5) !important;
     color: #ff6b6b !important;
 }
 
-.btn-danger:hover {
+.btn-danger:hover, .bg-red-600:hover {
     background: rgba(220, 53, 69, 0.4) !important;
+    color: #ff8787 !important;
+}
+
+.bg-yellow-500 {
+    background: rgba(243, 156, 18, 0.2) !important;
+    border: 1px solid rgba(243, 156, 18, 0.5) !important;
+    color: var(--warning-yellow) !important;
+}
+
+.bg-yellow-500:hover {
+    background: rgba(243, 156, 18, 0.3) !important;
+}
+
+.bg-green-500 {
+    background: rgba(46, 204, 113, 0.2) !important;
+    border: 1px solid rgba(46, 204, 113, 0.5) !important;
+    color: var(--success-green) !important;
+}
+
+.bg-green-500:hover {
+    background: rgba(46, 204, 113, 0.3) !important;
 }
 
 /* Form Controls */
-.form-control, .form-select {
+.form-control, .form-select, input[type="text"], input[type="number"], input[type="email"], textarea {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid var(--glass-border) !important;
     color: var(--text-light) !important;
+    border-radius: 8px;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus, .form-select:focus, input:focus, textarea:focus {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: var(--primary-gold) !important;
     box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25) !important;
+    outline: none;
+}
+
+.form-control::placeholder, input::placeholder, textarea::placeholder {
+    color: var(--text-dark) !important;
+}
+
+/* Labels */
+label {
+    color: var(--text-light) !important;
 }
 
 /* Footer */
@@ -150,17 +221,167 @@ footer {
     box-shadow: none !important;
 }
 
-/* Modal */
-.modal-content {
-    background: #1a1a1a !important;
+/* Modals - Dark Theme Fix */
+.modal-content, #ban-user-modal .relative > div, #delete-user-modal .relative > div,
+#delete-product-modal .relative > div {
+    background: var(--dark-bg) !important;
     border: 1px solid var(--glass-border) !important;
     color: var(--text-light) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
 }
 
 .modal-header, .modal-footer {
     border-color: var(--glass-border) !important;
 }
 
+.modal-header h3, .modal-header h5 {
+    color: var(--text-light) !important;
+}
+
+.modal-body h3, .modal-body p {
+    color: var(--text-light) !important;
+}
+
 .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Modal specific fixes for admin pages */
+#ban-user-modal .bg-white, #delete-user-modal .bg-white, #delete-product-modal .bg-white {
+    background: var(--dark-bg) !important;
+}
+
+/* Status Badges - Dark Theme Optimized */
+.badge, .status-badge {
+    padding: 0.35em 0.75em;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+/* Order Status Badges */
+.bg-green-100, .status-delivered {
+    background: var(--success-bg) !important;
+    color: var(--success-green) !important;
+}
+
+.bg-red-100, .status-cancelled {
+    background: var(--danger-bg) !important;
+    color: var(--danger-red) !important;
+}
+
+.bg-yellow-100, .status-pending {
+    background: var(--warning-bg) !important;
+    color: var(--warning-yellow) !important;
+}
+
+.bg-blue-100, .status-processing, .status-shipped {
+    background: var(--info-bg) !important;
+    color: var(--info-blue) !important;
+}
+
+.bg-gray-100 {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: var(--text-muted) !important;
+}
+
+/* Text color overrides for badges */
+.text-green-800 {
+    color: var(--success-green) !important;
+}
+
+.text-red-800 {
+    color: var(--danger-red) !important;
+}
+
+.text-yellow-800 {
+    color: var(--warning-yellow) !important;
+}
+
+.text-blue-800 {
+    color: var(--info-blue) !important;
+}
+
+.text-gray-800 {
+    color: var(--text-muted) !important;
+}
+
+/* Breadcrumbs */
+.breadcrumb, nav[aria-label="Breadcrumb"] {
+    color: var(--text-muted) !important;
+}
+
+.breadcrumb a {
+    color: var(--text-muted) !important;
+    transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+    color: var(--primary-gold) !important;
+}
+
+/* Search Inputs */
+.bg-gray-800 {
+    background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.border-gray-600 {
+    border-color: var(--glass-border) !important;
+}
+
+.focus\:ring-cyan-600:focus {
+    --tw-ring-color: var(--primary-gold) !important;
+}
+
+.focus\:border-cyan-600:focus {
+    border-color: var(--primary-gold) !important;
+}
+
+/* Hover states for interactive elements */
+.hover\:bg-gray-700:hover, .hover\:bg-gray-100:hover {
+    background: rgba(212, 175, 55, 0.1) !important;
+}
+
+.hover\:text-white:hover {
+    color: var(--primary-gold) !important;
+}
+
+/* Active states */
+.bg-gray-700 {
+    background: rgba(212, 175, 55, 0.15) !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.5);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.glass-card, .stat-card {
+    animation: fadeIn 0.3s ease;
 }

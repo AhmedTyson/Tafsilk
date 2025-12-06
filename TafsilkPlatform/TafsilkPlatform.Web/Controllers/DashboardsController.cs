@@ -132,14 +132,37 @@ public class DashboardsController : Controller
      o.Status == OrderStatus.Shipped);
             model.CompletedOrdersCount = orders.Count(o => o.Status == OrderStatus.Delivered);
 
-            // Get financial statistics
+            // Get financial statistics (NET REVENUE = Total - Commission)
             var completedOrders = orders.Where(o => o.Status == OrderStatus.Delivered).ToList();
-            model.TotalRevenue = (decimal)completedOrders.Sum(o => o.TotalPrice);
+            model.TotalRevenue = (decimal)completedOrders.Sum(o => o.TotalPrice - o.CommissionAmount);
 
             var monthlyOrders = completedOrders
-          .Where(o => o.CreatedAt >= DateTimeOffset.UtcNow.AddMonths(-1))
+                .Where(o => o.CreatedAt >= DateTimeOffset.UtcNow.AddMonths(-1))
                 .ToList();
-            model.MonthlyRevenue = (decimal)monthlyOrders.Sum(o => o.TotalPrice);
+            model.MonthlyRevenue = (decimal)monthlyOrders.Sum(o => o.TotalPrice - o.CommissionAmount);
+
+            // Chart Data: Net Revenue Last 7 Days
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var chartData = completedOrders
+                .Where(o => o.CreatedAt >= sevenDaysAgo)
+                .GroupBy(o => o.CreatedAt.Date)
+                .Select(g => new { Date = g.Key, NetTotal = g.Sum(o => o.TotalPrice - o.CommissionAmount) })
+                .OrderBy(x => x.Date)
+                .ToList();
+
+            // Fill in missing days
+            var dates = new List<string>();
+            var values = new List<decimal>();
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = DateTime.UtcNow.Date.AddDays(-i);
+                var entry = chartData.FirstOrDefault(x => x.Date == date);
+                dates.Add(date.ToString("MMM dd"));
+                values.Add(entry != null ? (decimal)entry.NetTotal : 0);
+            }
+
+            model.SalesDates = dates.ToArray();
+            model.SalesValues = values.ToArray();
 
             // Wallet balance not available (Wallet feature removed)
             model.WalletBalance = 0;
@@ -333,5 +356,49 @@ public class DashboardsController : Controller
   }
   }
         };
+    }
+    [HttpGet("Tailor/ExportIncomeStatement")]
+    [Authorize(Roles = "Tailor")]
+    public async Task<IActionResult> ExportIncomeStatement()
+    {
+        var userId = User.GetUserId();
+        var tailor = await _context.TailorProfiles.FirstOrDefaultAsync(t => t.UserId == userId);
+
+        if (tailor == null)
+            return NotFound("Tailor profile not found.");
+
+        var orders = await _context.Orders
+            .Where(o => o.TailorId == tailor.Id && o.Status == OrderStatus.Delivered)
+            .Include(o => o.Items).ThenInclude(i => i.Product)
+            .Include(o => o.Customer).ThenInclude(c => c.User)
+            .OrderByDescending(o => o.CreatedAt)
+            .ToListAsync();
+
+        var builder = new System.Text.StringBuilder();
+        // Header
+        builder.AppendLine("Date,Order ID,Customer,Product,Quantity,Unit Price (EGP),Total Price (EGP),Platform Fee (10%),Net Income (EGP)");
+
+        foreach (var order in orders)
+        {
+            foreach (var item in order.Items)
+            {
+                var lineDate = order.CreatedAt.ToString("yyyy-MM-dd HH:mm");
+                var orderId = order.OrderId.ToString().Substring(0, 8);
+                var customerName = order.Customer?.FullName?.Replace(",", " ") ?? "N/A";
+                var productName = item.Product?.Name?.Replace(",", " ") ?? "Unknown Product";
+                var quantity = item.Quantity;
+                var unitPrice = item.UnitPrice;
+                var itemTotal = unitPrice * quantity;
+                var platformFee = itemTotal * (decimal)0.10;
+                var netIncome = itemTotal - platformFee;
+
+                builder.AppendLine($"{lineDate},#{orderId},{customerName},{productName},{quantity},{unitPrice:F2},{itemTotal:F2},{platformFee:F2},{netIncome:F2}");
+            }
+        }
+
+        var contentType = "text/csv";
+        var fileName = $"IncomeStatement_Tailor_{DateTime.Now:yyyyMMddHHmm}.csv";
+
+        return File(System.Text.Encoding.UTF8.GetBytes(builder.ToString()), contentType, fileName);
     }
 }

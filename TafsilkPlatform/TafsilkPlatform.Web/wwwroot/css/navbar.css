@@ -361,3 +361,174 @@
     right: 0;
     left: auto;
 }
+
+/* ========================================
+   MOBILE OFFCANVAS SIDEBAR
+   Amazon-Style Mobile Navigation
+   ======================================== */
+
+/* --- Offcanvas Base --- */
+.offcanvas {
+    background-color: #131921;
+    width: 300px;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 2050;
+}
+
+.offcanvas-header {
+    background-color: #131921;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.offcanvas-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.btn-close-white {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+}
+
+.btn-close-white:hover {
+    opacity: 1;
+}
+
+/* --- User Section --- */
+.user-section {
+    background-color: #232f3e;
+}
+
+.user-avatar {
+    flex-shrink: 0;
+}
+
+/* --- Sidebar Navigation --- */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.875rem 1.5rem;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+}
+
+.sidebar-link i {
+    width: 20px;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-left-color: #ff9900;
+    color: #ff9900;
+}
+
+.sidebar-link:hover i {
+    color: #ff9900;
+}
+
+.sidebar-link.text-warning {
+    color: #ff9900 !important;
+    font-weight: 600;
+}
+
+.sidebar-link.text-warning:hover {
+    background-color: rgba(255, 153, 0, 0.1);
+}
+
+.sidebar-link.text-danger {
+    color: #ff6b6b !important;
+}
+
+.sidebar-link.text-danger:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+    border-left-color: #ff6b6b;
+}
+
+/* --- Section Titles --- */
+.sidebar-section-title {
+    padding: 0.75rem 1.5rem 0.5rem;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- Dividers --- */
+.sidebar-nav .border-top {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* --- Cart Badge in Sidebar --- */
+.sidebar-link .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+}
+
+/* --- Mobile Hamburger Button --- */
+.navbar-toggler.d-lg-none {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 0.375rem 0.75rem;
+}
+
+.navbar-toggler.d-lg-none:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.navbar-toggler.d-lg-none:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 153, 0, 0.25);
+}
+
+/* --- Backdrop --- */
+.offcanvas-backdrop {
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 2040 !important;
+}
+
+/* --- Animations --- */
+.offcanvas.show {
+    transform: none;
+}
+
+.offcanvas-start {
+    transform: translateX(-100%);
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 991.98px) {
+    /* Hide desktop navbar, show mobile sidebar */
+    .navbar-collapse {
+        display: none !important;
+    }
+    
+    /* Adjust navbar for mobile */
+    .navbar .container-fluid {
+        padding: 0.5rem 1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.5rem;
+    }
+}
+
+@media (min-width: 992px) {
+    /* Hide mobile sidebar on desktop */
+    .offcanvas.d-lg-none {
+        display: none !important;
+    }
+}

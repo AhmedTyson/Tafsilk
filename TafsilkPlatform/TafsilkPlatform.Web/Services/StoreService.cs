@@ -488,13 +488,13 @@ namespace TafsilkPlatform.Web.Services
             };
         }
 
-        public async Task<(bool Success, Guid? OrderId, string? ErrorMessage)> ProcessCheckoutAsync(
+        public async Task<(bool Success, List<Guid>? OrderIds, string? ErrorMessage)> ProcessCheckoutAsync(
             Guid customerId,
             ProcessPaymentRequest request)
         {
             // Use UnitOfWork's ExecuteInTransactionAsync for consistent transaction handling
             // Specify the exact tuple type (with nullable ErrorMessage) to avoid nullability inference issues
-            return await _unitOfWork.ExecuteInTransactionAsync<(bool Success, Guid? OrderId, string? ErrorMessage)>(async () =>
+            return await _unitOfWork.ExecuteInTransactionAsync<(bool Success, List<Guid>? OrderIds, string? ErrorMessage)>(async () =>
              {
                  try
                  {
@@ -509,7 +509,7 @@ namespace TafsilkPlatform.Web.Services
                      if (cart == null || !cart.Items.Any())
                      {
                          _logger.LogWarning("Empty cart for customer {CustomerId}", customerId);
-                         return (false, (Guid?)null, "Your cart is empty. Please add items before checkout.");
+                         return (false, null, "Your cart is empty. Please add items before checkout.");
                      }
 
                      // Validate and lock stock (CRITICAL - like Amazon prevents overselling)
@@ -545,14 +545,14 @@ namespace TafsilkPlatform.Web.Services
                          _logger.LogWarning(
                              "Stock validation failed for customer {CustomerId}. Errors: {Errors}",
                              customerId, string.Join("; ", stockValidationErrors));
-                         return (false, (Guid?)null, $"Stock issues: {string.Join("; ", stockValidationErrors)}");
+                         return (false, null, $"Stock issues: {string.Join("; ", stockValidationErrors)}");
                      }
 
                      // Get customer
                      var customer = await _unitOfWork.Customers.GetByIdAsync(customerId);
                      if (customer == null)
                      {
-                         return (false, (Guid?)null, "Customer not found");
+                         return (false, null, "Customer not found");
                      }
 
                      // Calculate totals
@@ -566,168 +566,122 @@ namespace TafsilkPlatform.Web.Services
                          ? OrderStatus.PendingPayment
                          : OrderStatus.Confirmed;
 
-                     // Group cart items by tailor to create separate orders
-                     var itemsByTailor = new Dictionary<Guid, List<CartItem>>();
+                     // ✅ SINGLE ORDER LOGIC (User Request)
+                     // Instead of splitting by tailor, we create ONE order containing all items.
+                     // We assign the order to the first tailor found (Primary Tailor).
 
+                     var firstItem = cart.Items.First();
+                     var primaryProduct = await _unitOfWork.Context.Products
+                         .Include(p => p.Tailor)
+                         .FirstOrDefaultAsync(p => p.ProductId == firstItem.ProductId);
+
+                     if (primaryProduct == null || primaryProduct.TailorId == null || primaryProduct.Tailor == null)
+                     {
+                         return (false, null, "Product information missing");
+                     }
+
+                     var primaryTailorId = primaryProduct.TailorId.Value;
+                     var primaryTailor = primaryProduct.Tailor;
+
+                     var createdOrders = new List<Order>();
+                     var createdOrderIds = new List<Guid>();
+
+                     // Create ONE single order
+                     var order = new Order
+                     {
+                         OrderId = Guid.NewGuid(),
+                         CustomerId = customerId,
+                         Customer = customer,
+                         TailorId = primaryTailorId, // Assigned to primary tailor
+                         Tailor = primaryTailor,
+                         Description = cart.Items.Count > 1
+                            ? $"Store Purchase ({cart.Items.Count} items)"
+                            : $"Store Purchase from {primaryTailor.ShopName ?? primaryTailor.FullName}",
+                         OrderType = "StoreOrder",
+                         TotalPrice = (double)total, // Total of ALL items + shipping + tax
+                         Status = orderStatus,
+                         CreatedAt = DateTimeOffset.UtcNow,
+                         DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
+                         FulfillmentMethod = "Delivery",
+                         CommissionRate = 0.10, // Platform fee
+                         CommissionAmount = (double)total * 0.10
+                     };
+
+                     await _unitOfWork.Orders.AddAsync(order);
+                     await _unitOfWork.SaveChangesAsync(); // Save to get OrderId
+
+                     createdOrderIds.Add(order.OrderId);
+                     createdOrders.Add(order);
+
+                     // Add ALL items to this single order
                      foreach (var cartItem in cart.Items)
                      {
-                         // Reload product to get tailor info
-                         var product = await _unitOfWork.Context.Products
-                             .Include(p => p.Tailor)
+                         // Reload product with lock
+                         var itemProduct = await _unitOfWork.Context.Products
                              .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
 
-                         if (product == null || product.TailorId == null)
+                         if (itemProduct == null) continue;
+
+                         // Double-check stock
+                         if (itemProduct.StockQuantity < cartItem.Quantity)
                          {
-                             _logger.LogWarning("Product {ProductId} has no tailor assigned", cartItem.ProductId);
-                             continue;
+                             throw new InvalidOperationException($"Insufficient stock for {itemProduct.Name}");
                          }
 
-                         var tailorId = product.TailorId.Value;
-                         if (!itemsByTailor.ContainsKey(tailorId))
+                         var orderItem = new OrderItem
                          {
-                             itemsByTailor[tailorId] = new List<CartItem>();
-                         }
-                         itemsByTailor[tailorId].Add(cartItem);
-                     }
-
-                     if (!itemsByTailor.Any())
-                     {
-                         return (false, (Guid?)null, "No valid products found in cart");
-                     }
-
-                     // Create separate order for each tailor
-                     var createdOrders = new List<Order>();
-                     var firstOrderId = (Guid?)null;
-
-                     foreach (var tailorGroup in itemsByTailor)
-                     {
-                         var tailorId = tailorGroup.Key;
-                         var tailorItems = tailorGroup.Value;
-
-                         // Get tailor
-                         var tailor = await _unitOfWork.Context.TailorProfiles
-                             .FirstOrDefaultAsync(t => t.Id == tailorId);
-
-                         if (tailor == null)
-                         {
-                             _logger.LogWarning("Tailor {TailorId} not found", tailorId);
-                             continue;
-                         }
-
-                         // Calculate order total for this tailor's products
-                         var orderSubtotal = (double)tailorItems.Sum(i => i.TotalPrice);
-                         var orderTotal = orderSubtotal;
-
-                         // Calculate commission (10% platform fee)
-                         var commissionRate = 0.10;
-                         var commissionAmount = orderTotal * commissionRate;
-
-                         // Create order for this tailor
-                         var order = new Order
-                         {
-                             OrderId = Guid.NewGuid(),
-                             CustomerId = customerId,
-                             Customer = customer,
-                             TailorId = tailorId,
-                             Tailor = tailor,
-                             Description = $"Store Purchase from {tailor.ShopName ?? tailor.FullName}",
-                             OrderType = "StoreOrder",
-                             TotalPrice = orderTotal,
-                             Status = orderStatus,
-                             CreatedAt = DateTimeOffset.UtcNow,
-                             DeliveryAddress = $"{request.ShippingAddress?.Street}, {request.ShippingAddress?.City}",
-                             FulfillmentMethod = "Delivery",
-                             CommissionRate = commissionRate,
-                             CommissionAmount = commissionAmount
-                         };
-
-                         await _unitOfWork.Orders.AddAsync(order);
-                         await _unitOfWork.SaveChangesAsync(); // Save to get OrderId
-
-                         if (firstOrderId == null)
-                         {
-                             firstOrderId = order.OrderId;
-                         }
-
-                         // Create order items and update stock atomically (CRITICAL)
-                         foreach (var cartItem in tailorItems)
-                         {
-                             // Reload product with lock
-                             var product = await _unitOfWork.Context.Products
-                                 .FirstOrDefaultAsync(p => p.ProductId == cartItem.ProductId);
-
-                             if (product == null) continue;
-
-                             // Double-check stock before updating (prevent race conditions)
-                             if (product.StockQuantity < cartItem.Quantity)
-                             {
-                                 _logger.LogError(
-                                     "Stock check failed during order creation for product {ProductId}. Available: {Available}, Requested: {Requested}",
-                                     product.ProductId, product.StockQuantity, cartItem.Quantity);
-                                 return (false, (Guid?)null, $"Insufficient stock for {product.Name}");
-                             }
-
-                             // Create order item
-                             var orderItem = new OrderItem
-                             {
-                                 OrderItemId = Guid.NewGuid(),
-                                 OrderId = order.OrderId,
-                                 Order = order,
-                                 ProductId = cartItem.ProductId,
-                                 Product = product,
-                                 Description = product.Name,
-                                 Quantity = cartItem.Quantity,
-                                 UnitPrice = cartItem.UnitPrice,
-                                 Total = cartItem.TotalPrice,
-                                 SelectedSize = cartItem.SelectedSize,
-                                 SelectedColor = cartItem.SelectedColor,
-                                 SpecialInstructions = cartItem.SpecialInstructions
-                             };
-
-                             // Use Context to add entity
-                             _unitOfWork.Context.OrderItems.Add(orderItem);
-
-                             // Update stock atomically (CRITICAL - like Amazon)
-                             product.StockQuantity -= cartItem.Quantity;
-                             product.SalesCount += cartItem.Quantity;
-                             product.UpdatedAt = DateTimeOffset.UtcNow;
-
-                             // Mark product as unavailable if stock reaches zero
-                             if (product.StockQuantity == 0)
-                             {
-                                 product.IsAvailable = false;
-                             }
-                         }
-
-                         // Create payment record for each order
-                         var paymentStatus = Enums.PaymentStatus.Pending;
-                         var payment = new TafsilkPlatform.Models.Models.Payment
-                         {
-                             PaymentId = Guid.NewGuid(),
+                             OrderItemId = Guid.NewGuid(),
                              OrderId = order.OrderId,
                              Order = order,
-                             CustomerId = customerId,
-                             Customer = customer,
-                             TailorId = tailorId,
-                             Tailor = tailor,
-                             Amount = (decimal)orderTotal,
-                             PaymentType = request.PaymentMethod == "CreditCard"
-                                ? Enums.PaymentType.Card
-                                : Enums.PaymentType.Cash,
-                             PaymentStatus = paymentStatus,
-                             TransactionType = Enums.TransactionType.Credit,
-                             PaidAt = null, // Not paid yet
-                             Currency = "EGP",
-                             Provider = request.PaymentMethod == "CreditCard" ? "Stripe" : "Internal",
-                             Notes = request.PaymentMethod == "CashOnDelivery"
-                                ? "Payment will be collected on delivery"
-                                : "Pending Stripe payment"
+                             ProductId = cartItem.ProductId,
+                             Product = itemProduct,
+                             Description = itemProduct.Name,
+                             Quantity = cartItem.Quantity,
+                             UnitPrice = cartItem.UnitPrice,
+                             Total = cartItem.TotalPrice,
+                             SelectedSize = cartItem.SelectedSize,
+                             SelectedColor = cartItem.SelectedColor,
+                             SpecialInstructions = cartItem.SpecialInstructions
                          };
 
-                         // Use Context to add payment
-                         _unitOfWork.Context.Payment.Add(payment);
-                         createdOrders.Add(order);
+                         _unitOfWork.Context.OrderItems.Add(orderItem);
+
+                         // Update stock
+                         itemProduct.StockQuantity -= cartItem.Quantity;
+                         itemProduct.SalesCount += cartItem.Quantity;
+                         itemProduct.UpdatedAt = DateTimeOffset.UtcNow;
+
+                         if (itemProduct.StockQuantity == 0)
+                         {
+                             itemProduct.IsAvailable = false;
+                         }
                      }
+
+                     // Create ONE payment record
+                     var payment = new TafsilkPlatform.Models.Models.Payment
+                     {
+                         PaymentId = Guid.NewGuid(),
+                         OrderId = order.OrderId,
+                         Order = order,
+                         CustomerId = customerId,
+                         Customer = customer,
+                         TailorId = primaryTailorId,
+                         Tailor = primaryTailor,
+                         Amount = (decimal)total,
+                         PaymentType = request.PaymentMethod == "CreditCard"
+                            ? Enums.PaymentType.Card
+                            : Enums.PaymentType.Cash,
+                         PaymentStatus = Enums.PaymentStatus.Pending,
+                         TransactionType = Enums.TransactionType.Credit,
+                         PaidAt = null,
+                         Currency = "EGP",
+                         Provider = request.PaymentMethod == "CreditCard" ? "Stripe" : "Internal",
+                         Notes = request.PaymentMethod == "CashOnDelivery"
+                            ? "Payment will be collected on delivery"
+                            : "Pending Stripe payment"
+                     };
+
+                     _unitOfWork.Context.Payment.Add(payment);
 
                      // Clear cart ONLY if payment is not CreditCard (Stripe)
                      // For Stripe, we keep items in cart until payment is confirmed via webhook/success page
@@ -740,10 +694,10 @@ namespace TafsilkPlatform.Web.Services
                      await _unitOfWork.SaveChangesAsync();
 
                      _logger.LogInformation(
-                         "Checkout completed successfully for customer {CustomerId}. Created {OrderCount} order(s). First OrderId: {OrderId}",
-                         customerId, createdOrders.Count, firstOrderId);
+                         "Checkout completed successfully for customer {CustomerId}. Created {OrderCount} order(s). OrderIds: {OrderIds}",
+                         customerId, createdOrders.Count, string.Join(", ", createdOrderIds));
 
-                     return (true, firstOrderId, (string?)null);
+                     return (true, createdOrderIds, (string?)null);
                  }
                  catch (Exception ex)
                  {
@@ -755,15 +709,15 @@ namespace TafsilkPlatform.Web.Services
 
         private decimal CalculateShipping(decimal subtotal)
         {
-            // Free shipping over 500 EGP
-            if (subtotal >= 500) return 0;
-            return 25; // Flat rate
+            // Free shipping over 1000 EGP, otherwise 60 EGP
+            if (subtotal > 1000) return 0;
+            return 60; // Flat rate for orders <= 1000
         }
 
         private decimal CalculateTax(decimal subtotal)
         {
-            // 14% VAT in Egypt
-            return subtotal * 0.14m;
+            // Tax is included in the item price, so no extra tax calculation needed
+            return 0;
         }
 
         /// <summary>

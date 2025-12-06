@@ -25,6 +25,8 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public List<string> AdditionalImages { get; set; } = new();
         public string? TailorName { get; set; }
         public Guid? TailorId { get; set; }
+        public List<TafsilkPlatform.Models.Models.Review> Reviews { get; set; } = new();
+        public bool CanReview { get; set; } = false;
     }
 
     public class ProductListViewModel
@@ -56,5 +58,18 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public string? SelectedSize { get; set; }
         public string? SelectedColor { get; set; }
         public string? SpecialInstructions { get; set; }
+    }
+
+    public class SubmitReviewRequest
+    {
+        [Required]
+        public Guid ProductId { get; set; }
+
+        [Required]
+        [Range(1, 5)]
+        public int Rating { get; set; }
+
+        [MaxLength(1000)]
+        public string? Comment { get; set; }
     }
 }

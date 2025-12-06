@@ -538,7 +538,7 @@
     </style>
 }
 
-<main class="container">
+<div class="container">
     <section class="tailor-profile">
         <div class="profile-header">
             <div class="profile-banner"></div>
@@ -581,8 +581,16 @@
                             <span class="stat-label">Orders Done</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-value">@safeModel.AverageRating.ToString("0.0")</span>
-                            <span class="stat-label">Rating</span>
+                            @if (safeModel.AverageRating == 0)
+                            {
+                                <span class="stat-value" style="color: var(--success-color); font-size: 1.25rem;">Recommended</span>
+                                <span class="stat-label">Status</span>
+                            }
+                            else
+                            {
+                                <span class="stat-value">@safeModel.AverageRating.ToString("0.0")</span>
+                                <span class="stat-label">Rating</span>
+                            }
                         </div>
                     </div>
 
@@ -699,6 +707,7 @@
                 <div class="tab active" onclick="openTab(event, 'products')">Products</div>
                 <div class="tab" onclick="openTab(event, 'portfolio')">Portfolio</div>
                 <div class="tab" onclick="openTab(event, 'info')">Information</div>
+                <div class="tab" onclick="openTab(event, 'reviews')">Reviews</div>
             </div>
 
             <!-- Products Tab -->
@@ -813,9 +822,74 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Reviews Tab -->
+            <div id="reviews" class="tab-content">
+                <h2 class="section-title">Customer Reviews</h2>
+                <div class="reviews-container">
+                    @{
+                        var reviews = ViewBag.Reviews as List<TafsilkPlatform.Models.Models.Review>;
+                    }
+                    @if (reviews != null && reviews.Any())
+                    {
+                        <div class="d-grid gap-3">
+                            @foreach (var review in reviews)
+                            {
+                                <div class="card border-0 shadow-sm p-4 rounded-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="avatar-circle bg-light text-dark fw-bold d-flex align-items-center justify-content-center" style="width: 45px; height: 45px; border-radius: 50%; font-size: 1.1rem;">
+                                                @(review.Customer.FullName?.FirstOrDefault() ?? 'C')
+                                            </div>
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark">@review.Customer.FullName</h6>
+                                                <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                            </div>
+                                        </div>
+                                        <div class="text-warning">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= review.Rating)
+                                                {
+                                                    <i class="fas fa-star"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="far fa-star"></i>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (review.IsVerifiedPurchase)
+                                    {
+                                        <div class="mb-2">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                                <i class="fas fa-check-circle me-1"></i> Verified Purchase
+                                            </span>
+                                        </div>
+                                    }
+                                    <h6 class="fw-bold text-primary mb-1">
+                                        <a href="@Url.Action("ProductDetails", "Store", new { id = review.ProductId, area = "Customer" })" class="text-decoration-none text-primary">
+                                            @review.Product?.Name
+                                        </a>
+                                    </h6>
+                                    <p class="mb-0 text-secondary">@review.Comment</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="far fa-comment-dots fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No reviews available for this tailor yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
     </section>
-</main>
+</div>
 
 @section Scripts {
     <script>

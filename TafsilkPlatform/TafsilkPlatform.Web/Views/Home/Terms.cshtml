@@ -1,0 +1,231 @@
+@{
+    ViewData["Title"] = "Terms of Service | Tafsilk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .legal-container {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .legal-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .legal-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .legal-content {
+            background: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .legal-content h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #D4AF37;
+        }
+
+        .legal-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .legal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .legal-content p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .legal-content ul, .legal-content ol {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .legal-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .legal-content strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        @@media (max-width: 768px) {
+            .legal-container {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .legal-header h1 {
+                font-size: 2rem;
+            }
+
+            .legal-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .legal-content h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}
+
+<div class="legal-container">
+    <div class="legal-header">
+        <h1>Terms of Service</h1>
+        <p>Please read these terms carefully before using our platform</p>
+    </div>
+
+    <div class="legal-content">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing and using Tafsilk ("the Platform"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to these Terms of Service, please do not use the Platform.</p>
+
+        <h2>2. Description of Service</h2>
+        <p>Tafsilk is an online platform that connects customers with professional tailors ("Service Providers"). We facilitate:</p>
+        <ul>
+            <li>Discovery and booking of tailoring services</li>
+            <li>Purchase of ready-made garments from verified tailors</li>
+            <li>Communication between customers and service providers</li>
+            <li>Secure payment processing</li>
+            <li>Order tracking and management</li>
+        </ul>
+
+        <h2>3. User Accounts</h2>
+        <h3>3.1 Registration</h3>
+        <p>To use certain features of the Platform, you must register for an account. You agree to:</p>
+        <ul>
+            <li>Provide accurate, current, and complete information</li>
+            <li>Maintain and update your information to keep it accurate</li>
+            <li>Maintain the security of your password</li>
+            <li>Accept all risks of unauthorized access to your account</li>
+        </ul>
+
+        <h3>3.2 Account Types</h3>
+        <p>We offer two types of accounts:</p>
+        <ul>
+            <li><strong>Customer Accounts:</strong> For individuals seeking tailoring services</li>
+            <li><strong>Tailor Accounts:</strong> For verified professional tailors offering services</li>
+        </ul>
+
+        <h2>4. User Responsibilities</h2>
+        <h3>4.1 General Conduct</h3>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Violate any laws or regulations</li>
+            <li>Infringe on any third party's rights</li>
+            <li>Post false, inaccurate, or misleading information</li>
+            <li>Engage in fraudulent activities</li>
+            <li>Harass, abuse, or harm other users</li>
+            <li>Attempt to gain unauthorized access to the Platform</li>
+        </ul>
+
+        <h3>4.2 Tailor Responsibilities</h3>
+        <p>Tailors using the Platform agree to:</p>
+        <ul>
+            <li>Provide accurate information about their services and pricing</li>
+            <li>Deliver services and products as described</li>
+            <li>Maintain professional standards of workmanship</li>
+            <li>Comply with all applicable laws and regulations</li>
+            <li>Honor agreed-upon timelines and commitments</li>
+        </ul>
+
+        <h2>5. Payments and Fees</h2>
+        <h3>5.1 Payment Processing</h3>
+        <p>All payments are processed securely through our integrated payment providers (Stripe). We do not store your payment card information.</p>
+
+        <h3>5.2 Platform Fees</h3>
+        <p>Tafsilk charges a service fee/commission on transactions facilitated through the Platform. The fee structure is:</p>
+        <ul>
+            <li>Platform commission: 10% of the transaction value</li>
+            <li>Payment processing fees: As charged by payment providers</li>
+        </ul>
+
+        <h3>5.3 Refunds and Cancellations</h3>
+        <p>Refund policies are subject to the individual tailor's terms and our general policies. Please review our refund policy before making purchases.</p>
+
+        <h2>6. Intellectual Property</h2>
+        <p>All content on the Platform, including text, graphics, logos, icons, images, and software, is the property of Tafsilk or its content suppliers and is protected by copyright and trademark laws.</p>
+
+        <h2>7. Privacy and Data Protection</h2>
+        <p>Your privacy is important to us. Please review our <a asp-controller="Home" asp-action="Privacy">Privacy Policy</a> to understand how we collect, use, and protect your personal information.</p>
+
+        <h2>8. Limitation of Liability</h2>
+        <p>Tafsilk acts as an intermediary platform and is not directly responsible for:</p>
+        <ul>
+            <li>The quality of services provided by tailors</li>
+            <li>Disputes between customers and tailors</li>
+            <li>Loss or damage resulting from use of the Platform</li>
+        </ul>
+        <p>However, we maintain quality standards and a dispute resolution process to protect all parties.</p>
+
+        <h2>9. Dispute Resolution</h2>
+        <p>In case of disputes:</p>
+        <ol>
+            <li>First, attempt to resolve the issue directly with the other party</li>
+            <li>Contact our support team for mediation</li>
+            <li>If unresolved, disputes will be settled through binding arbitration</li>
+        </ol>
+
+        <h2>10. Termination</h2>
+        <p>We reserve the right to suspend or terminate your account if you:</p>
+        <ul>
+            <li>Violate these Terms of Service</li>
+            <li>Engage in fraudulent or harmful activities</li>
+            <li>Fail to pay fees owed</li>
+            <li>Misuse the Platform</li>
+        </ul>
+
+        <h2>11. Changes to Terms</h2>
+        <p>We may update these Terms of Service from time to time. We will notify registered users of material changes via email or Platform notification. Continued use of the Platform after changes constitutes acceptance of the new terms.</p>
+
+        <h2>12. Contact Information</h2>
+        <p>For questions about these Terms of Service, please contact us:</p>
+        <ul>
+            <li>Email: info@tafsilk.com</li>
+            <li>Phone: +20 123 456 7890</li>
+            <li>Address: Cairo, Egypt</li>
+        </ul>
+
+        <div class="last-updated">
+            Last Updated: @DateTime.Now.ToString("MMMM dd, yyyy")
+        </div>
+    </div>
+</div>

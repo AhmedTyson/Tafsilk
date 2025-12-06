@@ -11,6 +11,9 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public string PaymentMethod { get; set; } = string.Empty;
         public DateTimeOffset OrderDate { get; set; }
         public int EstimatedDeliveryDays { get; set; }
+
+        // ✅ NEW: Support for multiple orders
+        public List<OrderSuccessDetailsViewModel> Orders { get; set; } = new();
     }
 
     /// <summary>
@@ -24,6 +27,8 @@ namespace TafsilkPlatform.Models.ViewModels.Store
         public DateTimeOffset OrderDate { get; set; }
         public string PaymentMethod { get; set; } = string.Empty;
         public string DeliveryAddress { get; set; } = string.Empty;
+        public string? TailorName { get; set; }
+        public string? TailorShopName { get; set; }
         public List<OrderSuccessItemViewModel> Items { get; set; } = new();
     }
 

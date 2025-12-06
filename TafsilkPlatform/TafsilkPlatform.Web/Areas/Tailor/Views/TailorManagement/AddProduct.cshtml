@@ -126,13 +126,6 @@
                                     <img id="primaryImagePreviewImg" class="img-fluid rounded" style="max-height: 200px;" />
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <label asp-for="AdditionalImages" class="form-label fw-bold"></label>
-                                <input asp-for="AdditionalImages" class="form-control" type="file" multiple accept="image/*" id="additionalImagesInput" />
-                                <div class="form-text">Upload up to 5 additional images for the gallery.</div>
-                                <span asp-validation-for="AdditionalImages" class="text-danger small"></span>
-                                <div id="additionalImagesPreview" class="row g-2 mt-2"></div>
-                            </div>
                         </div>
 
                         <hr class="my-4" />
@@ -271,25 +264,6 @@
                         $('#primaryImagePreview').show();
                     }
                     reader.readAsDataURL(this.files[0]);
-                }
-            });
-
-            // Image Preview for Additional Images
-            $("#additionalImagesInput").change(function() {
-                $('#additionalImagesPreview').empty();
-                if (this.files) {
-                    [].forEach.call(this.files, function(file) {
-                        var reader = new FileReader();
-                        reader.onload = function(e) {
-                            const col = $('<div>').addClass('col-md-3 position-relative');
-                            const img = $('<img>').attr('src', e.target.result)
-                                .addClass('img-fluid rounded')
-                                .css('max-height', '100px');
-                            col.append(img);
-                            $('#additionalImagesPreview').append(col);
-                        };
-                        reader.readAsDataURL(file);
-                    });
                 }
             });
         });

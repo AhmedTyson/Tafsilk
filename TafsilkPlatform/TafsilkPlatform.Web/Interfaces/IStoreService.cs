@@ -19,7 +19,7 @@ namespace TafsilkPlatform.Web.Interfaces
 
         // Checkout operations
         Task<CheckoutViewModel?> GetCheckoutDataAsync(Guid customerId);
-        Task<(bool Success, Guid? OrderId, string? ErrorMessage)> ProcessCheckoutAsync(Guid customerId, ProcessPaymentRequest request);
+        Task<(bool Success, List<Guid>? OrderIds, string? ErrorMessage)> ProcessCheckoutAsync(Guid customerId, ProcessPaymentRequest request);
 
         // ✅ NEW: Order details for payment success
         Task<OrderSuccessDetailsViewModel?> GetOrderDetailsAsync(Guid orderId, Guid customerId);

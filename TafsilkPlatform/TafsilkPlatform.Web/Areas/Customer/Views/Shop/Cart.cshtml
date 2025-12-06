@@ -9,46 +9,47 @@
             --premium-gold: #D4AF37;
             --premium-black: #1a1a1a;
             --premium-dark-gray: #333;
-            --premium-light-gray: #f8f9fa;
+            --premium-bg: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--premium-bg);
         }
 
         .premium-heading {
             font-family: 'Playfair Display', serif;
             color: var(--premium-black);
-            position: relative;
-            padding-bottom: 15px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
-        .premium-heading::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 60px;
-            height: 3px;
-            background-color: var(--premium-gold);
+        .cart-container {
+            max-width: 1200px;
         }
 
+        /* Cart Item Card */
         .cart-item-card {
             border: none;
-            border-radius: 12px;
-            transition: all 0.3s ease;
+            border-radius: 16px;
             background: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             overflow: hidden;
+            position: relative;
         }
 
         .cart-item-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
         }
 
         .item-image-container {
-            height: 120px;
-            width: 120px;
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
             overflow: hidden;
-            border-radius: 8px;
-            background-color: #f8f9fa;
+            background-color: #f1f1f1;
+            position: relative;
         }
 
         .item-image {
@@ -59,7 +60,17 @@
         }
 
         .cart-item-card:hover .item-image {
-            transform: scale(1.05);
+            transform: scale(1.08);
+        }
+
+        /* Quantity Control */
+        .qty-control {
+            display: inline-flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 50px;
+            padding: 4px;
+            border: 1px solid #e9ecef;
         }
 
         .qty-btn {
@@ -69,16 +80,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #e0e0e0;
+            border: none;
             background: #fff;
             color: var(--premium-dark-gray);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             transition: all 0.2s;
+            cursor: pointer;
         }
 
-        .qty-btn:hover {
+        .qty-btn:hover:not(:disabled) {
             background-color: var(--premium-gold);
-            border-color: var(--premium-gold);
             color: #fff;
+            transform: scale(1.1);
+        }
+        
+        .qty-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .qty-input {
@@ -87,103 +105,144 @@
             font-weight: 600;
             width: 40px;
             text-align: center;
+            color: var(--premium-black);
         }
 
+        /* Summary Card */
         .summary-card {
             border: none;
-            border-radius: 12px;
+            border-radius: 16px;
             background: var(--premium-black);
             color: #fff;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, var(--premium-gold), #f3e5ab);
         }
 
         .summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+            opacity: 0.9;
         }
 
-        .summary-row:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
+        .summary-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 20px 0;
         }
 
+        /* Buttons */
         .btn-premium {
-            background-color: var(--premium-gold);
+            background: linear-gradient(135deg, var(--premium-gold) 0%, #c5a028 100%);
             color: #fff;
             border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
+            padding: 16px 30px;
+            border-radius: 12px;
             font-weight: 600;
             letter-spacing: 0.5px;
             transition: all 0.3s;
             text-transform: uppercase;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
         }
 
         .btn-premium:hover {
-            background-color: #c5a028;
-            color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-outline-premium {
-            border: 2px solid var(--premium-gold);
-            color: var(--premium-gold);
-            background: transparent;
-            border-radius: 30px;
-            padding: 10px 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .btn-outline-premium:hover {
-            background-color: var(--premium-gold);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
             color: #fff;
         }
 
-        .empty-cart-icon {
-            font-size: 5rem;
-            color: #e0e0e0;
-            margin-bottom: 20px;
+        .btn-icon-remove {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc3545;
+            background: #fff0f1;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-icon-remove:hover {
+            background: #dc3545;
+            color: #fff;
+            transform: scale(1.1);
+        }
+
+        .empty-cart-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #e9ecef;
+            margin-bottom: 25px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @@keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Badges */
+        .spec-badge {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 }
 
-<div class="container py-5">
-    <div class="row mb-5 align-items-end">
-        <div class="col-md-8">
-            <h1 class="premium-heading mb-2">Shopping Cart</h1>
-            <p class="text-muted mb-0">You have @Model.TotalItems items in your cart</p>
-        </div>
-        <div class="col-md-4 text-md-end">
-            @if (Model.Items.Any())
-            {
-                <form asp-action="ClearCart" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to clear the cart?')">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-link text-danger text-decoration-none">
-                        <i class="fas fa-trash-alt me-1"></i> Clear Cart
-                    </button>
-                </form>
-            }
-        </div>
-    </div>
-
+<div class="container cart-container py-5">
+    
     @if (Model.Items.Any())
     {
-        <div class="row g-4">
-            <!-- Cart Items -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="premium-heading mb-1">Shopping Cart</h1>
+                <p class="text-muted mb-0">Review your selected items (@Model.TotalItems)</p>
+            </div>
+            <form asp-action="ClearCart" method="post" onsubmit="return confirm('Are you sure you want to clear the cart?')">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-outline-danger border-0 btn-sm rounded-pill px-3">
+                    <i class="fas fa-trash-alt me-2"></i>Clear Cart
+                </button>
+            </form>
+        </div>
+
+        <div class="row g-5">
+            <!-- Cart Items List -->
             <div class="col-lg-8">
-                <div class="d-flex flex-column gap-3">
+                <div class="d-flex flex-column gap-4">
                     @foreach (var item in Model.Items)
                     {
-                        <div class="cart-item-card p-3">
-                            <div class="row align-items-center">
+                        <div class="cart-item-card p-4">
+                            <div class="row align-items-center g-3">
                                 <!-- Image -->
-                                <div class="col-md-2 col-4">
+                                <div class="col-auto">
                                     <div class="item-image-container">
                                         @if (!string.IsNullOrEmpty(item.ProductImageBase64))
                                         {
@@ -191,145 +250,185 @@
                                         }
                                         else
                                         {
-                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light text-muted">
-                                                <i class="fas fa-image fa-2x"></i>
+                                            <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                                <i class="fas fa-image fa-lg"></i>
                                             </div>
                                         }
                                     </div>
                                 </div>
 
-                                <!-- Details -->
-                                <div class="col-md-5 col-8">
-                                    <h5 class="mb-2 fw-bold text-dark">@item.ProductName</h5>
-                                    <div class="d-flex flex-wrap gap-3 text-muted small mb-2">
+                                <!-- Product Info -->
+                                <div class="col flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="fw-bold mb-0 text-dark">
+                                            @item.ProductName
+                                        </h5>
+                                        <div class="fw-bold fs-5 text-dark ms-3">@item.TotalPrice.ToString("N0") <small class="fs-6 text-muted">EGP</small></div>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
                                         @if (!string.IsNullOrEmpty(item.SelectedSize))
                                         {
-                                            <span><i class="fas fa-ruler me-1"></i> @item.SelectedSize</span>
+                                            <div class="spec-badge">
+                                                <i class="fas fa-ruler small"></i> @item.SelectedSize
+                                            </div>
                                         }
                                         @if (!string.IsNullOrEmpty(item.SelectedColor))
                                         {
-                                            <span><i class="fas fa-palette me-1"></i> @item.SelectedColor</span>
+                                            <div class="spec-badge">
+                                                <i class="fas fa-palette small"></i> @item.SelectedColor
+                                            </div>
+                                        }
+                                        @if (!item.IsAvailable)
+                                        {
+                                            <span class="badge bg-danger">Out of Stock</span>
+                                        }
+                                        else if (item.Quantity > item.StockAvailable)
+                                        {
+                                            <span class="badge bg-warning text-dark">Only @item.StockAvailable left</span>
                                         }
                                     </div>
-                                    
-                                    @if (!item.IsAvailable)
-                                    {
-                                        <span class="badge bg-danger">Out of Stock</span>
-                                    }
-                                    else if (item.Quantity > item.StockAvailable)
-                                    {
-                                        <span class="badge bg-warning text-dark">Only @item.StockAvailable available</span>
-                                    }
-                                </div>
 
-                                <!-- Quantity -->
-                                <div class="col-md-3 col-6 mt-3 mt-md-0">
-                                    <form asp-action="UpdateCartItem" method="post" class="d-flex align-items-center justify-content-center justify-content-md-start">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="CartItemId" value="@item.CartItemId" />
-                                        
-                                        <button type="button" class="qty-btn" onclick="updateQuantity(this, -1, @item.StockAvailable)">
-                                            <i class="fas fa-minus small"></i>
-                                        </button>
-                                        
-                                        <input type="number" name="Quantity" class="qty-input mx-2" 
-                                               value="@item.Quantity" min="1" max="@item.StockAvailable" 
-                                               onchange="this.form.submit()">
-                                        
-                                        <button type="button" class="qty-btn" onclick="updateQuantity(this, 1, @item.StockAvailable)">
-                                            <i class="fas fa-plus small"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <!-- Quantity -->
+                                        <form asp-action="UpdateCartItem" method="post" class="d-inline-block">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="CartItemId" value="@item.CartItemId" />
+                                            
+                                            <div class="qty-control">
+                                                <button type="button" class="qty-btn" onclick="updateQuantity(this, -1, @item.StockAvailable)">
+                                                    <i class="fas fa-minus" style="font-size: 0.7rem;"></i>
+                                                </button>
+                                                
+                                                <input type="number" name="Quantity" class="qty-input" 
+                                                       value="@item.Quantity" min="1" max="@item.StockAvailable" 
+                                                       onchange="this.form.submit()">
+                                                
+                                                <button type="button" class="qty-btn" onclick="updateQuantity(this, 1, @item.StockAvailable)">
+                                                    <i class="fas fa-plus" style="font-size: 0.7rem;"></i>
+                                                </button>
+                                            </div>
+                                        </form>
 
-                                <!-- Price & Remove -->
-                                <div class="col-md-2 col-6 mt-3 mt-md-0 text-end">
-                                    <div class="fw-bold fs-5 text-dark mb-2">@item.TotalPrice.ToString("N0") EGP</div>
-                                    <form asp-action="RemoveFromCart" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="cartItemId" value="@item.CartItemId" />
-                                        <button type="submit" class="btn btn-link text-muted p-0 text-decoration-none small" 
-                                                onclick="return confirm('Remove this item?')">
-                                            <i class="fas fa-times me-1"></i> Remove
-                                        </button>
-                                    </form>
+                                        <!-- Remove -->
+                                        <form asp-action="RemoveFromCart" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="cartItemId" value="@item.CartItemId" />
+                                            <button type="submit" class="btn-icon-remove" title="Remove Item" onclick="return confirm('Remove this item?')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     }
                 </div>
 
-                <div class="mt-4">
-                    <a href="/Store" class="btn btn-outline-dark rounded-pill px-4">
-                        <i class="fas fa-arrow-right me-2"></i> Continue Shopping
+                <div class="mt-5">
+                    <a href="/Store" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-bold" style="border-width: 2px;">
+                        <i class="fas fa-arrow-left me-2"></i>Continue Shopping
                     </a>
                 </div>
             </div>
 
-            <!-- Summary -->
+            <!-- Summary Sidebar -->
             <div class="col-lg-4">
-                <div class="summary-card p-4 sticky-top" style="top: 100px;">
-                    <h4 class="mb-4" style="color: var(--premium-gold);">Order Summary</h4>
+                <div class="sticky-top" style="top: 100px;">
                     
-                    <div class="summary-row">
-                        <span class="text-white-50">Subtotal</span>
-                        <span class="fw-bold">@Model.SubTotal.ToString("N2") EGP</span>
-                    </div>
-                    
-                    <div class="summary-row">
-                        <span class="text-white-50">Shipping</span>
-                        @if (Model.ShippingCost == 0)
-                        {
-                            <span class="text-success fw-bold">Free</span>
-                        }
-                        else
-                        {
-                            <span class="fw-bold">@Model.ShippingCost.ToString("N2") EGP</span>
-                        }
-                    </div>
-                    
-                    <div class="summary-row">
-                        <span class="text-white-50">VAT (14%)</span>
-                        <span class="fw-bold">@Model.Tax.ToString("N2") EGP</span>
-                    </div>
+                    <!-- Delivery Alert -->
+                    @if (Model.SubTotal >= 1000)
+                    {
+                        <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-start gap-3">
+                            <div class="bg-success text-white rounded-circle p-1 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 24px; height: 24px;">
+                                <i class="fas fa-check small"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold">Free Delivery Unlocked!</div>
+                                <div class="small opacity-75">Your order qualifies for premium free shipping.</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        var remaining = 1000 - Model.SubTotal;
+                        <div class="alert alert-warning border-0 shadow-sm rounded-4 mb-4 d-flex align-items-start gap-3 bg-white border-warning" style="border-left: 5px solid #ffc107 !important;">
+                            <div class="text-warning flex-shrink-0">
+                                <i class="fas fa-truck fa-lg"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">Add @remaining.ToString("N0") EGP for Free Shipping</div>
+                                <div class="small text-muted">Standard delivery fee of 60 EGP applies.</div>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: @((Model.SubTotal / 1000.0m * 100).ToString("F0"))%" aria-valuenow="@Model.SubTotal" aria-valuemin="0" aria-valuemax="1000"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
 
-                    <div class="pt-3 mt-2 border-top border-secondary">
+                    <div class="summary-card p-4 p-md-5">
+                        <h4 class="mb-4 fw-bold" style="color: var(--premium-gold);">Order Summary</h4>
+                        
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span class="fw-bold">@Model.SubTotal.ToString("N2") EGP</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Shipping</span>
+                            @if (Model.ShippingCost == 0)
+                            {
+                                <span class="text-success fw-bold">Free</span>
+                            }
+                            else
+                            {
+                                <span class="fw-bold">@Model.ShippingCost.ToString("N2") EGP</span>
+                            }
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>VAT (14%)</span>
+                            <span class="fw-medium text-white-50">@(Model.Tax > 0 ? Model.Tax.ToString("N2") + " EGP" : "Included")</span>
+                        </div>
+
+                        <div class="summary-divider"></div>
+
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <span class="h5 mb-0">Total</span>
-                            <span class="h3 mb-0" style="color: var(--premium-gold);">@Model.Total.ToString("N2") <small class="fs-6 text-white-50">EGP</small></span>
+                            <span class="fs-5 fw-bold">Total</span>
+                            <span class="fs-2 fw-bold" style="color: var(--premium-gold);">@Model.Total.ToString("N0") <span class="fs-6 text-white-50">EGP</span></span>
+                        </div>
+
+                        <a href="/Store/Checkout" class="btn btn-premium w-100 d-flex align-items-center justify-content-around">
+                            <span>Proceed to Checkout</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+
+                        <div class="d-flex justify-content-center gap-3 mt-4 text-white-50 opacity-50">
+                            <i class="fab fa-cc-visa fa-lg"></i>
+                            <i class="fab fa-cc-mastercard fa-lg"></i>
+                            <i class="fas fa-lock fa-lg"></i>
                         </div>
                     </div>
 
-                    <a href="/Store/Checkout" class="btn btn-premium w-100 py-3 d-flex align-items-center justify-content-center gap-2">
-                        <span>Checkout</span>
-                        <i class="fas fa-lock small"></i>
-                    </a>
-
-                    <div class="text-center mt-3">
-                        <small class="text-white-50">
-                            <i class="fas fa-shield-alt me-1"></i> 100% Secure Payment
-                        </small>
-                    </div>
-                </div>
-
-                <!-- Trust Badges -->
-                <div class="row g-2 mt-3 text-center">
-                    <div class="col-4">
-                        <div class="bg-white p-2 rounded shadow-sm h-100">
-                            <i class="fas fa-truck text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">Fast Shipping</div>
+                    <!-- Trust Points -->
+                    <div class="row g-3 mt-2">
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="fas fa-box text-muted mb-2"></i>
+                                <div class="small fw-bold text-dark" style="font-size: 0.7rem;">Secure Packing</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="bg-white p-2 rounded shadow-sm h-100">
-                            <i class="fas fa-undo text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">Free Returns</div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="fas fa-undo text-muted mb-2"></i>
+                                <div class="small fw-bold text-dark" style="font-size: 0.7rem;">Easy Returns</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="bg-white p-2 rounded shadow-sm h-100">
-                            <i class="fas fa-headset text-dark mb-1"></i>
-                            <div class="small text-muted" style="font-size: 0.7rem;">24/7 Support</div>
+                        <div class="col-4">
+                            <div class="text-center">
+                                <i class="fas fa-medal text-muted mb-2"></i>
+                                <div class="small fw-bold text-dark" style="font-size: 0.7rem;">Quality Guarantee</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -338,14 +437,14 @@
     }
     else
     {
-        <div class="text-center py-5 my-5">
-            <div class="empty-cart-icon">
-                <i class="fas fa-shopping-bag"></i>
+        <div class="empty-cart-state">
+            <div class="empty-icon">
+                <i class="fas fa-shopping-basket"></i>
             </div>
-            <h2 class="fw-bold mb-3">Your cart is empty</h2>
-            <p class="text-muted mb-4 lead">You haven't added any items to your cart yet.</p>
-            <a href="/Store" class="btn btn-premium px-5">
-                Start Shopping Now
+            <h2 class="fw-bold mb-3 premium-heading">Your Cart is Empty</h2>
+            <p class="text-muted mb-5 lead">Looks like you haven't discovered our collection yet.</p>
+            <a href="/Store" class="btn btn-premium px-5 py-3 rounded-pill shadow">
+                Explore Collection
             </a>
         </div>
     }

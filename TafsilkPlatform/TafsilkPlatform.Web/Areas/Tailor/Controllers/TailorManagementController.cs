@@ -1393,7 +1393,7 @@ public partial class TailorManagementController(
             }
 
             // Process Additional Images
-            string? additionalImagesJson = await ProcessAdditionalImagesAsync(model.AdditionalImages);
+            string? additionalImagesJson = null; // User requested to remove additional images
 
             // Create Entity
             var product = await CreateProductEntityAsync(model, tailor, primaryImageData, additionalImagesJson);

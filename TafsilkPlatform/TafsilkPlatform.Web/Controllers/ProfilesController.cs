@@ -317,6 +317,7 @@ public class ProfilesController : Controller
                 CurrentProfilePictureData = tailor.ProfilePictureData,
                 CurrentProfilePictureContentType = tailor.ProfilePictureContentType,
                 CurrentProfilePictureUrl = tailor.ProfileImageUrl,
+                WhatsAppNumber = tailor.WhatsAppNumber,
 
                 // Statistics
                 TotalOrders = await _db.Orders.CountAsync(o => o.TailorId == tailor.Id),
@@ -420,6 +421,7 @@ public class ProfilesController : Controller
             tailor.InstagramUrl = model.InstagramUrl;
             tailor.TwitterUrl = model.TwitterUrl;
             tailor.WebsiteUrl = model.WebsiteUrl;
+            tailor.WhatsAppNumber = model.WhatsAppNumber;
 
             // Handle profile picture upload - prefer filesystem (Attachments/profile)
             if (model.ProfilePicture != null && model.ProfilePicture.Length > 0)

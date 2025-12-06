@@ -110,10 +110,16 @@
                         <div class="mb-5 p-4 bg-light rounded-4 border border-dashed text-center">
                             <label for="profilePicture" class="form-label fw-bold mb-3 d-block">Profile Picture</label>
                             <div class="d-flex flex-column align-items-center">
+                                <!-- Preview in Upload Area -->
+                                <div id="uploadPreviewContainer" class="mb-3" style="display:none;">
+                                    <img id="uploadPreviewImg" class="rounded-circle shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                                </div>
+
                                 <label class="btn btn-outline-primary rounded-pill px-4">
                                     <i class="fas fa-camera me-2"></i> Choose New Photo
                                     <input type="file" asp-for="ProfilePicture" class="d-none" id="profilePicture" accept="image/*" onchange="previewImage(this)">
                                 </label>
+                                <span id="fileNameDisplay" class="text-muted small mt-2 d-block"></span>
                                 <span asp-validation-for="ProfilePicture" class="text-danger small mt-2"></span>
                                 <small class="text-muted mt-2">Recommended size: 500x500px. Max 2MB.</small>
                             </div>
@@ -333,13 +339,29 @@
     <script>
         function previewImage(input) {
             if (input.files && input.files[0]) {
+                var file = input.files[0];
                 var reader = new FileReader();
                 reader.onload = function(e) {
-                    // Update sidebar image if it exists
-                    var sidebarImg = document.querySelector('.card-body img');
+                    // Update sidebar image (robust selector)
+                    var sidebarImg = document.querySelector('.col-lg-3 .rounded-circle img');
                     if (sidebarImg) sidebarImg.src = e.target.result;
+
+                    // Update upload area preview
+                    var uploadPreviewImg = document.getElementById('uploadPreviewImg');
+                    var uploadPreviewContainer = document.getElementById('uploadPreviewContainer');
+                    
+                    if (uploadPreviewImg && uploadPreviewContainer) {
+                        uploadPreviewImg.src = e.target.result;
+                        uploadPreviewContainer.style.display = 'block';
+                    }
+
+                    // Show file name
+                    var fileNameDisplay = document.getElementById('fileNameDisplay');
+                    if (fileNameDisplay) {
+                        fileNameDisplay.textContent = file.name;
+                    }
                 }
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
         

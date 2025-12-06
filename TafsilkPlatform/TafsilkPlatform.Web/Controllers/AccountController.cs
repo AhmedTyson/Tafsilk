@@ -111,11 +111,24 @@ public class AccountController(
         }
 
         // Verify token
+        _logger.LogInformation("Password reset attempt for {Email}. Token from form: '{FormToken}', Token in DB: '{DbToken}'",
+            model.Email,
+            model.Token ?? "NULL",
+            user.PasswordResetToken ?? "NULL");
+
         if (user.PasswordResetToken != model.Token ||
             !user.PasswordResetTokenExpires.HasValue ||
             user.PasswordResetTokenExpires.Value < DateTime.UtcNow)
         {
-            ModelState.AddModelError("", "Invalid or expired password reset token");
+            _logger.LogWarning("Password reset validation failed for {Email}. Token match: {TokenMatch}, Has expiry: {HasExpiry}, Expired: {IsExpired}, Expiry time: {ExpiryTime}, Current time: {CurrentTime}",
+                model.Email,
+                user.PasswordResetToken == model.Token,
+                user.PasswordResetTokenExpires.HasValue,
+                user.PasswordResetTokenExpires.HasValue && user.PasswordResetTokenExpires.Value < DateTime.UtcNow,
+                user.PasswordResetTokenExpires?.ToString("yyyy-MM-dd HH:mm:ss") ?? "NULL",
+                DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            ModelState.AddModelError("", "Invalid or expired password reset token. Please request a new password reset link.");
             return View(model);
         }
 
@@ -346,6 +359,14 @@ public class AccountController(
         if (!ok || user is null)
         {
             ModelState.AddModelError(string.Empty, err ?? "Incorrect email or password.");
+            return View();
+        }
+
+        // Check if user is banned
+        if (user.IsBanned)
+        {
+            _logger.LogWarning("[AccountController] Banned user {Email} attempted login. Ban Reason: {Reason}", email, user.BanReason);
+            ModelState.AddModelError(string.Empty, $"Your account has been suspended. Reason: {user.BanReason ?? "Violation of terms of service"}.");
             return View();
         }
 
@@ -1205,11 +1226,11 @@ public class AccountController(
             }
             else
             {
-                // Customers can go directly to their dashboard
+                // Customers can go directly to the store (User Request)
                 TempData["SuccessMessage"] = "Welcome! Your account has been created via Google.";
-                _logger.LogInformation("[AccountController] New customer {UserId} from Google OAuth redirected to dashboard", user.Id);
+                _logger.LogInformation("[AccountController] New customer {UserId} from Google OAuth redirected to Store", user.Id);
 
-                return RedirectToAction("Customer", "Dashboards");
+                return RedirectToAction("Index", "Store", new { area = "Customer" });
             }
         }
         catch (Exception ex)
@@ -1228,9 +1249,40 @@ public class AccountController(
     /// Displays the request role change page.
     /// </summary>
     [HttpGet]
-    public IActionResult RequestRoleChange()
+    [Authorize] // Require authentication
+    public async Task<IActionResult> RequestRoleChange()
     {
-        return View();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId) || !Guid.TryParse(userId, out var userGuid))
+        {
+            TempData["InfoMessage"] = "Please log in to request a role change.";
+            return RedirectToAction(nameof(Login));
+        }
+
+        var currentRole = User.FindFirstValue(ClaimTypes.Role);
+
+        // Only customers can request to become tailors
+        if (currentRole != "Customer")
+        {
+            if (currentRole == "Tailor")
+            {
+                TempData["InfoMessage"] = "You are already a tailor.";
+                return RedirectToAction("Tailor", "Dashboards");
+            }
+            TempData["ErrorMessage"] = "Role changes are not available for your account type.";
+            return RedirectToRoleDashboard(currentRole);
+        }
+
+        // Check if user already has a tailor profile
+        var existingTailorProfile = await _unitOfWork.Tailors.GetByUserIdAsync(userGuid);
+        if (existingTailorProfile != null)
+        {
+            TempData["InfoMessage"] = "You already have a tailor account.";
+            return RedirectToAction("Tailor", "Dashboards");
+        }
+
+        var model = new RoleChangeRequestViewModel();
+        return View(model);
     }
 
     /// <summary>

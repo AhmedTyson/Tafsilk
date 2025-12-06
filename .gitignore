@@ -3,3 +3,7 @@
 ################################################################################
 
 /TafsilkPlatform/TafsilkPlatform.Web/appsettings.json
+publish/
+**/publish/
+bin/
+obj/

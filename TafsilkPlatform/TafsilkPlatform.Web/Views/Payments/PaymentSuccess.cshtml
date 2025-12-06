@@ -10,10 +10,9 @@
             <!-- Success Animation Card -->
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-4 animate-up">
                 <div class="card-body p-0">
-                    <div class="@(Model.IsSuccess ? "bg-success" : "bg-warning") bg-gradient text-white p-5 text-center position-relative overflow-hidden">
+                    <div class="@(Model.IsSuccess ? "bg-gold-premium" : "bg-warning") text-white p-5 text-center position-relative overflow-hidden">
                         <!-- Decorative Circles -->
                         <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-white opacity-10" style="width: 200px; height: 200px;"></div>
-                        <div class="position-absolute bottom-0 end-0 translate-middle-x rounded-circle bg-white opacity-10" style="width: 150px; height: 150px;"></div>
                         
                         <!-- Animated Icon -->
                         <div class="mb-4">
@@ -44,8 +43,26 @@
                         <div class="receipt-edge-top"></div>
                         
                         <div class="text-center mb-4">
-                            <p class="text-muted small mb-1">ORDER NUMBER</p>
-                            <h4 class="fw-bold letter-spacing-1">#@Model.OrderNumber</h4>
+                            <p class="text-muted small mb-1">ORDER CONFIRMATION</p>
+                            @if (Model.Orders != null && Model.Orders.Any())
+                            {
+                                <div class="d-flex flex-column gap-2 mt-2">
+                                    @foreach (var order in Model.Orders)
+                                    {
+                                        <div class="d-flex justify-content-between align-items-center border-bottom border-dashed pb-2">
+                                            <div class="text-start">
+                                                <div class="fw-bold letter-spacing-1">#@order.OrderNumber</div>
+                                                <small class="text-muted">@order.TailorShopName</small>
+                                            </div>
+                                            <span class="fw-medium">@order.TotalAmount.ToString("N2") EGP</span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <h4 class="fw-bold letter-spacing-1">#@Model.OrderNumber</h4>
+                            }
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dashed pb-3">
@@ -59,14 +76,6 @@
                                 <i class="fas fa-credit-card me-1"></i> @Model.PaymentMethod
                             </span>
                         </div>
-                        
-                        @if (!string.IsNullOrEmpty(Model.TailorShopName) || !string.IsNullOrEmpty(Model.TailorName))
-                        {
-                            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom border-dashed pb-3">
-                                <span class="text-muted">Tailor/Shop</span>
-                                <span class="fw-medium">@(Model.TailorShopName ?? Model.TailorName)</span>
-                            </div>
-                        }
                         
                         <div class="d-flex justify-content-between align-items-center pt-2">
                             <span class="fw-bold fs-5">Total Amount</span>
@@ -104,8 +113,8 @@
 
             <!-- Actions -->
             <div class="d-grid gap-3 animate-up delay-200">
-                <a asp-controller="Orders" asp-action="OrderDetails" asp-route-id="@Model.OrderId" class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow-sm transition-all hover-scale">
-                    View Order Details <i class="fas fa-arrow-right ms-2"></i>
+                <a asp-controller="Orders" asp-action="MyOrders" asp-area="" class="btn btn-dark btn-lg rounded-pill py-3 fw-bold shadow-sm transition-all hover-scale">
+                    View My Orders <i class="fas fa-arrow-right ms-2"></i>
                 </a>
                 <a asp-controller="Store" asp-action="Index" asp-area="Customer" class="btn btn-outline-secondary btn-lg rounded-pill py-3 fw-bold transition-all hover-scale">
                     Continue Shopping
@@ -146,6 +155,22 @@
     
     .letter-spacing-1 { letter-spacing: 1px; }
     .border-dashed { border-style: dashed !important; }
+
+    /* Receipt Edge */
+    .receipt-section {
+        border-top: 2px dashed #e9ecef;
+    }
+    
+    .receipt-edge-top {
+        position: absolute;
+        top: -10px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: radial-gradient(circle, transparent 0.5rem, #fff 0.5rem);
+        background-size: 1.5rem 1.5rem;
+        background-position: 0 0.5rem;
+    }
 
     /* Checkmark Animation */
     .success-checkmark {
@@ -241,6 +266,18 @@
         65% { width: 0; right: 46px; top: 54px; }
         84% { width: 55px; right: 0px; top: 35px; }
         100% { width: 47px; right: 8px; top: 38px; }
+    }
+
+    /* Premium Gold Gradient */
+    .bg-gold-premium {
+        background: linear-gradient(135deg, #d4af37 0%, #f3e5ab 100%);
+        color: #fff;
+    }
+    
+    /* Adjust text color if needed for contrast, but white on gold usually works with shadow or if gold is dark enough. 
+       Let's add a text shadow for better readability on light gold */
+    .bg-gold-premium h2, .bg-gold-premium p {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 </style>
 

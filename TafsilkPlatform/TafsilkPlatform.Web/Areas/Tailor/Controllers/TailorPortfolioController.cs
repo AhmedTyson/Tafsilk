@@ -9,22 +9,25 @@ namespace TafsilkPlatform.Web.Areas.Tailor.Controllers;
 /// Controller for public tailor portfolio views
 /// </summary>
 [Area("Tailor")]
-[Route("portfolio")]
+[Route("tailor-portfolio")]
 public class TailorPortfolioController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogger<TailorPortfolioController> _logger;
     // ✅ NEW: Inject portfolio service for clean architecture
     private readonly IPortfolioService _portfolioService;
+    private readonly TafsilkPlatform.Web.Services.Interfaces.IReviewService _reviewService;
 
     public TailorPortfolioController(
         ApplicationDbContext db,
         ILogger<TailorPortfolioController> logger,
-        IPortfolioService portfolioService)
+        IPortfolioService portfolioService,
+        TafsilkPlatform.Web.Services.Interfaces.IReviewService reviewService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _portfolioService = portfolioService ?? throw new ArgumentNullException(nameof(portfolioService));
+        _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
     }
 
     /// <summary>
@@ -57,10 +60,14 @@ public class TailorPortfolioController : Controller
 
             // Ensure navigation collections are not null to avoid NRE in views
             tailor.PortfolioImages = portfolioImages.ToList();
+
+            // Fetch reviews
+            var reviews = await _reviewService.GetTailorReviewsAsync(id, 10);
+            ViewBag.Reviews = reviews;
+
             // Calculate statistics with safety guards
             ViewBag.PortfolioCount = tailor.PortfolioImages?.Count ?? 0;
-            ViewBag.PortfolioCount = tailor.PortfolioImages?.Count ?? 0;
-            ViewBag.ReviewCount = 0; // Simplified - no reviews
+            ViewBag.ReviewCount = reviews.Count;
             ViewBag.AverageRating = tailor.AverageRating;
             ViewBag.CompletedOrders = await _db.Orders.CountAsync(o =>
                 o.TailorId == id &&

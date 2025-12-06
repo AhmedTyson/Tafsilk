@@ -86,7 +86,8 @@ body {
 .container {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 @media (min-width: 768px) {
@@ -238,5 +239,164 @@ body {
         font-size: 1.1rem;
         padding: 0.75rem 0 !important;
         border-bottom: 1px solid #f8f9fa;
+    }
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   Mobile-First Responsive Design
+   ======================================== */
+
+/* --- Responsive Typography --- */
+@media (max-width: 575.98px) {
+    html {
+        font-size: 14px;
+    }
+    
+    h1, .h1 {
+        font-size: 2rem;
+    }
+    
+    h2, .h2 {
+        font-size: 1.75rem;
+    }
+    
+    h3, .h3 {
+        font-size: 1.5rem;
+    }
+    
+    h4, .h4 {
+        font-size: 1.25rem;
+    }
+    
+    h5, .h5 {
+        font-size: 1.1rem;
+    }
+}
+
+/* --- Responsive Containers --- */
+@media (max-width: 575.98px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* --- Responsive Spacing --- */
+.py-mobile-3 {
+    padding-top: var(--spacing-lg);
+    padding-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 768px) {
+    .py-mobile-3 {
+        padding-top: var(--spacing-3xl);
+        padding-bottom: var(--spacing-3xl);
+    }
+}
+
+/* --- Responsive Images --- */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* --- Touch Targets (Mobile) --- */
+@media (max-width: 991.98px) {
+    .btn {
+        min-height: 44px;
+        padding: 0.625rem 1.25rem;
+    }
+    
+    .btn-sm {
+        min-height: 36px;
+    }
+}
+
+/* --- Responsive Grid Helpers --- */
+@media (max-width: 767.98px) {
+    .row.g-4 {
+        row-gap: 1.5rem !important;
+    }
+}
+
+/* --- Mobile Text Alignment --- */
+@media (max-width: 575.98px) {
+    .text-sm-center {
+        text-align: center !important;
+    }
+}
+
+/* --- Responsive Padding/Margin --- */
+@media (max-width: 767.98px) {
+    .px-md-5 {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+    
+    .py-md-5 {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+    }
+    
+    .mt-md-5 {
+        margin-top: 2rem !important;
+    }
+    
+    .mb-md-5 {
+        margin-bottom: 2rem !important;
+    }
+}
+
+/* --- Hide/Show on Mobile --- */
+@media (max-width: 991.98px) {
+    .d-mobile-none {
+        display: none !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .d-desktop-none {
+        display: none !important;
+    }
+}
+
+/* --- Responsive Tables --- */
+@media (max-width: 767.98px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* --- Responsive Cards --- */
+@media (max-width: 575.98px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* --- Responsive Forms --- */
+@media (max-width: 575.98px) {
+    .form-control,
+    .form-select {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+}
+
+/* --- Responsive Display Utilities --- */
+.overflow-x-auto {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* --- Mobile-Friendly Scrolling --- */
+@media (max-width: 767.98px) {
+    body {
+        overflow-x: hidden;
     }
 }

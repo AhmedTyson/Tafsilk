@@ -1,0 +1,160 @@
+@model IEnumerable<TafsilkPlatform.Models.Models.TailorProfile>
+@{
+    ViewData["Title"] = "Tailor Verification";
+}
+
+<div class="glass-card p-4 my-4 container-fluid">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2 small">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index", "AdminDashboard")" class="text-decoration-none text-muted">Home</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">Tailor Verification</li>
+            </ol>
+        </nav>
+        <h1 class="h3 text-white fw-bold text-uppercase" style="letter-spacing: 1px;">Tailor Verification</h1>
+        <p class="text-muted small">Manage tailor verification status and grant verification badges</p>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success bg-success bg-opacity-25 text-success border-success mt-3" role="alert">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <form class="d-flex gap-2 flex-grow-1" style="max-width: 400px;" action="@Url.Action("TailorVerification")" method="GET">
+            <input type="text" name="search" value="@ViewBag.CurrentSearch" class="form-control bg-dark text-white border-secondary" placeholder="Search tailors...">
+            @if (!string.IsNullOrEmpty(ViewBag.CurrentSearch as string))
+            {
+                <a href="@Url.Action("TailorVerification")" class="btn btn-outline-secondary">Clear</a>
+            }
+        </form>
+
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary active" onclick="filterTailors('all')">
+                All (@Model.Count())
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterTailors('verified')">
+                Verified (@Model.Count(t => t.IsVerified))
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="filterTailors('unverified')">
+                Unverified (@Model.Count(t => !t.IsVerified))
+            </button>
+        </div>
+    </div>
+
+    <div class="table-responsive rounded">
+        <table class="table table-hover glass-table mb-0 align-middle">
+            <thead class="bg-dark text-uppercase text-muted small">
+                <tr>
+                    <th class="py-3 ps-4">Tailor</th>
+                    <th class="py-3">Shop Name</th>
+                    <th class="py-3">Experience</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3">Joined</th>
+                    <th class="py-3 text-end pe-4">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var tailor in Model)
+                {
+                    <tr data-status="@(tailor.IsVerified ? "verified" : "unverified")">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white fw-bold" style="width: 40px; height: 40px;">
+                                    @(tailor.User?.Email?.Substring(0, 1).ToUpper() ?? "T")
+                                </div>
+                                <div class="ms-3">
+                                    <div class="fw-bold text-white">@(tailor.FullName ?? "Unknown")</div>
+                                    <div class="small text-muted">@(tailor.User?.Email ?? "-")</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-white">@tailor.ShopName</td>
+                        <td class="text-muted">
+                            @(tailor.ExperienceYears.HasValue ? $"{tailor.ExperienceYears} Years" : "Not specified")
+                        </td>
+                        <td>
+                            @if (tailor.IsVerified)
+                            {
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success">
+                                    <i class="fas fa-check-circle me-1"></i> Verified
+                                </span>
+                                @if (tailor.VerifiedAt.HasValue)
+                                {
+                                    <div class="d-block small text-muted mt-1">@tailor.VerifiedAt.Value.ToString("MMM dd")</div>
+                                }
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning">Pending</span>
+                            }
+                        </td>
+                        <td class="text-muted small">
+                            @tailor.CreatedAt.ToString("MMM dd, yyyy")
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                @if (!tailor.IsVerified)
+                                {
+                                    <form asp-action="VerifyTailor" method="post" class="d-inline">
+                                        <input type="hidden" name="tailorId" value="@tailor.Id" />
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-check me-1"></i> Verify
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form asp-action="RejectTailor" method="post" class="d-inline">
+                                        <input type="hidden" name="tailorId" value="@tailor.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times me-1"></i> Revoke
+                                        </button>
+                                    </form>
+                                }
+                                
+                                <a href="@Url.Action("ViewPublicTailorProfile", "TailorPortfolio", new { area = "Tailor", id = tailor.Id })" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-external-link-alt me-1"></i> Portfolio
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center p-5 text-muted fst-italic">
+                            No tailors found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function filterTailors(status) {
+            const rows = document.querySelectorAll('tbody tr[data-status]');
+            const buttons = document.querySelectorAll('.btn-group button');
+            
+            // Update button styles
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active'); // Use currentTarget to target the button even if icon is clicked
+            
+            // Filter rows
+            rows.forEach(row => {
+                if (status === 'all') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = row.dataset.status === status ? '' : 'none';
+                }
+            });
+        }
+    </script>
+}

@@ -27,13 +27,24 @@ public class TailorsController : Controller
     /// </summary>
     [HttpGet("")]
     [HttpGet("index")]
-    public async Task<IActionResult> Index(string? city = null, string? specialization = null, string? filter = null, int page = 1, int pageSize = 12)
+    public async Task<IActionResult> Index(string? search = null, string? city = null, string? specialization = null, string? filter = null, int page = 1, int pageSize = 12)
     {
         try
         {
             var query = _db.TailorProfiles
                 .Include(t => t.User)
+                .Include(t => t.PortfolioImages.Where(p => !p.IsDeleted))
                 .Where(t => t.User.IsActive && !t.User.IsDeleted);
+
+            // Search by name or specialization
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim();
+                query = query.Where(t =>
+                    (t.ShopName != null && t.ShopName.Contains(search)) ||
+                    (t.FullName != null && t.FullName.Contains(search)) ||
+                    (t.Specialization != null && t.Specialization.Contains(search)));
+            }
 
             // Filter by city
             if (!string.IsNullOrEmpty(city))
@@ -57,7 +68,8 @@ public class TailorsController : Controller
                 case "TopRated":
                 default:
                     // Default to Top Rated
-                    query = query.OrderByDescending(t => t.AverageRating).ThenBy(t => t.ShopName);
+                    // Treat 0 rating (no reviews) as 5 for sorting purposes to give new tailors a chance
+                    query = query.OrderByDescending(t => t.AverageRating == 0 ? 5 : t.AverageRating).ThenBy(t => t.ShopName);
                     break;
             }
 
@@ -89,6 +101,7 @@ public class TailorsController : Controller
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             ViewBag.TotalCount = totalCount;
+            ViewBag.CurrentSearch = search;
             ViewBag.CurrentCity = city;
             ViewBag.CurrentSpecialization = specialization;
             ViewBag.Cities = cities;
@@ -163,9 +176,38 @@ public class TailorsController : Controller
             var tailor = await _db.TailorProfiles
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (tailor == null || tailor.ProfilePictureData == null)
+            if (tailor == null)
             {
-                // Return default avatar
+                return NotFound();
+            }
+
+            // Prefer filesystem-backed image
+            if (!string.IsNullOrWhiteSpace(tailor.ProfileImageUrl))
+            {
+                var imgUrl = tailor.ProfileImageUrl;
+
+                if (Uri.IsWellFormedUriString(imgUrl, UriKind.Absolute))
+                {
+                    return Redirect(imgUrl);
+                }
+
+                if (imgUrl.StartsWith('/'))
+                {
+                    var relativePath = imgUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                    var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", relativePath);
+                    if (System.IO.File.Exists(physicalPath))
+                    {
+                        var contentType = tailor.ProfilePictureContentType ?? "image/jpeg";
+                        return PhysicalFile(physicalPath, contentType);
+                    }
+                }
+
+                return Redirect(imgUrl);
+            }
+
+            // Fallback to DB stored image
+            if (tailor.ProfilePictureData == null)
+            {
                 return NotFound();
             }
 

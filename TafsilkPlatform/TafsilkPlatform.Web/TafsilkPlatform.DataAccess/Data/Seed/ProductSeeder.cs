@@ -10,21 +10,12 @@ namespace TafsilkPlatform.DataAccess.Data.Seed
         public static async Task SeedProductsAsync(ApplicationDbContext context)
         {
             // Check if products already exist
-            var existingProducts = await context.Products.ToListAsync();
-            if (existingProducts.Any())
+            // Check if products already exist
+            if (await context.Products.AnyAsync())
             {
-                // Clear existing products - need to handle foreign key constraints
-                // First remove cart items and order items that reference products
-                var productIds = existingProducts.Select(p => p.ProductId).ToList();
-                var cartItems = await context.CartItems.Where(ci => productIds.Contains(ci.ProductId)).ToListAsync();
-                var orderItems = await context.OrderItems.Where(oi => oi.ProductId.HasValue && productIds.Contains(oi.ProductId.Value)).ToListAsync();
-
-                context.CartItems.RemoveRange(cartItems);
-                context.OrderItems.RemoveRange(orderItems);
-                context.Products.RemoveRange(existingProducts);
-                await context.SaveChangesAsync();
-
-                Console.WriteLine($"✅ Cleared {existingProducts.Count} existing products, {cartItems.Count} cart items, {orderItems.Count} order items");
+                // Products already exist, skip seeding to prevent wiping order items
+                // Console.WriteLine("✓ Products already seeded. Skipping to preserve data.");
+                return;
             }
 
             var tailors = await context.TailorProfiles.ToListAsync();

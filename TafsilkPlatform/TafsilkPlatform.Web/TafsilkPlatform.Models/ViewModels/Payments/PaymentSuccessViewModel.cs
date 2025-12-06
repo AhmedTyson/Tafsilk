@@ -13,5 +13,6 @@ namespace TafsilkPlatform.Models.ViewModels.Payments
         public string PaymentMethod { get; set; } = string.Empty;
         public string? TailorName { get; set; }
         public string? TailorShopName { get; set; }
+        public List<TafsilkPlatform.Models.ViewModels.Store.OrderSuccessDetailsViewModel> Orders { get; set; } = new();
     }
 }

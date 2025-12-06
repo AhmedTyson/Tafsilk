@@ -53,62 +53,110 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     {
         return await ExecuteAsync(async () =>
         {
+            // Ensure OrderIds list is populated
+            if (!request.OrderIds.Any() && request.OrderId != Guid.Empty)
+            {
+                request.OrderIds.Add(request.OrderId);
+            }
+
             // Validation
-            ValidateGuid(request.OrderId, nameof(request.OrderId));
+            if (!request.OrderIds.Any()) throw new ArgumentException("No orders specified", nameof(request.OrderIds));
             ValidateGuid(request.CustomerId, nameof(request.CustomerId));
             ValidatePositive(request.Amount, nameof(request.Amount));
             ValidateNotEmpty(request.PaymentMethod, nameof(request.PaymentMethod));
 
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                // Get order
-                var order = await _context.Orders
-                    .Include(o => o.Customer)
-                    .ThenInclude(c => c.User)
-                    .FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
+                var orders = new List<Order>();
+                decimal totalOrderAmount = 0;
 
-                if (order == null)
+                foreach (var orderId in request.OrderIds)
                 {
-                    throw new InvalidOperationException("Order not found");
+                    var order = await _context.Orders
+                        .Include(o => o.Customer)
+                        .ThenInclude(c => c.User)
+                        .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+                    if (order == null) throw new InvalidOperationException($"Order {orderId} not found");
+
+                    // Check if order already has a completed payment
+                    var existingPayment = await _context.Payment
+                        .FirstOrDefaultAsync(p => p.OrderId == orderId &&
+                                                p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+
+                    if (existingPayment != null) throw new InvalidOperationException($"Order {orderId} already has a completed payment");
+
+                    orders.Add(order);
+                    totalOrderAmount += (decimal)order.TotalPrice;
                 }
 
-                // Check if order already has a completed payment
-                var existingPayment = await _context.Payment
-                    .FirstOrDefaultAsync(p => p.OrderId == request.OrderId &&
-                                            p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
-
-                if (existingPayment != null)
+                // Validate amount matches total of all orders
+                if (Math.Abs(totalOrderAmount - request.Amount) > 0.01m)
                 {
-                    throw new InvalidOperationException("Order already has a completed payment");
+                    throw new InvalidOperationException($"Payment amount ({request.Amount:C}) does not match total of orders ({totalOrderAmount:C})");
                 }
 
-                // Validate amount matches order total
-                if (Math.Abs((decimal)order.TotalPrice - request.Amount) > 0.01m)
-                {
-                    throw new InvalidOperationException($"Payment amount ({request.Amount:C}) does not match order total ({order.TotalPrice:C})");
-                }
-
-                PaymentProcessingResult result;
+                PaymentProcessingResult result = new PaymentProcessingResult();
 
                 // Process based on payment method
                 switch (request.PaymentMethod.ToLower())
                 {
                     case "cashondelivery":
                     case "cash":
-                        result = await ProcessCashPaymentAsync(order, request);
+                        foreach (var order in orders)
+                        {
+                            // Create request for single order
+                            var singleRequest = new PaymentProcessingRequest
+                            {
+                                OrderId = order.OrderId,
+                                CustomerId = request.CustomerId,
+                                Amount = (decimal)order.TotalPrice,
+                                PaymentMethod = request.PaymentMethod
+                            };
+                            result = await ProcessCashPaymentAsync(order, singleRequest);
+                        }
+                        // Return result for the last one (or aggregated)
+                        result.Message = $"Orders confirmed. Payment will be collected on delivery.";
                         break;
 
                     case "creditcard":
                     case "stripe":
                         if (_stripeEnabled)
                         {
-                            result = await ProcessStripePaymentAsync(order, request);
+                            // For Stripe, we create one payment intent/session for ALL orders
+                            // But we need to record pending payments for EACH order
+                            foreach (var order in orders)
+                            {
+                                var singleRequest = new PaymentProcessingRequest
+                                {
+                                    OrderId = order.OrderId,
+                                    CustomerId = request.CustomerId,
+                                    Amount = (decimal)order.TotalPrice,
+                                    PaymentMethod = request.PaymentMethod
+                                };
+                                result = await ProcessStripePaymentAsync(order, singleRequest);
+                            }
+                            result = new PaymentProcessingResult
+                            {
+                                RequiresAction = true,
+                                Status = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending,
+                                Message = "Redirecting to payment..."
+                            };
                         }
                         else
                         {
-                            // Fallback: Mark as pending, will be processed when Stripe is configured
-                            Logger.LogWarning("Stripe not configured. Creating pending payment for order {OrderId}", request.OrderId);
-                            result = await ProcessPendingCardPaymentAsync(order, request);
+                            foreach (var order in orders)
+                            {
+                                var singleRequest = new PaymentProcessingRequest
+                                {
+                                    OrderId = order.OrderId,
+                                    CustomerId = request.CustomerId,
+                                    Amount = (decimal)order.TotalPrice,
+                                    PaymentMethod = request.PaymentMethod
+                                };
+                                result = await ProcessPendingCardPaymentAsync(order, singleRequest);
+                            }
+                            result.Message = "Payments pending. Card processing will be available soon.";
                         }
                         break;
 
@@ -119,8 +167,8 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 await _unitOfWork.SaveChangesAsync();
 
                 Logger.LogInformation(
-                    "Payment processed for order {OrderId}. Method: {PaymentMethod}, Status: {Status}",
-                    request.OrderId, request.PaymentMethod, result.Status);
+                    "Payment processed for {OrderCount} orders. Method: {PaymentMethod}, Status: {Status}",
+                    orders.Count, request.PaymentMethod, result.Status);
 
                 return result;
             });
@@ -250,7 +298,13 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     {
         return await ExecuteAsync(async () =>
         {
-            ValidateGuid(request.OrderId, nameof(request.OrderId));
+            // Ensure OrderIds list is populated
+            if (!request.OrderIds.Any() && request.OrderId != Guid.Empty)
+            {
+                request.OrderIds.Add(request.OrderId);
+            }
+
+            if (!request.OrderIds.Any()) throw new ArgumentException("No orders specified", nameof(request.OrderIds));
             ValidatePositive(request.Amount, nameof(request.Amount));
 
             if (!_stripeEnabled)
@@ -260,24 +314,14 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
             var stripe = new StripeClient(_stripeSecretKey);
 
+            // Create comma-separated list of Order IDs for metadata
+            var orderIdsString = string.Join(",", request.OrderIds);
+
             var options = new Stripe.Checkout.SessionCreateOptions
             {
                 // Use Payment Method Configuration from Dashboard (enables Cash App Pay, etc.)
                 PaymentMethodConfiguration = _paymentMethodConfigurationId ?? "pmc_1SVjwXFfjWhZZwelqjN5Gyh5",
 
-                // ✅ APPLIED FROM GUIDE: Explicitly set payment method types
-                // PaymentMethodTypes = new List<string> { "card", "cashapp" },
-
-                /*
-                PaymentMethodOptions = new Stripe.Checkout.SessionPaymentMethodOptionsOptions
-                {
-                    Card = new Stripe.Checkout.SessionPaymentMethodOptionsCardOptions
-                    {
-                        SetupFutureUsage = "off", // Helps reduce "Link" prominence
-                    },
-                },
-                */
-                // PaymentMethodTypes = new List<string> { "card" }, // Removed in favor of Configuration
                 LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
                 {
                     new Stripe.Checkout.SessionLineItemOptions
@@ -285,10 +329,10 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                         PriceData = new Stripe.Checkout.SessionLineItemPriceDataOptions
                         {
                             UnitAmount = (long)(request.Amount * 100),
-                Currency = request.Currency?.ToLower() ?? "usd", // Changed to USD for Cash App Pay support
+                            Currency = request.Currency?.ToLower() ?? "egp", // Changed to EGP
                             ProductData = new Stripe.Checkout.SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = request.Description ?? "Tafsilk Order",
+                                Name = request.Description ?? $"Order Payment ({request.OrderIds.Count} orders)",
                             },
                         },
                         Quantity = 1,
@@ -300,13 +344,13 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                 CustomerEmail = request.CustomerEmail,
                 Metadata = new Dictionary<string, string>
                 {
-                    { "order_id", request.OrderId.ToString() }
+                    { "order_ids", orderIdsString }
                 },
                 PaymentIntentData = new Stripe.Checkout.SessionPaymentIntentDataOptions
                 {
                     Metadata = new Dictionary<string, string>
                     {
-                        { "order_id", request.OrderId.ToString() }
+                        { "order_ids", orderIdsString }
                     }
                 }
             };
@@ -338,7 +382,7 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
             var options = new PaymentIntentCreateOptions
             {
                 Amount = (long)(request.Amount * 100),
-                Currency = request.Currency?.ToLower() ?? "usd", // Changed to USD for Cash App Pay support
+                Currency = request.Currency?.ToLower() ?? "egp", // Changed to EGP
                 AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
                 {
                     Enabled = true
@@ -457,74 +501,103 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(orderIdStr) && Guid.TryParse(orderIdStr, out var orderId))
+                    string? orderIdsStr = null;
+                    if (!string.IsNullOrEmpty(orderIdStr))
                     {
-                        await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                        // Fallback for old metadata key
+                        orderIdsStr = orderIdStr;
+                    }
+                    else
+                    {
+                        // Check for new metadata key
+                        if (stripeEvent.Type == "payment_intent.succeeded")
                         {
-                            // Check if order is already paid to prevent duplicate payments from multiple events
-                            var existingCompletedPayment = await _context.Payment
-                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+                            var pi = stripeEvent.Data.Object as PaymentIntent;
+                            pi?.Metadata.TryGetValue("order_ids", out orderIdsStr);
+                        }
+                        else if (stripeEvent.Type == "checkout.session.completed")
+                        {
+                            var s = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                            s?.Metadata.TryGetValue("order_ids", out orderIdsStr);
+                        }
+                    }
 
-                            if (existingCompletedPayment != null)
+                    if (!string.IsNullOrEmpty(orderIdsStr))
+                    {
+                        var orderIds = orderIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                                  .Select(id => Guid.TryParse(id, out var g) ? g : Guid.Empty)
+                                                  .Where(g => g != Guid.Empty)
+                                                  .ToList();
+
+                        foreach (var orderId in orderIds)
+                        {
+                            await _unitOfWork.ExecuteInTransactionAsync(async () =>
                             {
-                                Logger.LogInformation("Payment already completed for order {OrderId}. Skipping webhook processing.", orderId);
-                                return;
-                            }
+                                // Check if order is already paid to prevent duplicate payments from multiple events
+                                var existingCompletedPayment = await _context.Payment
+                                    .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
-                            // Find existing pending payment or create new one
-                            var payment = await _context.Payment
-                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
-
-                            if (payment == null)
-                            {
-                                // If no pending payment found, create one (this handles cases where webhook arrives before local record is created, though unlikely with our flow)
-                                var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
-                                if (order != null)
+                                if (existingCompletedPayment != null)
                                 {
-                                    payment = new TafsilkPlatform.Models.Models.Payment
-                                    {
-                                        PaymentId = Guid.NewGuid(),
-                                        OrderId = order.OrderId,
-                                        Order = order,
-                                        CustomerId = order.CustomerId,
-                                        Customer = order.Customer,
-                                        TailorId = order.TailorId,
-                                        Tailor = order.Tailor,
-                                        Amount = (decimal)amount / 100m,
-                                        PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
-                                        TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
-                                        Provider = "Stripe",
-                                        CreatedAt = DateTimeOffset.UtcNow
-                                    };
-                                    _context.Payment.Add(payment);
+                                    Logger.LogInformation("Payment already completed for order {OrderId}. Skipping webhook processing.", orderId);
+                                    return;
                                 }
-                            }
 
-                            if (payment != null)
-                            {
-                                payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
-                                payment.PaidAt = DateTimeOffset.UtcNow;
-                                payment.ProviderTransactionId = transactionId;
-                                payment.Currency = currency;
+                                // Find existing pending payment or create new one
+                                var payment = await _context.Payment
+                                    .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
 
-                                // Update order status
-                                var order = await _context.Orders.FindAsync(payment.OrderId);
-                                if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
+                                if (payment == null)
                                 {
-                                    order.Status = OrderStatus.Confirmed;
-
-                                    // Clear cart now that payment is confirmed
-                                    var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
-                                    if (cart != null)
+                                    // If no pending payment found, create one
+                                    var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
+                                    if (order != null)
                                     {
-                                        await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                        payment = new TafsilkPlatform.Models.Models.Payment
+                                        {
+                                            PaymentId = Guid.NewGuid(),
+                                            OrderId = order.OrderId,
+                                            Order = order,
+                                            CustomerId = order.CustomerId,
+                                            Customer = order.Customer,
+                                            TailorId = order.TailorId,
+                                            Tailor = order.Tailor,
+                                            Amount = (decimal)order.TotalPrice, // Use order total, not full transaction amount
+                                            PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+                                            TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
+                                            Provider = "Stripe",
+                                            CreatedAt = DateTimeOffset.UtcNow
+                                        };
+                                        _context.Payment.Add(payment);
                                     }
                                 }
 
-                                await _unitOfWork.SaveChangesAsync();
-                                Logger.LogInformation("Payment confirmed via webhook for order {OrderId}", orderId);
-                            }
-                        });
+                                if (payment != null)
+                                {
+                                    payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
+                                    payment.PaidAt = DateTimeOffset.UtcNow;
+                                    payment.ProviderTransactionId = transactionId;
+                                    payment.Currency = currency;
+
+                                    // Update order status
+                                    var order = await _context.Orders.FindAsync(payment.OrderId);
+                                    if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
+                                    {
+                                        order.Status = OrderStatus.Confirmed;
+
+                                        // Clear cart now that payment is confirmed
+                                        var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
+                                        if (cart != null)
+                                        {
+                                            await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                        }
+                                    }
+
+                                    await _unitOfWork.SaveChangesAsync();
+                                    Logger.LogInformation("Payment confirmed via webhook for order {OrderId}", orderId);
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -645,32 +718,33 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
     /// <summary>
     /// Validate payment before processing
     /// </summary>
-    public async Task<Result> ValidatePaymentAsync(Guid orderId, decimal amount)
+    public async Task<Result> ValidatePaymentAsync(List<Guid> orderIds, decimal amount)
     {
         return await ExecuteAsync(async () =>
         {
-            ValidateGuid(orderId, nameof(orderId));
+            if (!orderIds.Any()) throw new ArgumentException("No orders specified", nameof(orderIds));
             ValidatePositive(amount, nameof(amount));
 
-            var order = await _context.Orders.FindAsync(orderId);
-            if (order == null)
+            decimal totalCalculated = 0;
+
+            foreach (var orderId in orderIds)
             {
-                throw new InvalidOperationException("Order not found");
+                var order = await _context.Orders.FindAsync(orderId);
+                if (order == null) throw new InvalidOperationException($"Order {orderId} not found");
+
+                // Check if order already paid
+                var existingPayment = await _context.Payment
+                    .FirstOrDefaultAsync(p => p.OrderId == orderId &&
+                                            p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
+
+                if (existingPayment != null) throw new InvalidOperationException($"Order {orderId} already paid");
+
+                totalCalculated += (decimal)order.TotalPrice;
             }
 
-            if (Math.Abs((decimal)order.TotalPrice - amount) > 0.01m)
+            if (Math.Abs(totalCalculated - amount) > 0.01m)
             {
-                throw new InvalidOperationException($"Amount mismatch. Expected: {order.TotalPrice:C}, Provided: {amount:C}");
-            }
-
-            // Check if order already paid
-            var existingPayment = await _context.Payment
-                .FirstOrDefaultAsync(p => p.OrderId == orderId &&
-                                        p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
-
-            if (existingPayment != null)
-            {
-                throw new InvalidOperationException("Order already paid");
+                throw new InvalidOperationException($"Amount mismatch. Expected: {totalCalculated:C}, Provided: {amount:C}");
             }
         }, "ValidatePayment");
     }
@@ -700,73 +774,96 @@ public class PaymentProcessorService : BaseService, IPaymentProcessorService
 
             if (session.PaymentStatus == "paid")
             {
-                // Extract order ID from metadata
-                if (session.Metadata.TryGetValue("order_id", out var orderIdStr) && Guid.TryParse(orderIdStr, out var orderId))
+                // Extract order IDs from metadata
+                string? orderIdsStr = null;
+                if (session.Metadata.TryGetValue("order_ids", out var ids))
                 {
-                    await _unitOfWork.ExecuteInTransactionAsync(async () =>
+                    orderIdsStr = ids;
+                }
+                else if (session.Metadata.TryGetValue("order_id", out var id))
+                {
+                    orderIdsStr = id;
+                }
+
+                if (!string.IsNullOrEmpty(orderIdsStr))
+                {
+                    var orderIds = orderIdsStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                              .Select(id => Guid.TryParse(id, out var g) ? g : Guid.Empty)
+                                              .Where(g => g != Guid.Empty)
+                                              .ToList();
+
+                    foreach (var orderId in orderIds)
                     {
-                        // Check if already completed to avoid redundant updates
-                        var existingCompletedPayment = await _context.Payment
-                            .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
-
-                        if (existingCompletedPayment != null)
+                        await _unitOfWork.ExecuteInTransactionAsync(async () =>
                         {
-                            return; // Already processed
-                        }
+                            // Check if already completed to avoid redundant updates
+                            var existingCompletedPayment = await _context.Payment
+                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed);
 
-                        // Find pending payment or create new one
-                        var payment = await _context.Payment
-                            .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
-
-                        if (payment == null)
-                        {
-                            var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
-                            if (order != null)
+                            if (existingCompletedPayment != null)
                             {
-                                payment = new TafsilkPlatform.Models.Models.Payment
-                                {
-                                    PaymentId = Guid.NewGuid(),
-                                    OrderId = order.OrderId,
-                                    Order = order,
-                                    CustomerId = order.CustomerId,
-                                    Customer = order.Customer,
-                                    TailorId = order.TailorId,
-                                    Tailor = order.Tailor,
-                                    Amount = (decimal)(session.AmountTotal ?? 0) / 100m,
-                                    PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
-                                    TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
-                                    Provider = "Stripe",
-                                    CreatedAt = DateTimeOffset.UtcNow
-                                };
-                                _context.Payment.Add(payment);
+                                return; // Already processed
                             }
-                        }
 
-                        if (payment != null)
-                        {
-                            payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
-                            payment.PaidAt = DateTimeOffset.UtcNow;
-                            payment.ProviderTransactionId = session.PaymentIntentId ?? session.Id;
-                            payment.Currency = session.Currency;
+                            // Find pending payment or create new one
+                            var payment = await _context.Payment
+                                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.PaymentStatus == TafsilkPlatform.Models.Models.Enums.PaymentStatus.Pending);
 
-                            // Update order status
-                            var order = await _context.Orders.FindAsync(payment.OrderId);
-                            if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
+                            if (payment == null)
                             {
-                                order.Status = OrderStatus.Confirmed;
-
-                                // Clear cart now that payment is confirmed
-                                var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
-                                if (cart != null)
+                                var order = await _context.Orders.Include(o => o.Customer).Include(o => o.Tailor).FirstOrDefaultAsync(o => o.OrderId == orderId);
+                                if (order != null)
                                 {
-                                    await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                    payment = new TafsilkPlatform.Models.Models.Payment
+                                    {
+                                        PaymentId = Guid.NewGuid(),
+                                        OrderId = order.OrderId,
+                                        Order = order,
+                                        CustomerId = order.CustomerId,
+                                        Customer = order.Customer,
+                                        TailorId = order.TailorId,
+                                        Tailor = order.Tailor,
+                                        Amount = (decimal)(session.AmountTotal ?? 0) / 100m, // Note: This might be total for all orders, ideally should be per order
+                                        PaymentType = TafsilkPlatform.Models.Models.Enums.PaymentType.Card,
+                                        TransactionType = TafsilkPlatform.Models.Models.Enums.TransactionType.Credit,
+                                        Provider = "Stripe",
+                                        CreatedAt = DateTimeOffset.UtcNow
+                                    };
+                                    // Adjust amount if multiple orders (simple split or fetch actual order total)
+                                    if (orderIds.Count > 1)
+                                    {
+                                        payment.Amount = (decimal)order.TotalPrice;
+                                    }
+                                    _context.Payment.Add(payment);
                                 }
                             }
 
-                            await _unitOfWork.SaveChangesAsync();
-                            Logger.LogInformation("Payment verified and confirmed via Session Check for order {OrderId}", orderId);
-                        }
-                    });
+                            if (payment != null)
+                            {
+                                payment.PaymentStatus = TafsilkPlatform.Models.Models.Enums.PaymentStatus.Completed;
+                                payment.PaidAt = DateTimeOffset.UtcNow;
+                                payment.ProviderTransactionId = session.PaymentIntentId ?? session.Id;
+                                payment.Currency = session.Currency;
+
+                                // Update order status
+                                var order = await _context.Orders.FindAsync(payment.OrderId);
+                                if (order != null && (order.Status == OrderStatus.Pending || order.Status == OrderStatus.PendingPayment))
+                                {
+                                    order.Status = OrderStatus.Confirmed;
+
+                                    // Clear cart now that payment is confirmed
+                                    var cart = await _unitOfWork.ShoppingCarts.GetActiveCartByCustomerIdAsync(order.CustomerId);
+                                    if (cart != null)
+                                    {
+                                        await _unitOfWork.ShoppingCarts.ClearCartAsync(cart.CartId);
+                                    }
+                                }
+
+                                await _unitOfWork.SaveChangesAsync();
+                                Logger.LogInformation("Payment verified and confirmed via Session Check for order {OrderId}", orderId);
+                            }
+                        });
+                    }
 
                     return true;
                 }

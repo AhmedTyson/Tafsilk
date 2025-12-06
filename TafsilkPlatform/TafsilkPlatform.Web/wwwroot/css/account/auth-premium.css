@@ -19,6 +19,7 @@ body {
     align-items: center;
     justify-content: center;
     margin: 0;
+    width: 100%;
     overflow-x: hidden;
 }
 
@@ -309,26 +310,234 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ====================================
+   RESPONSIVE DESIGN - MOBILE FIRST
+   ==================================== */
+
+/* Tablet & Mobile (Below 992px) */
+@media (max-width: 991.98px) {
     .auth-container {
         flex-direction: column;
-        margin: 1rem;
+        margin: 2rem auto;
+        width: 90%;
+        max-width: 600px;
+        min-height: auto;
     }
     
     .auth-visual {
-        padding: 2rem;
+        padding: 2.5rem 2rem;
+        min-height: 250px;
+    }
+    
+    .visual-heading {
+        font-size: 2.5rem;
+    }
+    
+    .auth-form-container {
+        padding: 2.5rem 2rem;
+    }
+    
+    .auth-title {
+        font-size: 1.75rem;
+    }
+}
+
+/* Mobile Devices (Below 768px) */
+@media (max-width: 767.98px) {
+    body {
+        padding-top: 60px; /* Adjust for mobile navbar */
+    }
+    
+    .auth-page {
+        padding-top: 60px;
+    }
+    
+    .auth-container {
+        margin: 1rem auto;
+        width: 92%;
+        max-width: 100%;
+        border-radius: 16px;
+    }
+    
+    .auth-visual {
+        padding: 2rem 1.5rem;
         min-height: 200px;
+    }
+    
+    .brand-logo {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
     }
     
     .visual-heading {
         font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+    
+    .visual-text {
+        font-size: 1rem;
     }
     
     .auth-form-container {
-        padding: 2rem;
+        padding: 2rem 1.5rem;
+    }
+    
+    .auth-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .auth-title {
+        font-size: 1.5rem;
+    }
+    
+    .auth-subtitle {
+        font-size: 0.9rem;
+    }
+    
+    /* Form Elements - Mobile Optimized */
+    .form-control {
+        font-size: 16px; /* Prevents iOS zoom */
+        padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+    }
+    
+    .input-icon {
+        left: 0.875rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Buttons - Touch Friendly */
+    .btn-premium,
+    .btn-google {
+        padding: 0.875rem;
+        font-size: 0.95rem;
+        min-height: 48px; /* Touch target size */
+    }
+    
+    /* User Type Toggle */
+    .user-type-toggle {
+        margin-bottom: 1.5rem;
+    }
+    
+    .user-type-option {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.9rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .user-type-option i {
+        font-size: 1.25rem;
+    }
+    
+    /* Register Page - Password Fields */
+    .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .row > [class*='col-'] {
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    /* Contact Page Adjustments */
+    .contact-info-item {
+        margin-bottom: 1rem;
+    }
+    
+    .contact-info-item h6 {
+        font-size: 0.85rem;
+    }
+    
+    .contact-info-item p {
+        font-size: 0.8rem;
     }
 }
+
+/* Small Mobile (Below 576px) */
+@media (max-width: 575.98px) {
+    .auth-container {
+        margin: 0.5rem auto;
+        width: 95%;
+        /* Keep border-radius from base style (24px) */
+        min-height: auto;
+    }
+    
+    .auth-visual {
+        padding: 1.5rem 1rem;
+        min-height: 180px;
+    }
+    
+    .brand-logo {
+        font-size: 1.25rem;
+    }
+    
+    .visual-heading {
+        font-size: 1.75rem;
+    }
+    
+    .visual-text {
+        font-size: 0.9rem;
+    }
+    
+    .auth-form-container {
+        padding: 1.5rem 1rem;
+    }
+    
+    .auth-title {
+        font-size: 1.375rem;
+    }
+    
+    /* Form Spacing */
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+    
+    .divider {
+        margin: 1.25rem 0;
+    }
+    
+    .divider span {
+        font-size: 0.8rem;
+    }
+    
+    /* Buttons */
+    .btn-premium,
+    .btn-google {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    /* Register password fields - stack on very small screens */
+    .row > .col-md-6 {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+/* Landscape Mobile (Small Height) */
+@media (max-height: 600px) and (orientation: landscape) {
+    .auth-container {
+        margin: 0.5rem;
+    }
+    
+    .auth-visual {
+        display: none; /* Hide visual panel in landscape to save space */
+    }
+    
+    .auth-form-container {
+        padding: 1.5rem;
+    }
+    
+    .auth-header {
+        margin-bottom: 1rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+}
+
 
 /* Animations */
 @keyframes fadeInUp {

@@ -1,6 +1,174 @@
 @{
-    ViewData["Title"] = "Privacy Policy";
+    ViewData["Title"] = "Privacy Policy | Tafsilk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Use this page to detail your site's privacy policy.</p>
+@section Styles {
+    <style>
+        .legal-container {
+            max-width: 900px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .legal-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .legal-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+        }
+
+        .legal-content {
+            background: #fff;
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .legal-content h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #D4AF37;
+        }
+
+        .legal-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .legal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .legal-content p {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .legal-content ul, .legal-content ol {
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            padding-left: 2rem;
+        }
+
+        .legal-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .legal-content strong {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            font-style: italic;
+        }
+
+        @@media (max-width: 768px) {
+            .legal-container {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .legal-header h1 {
+                font-size: 2rem;
+            }
+
+            .legal-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .legal-content h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}
+
+<div class="legal-container">
+    <div class="legal-header">
+        <h1>Privacy Policy</h1>
+        <p>Your privacy is our priority. Here is how we handle your data.</p>
+    </div>
+
+    <div class="legal-content">
+        <h2>1. What Information Do We Collect?</h2>
+        <p>To provide you with the best experience on Tafsilk, we collect certain information when you visit our site, register, or place an order:</p>
+        <ul>
+            <li><strong>Personal Information:</strong> Name, email address, phone number, and shipping address when you create an account or make a purchase.</li>
+            <li><strong>Account Credentials:</strong> Securely hashed passwords and login information.</li>
+            <li><strong>Measurements:</strong> If you use our sizing features, we store your provided body measurements to help tailors create the perfect fit.</li>
+            <li><strong>Usage Data:</strong> Information about how you interact with our platform, such as pages visited and time spent, to help us improve our services.</li>
+        </ul>
+
+        <h2>2. How Do We Use Your Data?</h2>
+        <p>We use the information we collect for the following clear purposes:</p>
+        <ul>
+            <li><strong>Service Delivery:</strong> To process your orders, manage your account, and connect you with tailors.</li>
+            <li><strong>Communication:</strong> To send you order updates, support messages, and important platform notifications.</li>
+            <li><strong>Improvement:</strong> To analyze usage patterns and enhance the user experience of our website.</li>
+            <li><strong>Security:</strong> To detect and prevent fraud or unauthorized access to your account.</li>
+        </ul>
+
+        <h2>3. Do We Share Your Information?</h2>
+        <p>We value your privacy and do not sell your personal data. We only share information in the following specific scenarios:</p>
+        <ul>
+            <li><strong>With Tailors:</strong> When you place an order, necessary details (like measurements and shipping address) are shared with the specific tailor fulfilling your request.</li>
+            <li><strong>With Service Providers:</strong> Trusted third parties who assist us with payment processing (Stripe) and email delivery. These partners are bound by strict confidentiality agreements.</li>
+            <li><strong>Legal Requirements:</strong> If required by law or to protect the rights and safety of Tafsilk, our users, or others.</li>
+        </ul>
+
+        <h2>4. How Do We Protect Your Information?</h2>
+        <p>We implement a variety of security measures to maintain the safety of your personal information:</p>
+        <ul>
+            <li><strong>Encryption:</strong> All sensitive data transmitted between your browser and our servers is encrypted using Secure Socket Layer (SSL) technology.</li>
+            <li><strong>Secure Storage:</strong> Tailor and customer data is stored in secure databases with restricted access.</li>
+            <li><strong>Payment Security:</strong> We do not store your credit card information on our servers. All transactions are processed through secure payment gateways.</li>
+        </ul>
+
+        <h2>5. Your Rights and Choices</h2>
+        <p>You have control over your personal information:</p>
+        <ul>
+            <li><strong>Access & Update:</strong> You can view and edit your personal details at any time through your account settings.</li>
+            <li><strong>Data Deletion:</strong> You may request the deletion of your account and associated data by contacting our support team.</li>
+            <li><strong>Communication Preferences:</strong> You can opt-out of marketing emails at any time, though essential transaction emails will still be sent.</li>
+        </ul>
+
+        <h2>6. Cookies</h2>
+        <p>We use cookies to enhance your browsing experience. Cookies are small files stored on your device that help us remember your preferences (like your login status or shopping cart items). You can choose to disable cookies through your browser settings, but this may affect some site functionality.</p>
+
+        <h2>7. Contact Us</h2>
+        <p>If you have any questions or concerns about this Privacy Policy, please reach out to us:</p>
+        <ul>
+            <li>Email: <a href="mailto:privacy@tafsilk.com">privacy@tafsilk.com</a></li>
+            <li>Support Page: <a asp-controller="Home" asp-action="Contact">Contact Support</a></li>
+        </ul>
+
+        <div class="last-updated">
+            Last Updated: @DateTime.Now.ToString("MMMM dd, yyyy")
+        </div>
+    </div>
+</div>

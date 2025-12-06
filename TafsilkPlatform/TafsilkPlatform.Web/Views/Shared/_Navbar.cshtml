@@ -25,20 +25,34 @@
     }
 }
 
+<style>
+    /* Remove focus outline from navbar elements */
+    .navbar .nav-link:focus,
+    .navbar .btn:focus,
+    .navbar .dropdown-toggle:focus,
+    .navbar-toggler:focus,
+    .sidebar-link:focus,
+    .btn-close:focus,
+    .dropdown-item:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+</style>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom">
     <div class="container-fluid px-3">
+        <!-- Mobile Sidebar Toggle (visible only on mobile) -->
+        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
         <!-- Brand -->
         <a class="navbar-brand fw-bold" href="/Home/Index">
             <i class="fas fa-cut me-2"></i>Tafsilk
         </a>
 
-        <!-- Mobile Toggle -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Navbar Content -->
-        <div class="collapse navbar-collapse" id="navbarNav">
+        <!-- Desktop Navbar Content (visible on lg and up) -->
+        <div class="collapse navbar-collapse d-none d-lg-flex" id="navbarNav">
             <!-- Main Links (Left/Center) -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
@@ -59,13 +73,30 @@
                 <li class="nav-item">
                     <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">Contact</a>
                 </li>
+                
+                @if (User.IsInRole("Admin"))
+                {
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Administration
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item" href="/Admin/AdminDashboard">Dashboard Overview</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/Admin/AdminDashboard/Products">Products</a></li>
+                            <li><a class="dropdown-item" href="/Admin/AdminDashboard/Orders">Orders</a></li>
+                            <li><a class="dropdown-item" href="/Admin/AdminDashboard/Users">Users</a></li>
+                            <li><a class="dropdown-item" href="/Admin/AdminDashboard/TailorVerification">Tailor Verification</a></li>
+                        </ul>
+                    </li>
+                }
             </ul>
 
             <!-- Right Side Actions -->
             <div class="d-flex align-items-center gap-2">
                 
                 <!-- Cart (Customer Only) -->
-                @if (isAuthenticated && userRole == "Customer")
+                @if (isAuthenticated && User.IsInRole("Customer"))
                 {
                     <a asp-area="Customer" asp-controller="Store" asp-action="Cart" class="btn btn-sm btn-outline-light position-relative" title="Cart">
                         <i class="fas fa-shopping-cart"></i>
@@ -92,7 +123,7 @@
                             <li><hr class="dropdown-divider"></li>
                             
                             <!-- Dashboard Link -->
-                            @if (userRole != "Customer")
+                            @if (!User.IsInRole("Customer"))
                             {
                                 <li>
                                     <a class="dropdown-item" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
@@ -102,7 +133,7 @@
                             }
 
                             <!-- Role Specific Links -->
-                            @if (userRole == "Tailor")
+                            @if (User.IsInRole("Tailor"))
                             {
                                 <li>
                                     <a class="dropdown-item" asp-area="" asp-controller="Profiles" asp-action="EditTailorProfile">
@@ -115,7 +146,7 @@
                                     </a>
                                 </li>
                             }
-                            else if (userRole == "Customer")
+                            else if (User.IsInRole("Customer"))
                             {
                                 <li>
                                     <a class="dropdown-item" asp-area="" asp-controller="Profiles" asp-action="CustomerProfile">
@@ -149,10 +180,118 @@
                 }
             </div>
         </div>
+
     </div>
 </nav>
 
-@if (isAuthenticated && userRole == "Customer")
+<!-- Mobile Offcanvas Sidebar (visible only on mobile) -->
+<div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="mobileSidebarLabel">
+            <i class="fas fa-cut me-2 text-warning"></i>Tafsilk
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <!-- User Info Section (if authenticated) -->
+        @if (isAuthenticated)
+        {
+            <div class="user-section border-bottom p-3 bg-dark">
+                <div class="d-flex align-items-center">
+                    <div class="user-avatar bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; font-weight: bold;">
+                        @userName.Substring(0, 1).ToUpper()
+                    </div>
+                    <div class="ms-3">
+                        <div class="fw-bold text-white">@userName</div>
+                        <small class="text-muted">@userRole</small>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Navigation Links -->
+        <div class="sidebar-nav">
+            <a class="sidebar-link" href="/Home/Index">
+                <i class="fas fa-home"></i> Home
+            </a>
+            <a class="sidebar-link" asp-area="" asp-controller="Tailors" asp-action="Index">
+                <i class="fas fa-user-tie"></i> Tailors
+            </a>
+            <a class="sidebar-link" asp-area="Customer" asp-controller="Store" asp-action="Index">
+                <i class="fas fa-store"></i> Store
+            </a>
+            <a class="sidebar-link" asp-area="" asp-controller="Home" asp-action="Contact">
+                <i class="fas fa-envelope"></i> Contact
+            </a>
+        </div>
+
+        @if (isAuthenticated)
+        {
+            <!-- Divider -->
+            <div class="border-top my-2"></div>
+
+            <!-- User Menu -->
+            <div class="sidebar-nav">
+                <div class="sidebar-section-title">Account</div>
+                
+                @if (!User.IsInRole("Customer"))
+                {
+                    <a class="sidebar-link" asp-area="@dashboardArea" asp-controller="@dashboardController" asp-action="@dashboardAction">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                }
+
+                @if (User.IsInRole("Tailor"))
+                {
+                    <a class="sidebar-link" asp-area="" asp-controller="Profiles" asp-action="EditTailorProfile">
+                        <i class="fas fa-cog"></i> Account Settings
+                    </a>
+                    <a class="sidebar-link" asp-area="Tailor" asp-controller="TailorManagement" asp-action="ManageProducts">
+                        <i class="fas fa-box"></i> My Products
+                    </a>
+                }
+                else if (User.IsInRole("Customer"))
+                {
+                    <a class="sidebar-link" asp-area="" asp-controller="Profiles" asp-action="CustomerProfile">
+                        <i class="fas fa-cog"></i> Account Settings
+                    </a>
+                    <a class="sidebar-link" asp-area="" asp-controller="Orders" asp-action="MyOrders">
+                        <i class="fas fa-shopping-bag"></i> My Orders
+                    </a>
+                    <a class="sidebar-link" asp-area="Customer" asp-controller="Store" asp-action="Cart">
+                        <i class="fas fa-shopping-cart"></i> Cart
+                        <span class="badge bg-warning text-dark ms-auto" id="mobile-cart-badge" style="display:none;">0</span>
+                    </a>
+                }
+
+                <!-- Divider -->
+                <div class="border-top my-2"></div>
+
+                <!-- Logout -->
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                    <button type="submit" class="sidebar-link text-danger w-100 border-0 bg-transparent text-start">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <!-- Guest Actions -->
+            <div class="sidebar-nav">
+                <div class="border-top my-2"></div>
+                <a asp-area="" asp-controller="Account" asp-action="Login" class="sidebar-link">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a asp-area="" asp-controller="Account" asp-action="Register" class="sidebar-link text-warning">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@if (isAuthenticated && User.IsInRole("Customer"))
 {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -160,9 +299,17 @@
                 .then(response => response.json())
                 .then(data => {
                     const badge = document.getElementById('cart-badge');
-                    if (badge && data.count > 0) {
-                        badge.textContent = data.count;
-                        badge.style.display = 'block';
+                    const mobileBadge = document.getElementById('mobile-cart-badge');
+                    
+                    if (data.count > 0) {
+                        if (badge) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'block';
+                        }
+                        if (mobileBadge) {
+                            mobileBadge.textContent = data.count;
+                            mobileBadge.style.display = 'inline-block';
+                        }
                     }
                 })
                 .catch(err => console.error('Error fetching cart count:', err));

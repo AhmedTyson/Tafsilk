@@ -1,0 +1,467 @@
+@{
+    ViewData["Title"] = "Help & FAQ | Tafsilk";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .faq-container {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+        }
+
+        .faq-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .faq-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+        }
+
+        .faq-header p {
+            color: #6b7280;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .faq-category {
+            margin-bottom: 3rem;
+        }
+
+        .faq-category-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid #D4AF37;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .faq-category-title i {
+            color: #D4AF37;
+            font-size: 1.5rem;
+        }
+
+        .faq-item {
+            background: #fff;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-question {
+            padding: 1.5rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: #f9fafb;
+        }
+
+        .faq-question i {
+            color: #D4AF37;
+            transition: transform 0.3s;
+        }
+
+        .faq-item.active .faq-question i {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-answer-content {
+            padding: 0 2rem 1.5rem;
+            color: #4b5563;
+            line-height: 1.8;
+        }
+
+        .faq-answer-content p {
+            margin-bottom: 0.75rem;
+        }
+
+        .faq-answer-content ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .faq-answer-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .contact-cta {
+            background: linear-gradient(135deg, #D4AF37 0%, #C5A028 100%);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            text-align: center;
+            color: #fff;
+            margin-top: 4rem;
+        }
+
+        .contact-cta h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .contact-cta p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .contact-cta .btn {
+            background: #fff;
+            color: #D4AF37;
+            padding: 0.875rem 2rem;
+            font-weight: 700;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s;
+        }
+
+        .contact-cta .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        @@media (max-width: 768px) {
+            .faq-container {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            .faq-header h1 {
+                font-size: 2rem;
+            }
+
+            .faq-question, .faq-answer-content {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+
+            .contact-cta h2 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+}
+
+<div class="faq-container">
+    <div class="faq-header">
+        <h1>Help & Frequently Asked Questions</h1>
+        <p>Find answers to common questions about using Tafsilk</p>
+    </div>
+
+    <!-- Getting Started -->
+    <div class="faq-category">
+        <h2 class="faq-category-title">
+            <i class="fas fa-rocket"></i>
+            Getting Started
+        </h2>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I create an account on Tafsilk?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Creating an account is simple:</p>
+                    <ul>
+                        <li>Click "Sign Up" in the navigation bar</li>
+                        <li>Choose between Customer or Tailor account</li>
+                        <li>Fill in your details (name, email, password)</li>
+                        <li>Verify your email address</li>
+                        <li>Complete your profile</li>
+                    </ul>
+                    <p>You can also sign up using your Google account for faster registration.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What's the difference between Customer and Tailor accounts?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p><strong>Customer Account:</strong> For individuals looking to find tailors and purchase custom or ready-made garments. Features include browsing tailors, placing orders, and managing purchases.</p>
+                    <p><strong>Tailor Account:</strong> For professional tailors who want to showcase their work, sell products, and manage customer orders. Requires verification and includes business management tools.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- For Customers -->
+    <div class="faq-category">
+        <h2 class="faq-category-title">
+            <i class="fas fa-shopping-bag"></i>
+            For Customers
+        </h2>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I find a tailor?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>You can find tailors in several ways:</p>
+                    <ul>
+                        <li>Browse the "Find Tailors" page to see all verified tailors</li>
+                        <li>Use filters to narrow by location, specialty, or rating</li>
+                        <li>Check the homepage for featured and top-rated tailors</li>
+                        <li>View tailor portfolios to see their previous work</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I place an order?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>To place an order:</p>
+                    <ul>
+                        <li>Browse the Store or visit a tailor's profile</li>
+                        <li>Select the product you want</li>
+                        <li>Add it to your cart</li>
+                        <li>Proceed to checkout</li>
+                        <li>Complete payment securely through Stripe</li>
+                    </ul>
+                    <p>You'll receive order confirmation and can track your order status in "My Orders".</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What payment methods do you accept?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>We accept all major payment methods through Stripe, including:</p>
+                    <ul>
+                        <li>Credit and debit cards (Visa, Mastercard, American Express)</li>
+                        <li>Digital wallets (Apple Pay, Google Pay)</li>
+                        <li>Other local payment methods supported by Stripe</li>
+                    </ul>
+                    <p>All payments are processed securely and we never store your payment information.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Can I cancel or modify my order?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Order modifications depend on the order status:</p>
+                    <ul>
+                        <li><strong>Pending:</strong> Can be cancelled with full refund</li>
+                        <li><strong>Processing/In Progress:</strong> Contact the tailor directly to discuss modifications</li>
+                        <li><strong>Shipped:</strong> Cannot be cancelled, but can be returned according to return policy</li>
+                    </ul>
+                    <p>Contact our support team for assistance with order changes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- For Tailors -->
+    <div class="faq-category">
+        <h2 class="faq-category-title">
+            <i class="fas fa-cut"></i>
+            For Tailors
+        </h2>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I become a verified tailor on Tafsilk?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>To join as a tailor:</p>
+                    <ul>
+                        <li>Create a Tailor account</li>
+                        <li>Complete your professional profile with portfolio images</li>
+                        <li>Provide business information and credentials</li>
+                        <li>Wait for our team to review and verify your account</li>
+                    </ul>
+                    <p>Verification typically takes 1-3 business days.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I add products to the store?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Once verified, you can add products through your Dashboard:</p>
+                    <ul>
+                        <li>Go to "My Products" in your dashboard</li>
+                        <li>Click "Add New Product"</li>
+                        <li>Upload product images and provide details</li>
+                        <li>Set pricing and availability</li>
+                        <li>Publish when ready</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>What are the platform fees?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Our fee structure includes:</p>
+                    <ul>
+                        <li>Platform commission on each sale (as agreed during onboarding)</li>
+                        <li>Payment processing fees (handled by Stripe)</li>
+                    </ul>
+                    <p>You keep the majority of each sale, and we handle all payment processing, customer service, and platform maintenance.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How do I manage orders?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Manage all orders through your Tailor Dashboard:</p>
+                    <ul>
+                        <li>View new orders and customer details</li>
+                        <li>Update order status (Processing, Shipped, Delivered)</li>
+                        <li>Communicate with customers</li>
+                        <li>Track earnings and analytics</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments & Security -->
+    <div class="faq-category">
+        <h2 class="faq-category-title">
+            <i class="fas fa-shield-alt"></i>
+            Payments & Security
+        </h2>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>Is my payment information secure?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Absolutely! We use industry-leading security measures:</p>
+                    <ul>
+                        <li>All payments processed through Stripe (PCI-DSS compliant)</li>
+                        <li>We never store your payment card information</li>
+                        <li>SSL encryption for all data transmission</li>
+                        <li>Secure authentication and authorization</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-question">
+                <span>How long do refunds take?</span>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Approved refunds are typically processed within:</p>
+                    <ul>
+                        <li>3-5 business days to appear in your account</li>
+                        <li>Up to 10 business days depending on your bank</li>
+                    </ul>
+                    <p>You'll receive email confirmation once the refund is initiated.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="contact-cta">
+        <h2>Still Have Questions?</h2>
+        <p>Our support team is here to help you</p>
+        <a asp-controller="Home" asp-action="Contact" class="btn">
+            <i class="fas fa-envelope me-2"></i>Contact Support
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+                const answer = item.querySelector('.faq-answer');
+                
+                question.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close all other items
+                    faqItems.forEach(otherItem => {
+                        otherItem.classList.remove('active');
+                        otherItem.querySelector('.faq-answer').style.maxHeight = null;
+                    });
+                    
+                    // Toggle current item
+                    if (!isActive) {
+                        item.classList.add('active');
+                        answer.style.maxHeight = answer.scrollHeight + 'px';
+                    }
+                });
+            });
+        });
+    </script>
+}
