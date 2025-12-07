@@ -6,7 +6,7 @@ namespace TafsilkPlatform.Web.Services.Interfaces
     {
         Task<bool> CanUserReviewProductAsync(Guid userId, Guid productId);
         Task AddReviewAsync(Review review);
-        Task<List<Review>> GetProductReviewsAsync(Guid productId);
-        Task<List<Review>> GetTailorReviewsAsync(Guid tailorId, int count = 5);
+        Task<List<Review>> GetProductReviewsAsync(Guid productId, int page = 1, int pageSize = 10);
+        Task<List<Review>> GetTailorReviewsAsync(Guid tailorId, int page = 1, int pageSize = 10);
     }
 }

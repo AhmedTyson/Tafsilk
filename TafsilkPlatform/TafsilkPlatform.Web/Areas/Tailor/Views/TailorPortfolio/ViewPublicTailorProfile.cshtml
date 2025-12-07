@@ -886,6 +886,36 @@
                         </div>
                     }
                 </div>
+                
+                @if (ViewBag.TotalReviewPages != null && ViewBag.TotalReviewPages > 1)
+                {
+                    <nav aria-label="Review pagination" class="mt-4">
+                        <ul class="pagination justify-content-center">
+                            @{
+                                int currentPage = ViewBag.ReviewPage ?? 1;
+                                int totalPages = ViewBag.TotalReviewPages ?? 1;
+                                var prevDisabled = currentPage == 1 ? "disabled" : "";
+                                var nextDisabled = currentPage == totalPages ? "disabled" : "";
+                            }
+                            <li class="page-item @prevDisabled">
+                                <a class="page-link" href="@Url.Action("ViewPublicTailorProfile", new { id = Model.Id, page = currentPage - 1 })" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(currentPage == i ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("ViewPublicTailorProfile", new { id = Model.Id, page = i })">@i</a>
+                                </li>
+                            }
+                            <li class="page-item @nextDisabled">
+                                <a class="page-link" href="@Url.Action("ViewPublicTailorProfile", new { id = Model.Id, page = currentPage + 1 })" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                }
             </div>
         </div>
     </section>
@@ -914,5 +944,25 @@
             document.getElementById(tabName).classList.add("active");
             evt.currentTarget.className += " active";
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if page parameter exists and switch to Reviews tab
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('page')) {
+                const page = parseInt(urlParams.get('page'));
+                if (page > 0) {
+                     // Find the review tab and click it
+                     const reviewTab = document.querySelector('.tab[onclick*="reviews"]');
+                     if (reviewTab) {
+                         reviewTab.click();
+                         // Scroll to reviews section
+                         const reviewsSection = document.getElementById('reviews');
+                         if (reviewsSection) {
+                             reviewsSection.scrollIntoView({ behavior: 'smooth' });
+                         }
+                     }
+                }
+            }
+        });
     </script>
 }

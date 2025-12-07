@@ -8,6 +8,7 @@ using TafsilkPlatform.Models.Models;
 using TafsilkPlatform.Models.ViewModels;
 using TafsilkPlatform.Models.ViewModels.Tailor;
 using TafsilkPlatform.Web.Services;
+using TafsilkPlatform.Web.Services.Interfaces;
 
 namespace TafsilkPlatform.Web.Controllers;
 
@@ -23,19 +24,22 @@ public class ProfilesController : Controller
     private readonly IFileUploadService _fileUploadService;
     private readonly IProfileCompletionService _profileCompletionService;
     private readonly IAttachmentService _attachmentService;
+    private readonly IReviewService _reviewService;
 
     public ProfilesController(
       ApplicationDbContext db,
         ILogger<ProfilesController> logger,
    IFileUploadService fileUploadService,
         IProfileCompletionService profileCompletionService,
-        IAttachmentService attachmentService)
+        IAttachmentService attachmentService,
+        IReviewService reviewService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
         _profileCompletionService = profileCompletionService ?? throw new ArgumentNullException(nameof(profileCompletionService));
         _attachmentService = attachmentService ?? throw new ArgumentNullException(nameof(attachmentService));
+        _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
     }
 
     #region Customer Profile Actions
@@ -254,7 +258,13 @@ public class ProfilesController : Controller
 
             ViewBag.ServiceCount = tailor.TailorServices.Count(s => !s.IsDeleted);
             ViewBag.PortfolioCount = tailor.PortfolioImages.Count(p => !p.IsDeleted);
-            ViewBag.ReviewCount = 0; // Simplified - no reviews
+            
+            // Reviews (fetch top 5 recent reviews for dashboard overview)
+            var reviews = await _reviewService.GetTailorReviewsAsync(tailor.Id, 1, 5); 
+            ViewBag.Reviews = reviews;
+            ViewBag.ReviewCount = reviews.Count; // This is just the count of fetched reviews.
+            // Using DB count for total
+            ViewBag.TotalReviews = await _db.Reviews.CountAsync(r => r.Product.TailorId == tailor.Id);
 
             // Get profile completion
             var completion = await _profileCompletionService.GetTailorCompletionAsync(userId);

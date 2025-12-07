@@ -74,7 +74,7 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
 
         // GET: /Store/Product/guid
         [HttpGet("Product/{id}")]
-        public async Task<IActionResult> ProductDetails(Guid id)
+        public async Task<IActionResult> ProductDetails(Guid id, int page = 1)
         {
             var product = await _storeService.GetProductDetailsAsync(id);
             if (product == null)
@@ -102,7 +102,19 @@ namespace TafsilkPlatform.Web.Areas.Customer.Controllers
             }
 
             // ✅ REVIEWS: Fetch reviews and check permission
-            product.Reviews = await _reviewService.GetProductReviewsAsync(id);
+            // Pagination: Default 5 reviews per page
+            int pageSize = 5;
+            product.Reviews = await _reviewService.GetProductReviewsAsync(id, page, pageSize);
+            
+            // Pass pagination info to view
+            ViewBag.ReviewPage = page;
+            ViewBag.ReviewPageSize = pageSize;
+            
+            // We need total count to calculate total pages. 
+            // Note: ReviewService doesn't return total count yet. Ideally it should return a paginated result object.
+            // For now, we will rely on product.ReviewCount if it's accurate, or we might need to update the service to return count.
+            ViewBag.TotalReviews = product.ReviewCount;
+            ViewBag.TotalReviewPages = (int)Math.Ceiling((double)product.ReviewCount / pageSize);
 
             if (User.Identity?.IsAuthenticated == true)
             {

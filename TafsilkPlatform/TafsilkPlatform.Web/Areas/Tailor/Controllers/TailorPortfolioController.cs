@@ -62,12 +62,26 @@ public class TailorPortfolioController : Controller
             tailor.PortfolioImages = portfolioImages.ToList();
 
             // Fetch reviews
-            var reviews = await _reviewService.GetTailorReviewsAsync(id, 10);
+            int page = 1;
+            int pageSize = 10;
+            if (Request.Query.ContainsKey("page") && int.TryParse(Request.Query["page"], out int p))
+            {
+                page = p;
+            }
+
+            var reviews = await _reviewService.GetTailorReviewsAsync(id, page, pageSize);
             ViewBag.Reviews = reviews;
+            
+            // Pass pagination info
+            ViewBag.ReviewPage = page;
+            ViewBag.ReviewPageSize = pageSize;
+            var totalReviews = await _db.Reviews.CountAsync(r => r.Product.TailorId == id);
+            ViewBag.TotalReviews = totalReviews;
+            ViewBag.TotalReviewPages = (int)Math.Ceiling((double)totalReviews / pageSize);
 
             // Calculate statistics with safety guards
             ViewBag.PortfolioCount = tailor.PortfolioImages?.Count ?? 0;
-            ViewBag.ReviewCount = reviews.Count;
+            ViewBag.ReviewCount = totalReviews; // Use real total count
             ViewBag.AverageRating = tailor.AverageRating;
             ViewBag.CompletedOrders = await _db.Orders.CountAsync(o =>
                 o.TailorId == id &&

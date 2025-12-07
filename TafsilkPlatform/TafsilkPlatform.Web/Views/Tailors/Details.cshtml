@@ -608,12 +608,87 @@
         <!-- Reviews Section -->
         <div class="content-section">
             <h2 class="section-title">Reviews (@reviewCount)</h2>
-            <!-- Reviews simplified - showing average rating only -->
-            <div class="alert alert-info">
-                <i class="fas fa-star text-warning"></i>
-                <strong>Rating: @Model.AverageRating.ToString("F1") out of 5</strong>
-                <p class="mt-2">Review system simplified - only total rating displayed</p>
-            </div>
+            
+            @{
+                var reviews = ViewBag.Reviews as List<TafsilkPlatform.Models.Models.Review>;
+            }
+
+            @if (reviews != null && reviews.Any())
+            {
+                <div class="review-list">
+                    @foreach (var review in reviews)
+                    {
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="reviewer-name">@(review.Customer?.FullName ?? "Customer")</span>
+                                <span class="review-date">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            </div>
+                            <div class="review-rating">
+                                @for (int i = 1; i <= 5; i++)
+                                {
+                                    if (i <= review.Rating)
+                                    {
+                                        <i class="fas fa-star"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="far fa-star"></i>
+                                    }
+                                }
+                            </div>
+                            @if (review.IsVerifiedPurchase)
+                            {
+                                <div style="margin-bottom: 8px;">
+                                    <span class="badge bg-light text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                                        <i class="fas fa-check-circle me-1"></i> Verified Purchase
+                                    </span>
+                                </div>
+                            }
+                            <div class="review-comment">@review.Comment</div>
+                            <div class="mt-2 text-muted small">
+                                <i class="fas fa-tshirt me-1"></i> Review for: <strong>@review.Product?.Name</strong>
+                            </div>
+                        </div>
+                    }
+
+                    @if (ViewBag.TotalReviewPages != null && ViewBag.TotalReviewPages > 1)
+                    {
+                        <nav aria-label="Review pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                @{
+                                    int currentPage = ViewBag.ReviewPage ?? 1;
+                                    int totalPages = ViewBag.TotalReviewPages ?? 1;
+                                    var prevDisabled = currentPage == 1 ? "disabled" : "";
+                                    var nextDisabled = currentPage == totalPages ? "disabled" : "";
+                                }
+                                <li class="page-item @prevDisabled">
+                                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Id, page = currentPage - 1 })" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                @for (int i = 1; i <= totalPages; i++)
+                                {
+                                    <li class="page-item @(currentPage == i ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("Details", new { id = Model.Id, page = i })">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @nextDisabled">
+                                    <a class="page-link" href="@Url.Action("Details", new { id = Model.Id, page = currentPage + 1 })" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="no-data">
+                    <i class="far fa-comment-alt fa-3x mb-3"></i>
+                    <p>No reviews available yet.</p>
+                </div>
+            }
         </div>
     </div>
 </main>

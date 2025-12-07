@@ -50,24 +50,33 @@ namespace TafsilkPlatform.Web.Services
             }
         }
 
-        public async Task<List<Review>> GetProductReviewsAsync(Guid productId)
+        public async Task<List<Review>> GetProductReviewsAsync(Guid productId, int page = 1, int pageSize = 10)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+
             return await _context.Reviews
                 .Include(r => r.Customer)
                 .Where(r => r.ProductId == productId)
                 .OrderByDescending(r => r.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 
-        public async Task<List<Review>> GetTailorReviewsAsync(Guid tailorId, int count = 5)
+        public async Task<List<Review>> GetTailorReviewsAsync(Guid tailorId, int page = 1, int pageSize = 10)
         {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+
             // Get reviews for all products belonging to this tailor
             return await _context.Reviews
                 .Include(r => r.Product)
                 .Include(r => r.Customer)
                 .Where(r => r.Product.TailorId == tailorId)
                 .OrderByDescending(r => r.CreatedAt)
-                .Take(count)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
         }
 

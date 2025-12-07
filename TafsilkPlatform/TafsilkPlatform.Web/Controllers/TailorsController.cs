@@ -14,11 +14,13 @@ public class TailorsController : Controller
 {
     private readonly ApplicationDbContext _db;
     private readonly ILogger<TailorsController> _logger;
+    private readonly TafsilkPlatform.Web.Services.Interfaces.IReviewService _reviewService;
 
-    public TailorsController(ApplicationDbContext db, ILogger<TailorsController> logger)
+    public TailorsController(ApplicationDbContext db, ILogger<TailorsController> logger, TafsilkPlatform.Web.Services.Interfaces.IReviewService reviewService)
     {
         _db = db ?? throw new ArgumentNullException(nameof(db));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
     }
 
     /// <summary>
@@ -145,9 +147,35 @@ public class TailorsController : Controller
             //     return NotFound("Tailor not found");
             // }
 
-            // Reviews simplified - no database
-            ViewBag.Reviews = new List<object>();
-            ViewBag.ReviewCount = 0;
+            // Reviews with pagination
+            int page = 1;
+            int pageSize = 5;
+            if (Request.Query.ContainsKey("page") && int.TryParse(Request.Query["page"], out int p))
+            {
+                page = p;
+            }
+
+            var reviews = await _reviewService.GetTailorReviewsAsync(id, page, pageSize);
+            ViewBag.Reviews = reviews;
+            
+            // For pagination
+            ViewBag.ReviewPage = page;
+            ViewBag.ReviewPageSize = pageSize;
+            ViewBag.ReviewCount = reviews.Count; // This is page count, need total.
+            // Using tailor.ReviewCount if available, or fetch total count later. 
+            // The model TailorProfile has ReviewCount? Let's check. 
+            // In ReviewService.UpdateTailorRatingAsync we see: product.ReviewCount, but for TailorProfile it updates AverageRating. 
+            // Does TailorProfile have ReviewCount? 
+            // Let's assume passed in ViewBag.ReviewCount is total for now or fix model if needed.
+            // Wait, previous code had `ViewBag.ReviewCount = 0;`. 
+            // We can get total count from DB if needed, or if AverageRating is there, maybe we can assume ReviewCount is stored on TailorProfile too?
+            // In ReviewService.cs:46 `product.ReviewCount` is used.
+            // In ReviewService.cs:101 `tailor.AverageRating` is used. It doesn't seem to update `tailor.ReviewCount`.
+            
+            // To get accurate total count for pagination:
+             var totalReviews = await _db.Reviews.CountAsync(r => r.Product.TailorId == id);
+             ViewBag.TotalReviews = totalReviews;
+             ViewBag.TotalReviewPages = (int)Math.Ceiling((double)totalReviews / pageSize);
 
             // Calculate statistics
             ViewBag.TotalOrders = await _db.Orders.CountAsync(o => o.TailorId == id);

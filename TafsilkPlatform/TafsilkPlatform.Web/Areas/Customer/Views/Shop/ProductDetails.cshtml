@@ -552,6 +552,36 @@
                             </div>
                         </div>
                     }
+
+                    @if (ViewBag.TotalReviewPages != null && ViewBag.TotalReviewPages > 1)
+                    {
+                        <nav aria-label="Review pagination" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                @{
+                                    int currentPage = ViewBag.ReviewPage ?? 1;
+                                    int totalPages = ViewBag.TotalReviewPages ?? 1;
+                                    var prevDisabled = currentPage == 1 ? "disabled" : "";
+                                    var nextDisabled = currentPage == totalPages ? "disabled" : "";
+                                }
+                                <li class="page-item @prevDisabled">
+                                    <a class="page-link" href="@Url.Action("ProductDetails", new { id = Model.ProductId, page = currentPage - 1 })" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                @for (int i = 1; i <= totalPages; i++)
+                                {
+                                    <li class="page-item @(currentPage == i ? "active" : "")">
+                                        <a class="page-link" href="@Url.Action("ProductDetails", new { id = Model.ProductId, page = i })">@i</a>
+                                    </li>
+                                }
+                                <li class="page-item @nextDisabled">
+                                    <a class="page-link" href="@Url.Action("ProductDetails", new { id = Model.ProductId, page = currentPage + 1 })" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    }
                 </div>
             }
             else
